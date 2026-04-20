@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')  
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,7 +17,6 @@ from torch.utils.data import Dataset, DataLoader, Subset
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-# LoRA Layer (shared)
 class LoRALinear(nn.Module):
     def __init__(self, in_f, out_f, r=4):
         super().__init__()
@@ -409,7 +411,6 @@ def split_dataset(dataset, num_clients=3):
             for i in range(num_clients)]
 
 
-# Federated Experiment Runner
 def run_experiment(name, model_fn, trainset, testloader,
                    num_clients=3, num_rounds=5,
                    client_epochs=(1, 2, 3), delays=(0.0, 0.0, 0.0)):
@@ -535,7 +536,7 @@ results["Audio-1DCNN"] = run_experiment(
     lambda: AudioCNN(in_channels=1, num_classes=AUDIO_N_CLASSES, r=4),
     audio_train, audio_testloader)
 
-# ORIGINAL ACCURACY VISUALISATIONS
+
 
 groups = {
     "Image":   ["CIFAR-CNN",   "CIFAR-MLP",   "Fashion-CNN", "Fashion-MLP"],
@@ -566,7 +567,7 @@ plt.savefig("federated_lora_results.png", dpi=150, bbox_inches="tight")
 plt.show()
 print("Saved: federated_lora_results.png")
 
-# Final accuracy bar chart
+
 plt.figure(figsize=(12, 6))
 models     = list(results.keys())
 final_accs = [results[m][1] for m in models]
@@ -626,15 +627,13 @@ print("="*65)
 df.to_csv("federated_lora_summary.csv", index=False)
 print("Saved: federated_lora_summary.csv")
 
-# SECTION 3: PER-CLIENT COLLABORATION CHARTS
 CLIENT_COLORS  = ["#378ADD", "#1D9E75", "#EF9F27"]
-CLIENT_EPOCHS  = (1, 2, 3)          # epochs assigned per client in run_experiment
+CLIENT_EPOCHS  = (1, 2, 3)          
 NUM_CLIENTS    = 3
 NUM_ROUNDS     = 5
 EXP_NAMES      = list(results.keys())
 
 
-# Helper: extract actual per-round collaboration data 
 def get_collab(name):
     """
     Returns collab_history: list of NUM_ROUNDS lists,
@@ -683,8 +682,6 @@ for ax, name in zip(axes.flat, EXP_NAMES):
     ax.grid(axis="y", alpha=0.25, linestyle="--")
     ax.legend(fontsize=7, loc="upper right", framealpha=0.7)
 
-# Hide any unused subplot (9 experiments fit exactly in 3×3 so none should be hidden,
-# but guard just in case)
 for ax in axes.flat[len(EXP_NAMES):]:
     ax.set_visible(False)
 
