@@ -105,10 +105,16 @@ def main():
         domain_scores[did].append(r['score'])
 
     for did in sorted(domain_scores.keys()):
-        scores = domain_scores[did]
-        print(f"  Domain {did} ({complexity_results[did * 3]['domain_name']}): "
-              f"avg={np.mean(scores):.4f}, std={np.std(scores):.4f}")
+    scores = domain_scores[did]
 
+    domain_name = next(
+        r['domain_name'] for r in complexity_results.values()
+        if r['domain_id'] == did
+    )
+
+    print(f"  Domain {did} ({domain_name}): "
+          f"avg={np.mean(scores):.4f}, std={np.std(scores):.4f}")
+    
     # Step 4: Save results
     # Convert to JSON-serializable format
     save_results = {}
