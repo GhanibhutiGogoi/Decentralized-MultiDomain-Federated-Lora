@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# PyTorch / ML artifacts
+*.pth
+*.pt
+*.ckpt
+*.onnx
+
+# Experiment outputs
+**/results/*
+!**/results/.gitkeep
+**/runs/
+**/logs/
+**/checkpoints/
+**/wandb/
+tensorboard/
+events.out.tfevents.*
+
+# Datasets (downloaded locally, should not be committed)
+**/data/cifar-100-python/
+**/data/cifar-100-python.tar.gz
+**/data/cifar-10-batches-py/
+**/data/cifar-10-python.tar.gz
+**/data/raw/
+**/data/processed/
+
+# Env / secrets
+.env
+.env.local
+
+# OS
+Thumbs.db
