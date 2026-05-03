@@ -1,0 +1,71 @@
+{
+  "final_accuracy": 0.15831393612503059,
+  "best_accuracy": 0.15831393612503059,
+  "total_messages": 30,
+  "topology": "ring",
+  "topology_info": {
+    "n_clients": 15,
+    "n_edges": 15,
+    "avg_degree": 2.0,
+    "min_degree": 2,
+    "max_degree": 2
+  },
+  "final_per_domain": {
+    "0": 0.13853733793763778,
+    "1": 0.2034988511750131,
+    "2": 0.11103007055031043,
+    "3": 0.1415080747914331,
+    "4": 0.19699534617075845
+  },
+  "fairness": {
+    "accuracy_gap": 0.09246878062470267,
+    "accuracy_variance": 0.0012894485571835548,
+    "min_domain_accuracy": 0.11103007055031043,
+    "max_domain_accuracy": 0.2034988511750131,
+    "avg_domain_accuracy": 0.15831393612503059
+  },
+  "n_rounds": 2,
+  "config": {
+    "clustering": {
+      "linkage": "ward",
+      "method": "agglomerative",
+      "n_clusters": 5,
+      "similarity_metric": "cosine"
+    },
+    "data": {
+      "batch_size": 64,
+      "clients_per_domain": 3,
+      "data_dir": "./data",
+      "dataset": "cifar100",
+      "dirichlet_alpha": 0.5,
+      "n_domains": 5
+    },
+    "gossip": {
+      "n_neighbors": 2,
+      "topology": "ring"
+    },
+    "logging": {
+      "log_dir": "./logs",
+      "save_every": 10,
+      "verbose": true
+    },
+    "model": {
+      "base": "resnet18",
+      "lora_alpha": 32,
+      "lora_rank": 16,
+      "lora_target_modules": [
+        "fc"
+      ],
+      "num_classes": 100,
+      "pretrained": true
+    },
+    "training": {
+      "learning_rate": 0.001,
+      "local_epochs": 5,
+      "n_rounds": 2,
+      "optimizer": "adam",
+      "seed": 42,
+      "weight_decay": 0.0001
+    }
+  }
+}
