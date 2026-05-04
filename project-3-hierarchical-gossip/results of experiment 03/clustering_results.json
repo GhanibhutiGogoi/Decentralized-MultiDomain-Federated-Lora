@@ -1,0 +1,69 @@
+{
+  "stages": [
+    {
+      "stage": 2,
+      "adjusted_rand_index": 0.03076923076923077,
+      "normalized_mutual_info": 0.45107718978689826,
+      "silhouette_score": 0.2218390109911755
+    },
+    {
+      "stage": 5,
+      "adjusted_rand_index": -0.041025641025641026,
+      "normalized_mutual_info": 0.39218654699913513,
+      "silhouette_score": 0.1588256398336699
+    },
+    {
+      "stage": 10,
+      "adjusted_rand_index": -0.0425531914893617,
+      "normalized_mutual_info": 0.36414194785558207,
+      "silhouette_score": 0.08044675596861893
+    },
+    {
+      "stage": 20,
+      "adjusted_rand_index": -0.13953488372093023,
+      "normalized_mutual_info": 0.2902644665027458,
+      "silhouette_score": 0.07042823441582372
+    }
+  ],
+  "final_stage": 20,
+  "final_assignments": {
+    "0": 4,
+    "1": 1,
+    "2": 2,
+    "3": 1,
+    "4": 2,
+    "5": 3,
+    "6": 1,
+    "7": 0,
+    "8": 4,
+    "9": 0,
+    "10": 4,
+    "11": 1,
+    "12": 4,
+    "13": 4,
+    "14": 1
+  },
+  "true_domains": {
+    "0": 0,
+    "1": 0,
+    "2": 0,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 2,
+    "7": 2,
+    "8": 2,
+    "9": 3,
+    "10": 3,
+    "11": 3,
+    "12": 4,
+    "13": 4,
+    "14": 4
+  },
+  "config": {
+    "n_clusters": 5,
+    "method": "agglomerative",
+    "linkage": "ward",
+    "seed": 42
+  }
+}
