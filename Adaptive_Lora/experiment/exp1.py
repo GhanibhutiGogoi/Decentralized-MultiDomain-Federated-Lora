@@ -63,14 +63,11 @@ print(f"Using device: {device}")
 NUM_ROUNDS    = 5
 NUM_CLIENTS   = 3
 
-# Computational capability proxy: batch size
-# C0=weak (small batch), C1=medium, C2=strong (large batch)
 CLIENT_BATCH_SIZES = (16, 64, 256)
 
-# Homo baseline: high rank to stress weak clients
+
 FIXED_RANK = 32
 
-# Adaptive: each client's max rank is gated by its batch size
 BATCH_TO_MAX_RANK   = {16: 4, 64: 8, 256: 16}
 ALL_CANDIDATE_RANKS = [2, 4, 6, 8, 12, 16, 24, 32]
 
@@ -122,8 +119,8 @@ class LoRALinear(nn.Module):
         super().__init__()
         self.W = nn.Parameter(torch.randn(out_f, in_f) * 0.01)
         self.b = nn.Parameter(torch.zeros(out_f))
-        self.A = nn.Parameter(torch.randn(r, in_f) * 0.01)   # [r, in_f]
-        self.B = nn.Parameter(torch.randn(out_f, r) * 0.01)  # [out_f, r]
+        self.A = nn.Parameter(torch.randn(r, in_f) * 0.01)   
+        self.B = nn.Parameter(torch.randn(out_f, r) * 0.01) 
 
     def forward(self, x):
         return x @ self.W.t() + (x @ self.A.t()) @ self.B.t() + self.b
@@ -405,7 +402,7 @@ def project_tensor_to_rank(t, target_rank, rank_dim=0):
         return t.clone()
 
     if cur_rank > target_rank:
-        # Normalise so rank is always on dim-0 before SVD
+    
         mat = t.float() if rank_dim == 0 else t.float().t()   
         _, _, Vh = torch.linalg.svd(mat, full_matrices=False)  
         actual_rows = Vh.shape[0]
@@ -922,11 +919,11 @@ for ei, name in enumerate(EXP_NAMES):
                marker="s", zorder=3)
     ax.scatter(a_flops_sum, a_acc_final, color=ADAPT_COL, s=120,
                marker="o", zorder=3)
-    # Arrow from homo → adaptive
+    
     ax.annotate("", xy=(a_flops_sum, a_acc_final),
                 xytext=(h_flops_sum, h_acc_final),
                 arrowprops=dict(arrowstyle="->", color="gray", lw=1.2))
-    # Label experiment name at midpoint
+    
     mx = (h_flops_sum + a_flops_sum) / 2
     my = (h_acc_final + a_acc_final) / 2
     ax.text(mx, my + 0.3, name, fontsize=7, ha="center", color="dimgray")
@@ -948,17 +945,14 @@ plt.savefig("fig6_pareto_accuracy_flops.png", dpi=150, bbox_inches="tight")
 plt.close()
 print("  Saved: fig6_pareto_accuracy_flops.png")
 
-
-# ============================================================
 # SUMMARY CSV
-# ============================================================
 
 print("\nGenerating summary CSV...")
 rows = []
 for name in EXP_NAMES:
     h_acc       = results[name]["homo"][1]
     a_acc       = results[name]["adaptive"][1]
-    h_flops_all = results[name]["homo"][2]      # [round][client]
+    h_flops_all = results[name]["homo"][2]   
     a_flops_all = results[name]["adaptive"][2]
     rank_hist   = results[name]["adaptive"][3]
 
@@ -999,6 +993,7 @@ print(df.to_string(index=False))
 df.to_csv("federated_lora_summary.csv", index=False)
 print("\nSaved: federated_lora_summary.csv")
 
+# OUTPUTS
 print("\n" + "="*65)
 print("ALL OUTPUTS SAVED")
 print("="*65)
