@@ -1,3 +1,46 @@
+# =============================================================================
+# EXPERIMENT: Capability-Aware Adaptive LoRA in Federated Learning
+# =============================================================================
+#
+# WHAT THIS DOES:
+#   Simulates a federated learning setup with 3 clients of varying computational
+#   capability (weak / medium / strong), proxied by batch size (16 / 64 / 256).
+#   Two strategies are compared across 5 datasets:
+#
+#     1. Homogeneous (Homo): all clients use a fixed high LoRA rank (r=32),
+#        stressing weaker clients with unnecessary compute.
+#
+#     2. Adaptive: each client selects its own LoRA rank based on a gradient-
+#        signal probe, capped by its capability ceiling (r=4 / 8 / 16).
+#        The server aggregates updates via quality-weighted FedAvg.
+#
+#   The goal is to show that adaptive rank selection maintains comparable
+#   accuracy while significantly reducing total FLOPs, especially for
+#   resource-constrained clients.
+#
+# DATASETS & MODELS:
+#   - CIFAR-10       → CNN with LoRA linear heads
+#   - FashionMNIST   → MLP with LoRA layers
+#   - AG News        → LSTM with LoRA classifier head
+#   - Tabular (UCI)  → Deep MLP with LoRA layers
+#   - Speech Commands → 1D AudioCNN with LoRA layers
+#
+# OUTPUTS:
+#   fig1_accuracy_curves.png         — Homo vs Adaptive accuracy per round
+#   fig2_adaptive_rank_per_client.png — Rank chosen per client per round
+#   fig3_final_accuracy_bar.png      — Final accuracy comparison + delta
+#   fig4_total_flops_per_round.png   — Total FLOPs per round
+#   fig5_flops_per_client.png        — Per-client FLOPs breakdown (stacked bars)
+#   fig6_pareto_accuracy_flops.png   — Accuracy vs FLOPs Pareto scatter
+#   federated_lora_summary.csv       — Full numerical results table
+#
+# ESTIMATED RUNTIME:
+#   CPU  : ~25–45 minutes  (depends on machine; Audio/AGNews are slowest)
+#   GPU  : ~5–10 minutes
+#   Bottlenecks: AGNews-LSTM and Audio-1DCNN training rounds
+#
+# =============================================================================
+
 import matplotlib
 matplotlib.use('Agg')
 
