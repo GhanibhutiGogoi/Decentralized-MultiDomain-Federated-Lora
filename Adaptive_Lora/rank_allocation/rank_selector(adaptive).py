@@ -1,4 +1,4 @@
-# src/lora/rank_selector.py — capability-aware adaptive rank selector
+# capability-aware adaptive rank selector
 
 import numpy as np
 import torch
