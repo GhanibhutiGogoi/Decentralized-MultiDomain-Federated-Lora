@@ -11,8 +11,8 @@ class LoRALinear(nn.Module):
     """
     def __init__(self, in_f, out_f, r=4):
         super().__init__()
-        self.W = nn.Parameter(torch.randn(out_f, in_f) * 0.01)
-        self.b = nn.Parameter(torch.zeros(out_f))
+        self.W = nn.Parameter(torch.randn(out_f, in_f) * 0.01, requires_grad=False)
+        self.b = nn.Parameter(torch.zeros(out_f), requires_grad=False)
         self.A = nn.Parameter(torch.randn(r, in_f) * 0.01)
         self.B = nn.Parameter(torch.randn(out_f, r) * 0.01)
 

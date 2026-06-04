@@ -4,6 +4,18 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+try:
+    from config import LORA_SUFFIXES
+except ImportError:
+    from Adaptive_Lora.config import LORA_SUFFIXES
+
+
+def set_lora_only_trainable(model):
+    """Freeze the base model and leave only LoRA adapter factors trainable."""
+    for name, param in model.named_parameters():
+        param.requires_grad = any(name.endswith(suffix) for suffix in LORA_SUFFIXES)
+    return model
+
 
 def train_client(model, loader, epochs, device):
     """
@@ -11,7 +23,9 @@ def train_client(model, loader, epochs, device):
     Returns (state_dict, total_samples_seen).
     """
     model.train()
-    opt     = optim.Adam(model.parameters(), lr=0.001)
+    set_lora_only_trainable(model)
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+    opt     = optim.Adam(trainable_params, lr=0.001)
     loss_fn = nn.CrossEntropyLoss()
     total   = 0
 

@@ -1,7 +1,11 @@
 # LoRa rank projection utilities with some explanations provided.
 
 import torch
-from config import LORA_SUFFIXES, LORA_A_SUFFIXES, LORA_B_SUFFIXES
+
+try:
+    from config import LORA_SUFFIXES, LORA_A_SUFFIXES, LORA_B_SUFFIXES
+except ImportError:
+    from Adaptive_Lora.config import LORA_SUFFIXES, LORA_A_SUFFIXES, LORA_B_SUFFIXES
 
 
 def is_lora_key(k):
