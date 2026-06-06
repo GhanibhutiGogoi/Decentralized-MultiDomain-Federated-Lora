@@ -4,10 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-try:
-    from config import LORA_SUFFIXES
-except ImportError:
-    from Adaptive_Lora.config import LORA_SUFFIXES
+from config import LORA_SUFFIXES
 
 
 def set_lora_only_trainable(model):

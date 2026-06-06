@@ -2,12 +2,8 @@
 
 import torch
 
-try:
-    from config import LORA_A_SUFFIXES, LORA_B_SUFFIXES
-    from rank_allocation.LoRa_rank_projection import is_lora_key, load_global_state
-except ImportError:
-    from Adaptive_Lora.config import LORA_A_SUFFIXES, LORA_B_SUFFIXES
-    from Adaptive_Lora.rank_allocation.LoRa_rank_projection import is_lora_key, load_global_state
+from config import LORA_A_SUFFIXES, LORA_B_SUFFIXES
+from rank_allocation.LoRa_rank_projection import is_lora_key, load_global_state
 
 
 def _normalised_client_weights(samples, quality_scores):

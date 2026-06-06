@@ -3,12 +3,8 @@
 import numpy as np
 import torch
 
-try:
-    from config import ALL_CANDIDATE_RANKS, BATCH_TO_MAX_RANK
-    from Federated.client import set_lora_only_trainable
-except ImportError:
-    from Adaptive_Lora.config import ALL_CANDIDATE_RANKS, BATCH_TO_MAX_RANK
-    from Adaptive_Lora.Federated.client import set_lora_only_trainable
+from config import ALL_CANDIDATE_RANKS, BATCH_TO_MAX_RANK
+from Federated.client import set_lora_only_trainable
 
 
 def _nearest_candidate(rank, candidates):

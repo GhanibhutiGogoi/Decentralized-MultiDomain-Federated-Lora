@@ -1,9 +1,6 @@
 """LoRA FLOPs accounting utilities."""
 
-try:
-    from Source.Models.lora import LoRALinear, LoRAMultiheadAttention
-except ImportError:
-    from Adaptive_Lora.Source.Models.lora import LoRALinear, LoRAMultiheadAttention
+from Source.Models.lora import LoRALinear, LoRAMultiheadAttention
 
 
 def estimate_lora_flops(model, batch_size, rank):
