@@ -48,6 +48,8 @@ events.out.tfevents.*
 **/data/cifar-10-python.tar.gz
 **/data/raw/
 **/data/processed/
+Adaptive_Lora/data/
+Adaptive_Lora/result/exp1/data/
 
 # Env / secrets
 .env

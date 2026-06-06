@@ -1,0 +1,6 @@
+Experiment,Rank Equation,Fixed Rank,Fixed Final Acc (%),Adaptive Final Acc (%),Accuracy Delta (%),Fixed Total FLOPs,Adaptive Total FLOPs,FLOPs Saved (%),Average Adaptive Rank
+CIFAR-CNN,"s(G)=||G||_F^2/||G||_2^2; c_i=capability_index(batch_i)/(num_capabilities-1); r_i=nearest_allowed_rank(max(r_min, c_i*R_i^max, min(s(G), R_i^max)))",32,59.79,41.44,-18.35,315772508160,72724659840,76.97,7.33
+Fashion-MLP,"s(G)=||G||_F^2/||G||_2^2; c_i=capability_index(batch_i)/(num_capabilities-1); r_i=nearest_allowed_rank(max(r_min, c_i*R_i^max, min(s(G), R_i^max)))",32,87.02,68.81,-18.21,91107072000,20965392000,76.99,7.33
+AGNews-LSTM,"s(G)=||G||_F^2/||G||_2^2; c_i=capability_index(batch_i)/(num_capabilities-1); r_i=nearest_allowed_rank(max(r_min, c_i*R_i^max, min(s(G), R_i^max)))",32,26.5,25.9,-0.6,988416000,231327360,76.6,7.33
+Tabular-MLP,"s(G)=||G||_F^2/||G||_2^2; c_i=capability_index(batch_i)/(num_capabilities-1); r_i=nearest_allowed_rank(max(r_min, c_i*R_i^max, min(s(G), R_i^max)))",32,90.0,75.0,-15.0,608693760,195464160,67.89,7.33
+Audio-1DCNN,"s(G)=||G||_F^2/||G||_2^2; c_i=capability_index(batch_i)/(num_capabilities-1); r_i=nearest_allowed_rank(max(r_min, c_i*R_i^max, min(s(G), R_i^max)))",32,3.33,2.83,-0.5,6913405440,1590354720,77.0,7.33

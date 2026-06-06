@@ -1,0 +1,1 @@
+s(G)=||G||_F^2/||G||_2^2; c_i=capability_index(batch_i)/(num_capabilities-1); r_i=nearest_allowed_rank(max(r_min, c_i*R_i^max, min(s(G), R_i^max)))
