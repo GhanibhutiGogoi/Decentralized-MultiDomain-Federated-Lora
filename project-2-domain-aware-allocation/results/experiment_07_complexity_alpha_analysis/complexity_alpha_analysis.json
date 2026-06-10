@@ -1,0 +1,348 @@
+{
+  "description": "Correlation analysis between complexity sub-metrics and best LoRA alpha.",
+  "client_table": [
+    {
+      "client_id": 0,
+      "domain_id": 0,
+      "domain_name": "Aquatic & Nature",
+      "complexity_score": 0.6124228523104034,
+      "entropy": 0.8611452045283259,
+      "diversity": 0.3049803674221039,
+      "intrinsic_dim": 0.23828125,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.4542696746748492,
+      "n_samples": 3374,
+      "n_classes": 17,
+      "fixed_rank": 32,
+      "best_alpha": 128,
+      "best_accuracy": 0.2773613193403298
+    },
+    {
+      "client_id": 1,
+      "domain_id": 0,
+      "domain_name": "Aquatic & Nature",
+      "complexity_score": 0.6140146548423879,
+      "entropy": 0.8692986148437191,
+      "diversity": 0.2947085201740265,
+      "intrinsic_dim": 0.232421875,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.4779899135446686,
+      "n_samples": 2776,
+      "n_classes": 20,
+      "fixed_rank": 32,
+      "best_alpha": 128,
+      "best_accuracy": 0.28335832083958024
+    },
+    {
+      "client_id": 2,
+      "domain_id": 0,
+      "domain_name": "Aquatic & Nature",
+      "complexity_score": 0.6121596945641504,
+      "entropy": 0.829843193562908,
+      "diversity": 0.29663169384002686,
+      "intrinsic_dim": 0.259765625,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.5192727272727272,
+      "n_samples": 3850,
+      "n_classes": 20,
+      "fixed_rank": 64,
+      "best_alpha": 64,
+      "best_accuracy": 0.30180180180180183
+    },
+    {
+      "client_id": 3,
+      "domain_id": 1,
+      "domain_name": "Household & Insects",
+      "complexity_score": 0.616352072560996,
+      "entropy": 0.9183210586596436,
+      "diversity": 0.29271531105041504,
+      "intrinsic_dim": 0.232421875,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.35828317753020017,
+      "n_samples": 2603,
+      "n_classes": 18,
+      "fixed_rank": 32,
+      "best_alpha": 32,
+      "best_accuracy": 0.3523238380809595
+    },
+    {
+      "client_id": 4,
+      "domain_id": 1,
+      "domain_name": "Household & Insects",
+      "complexity_score": 0.6004272907568399,
+      "entropy": 0.7746576167532191,
+      "diversity": 0.2917068600654602,
+      "intrinsic_dim": 0.240234375,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.6164175871778211,
+      "n_samples": 2187,
+      "n_classes": 19,
+      "fixed_rank": 32,
+      "best_alpha": 128,
+      "best_accuracy": 0.25337331334332835
+    },
+    {
+      "client_id": 5,
+      "domain_id": 1,
+      "domain_name": "Household & Insects",
+      "complexity_score": 0.6189890364629235,
+      "entropy": 0.9399258574364617,
+      "diversity": 0.29650208353996277,
+      "intrinsic_dim": 0.232421875,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.31226487523992325,
+      "n_samples": 5210,
+      "n_classes": 20,
+      "fixed_rank": 32,
+      "best_alpha": 64,
+      "best_accuracy": 0.3633633633633634
+    },
+    {
+      "client_id": 6,
+      "domain_id": 2,
+      "domain_name": "Large Animals & Outdoor",
+      "complexity_score": 0.6143493042573139,
+      "entropy": 0.8661491740479199,
+      "diversity": 0.27727946639060974,
+      "intrinsic_dim": 0.25,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.4904865876481597,
+      "n_samples": 3206,
+      "n_classes": 20,
+      "fixed_rank": 32,
+      "best_alpha": 128,
+      "best_accuracy": 0.25337331334332835
+    },
+    {
+      "client_id": 7,
+      "domain_id": 2,
+      "domain_name": "Large Animals & Outdoor",
+      "complexity_score": 0.600912372769618,
+      "entropy": 0.8081288217680827,
+      "diversity": 0.2677370607852936,
+      "intrinsic_dim": 0.240234375,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.568794390821344,
+      "n_samples": 2312,
+      "n_classes": 19,
+      "fixed_rank": 32,
+      "best_alpha": 128,
+      "best_accuracy": 0.22488755622188905
+    },
+    {
+      "client_id": 8,
+      "domain_id": 2,
+      "domain_name": "Large Animals & Outdoor",
+      "complexity_score": 0.6134708592170319,
+      "entropy": 0.8828661935133858,
+      "diversity": 0.2766878008842468,
+      "intrinsic_dim": 0.25390625,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.4249219098616689,
+      "n_samples": 4482,
+      "n_classes": 20,
+      "fixed_rank": 64,
+      "best_alpha": 32,
+      "best_accuracy": 0.2672672672672673
+    },
+    {
+      "client_id": 9,
+      "domain_id": 3,
+      "domain_name": "Medium Animals & People",
+      "complexity_score": 0.6128344916556946,
+      "entropy": 0.8457469898630703,
+      "diversity": 0.29244932532310486,
+      "intrinsic_dim": 0.259765625,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.4866740463215259,
+      "n_samples": 2936,
+      "n_classes": 16,
+      "fixed_rank": 32,
+      "best_alpha": 32,
+      "best_accuracy": 0.17541229385307347
+    },
+    {
+      "client_id": 10,
+      "domain_id": 3,
+      "domain_name": "Medium Animals & People",
+      "complexity_score": 0.6223583538372804,
+      "entropy": 0.898750264720031,
+      "diversity": 0.29776135087013245,
+      "intrinsic_dim": 0.263671875,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.40446629247244625,
+      "n_samples": 4379,
+      "n_classes": 19,
+      "fixed_rank": 64,
+      "best_alpha": 64,
+      "best_accuracy": 0.23088455772113944
+    },
+    {
+      "client_id": 11,
+      "domain_id": 3,
+      "domain_name": "Medium Animals & People",
+      "complexity_score": 0.6129458448568836,
+      "entropy": 0.8386803023336653,
+      "diversity": 0.28490185737609863,
+      "intrinsic_dim": 0.2578125,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.5279888268156424,
+      "n_samples": 2685,
+      "n_classes": 20,
+      "fixed_rank": 32,
+      "best_alpha": 32,
+      "best_accuracy": 0.23123123123123124
+    },
+    {
+      "client_id": 12,
+      "domain_id": 4,
+      "domain_name": "Small Animals & Vehicles",
+      "complexity_score": 0.6126504978609749,
+      "entropy": 0.8819587701052173,
+      "diversity": 0.27713894844055176,
+      "intrinsic_dim": 0.2421875,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.4419757714129935,
+      "n_samples": 3089,
+      "n_classes": 19,
+      "fixed_rank": 32,
+      "best_alpha": 64,
+      "best_accuracy": 0.29235382308845576
+    },
+    {
+      "client_id": 13,
+      "domain_id": 4,
+      "domain_name": "Small Animals & Vehicles",
+      "complexity_score": 0.6139587566897953,
+      "entropy": 0.8825392851063345,
+      "diversity": 0.2785932123661041,
+      "intrinsic_dim": 0.23828125,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.45822078684674106,
+      "n_samples": 3406,
+      "n_classes": 20,
+      "fixed_rank": 32,
+      "best_alpha": 32,
+      "best_accuracy": 0.2518740629685157
+    },
+    {
+      "client_id": 14,
+      "domain_id": 4,
+      "domain_name": "Small Animals & Vehicles",
+      "complexity_score": 0.6121299578448343,
+      "entropy": 0.8979143542996284,
+      "diversity": 0.2709640860557556,
+      "intrinsic_dim": 0.232421875,
+      "task_difficulty": 1.0,
+      "data_imbalance": 0.4207845934379458,
+      "n_samples": 3505,
+      "n_classes": 20,
+      "fixed_rank": 64,
+      "best_alpha": 64,
+      "best_accuracy": 0.26426426426426425
+    }
+  ],
+  "correlations_with_best_alpha": {
+    "score": {
+      "pearson": {
+        "r": -0.4782912822057513,
+        "p_value": 0.0713200742731367
+      },
+      "spearman": {
+        "rho": -0.3023715784073817,
+        "p_value": 0.2733497896981919
+      },
+      "kendall": {
+        "tau": -0.2591806381167451,
+        "p_value": 0.22435760504520907
+      }
+    },
+    "entropy": {
+      "pearson": {
+        "r": -0.44434605151588313,
+        "p_value": 0.09703508339255937
+      },
+      "spearman": {
+        "rho": -0.37796447300922714,
+        "p_value": 0.16482344535684462
+      },
+      "kendall": {
+        "tau": -0.30425553170226594,
+        "p_value": 0.1537729738179311
+      }
+    },
+    "diversity": {
+      "pearson": {
+        "r": 0.06842589557718426,
+        "p_value": 0.8085443218454087
+      },
+      "spearman": {
+        "rho": 0.09449111825230679,
+        "p_value": 0.7376520134180338
+      },
+      "kendall": {
+        "tau": 0.07888106377466154,
+        "p_value": 0.711539428277376
+      }
+    },
+    "intrinsic_dim": {
+      "pearson": {
+        "r": -0.3119506967799464,
+        "p_value": 0.25767578752768205
+      },
+      "spearman": {
+        "rho": -0.2198969344752002,
+        "p_value": 0.4309983747919083
+      },
+      "kendall": {
+        "tau": -0.1649915822768611,
+        "p_value": 0.45388203101078606
+      }
+    },
+    "task_difficulty": {
+      "note": "constant metric, correlation is undefined"
+    },
+    "data_imbalance": {
+      "pearson": {
+        "r": 0.4549305330555171,
+        "p_value": 0.08840993209006152
+      },
+      "spearman": {
+        "rho": 0.34016802570830446,
+        "p_value": 0.21476051598719245
+      },
+      "kendall": {
+        "tau": 0.2591806381167451,
+        "p_value": 0.22435760504520907
+      }
+    },
+    "n_samples": {
+      "pearson": {
+        "r": -0.33028310035561603,
+        "p_value": 0.2292416898998699
+      },
+      "spearman": {
+        "rho": -0.22677868380553629,
+        "p_value": 0.41634141804488756
+      },
+      "kendall": {
+        "tau": -0.1690308509457033,
+        "p_value": 0.4281240894661663
+      }
+    },
+    "n_classes": {
+      "pearson": {
+        "r": 0.014802231160433431,
+        "p_value": 0.9582438119532304
+      },
+      "spearman": {
+        "rho": -0.0517919244040651,
+        "p_value": 0.8545556394003335
+      },
+      "kendall": {
+        "tau": -0.05481509678620252,
+        "p_value": 0.8163619163594624
+      }
+    }
+  }
+}
