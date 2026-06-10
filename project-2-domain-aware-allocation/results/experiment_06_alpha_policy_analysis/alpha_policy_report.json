@@ -1,0 +1,167 @@
+{
+  "best_global_alpha": {
+    "best_alpha": 64,
+    "average_accuracy": 0.26510948729839284,
+    "all_average_scores": {
+      "4": 0.19230805017911465,
+      "8": 0.22430946688817752,
+      "16": 0.24620932776854818,
+      "32": 0.2615096355726041,
+      "64": 0.26510948729839284,
+      "128": 0.26440908674791735
+    }
+  },
+  "best_alpha_distribution": {
+    "32": 5,
+    "64": 5,
+    "128": 5
+  },
+  "best_alpha_per_rank": {
+    "32": {
+      "best_alpha": 64,
+      "average_accuracy": 0.2647658562201291,
+      "all_average_scores": {
+        "4": 0.18814384781401275,
+        "8": 0.22304838571705138,
+        "16": 0.2459525765372842,
+        "32": 0.2616312646297654,
+        "64": 0.2647658562201291,
+        "128": 0.26408376483339
+      }
+    },
+    "64": {
+      "best_alpha": 64,
+      "average_accuracy": 0.2660544727636182,
+      "all_average_scores": {
+        "4": 0.2037596066831449,
+        "8": 0.22777744010877443,
+        "16": 0.24691539365452408,
+        "32": 0.26117515566541055,
+        "64": 0.2660544727636182,
+        "128": 0.26530372201286745
+      }
+    }
+  },
+  "smallest_alpha_within_0_005_tolerance": {
+    "0": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 128,
+      "oracle_best_accuracy": 0.2773613193403298,
+      "policy_alpha": 64,
+      "policy_accuracy": 0.272863568215892,
+      "accuracy_drop": 0.004497751124437788
+    },
+    "1": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 128,
+      "oracle_best_accuracy": 0.28335832083958024,
+      "policy_alpha": 64,
+      "policy_accuracy": 0.280359820089955,
+      "accuracy_drop": 0.0029985007496252103
+    },
+    "2": {
+      "fixed_rank": 64,
+      "oracle_best_alpha": 64,
+      "oracle_best_accuracy": 0.30180180180180183,
+      "policy_alpha": 64,
+      "policy_accuracy": 0.30180180180180183,
+      "accuracy_drop": 0.0
+    },
+    "3": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 32,
+      "oracle_best_accuracy": 0.3523238380809595,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.3523238380809595,
+      "accuracy_drop": 0.0
+    },
+    "4": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 128,
+      "oracle_best_accuracy": 0.25337331334332835,
+      "policy_alpha": 128,
+      "policy_accuracy": 0.25337331334332835,
+      "accuracy_drop": 0.0
+    },
+    "5": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 64,
+      "oracle_best_accuracy": 0.3633633633633634,
+      "policy_alpha": 64,
+      "policy_accuracy": 0.3633633633633634,
+      "accuracy_drop": 0.0
+    },
+    "6": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 128,
+      "oracle_best_accuracy": 0.25337331334332835,
+      "policy_alpha": 64,
+      "policy_accuracy": 0.24887556221889057,
+      "accuracy_drop": 0.004497751124437788
+    },
+    "7": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 128,
+      "oracle_best_accuracy": 0.22488755622188905,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.22038980509745126,
+      "accuracy_drop": 0.004497751124437788
+    },
+    "8": {
+      "fixed_rank": 64,
+      "oracle_best_alpha": 32,
+      "oracle_best_accuracy": 0.2672672672672673,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.2672672672672673,
+      "accuracy_drop": 0.0
+    },
+    "9": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 32,
+      "oracle_best_accuracy": 0.17541229385307347,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.17541229385307347,
+      "accuracy_drop": 0.0
+    },
+    "10": {
+      "fixed_rank": 64,
+      "oracle_best_alpha": 64,
+      "oracle_best_accuracy": 0.23088455772113944,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.22938530734632684,
+      "accuracy_drop": 0.0014992503748126051
+    },
+    "11": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 32,
+      "oracle_best_accuracy": 0.23123123123123124,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.23123123123123124,
+      "accuracy_drop": 0.0
+    },
+    "12": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 64,
+      "oracle_best_accuracy": 0.29235382308845576,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.28785607196401797,
+      "accuracy_drop": 0.004497751124437788
+    },
+    "13": {
+      "fixed_rank": 32,
+      "oracle_best_alpha": 32,
+      "oracle_best_accuracy": 0.2518740629685157,
+      "policy_alpha": 32,
+      "policy_accuracy": 0.2518740629685157,
+      "accuracy_drop": 0.0
+    },
+    "14": {
+      "fixed_rank": 64,
+      "oracle_best_alpha": 64,
+      "oracle_best_accuracy": 0.26426426426426425,
+      "policy_alpha": 64,
+      "policy_accuracy": 0.26426426426426425,
+      "accuracy_drop": 0.0
+    }
+  }
+}
