@@ -65,15 +65,14 @@ Training progress:
 
 ## Findings
 
-The Gossip baseline substantially outperformed the FedAvg baseline under the same experimental configuration.
+## Findings
 
-Compared with FedAvg:
+This experiment should be interpreted as a 2-round pipeline-validation run rather than a full research result.
 
-* FedAvg Accuracy: 0.0179
-* Gossip Accuracy: 0.1583
+The purpose of this run was to verify that the Gossip pipeline, client-to-client communication, decentralized update flow, evaluation, and result logging work end-to-end.
 
-This corresponds to approximately an 8.8× improvement in average accuracy.
+The reported accuracy values should not be used to claim that Gossip outperforms FedAvg. FedAvg and Gossip are evaluated under different protocols in these smoke tests: FedAvg evaluates one global model, while Gossip evaluates personalized client models.
 
-Unlike FedAvg, which suffered from extremely poor performance in several domains, Gossip achieved more consistent accuracy across all domains. Every domain exceeded 11% accuracy, demonstrating that decentralized communication can better preserve useful local information in heterogeneous federated settings.
+Therefore, the FedAvg and Gossip accuracy numbers are not directly comparable in this setting.
 
-These results establish Gossip learning as a much stronger baseline than FedAvg and motivate the development of more advanced decentralized approaches such as hierarchical gossip aggregation and adaptive LoRA allocation.
+Full-length experiments with 50+ communication rounds and aligned evaluation protocols are required before drawing conclusions about relative algorithm performance.
