@@ -1,58 +1,31 @@
-"""
-Experiment 06: Alpha Policy Analysis
-
-Purpose:
-    Analyze Experiment 05 alpha-search results and derive
-    simple alpha allocation policies.
-
-Input:
-    results/experiment_05_alpha_search/best_alpha_per_client.json
-
-Output:
-    results/experiment_06_alpha_policy_analysis/alpha_policy_report.json
-"""
-
-import os
 import json
-from collections import defaultdict
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.allocation.alpha_policy import AlphaPolicyAnalyzer
 
 
 INPUT_FILE = (
-    "results/experiment_05_alpha_search/"
-    "best_alpha_per_client.json"
+    PROJECT_ROOT
+    / "results"
+    / "experiment_05_alpha_search"
+    / "best_alpha_per_client.json"
 )
 
-OUTPUT_DIR = "results/experiment_06_alpha_policy_analysis"
-OUTPUT_FILE = os.path.join(
-    OUTPUT_DIR,
-    "alpha_policy_report.json"
+OUTPUT_DIR = (
+    PROJECT_ROOT
+    / "results"
+    / "experiment_06_alpha_policy_analysis"
 )
 
+OUTPUT_FILE = OUTPUT_DIR / "alpha_policy_report.json"
 
 def load_results():
     with open(INPUT_FILE, "r") as f:
         return json.load(f)
-
-
-def compute_global_alpha(data):
-    alpha_scores = defaultdict(list)
-
-    for client in data.values():
-        for alpha, acc in client["all_alpha_results"].items():
-            alpha_scores[int(alpha)].append(acc)
-
-    avg_scores = {
-        alpha: sum(scores) / len(scores)
-        for alpha, scores in alpha_scores.items()
-    }
-
-    best_alpha = max(avg_scores, key=avg_scores.get)
-
-    return {
-        "best_alpha": best_alpha,
-        "average_accuracy": avg_scores[best_alpha],
-        "all_average_scores": dict(sorted(avg_scores.items()))
-    }
 
 
 def compute_alpha_distribution(data):
@@ -64,31 +37,6 @@ def compute_alpha_distribution(data):
     return dict(sorted(distribution.items()))
 
 
-def compute_rank_specific_alpha(data):
-    rank_scores = defaultdict(lambda: defaultdict(list))
-
-    for client in data.values():
-        rank = client["fixed_rank"]
-
-        for alpha, acc in client["all_alpha_results"].items():
-            rank_scores[rank][int(alpha)].append(acc)
-
-    result = {}
-
-    for rank, alpha_dict in rank_scores.items():
-
-        avg_scores = {
-            alpha: sum(scores) / len(scores)
-            for alpha, scores in alpha_dict.items()
-        }
-
-        best_alpha = max(avg_scores, key=avg_scores.get)
-
-        result[rank] = {
-            "best_alpha": best_alpha,
-            "average_accuracy": avg_scores[best_alpha],
-            "all_average_scores": dict(sorted(avg_scores.items()))
-        }
 
     return dict(sorted(result.items()))
 
@@ -132,19 +80,21 @@ def compute_tolerance_policy(data, tolerance=0.005):
 
 def main():
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     data = load_results()
 
+    analyzer = AlphaPolicyAnalyzer(INPUT_FILE)
+
     report = {
         "best_global_alpha":
-            compute_global_alpha(data),
+            analyzer.best_global_alpha(),
 
         "best_alpha_distribution":
             compute_alpha_distribution(data),
 
         "best_alpha_per_rank":
-            compute_rank_specific_alpha(data),
+            analyzer.best_alpha_per_rank(),
 
         "smallest_alpha_within_0_005_tolerance":
             compute_tolerance_policy(
@@ -170,6 +120,8 @@ def main():
     print(report["best_alpha_per_rank"])
 
     print(f"\nSaved to: {OUTPUT_FILE}")
+
+
 
 
 if __name__ == "__main__":
