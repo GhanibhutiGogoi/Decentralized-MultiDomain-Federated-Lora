@@ -1,5 +1,5 @@
 """
-Experiment 08: Complexity Components vs Alpha Analysis
+Experiment 07: Complexity Components vs Alpha Analysis
 
 Purpose:
     Analyze which dataset complexity components are related to the oracle
