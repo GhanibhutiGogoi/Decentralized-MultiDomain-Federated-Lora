@@ -51,10 +51,20 @@ The heatmap shows a clear trend that performance generally improves as alpha inc
 
 ## Findings
 
-The results indicate that larger alpha values are consistently more effective than small alpha values.
+The results suggest that larger alpha values often perform better under the current fixed-learning-rate setup. However, this should be interpreted with caution because alpha is partially confounded with the effective LoRA scaling factor and learning rate, as discussed in the caveat below.
 
 Across all 15 clients, the best alpha was always selected from the set {32, 64, 128}, while smaller alpha values never achieved the highest accuracy. :contentReference[oaicite:4]{index=4}
 
 Most clients showed monotonic improvement as alpha increased, suggesting that stronger LoRA update scaling improves adaptation capacity. However, several clients experienced performance saturation beyond alpha 64, indicating diminishing returns at very large alpha values. 
 
 These findings suggest that alpha is an important hyperparameter and should be considered together with rank when designing adaptive LoRA allocation strategies. The experiment provides oracle alpha labels that can be used in future work for alpha prediction or adaptive alpha allocation.
+
+## Caveat
+
+The observed preference for larger alpha values should be interpreted with caution.
+
+During the alpha search, the optimizer learning rate was fixed at 0.001 while the effective LoRA scaling factor is alpha / rank. Increasing alpha therefore also increases the magnitude of the LoRA update path.
+
+As a result, alpha and learning rate are partially confounded in this experiment. Larger alpha values may behave similarly to using a larger effective learning rate under the fixed 20-epoch training budget.
+
+Future experiments should control for this effect by jointly studying alpha, rank, scaling, and learning rate.
