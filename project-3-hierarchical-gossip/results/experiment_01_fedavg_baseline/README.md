@@ -59,8 +59,12 @@ Fairness metrics:
 
 ## Findings
 
-The FedAvg baseline achieved only 1.79% average accuracy under the heterogeneous multi-domain setting.
+## Findings
 
-Performance varied substantially across domains. Domain 1 achieved the highest accuracy (4.55%), while Domain 0 achieved only 0.30%, resulting in a large domain accuracy gap. This indicates that different domains contribute unevenly to the global model and highlights the difficulty of learning under domain heterogeneity.
+This experiment should be interpreted as a 2-round pipeline-validation run rather than a full research result.
 
-These results establish a challenging baseline and motivate the development of adaptive LoRA allocation strategies investigated in later experiments.
+The purpose of this run was to verify that the FedAvg pipeline, data loading, client training, aggregation, evaluation, and result logging work end-to-end.
+
+Because only 2 communication rounds were executed, the reported accuracy values are not meaningful for algorithmic comparison or convergence analysis.
+
+Full-length experiments with 50+ communication rounds are required before drawing conclusions about FedAvg performance in this setting.
