@@ -10,8 +10,8 @@ Inputs:
     - results/experiment_05_alpha_search/best_alpha_per_client.json
 
 Outputs:
-    - results/experiment_08_complexity_alpha_analysis/complexity_alpha_analysis.json
-    - results/experiment_08_complexity_alpha_analysis/complexity_alpha_scatter.png
+    - results/experiment_07_complexity_alpha_analysis/complexity_alpha_analysis.json
+    - results/experiment_07_complexity_alpha_analysis/complexity_alpha_scatter.png
 """
 
 import os
@@ -25,7 +25,7 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 COMPLEXITY_PATH = "results/experiment_01_data_and_complexity/complexity_scores.json"
 ALPHA_PATH = "results/experiment_05_alpha_search/best_alpha_per_client.json"
 
-OUTPUT_DIR = "results/experiment_08_complexity_alpha_analysis"
+OUTPUT_DIR = "results/experiment_07_complexity_alpha_analysis"
 OUTPUT_JSON = os.path.join(OUTPUT_DIR, "complexity_alpha_analysis.json")
 OUTPUT_PLOT = os.path.join(OUTPUT_DIR, "complexity_alpha_scatter.png")
 
@@ -188,7 +188,7 @@ def main():
     plot_complexity_vs_alpha(rows)
 
     print("=" * 60)
-    print("EXPERIMENT 08 COMPLETE")
+    print("EXPERIMENT 07 COMPLETE")
     print("=" * 60)
 
     print("\nStrongest metrics by absolute Pearson correlation:")
