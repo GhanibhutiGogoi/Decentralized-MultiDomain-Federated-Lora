@@ -113,7 +113,7 @@ def analyze_correlations(rows):
         "diversity_vs_scaling": compute_corr(diversity_values, scalings),
         "intrinsic_dim_vs_scaling": compute_corr(intrinsic_dim_values, scalings),
         "data_imbalance_vs_scaling": compute_corr(imbalance_values, scalings),
-        "rank_vs_scaling": compute_corr(ranks, scalings),
+        "rank_vs_best_alpha": compute_corr(best_ranks, best_alphas),
         "alpha_vs_scaling": compute_corr(alphas, scalings),
         "rank_vs_alpha": compute_corr(ranks, alphas),
     }
