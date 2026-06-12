@@ -61,8 +61,14 @@ The t-SNE visualization further demonstrates that predicted clusters do not alig
 
 ## Findings
 
-The clustering method failed to recover the true domain structure of the clients.
+## Findings
 
-All three clustering metrics deteriorated as training progressed. ARI became negative, indicating that the final clustering assignments were worse than random agreement with the ground-truth domains. NMI also decreased steadily from 0.4511 to 0.2903, while the silhouette score dropped from 0.2218 to 0.0704.
+This experiment should be interpreted as a pipeline-validation run rather than a final research conclusion.
 
-These results suggest that the current feature representation does not provide sufficient separation between domains for reliable clustering. Consequently, clustering-based client grouping requires either improved representations, alternative similarity metrics, or different clustering strategies before it can be effectively integrated into Hierarchical Gossip Aggregation.
+The purpose of this run was to verify that client feature extraction, clustering, metric computation, and visualization generation work end-to-end.
+
+Because these results are based on short smoke-test runs, the clustering metrics should be treated as diagnostic outputs only.
+
+The current results are useful for checking the implementation and identifying potential issues in the clustering pipeline, but they should not be used as final evidence about clustering quality.
+
+Full-length experiments with stable representations and more complete training are required before drawing conclusions about the effectiveness of the clustering strategy.
