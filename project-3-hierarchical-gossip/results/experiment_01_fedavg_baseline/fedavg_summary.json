@@ -1,0 +1,62 @@
+{
+  "final_accuracy": 0.017899908904406656,
+  "best_accuracy": 0.017899908904406656,
+  "final_per_domain": {
+    "0": 0.003000751876314095,
+    "1": 0.04549827188507848,
+    "2": 0.01849975912944429,
+    "3": 0.008501004752878816,
+    "4": 0.0139997568783176
+  },
+  "fairness": {
+    "accuracy_gap": 0.04249752000876439,
+    "accuracy_variance": 0.00021751298494587372,
+    "min_domain_accuracy": 0.003000751876314095,
+    "max_domain_accuracy": 0.04549827188507848,
+    "avg_domain_accuracy": 0.017899908904406656
+  },
+  "n_rounds": 2,
+  "config": {
+    "clustering": {
+      "linkage": "ward",
+      "method": "agglomerative",
+      "n_clusters": 5,
+      "similarity_metric": "cosine"
+    },
+    "data": {
+      "batch_size": 64,
+      "clients_per_domain": 3,
+      "data_dir": "./data",
+      "dataset": "cifar100",
+      "dirichlet_alpha": 0.5,
+      "n_domains": 5
+    },
+    "gossip": {
+      "n_neighbors": 2,
+      "topology": "ring"
+    },
+    "logging": {
+      "log_dir": "./logs",
+      "save_every": 10,
+      "verbose": true
+    },
+    "model": {
+      "base": "resnet18",
+      "lora_alpha": 32,
+      "lora_rank": 16,
+      "lora_target_modules": [
+        "fc"
+      ],
+      "num_classes": 100,
+      "pretrained": true
+    },
+    "training": {
+      "learning_rate": 0.001,
+      "local_epochs": 5,
+      "n_rounds": 2,
+      "optimizer": "adam",
+      "seed": 42,
+      "weight_decay": 0.0001
+    }
+  }
+}
