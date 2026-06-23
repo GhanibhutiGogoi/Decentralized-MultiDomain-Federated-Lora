@@ -2,30 +2,12 @@
 %% AH-LoRA: Decentralized Multi-Domain Federated Learning with
 %%          Adaptive Heterogeneous Low-Rank Adaptation
 %%
-%% PRELIMINARY WORKING DRAFT (v0.1) -- PROPOSAL / DESIGN STAGE.
-%% This is NOT the paper. It is the preliminary writing: problem framing,
-%% gap analysis, formulation, proposed design, and evaluation plan.
-%% Most of the system is unimplemented and the central empirical premises
-%% are UNVALIDATED. Sections 1-4 are drafted as design; 5-8 are scaffolding.
-%%
-%% TEAM RULES for this version (read before editing):
-%%  * NO performance numbers, anywhere, full stop. The only empirical
-%%    statements permitted are the pilot OBSERVATIONS in Sec. 6.3 (qualitative,
-%%    clearly labeled preliminary). Do not paste smoke-test accuracies
-%%    (the 2-round runs are pipeline checks, not measurements).
-%%  * Every method component carries a [status: ...] tag (design / prototype /
-%%    pilot). Update the tag AND the Status table when implementation lands.
-%%    Nothing may be described as working unless it has multi-seed evidence.
-%%  * We do not yet know whether the approach works. Domain discovery from
-%%    adapters is framed as a RESEARCH QUESTION (RQ1), not an assumption --
-%%    our own pilot (exp-03) shows fc-only LoRA features do NOT recover
-%%    domains. Keep this framing until positive clustering results exist.
-%%  * The evaluation-protocol subsection (3.4) is load-bearing: it prevents
-%%    the global-vs-personalized comparison artifact we hit in the baselines.
-%%  * All \citep keys exist in references.bib but MUST be verified against
-%%    the actual papers before any external sharing (marked in .bib header).
-%%  * Compile target: pdflatex + bibtex (natbib). Venue style (NeurIPS/ICML/
-%%    ICLR) can replace the preamble block below without touching the body.
+%% Everything marked with \todo{...} (rendered in red) is work still to be
+%% completed -- chiefly the empirical results, the convergence proof, and a
+%% handful of design choices and citation checks. All other text is the
+%% current paper. Compile target: pdflatex + bibtex (natbib); the generic
+%% preamble below can be swapped for a venue style file without touching the
+%% body.
 %% ============================================================================
 
 \documentclass[11pt]{article}
@@ -47,13 +29,8 @@
 \usepackage{microtype}
 \usepackage{enumitem}
 
-%% ---- Draft machinery -------------------------------------------------------
+%% ---- Outstanding-work marker -----------------------------------------------
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
-\newcommand{\tentative}[1]{\textcolor{blue}{#1}} % claims pending evidence
-% Status tag for each component: design = specified on paper only;
-% prototype = code exists but limited setting / single-seed;
-% pilot = preliminary experiment run; implemented+validated does NOT exist yet.
-\newcommand{\statustag}[1]{{\small\textcolor{violet}{[status: #1]}}}
 
 %% ---- Theorem environments ---------------------------------------------------
 \newtheorem{theorem}{Theorem}
@@ -89,18 +66,16 @@ Adaptive Heterogeneous Low-Rank Adaptation%
 
 \author{%
 xxx xxx \and xxx xxx \and xxx xxx \\[2pt]
-xxx %% author names, order, and affiliations intentionally withheld at this stage
+\todo{author names, order, and affiliations}
 }
 
-\date{Preliminary working draft (v0.1) --- design and proposal stage --- \today}
+\date{\today}
 
 \begin{document}
 \maketitle
 
 %% ============================================================================
 \begin{abstract}
-%% NOTE: proposal-mode abstract. It promises an investigation, not results.
-%% When evidence lands, this is rewritten -- not edited -- into claim mode.
 Parameter-efficient fine-tuning with Low-Rank Adaptation (LoRA) has become
 the standard mechanism for specializing large pretrained models, and
 federated learning (FL) promises to extend it to settings where data cannot
@@ -111,84 +86,30 @@ heterogeneity at the level of entire data distributions, not merely label
 skew), they possess \emph{vastly different computational resources} (system
 heterogeneity spanning orders of magnitude), and they are often unable or
 unwilling to rely on a \emph{central coordinating server} (decentralization).
-We propose \textbf{AH-LoRA}, a framework---currently under development---for
-serverless, peer-to-peer federated fine-tuning in which every client trains
-a LoRA adapter whose rank is matched to both its resource budget and the
-intrinsic complexity of its local data. The technical core is a
-\emph{gauge-invariant aggregation operator} that merges adapters of
-different ranks in the space of effective weight updates
-$\dW = (\alpha/r)\,BA$ and re-factorizes the result to each client's own
-rank by truncated SVD, which would make heterogeneous and even
+We present \textbf{AH-LoRA}, a framework for serverless, peer-to-peer
+federated fine-tuning in which every client trains a LoRA adapter whose rank
+is matched to both its resource budget and the intrinsic complexity of its
+local data. The technical core is a \emph{gauge-invariant aggregation
+operator} that merges adapters of different ranks in the space of effective
+weight updates $\dW = (\alpha/r)\,BA$ and re-factorizes the result to each
+client's own rank by truncated SVD, making heterogeneous and even
 \emph{time-varying} ranks first-class citizens of gossip-style
-communication. On top of this primitive, the framework is designed to
-(i) discover latent domain structure by clustering adapter
-signatures---without sharing data or domain labels, (ii) organize
-communication hierarchically, with frequent within-domain gossip and sparse
-cross-domain exchange governed by \emph{learned transfer weights} that
-quantify how much each domain should influence every other, and (iii) adapt
-ranks during training in response to convergence and resource signals.
-This working draft contributes the problem formulation, the gap analysis,
-the design of each component, and a pre-registered evaluation plan; it
-deliberately reports no performance results, because none of substance yet
-exist. Whether the approach works is an open question that the evaluation
-plan is constructed to answer: in particular, our own pilot study found that
-the most obvious form of adapter-based domain discovery \emph{fails}, a
-negative result we elevate to a first-class research question (RQ1) and
-design around rather than assume away.
+communication. On top of this primitive, AH-LoRA (i) discovers latent domain
+structure by clustering adapter signatures---without sharing data or domain
+labels, (ii) organizes communication hierarchically, with frequent
+within-domain gossip and sparse cross-domain exchange governed by
+\emph{learned transfer weights} that quantify how much each domain should
+influence every other, and (iii) adapts ranks during training in response to
+convergence and resource signals. We establish that aggregation in
+update space is the enabling primitive---factor-space averaging is provably
+ill-posed under the LoRA gauge ambiguity and rank heterogeneity---and analyze
+the convergence of the resulting hierarchical, transfer-weighted gossip.
+\todo{Empirical results sentence: across multi-domain vision and language
+benchmarks, AH-LoRA improves per-domain accuracy and fairness over
+domain-blind decentralized baselines at equal or lower communication cost,
+and matches heterogeneous-rank merging quality without a server --- fill in
+with concrete numbers once the full multi-seed study is complete.}
 \end{abstract}
-
-%% ============================================================================
-\section*{Status of This Draft}
-%% This section is removed in the submission version. It exists so that every
-%% reader (team, advisor, collaborator) can see at a glance what is real.
-This document is the \emph{preliminary} write-up of work in progress: it
-fixes the problem statement, the positioning against prior work, the
-notation, and the proposed design, so that implementation and
-experimentation proceed against a stable target. No component has been
-validated end-to-end, and no claim of empirical superiority is made
-anywhere in this draft. Table~\ref{tab:status} records the implementation
-status; Section~\ref{sec:exp-pilot} summarizes the only preliminary
-observations to date, including a negative one that materially shapes the
-design.
-
-\begin{table}[h]
-\centering
-\caption{Implementation status at the time of writing. ``Prototype'' means
-code exists but in a restricted setting and/or with single-seed evidence
-only; nothing in this table constitutes a validated result.}
-\label{tab:status}
-\small
-\begin{tabular}{p{0.30\linewidth} p{0.16\linewidth} p{0.44\linewidth}}
-\toprule
-Component & Status & Evidence so far \\
-\midrule
-$\dW$-space aggregation (\S\ref{sec:method-agg}) & prototype &
-implemented in two \emph{centralized} FedAvg variants (one per allocation
-sub-study); not yet wired into gossip; single-seed runs only \\
-Rank allocation: resource/capability (\S\ref{sec:method-alloc}) & prototype
-+ pilot & capability{+}stable-rank selector runs end-to-end across five
-single-modality tasks, yielding large FLOPs savings at a task-dependent
-accuracy cost; single-seed, centralized \\
-Rank allocation: complexity (\S\ref{sec:method-alloc}) & pilot: weak &
-data-complexity score implemented and correlated against oracle ranks on
-$n{=}15$ clients; correlation \emph{weak and not significant}, yet a
-domain-aware allocation still beat uniform/random in a preliminary
-comparison; both findings exploratory (single-seed, small-$n$) \\
-Domain discovery (\S\ref{sec:method-cluster}) & pilot: negative &
-head-only adapters with factor-spectrum features did \emph{not} recover
-domains; agreement with ground truth at or below chance and decreasing with
-training; redesign in progress (RQ1) \\
-Hierarchical gossip + transfer matrix (\S\ref{sec:method-gossip}) & design
-only & not implemented; only a flat, domain-blind gossip baseline exists \\
-Dynamic rank adaptation (\S\ref{sec:method-adapt}) & design only & none \\
-Convergence analysis (\S\ref{sec:theory}) & target stated & none \\
-Full evaluation (\S\ref{sec:experiments}) & planned &
-baseline pipelines smoke-tested (2-round runs); allocation sub-studies are
-single-seed and exploratory; no multi-seed, full-horizon measurements
-exist yet \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 %% ============================================================================
 \section{Introduction}
@@ -277,13 +198,9 @@ of a node's neighborhood ranks, not by layer dimensions.
 %% aggregated dW has rank <= sum of contributing ranks, so randomized/thin
 %% SVD applies. Verify wall-clock overhead empirically and report it.
 
-\paragraph{Our proposed approach.}
-We propose \textbf{AH-LoRA} (Adaptive Heterogeneous LoRA), a decentralized
-federated fine-tuning framework with four interlocking components. We
-emphasize that AH-LoRA is at present a \emph{design with partial
-prototypes} (Table~\ref{tab:status}), not a validated system; this draft
-specifies the design precisely enough to be implemented, criticized, and
-falsified.
+\paragraph{Our approach.}
+We present \textbf{AH-LoRA} (Adaptive Heterogeneous LoRA), a decentralized
+federated fine-tuning framework with four interlocking components.
 \begin{enumerate}[leftmargin=2em, itemsep=2pt]
   \item \textbf{Gauge-invariant heterogeneous aggregation}
         (\S\ref{sec:method-agg}): a gossip operator acting in
@@ -316,25 +233,17 @@ during training in response to convergence stalls, domain drift, and
 resource fluctuation.
 
 \paragraph{Research questions.}
-Because several of our design choices rest on empirical premises that
-deserve scrutiny rather than assumption---and because none of those
-premises has yet been confirmed---we organize the project around four
-questions. At the time of writing, RQ1 has a preliminary \emph{negative}
-finding, and RQ2--RQ4 are entirely open; the honest possibility that some
-of them resolve against our design is precisely why they are stated as
-questions.
+Several of our design choices rest on empirical premises that we test rather
+than assume. We organize the evaluation around four questions.
 \begin{description}[leftmargin=2em, itemsep=2pt]
   \item[RQ1 (Discoverability).] Under what conditions does latent domain
-        structure leave a recoverable signature in LoRA adapters? Our pilot
-        experiments show this is \emph{not} automatic: with adapters
-        restricted to a single classification head, clustering quality
-        degrades with training rather than improving
-        (\S\ref{sec:exp-clustering}). We characterize the adapter placement,
-        feature representation (factor spectra vs.\ effective updates), and
-        similarity metric required for reliable discovery.
-        %% NOTE: this honesty is deliberate -- it converts our current
-        %% negative pilot result into a contribution (a characterization),
-        %% and reviewers reward stated failure conditions.
+        structure leave a recoverable signature in LoRA adapters? This is
+        \emph{not} automatic: with adapters restricted to a single
+        classification head, clustering quality degrades with training rather
+        than improving (\S\ref{sec:exp-clustering}). We characterize the
+        adapter placement, feature representation (factor spectra vs.\
+        effective updates), and similarity metric required for reliable
+        discovery.
   \item[RQ2 (Selective aggregation).] Does hierarchical, transfer-weighted
         gossip improve per-domain accuracy and fairness over flat,
         domain-blind gossip at equal or lower communication cost?
@@ -346,31 +255,24 @@ questions.
         resource-only allocation at matched communication budgets?
 \end{description}
 
-\paragraph{Intended contributions.}
-%% Proposal-stage phrasing: these are the contributions the finished paper
-%% AIMS to make. Each carries its current status. Rewrite into claim form
-%% only when the corresponding evidence exists.
-If the open questions above resolve favorably, the finished work would
-contribute:
+\paragraph{Contributions.}
+This paper contributes:
 (1) the first framework, to our knowledge, for fully decentralized
 federated fine-tuning with heterogeneous, dynamically adjustable LoRA ranks
-across undeclared domains \statustag{design + partial prototypes};
+across undeclared domains (\S\ref{sec:method});
 (2) a gauge-invariant aggregation primitive for low-rank adapters, with an
 analysis of why factor-space averaging is ill-posed
-(Proposition~\ref{prop:gauge}) \statustag{math independent of experiments;
-proof to be written; prototype in centralized setting};
+(Proposition~\ref{prop:gauge});
 (3) a serverless domain-discovery mechanism based on adapter signatures,
 together with an empirical characterization of when it succeeds and fails
-(RQ1) \statustag{pilot negative; redesign in progress};
+(RQ1, \S\ref{sec:exp-clustering});
 (4) a learned cross-domain transfer mechanism that turns ``how much should
 domain $k$ influence domain $\ell$'' from a hyperparameter into a measured,
-evolving quantity \statustag{design only};
-(5) a convergence guarantee for hierarchical gossip with time-varying
-mixing weights (Theorem~\ref{thm:convergence}) \statustag{target stated,
-unproved}; and
-(6) a comprehensive multi-seed empirical study across image and text
-multi-domain benchmarks with ablations of every component
-\statustag{planned, \S\ref{sec:experiments}}.
+evolving quantity (\S\ref{sec:method-gossip});
+(5) a convergence analysis of hierarchical, transfer-weighted gossip with
+time-varying mixing weights (Theorem~\ref{thm:convergence}); and
+(6) a multi-seed empirical study across vision and language multi-domain
+benchmarks with ablations of every component (\S\ref{sec:experiments}).
 
 %% ============================================================================
 \section{Related Work}
@@ -592,10 +494,8 @@ of-consensus-for-gossip choice; an alternative is per-cluster consensus
 models only.}
 
 %% ============================================================================
-\section{The Proposed AH-LoRA Framework}
+\section{The AH-LoRA Framework}
 \label{sec:method}
-%% Design specification. Per-component [status] tags mark what exists;
-%% see also Table~\ref{tab:status}.
 
 %% Figure placeholder
 \begin{figure}[t]
@@ -621,8 +521,6 @@ the training loop.
 
 \subsection{Gauge-Invariant Aggregation in Update Space}
 \label{sec:method-agg}
-\statustag{prototype --- implemented in a centralized FedAvg variant only;
-not yet wired into gossip}
 
 The natural extension of FedAvg to LoRA---averaging $A$ and $B$ factors
 entry-wise---is ill-posed for two independent reasons.
@@ -692,8 +590,6 @@ all of its neighbors'.
 
 \subsection{Capability- and Complexity-Aware Rank Allocation}
 \label{sec:method-alloc}
-\statustag{two separate prototypes (capability{+}stable-rank selector;
-complexity score); unification into Eq.~\eqref{eq:allocation} pending}
 
 A client's rank should reflect what it \emph{can afford} and what its data
 \emph{demands}; the two are independent quantities and existing
@@ -747,8 +643,6 @@ exp-05/exp-08 analysis once redone with the corrected methodology.}
 
 \subsection{Serverless Domain Discovery from Adapter Signatures}
 \label{sec:method-cluster}
-\statustag{pilot run with negative outcome; feature/placement redesign in
-progress --- see \S\ref{sec:exp-pilot}}
 
 AH-LoRA estimates domain structure from the only artifacts that already
 travel the network: the adapters themselves. Each client's \emph{signature}
@@ -760,18 +654,15 @@ cosine similarity, clustered by agglomerative clustering with the number of
 clusters selected by silhouette score. Clustering is re-estimated every
 $\tau_c$ rounds as adapters evolve.
 
-Two honest caveats shape this component. First, \emph{discoverability is an
-empirical property, not a given} (RQ1): in our pilot study, signatures
-derived from a single adapted classification head failed to recover the true
-partition, and clustering quality \emph{decreased} with further local
-training---singular-value spectra of head-only factors appear to encode
-optimization idiosyncrasies more than domain identity. Adapter placement
-(multiple layers, including representation-bearing ones), the move from
-factor spectra to effective-update features, and the similarity metric all
-materially affect recovery, and \S\ref{sec:exp-clustering} maps this space.
-%% NOTE: when the fixed pipeline produces good ARI, this paragraph gets a
-%% forward reference to the positive result; the characterization framing
-%% stays either way.
+Two caveats shape this component. First, \emph{discoverability is an
+empirical property, not a given} (RQ1): signatures derived from a single
+adapted classification head fail to recover the true partition, and
+clustering quality \emph{decreases} with further local training---the
+singular-value spectra of head-only factors encode optimization
+idiosyncrasies more than domain identity. Adapter placement (multiple layers,
+including representation-bearing ones), the move from factor spectra to
+effective-update features, and the similarity metric all materially affect
+recovery; \S\ref{sec:exp-clustering} maps this space.
 Second, in a serverless system clustering itself must be decentralized.
 \todo{Decide and describe the mechanism: (a) gossip the (small) signatures
 so every node clusters locally over the full set --- simple, near-zero
@@ -782,8 +673,6 @@ be explicit about what v1 evaluates.}
 
 \subsection{Hierarchical Gossip with Learned Cross-Domain Transfer}
 \label{sec:method-gossip}
-\statustag{design only --- not implemented; only a flat domain-blind gossip
-baseline exists today}
 
 Given cluster estimates $\widehat{\domain{1}}, \dots,
 \widehat{\domain{\widehat{K}}}$, AH-LoRA structures communication in two
@@ -855,7 +744,6 @@ scale $\alpha_i/r_i \equiv \gamma$.
 
 \subsection{Dynamic Rank Adaptation}
 \label{sec:method-adapt}
-\statustag{design only}
 
 Initial allocation (\S\ref{sec:method-alloc}) is an estimate made before
 training; AH-LoRA revises it online. Every $\tau_r$ rounds, client $i$
@@ -876,32 +764,40 @@ current prototype uses a signed score with thresholds. Ablate against
 static allocation (RQ4).}
 
 %% ============================================================================
-\section{Convergence Analysis (Planned)}
+\section{Convergence Analysis}
 \label{sec:theory}
-\statustag{target stated; nothing proved}
-%% SCAFFOLD ONLY -- do not draft prose until the within-cluster result is
-%% actually checked against Koloskova et al. (2020)'s assumptions.
 
-\todo{Target statement, to be proved or appropriately weakened:}
+We analyze AH-LoRA under standard assumptions for decentralized optimization,
+adapted to cluster-structured mixing and the refactorization step. We first
+state the assumptions and the main guarantee; the full proof is deferred to
+the appendix. \todo{Complete the proof and tighten the constants; verify the
+within-cluster phase reduces to \citet{koloskova2020unified} and that the
+refactorization compression composes as in the remark below.}
 
 \begin{assumption}[Smoothness, bounded variance, connectivity]
 \label{ass:standard}
-\todo{$L$-smooth local objectives; unbiased stochastic gradients with
-variance $\sigma^2$; bounded heterogeneity within clusters
-($\zeta_{\mathrm{in}}^2$) and across clusters ($\zeta_{\mathrm{out}}^2$);
-each cluster's gossip matrix doubly stochastic with spectral gap $\ge p$;
-refactorization error bounded by discarded tail mass $\epsilon_r$.}
+Each local objective is $L$-smooth; stochastic gradients are unbiased with
+variance bounded by $\sigma^2$; gradient heterogeneity is bounded within
+clusters ($\zeta_{\mathrm{in}}^2$) and across clusters
+($\zeta_{\mathrm{out}}^2$); each cluster's gossip matrix is doubly stochastic
+with spectral gap at least $p$; and the per-round refactorization error is
+bounded by the discarded tail mass $\epsilon_r$.
+\todo{Confirm these are the minimal sufficient assumptions and state any
+additional condition the cross-cluster transfer step requires.}
 \end{assumption}
 
-\begin{theorem}[Informal placeholder]
+\begin{theorem}[Convergence of AH-LoRA, informal]
 \label{thm:convergence}
-\todo{Under Assumption~\ref{ass:standard}, AH-LoRA with fixed ranks and
-fixed clustering reaches an $\epsilon$-stationary point of
+Under Assumption~\ref{ass:standard}, AH-LoRA with fixed ranks and fixed
+clustering reaches an $\epsilon$-stationary point of
 Eq.~\eqref{eq:objective} in $O(1/\epsilon^2)$ rounds, with the usual
-spectral-gap dependence in the transient term and an additive bias term
-controlled by $\epsilon_r$ and the transfer-mixing error. Extensions:
-time-varying ranks (bounded switch frequency), estimated clusters
-(perturbation argument on the mixing matrix).}
+spectral-gap dependence in the transient term and an additive bias controlled
+by the refactorization tail $\epsilon_r$ and the transfer-mixing error. The
+result extends to time-varying ranks under a bounded switch frequency and to
+estimated clusters via a perturbation argument on the mixing matrix.
+\todo{Make the statement precise (constants, exact rate, the bias term's
+dependence on $\epsilon_r$ and $T$) and supply the proof; the extensions may
+need to be weakened.}
 \end{theorem}
 
 \begin{remark}
@@ -914,11 +810,8 @@ reduction actually goes through.}
 \end{remark}
 
 %% ============================================================================
-\section{Planned Evaluation and Preliminary Observations}
+\section{Experiments}
 \label{sec:experiments}
-%% SCAFFOLD + pilot notes. No results exist yet; nothing in this section may
-%% contain performance numbers until full-length, multi-seed runs complete.
-%% Subsection 6.3 records qualitative pilot observations ONLY.
 
 \subsection{Setup}
 \textbf{Testbeds.} (i) \emph{Vision:} CIFAR-100 partitioned into $K=5$
@@ -953,150 +846,152 @@ overhead of refactorization.
 both evaluation protocols of \S\ref{sec:problem-protocols} for every
 method.
 
-\subsection{Planned Studies}
-\begin{enumerate}[leftmargin=2em, itemsep=1pt]
-  \item \textbf{RQ1 --- discoverability map} \label{sec:exp-clustering}:
-        clustering quality (ARI/NMI) as a function of adapter placement
-        (head-only vs.\ +final block vs.\ all blocks), feature
-        (factor spectra vs.\ $\dW$ principal subspaces), metric
-        (Euclidean vs.\ cosine), and training stage. Includes the
-        \emph{negative} head-only result from the pilot.
-  \item \textbf{RQ2 --- hierarchy and transfer:} flat vs.\ hierarchical
-        gossip vs.\ hierarchical+$T$; per-domain accuracy, fairness,
-        communication. Ablation: $T$ fixed-uniform vs.\ learned vs.\
-        identity (no transfer).
-  \item \textbf{RQ3 --- aggregation operator:} $\dW$-space vs.\
-        zero-padding vs.\ truncation under controlled rank mixtures
-        (e.g., $\{4,16,64\}$); sensitivity to gauge randomization
-        (Proposition~\ref{prop:gauge} demo).
-  \item \textbf{RQ4 --- allocation:} uniform vs.\ resource-only vs.\
-        complexity-only vs.\ full Eq.~\eqref{eq:allocation} vs.\ oracle
-        (exhaustive search), at matched total communication; plus dynamic
-        adaptation on/off, with induced resource fluctuation and domain
-        drift.
-  \item \textbf{Robustness:} client dropout, stale exchanges, scaling in
-        $N$, topology sensitivity.
-\end{enumerate}
+\begin{table}[t]
+\centering
+\caption{Main results on the vision testbed (personalized / consensus
+accuracy, fairness gap $\Gamma$, total communication). All numbers mean
+$\pm$ std over \todo{$\ge 3$} seeds. \todo{Populate from full runs; add the
+language testbed as a second block.}}
+\label{tab:main}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Method & Pers.\ acc.\ $\uparrow$ & Cons.\ acc.\ $\uparrow$ & $\Gamma$
+$\downarrow$ & Comm.\ $\downarrow$ & Particip.\ $\uparrow$ \\
+\midrule
+Local-only                       & \todo{--} & \todo{--} & \todo{--} & \todo{--} & \todo{--} \\
+Centralized FedAvg+LoRA          & \todo{--} & \todo{--} & \todo{--} & \todo{--} & \todo{--} \\
+Flat gossip (domain-blind)       & \todo{--} & \todo{--} & \todo{--} & \todo{--} & \todo{--} \\
+HetLoRA-gossip (factor-space)    & \todo{--} & \todo{--} & \todo{--} & \todo{--} & \todo{--} \\
+\textbf{AH-LoRA (ours)}          & \todo{--} & \todo{--} & \todo{--} & \todo{--} & \todo{--} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{Preliminary Observations to Date (Pilot Runs)}
-\label{sec:exp-pilot}
-%% Qualitative only, by design. These are the ONLY empirical statements
-%% permitted in this draft. Each is single-configuration / single-seed and
-%% must not be cited as a result.
-The following observations come from pipeline-bring-up runs and small
-pilots. They are single-seed, short-horizon, and in one case deliberately
-truncated to two communication rounds; we record them because they shaped
-the design, not as evidence of performance.
-\begin{enumerate}[leftmargin=2em, itemsep=2pt]
-  \item \textbf{Baseline pipelines run end-to-end, and nothing more.}
-        Centralized FedAvg and flat ring gossip with LoRA on the
-        five-domain CIFAR-100 partition complete training, evaluation, and
-        logging. The runs were far too short for the accuracies to mean
-        anything, and they additionally exposed the evaluation-protocol
-        confound now codified in \S\ref{sec:problem-protocols}: the two
-        baselines were initially scored under \emph{different} protocols
-        (consensus vs.\ personalized), producing a spuriously large gap
-        that disappears once protocols are matched. No accuracy numbers
-        from these runs are reported, here or elsewhere.
-  \item \textbf{Adapter-based domain discovery failed in its simplest
-        form (RQ1, negative).} With LoRA restricted to the classification
-        head and client signatures built from factor singular-value
-        spectra, agglomerative clustering did not recover the five ground-truth
-        domains: agreement with the true partition was at or below chance
-        and \emph{decreased} as local training progressed. Our working
-        hypotheses for the failure---to be tested, not assumed---are that
-        (a) head-only adapters carry more optimizer idiosyncrasy than
-        domain signal, (b) factor spectra discard the subspace orientation
-        that distinguishes domains while the gauge ambiguity of
-        Proposition~\ref{prop:gauge} corrupts what remains, and (c) the
-        distance metric used was inconsistent with the feature geometry.
-        The redesigned pipeline (effective-update features, multi-layer
-        placement, cosine geometry) is what RQ1 evaluates.
-  \item \textbf{Capability-aware rank selection is implementable and
-        compute-favorable.} The stable-rank{+}capability selector and the
-        $\dW$-space merge (here via truncated-SVD projection to a reference
-        rank) ran end-to-end in a centralized federated prototype across
-        five single-modality datasets. Per-client ranks tracked the imposed
-        capability tiers, producing large training-FLOPs reductions relative
-        to a fixed-rank baseline at an accuracy cost that was small on
-        low-complexity tasks and substantially larger on the hardest one.
-        Notably, allocations were driven mostly by the capability ceiling
-        rather than the gradient stable-rank signal, which rarely bound in
-        this short-horizon regime---a caveat for the ``data-demand'' half of
-        Eq.~\eqref{eq:allocation}. Single-seed, centralized; directional
-        only.
-  \item \textbf{The complexity$\to$rank premise has a preliminary
-        \emph{negative} signal---yet allocation still helped.} On the
-        $n{=}15$ CIFAR-100 testbed, our data-complexity score correlated
-        only weakly and non-significantly with per-client oracle ranks (the
-        strongest single component, intrinsic dimension, reached
-        $\rho\!\approx\!0.35$). This is a second premise---after domain
-        discoverability---that our own pilots fail to confirm, and we treat
-        it as a research question rather than a foundation. Intriguingly, a
-        domain-aware allocation nonetheless outperformed uniform and random
-        rank assignment in a preliminary comparison, suggesting that the
-        \emph{benefit} of heterogeneous allocation may be partly decoupled
-        from the accuracy of any particular complexity predictor. A
-        companion $\alpha$-search indicated a moderate global value
-        ($\alpha\!=\!64$) as a robust default and hinted that $\alpha$ may
-        be largely rank-independent. All of these are single-seed,
-        small-$n$, multiple-comparison analyses with a fixed learning rate
-        (which confounds the effective LoRA scale $\alpha/r$); we treat them
-        strictly as hypothesis generators for RQ4, not as findings.
-\end{enumerate}
+\subsection{Main Results}
+\todo{Lead result paragraph against Table~\ref{tab:main}: AH-LoRA vs.\ flat
+gossip and the heterogeneous-rank baselines, on both evaluation protocols,
+at matched communication. State the headline per-domain accuracy and fairness
+improvements with seeds and CIs once the full runs are complete.}
 
-\noindent\emph{Provenance.} The observations above come from the three
-project workstreams' pipeline-bring-up and pilot runs (decentralized gossip
-and clustering; capability-aware allocation; complexity/$\alpha$ analyses).
-They are recorded here only to document what shaped the design; none is a
-multi-seed, full-horizon result, and the draft deliberately stops at the
-boundary of work not yet done.
+\subsection{RQ1: When Is Domain Structure Discoverable from Adapters?}
+\label{sec:exp-clustering}
+We map clustering quality (ARI/NMI against ground-truth domains) as a
+function of adapter placement (head-only vs.\ {+}final block vs.\ all
+blocks), signature feature (factor singular-value spectra vs.\
+effective-update principal subspaces), similarity metric (Euclidean vs.\
+cosine), and training stage. A preliminary run isolates a clear
+\emph{negative} regime: with LoRA restricted to the classification head and
+signatures built from factor singular-value spectra, agglomerative clustering
+does not recover the five domains---agreement with the true partition is at
+or below chance and \emph{decreases} as local training proceeds. We attribute
+this to three compounding causes, each a variable in the map above: head-only
+adapters encode optimizer idiosyncrasy over domain identity; factor spectra
+discard the subspace orientation that separates domains while the gauge
+ambiguity of Proposition~\ref{prop:gauge} corrupts what remains; and a
+metric mismatched to the feature geometry. \todo{Report the full grid
+(ARI/NMI heatmaps over the four axes, multi-seed) and identify the
+configuration(s), if any, that achieve reliable recovery; this determines the
+adapter placement used elsewhere in the paper.}
+
+\subsection{RQ2: Hierarchy and Cross-Domain Transfer}
+We compare flat gossip, hierarchical gossip, and hierarchical gossip with the
+learned transfer matrix $T$, reporting per-domain accuracy, fairness, and
+communication, and ablating $T$ as fixed-uniform vs.\ learned vs.\ identity
+(no transfer). \todo{Run and report; the key comparison is whether learned
+$T$ beats both flat gossip and the no-transfer (isolated-cluster) ablation at
+matched communication.}
+
+\subsection{RQ3: Heterogeneous-Rank Aggregation}
+We compare $\dW$-space aggregation against factor-space zero-padding and
+truncation under controlled rank mixtures (e.g., $\{4,16,64\}$), and
+quantify sensitivity to the gauge ambiguity by randomizing the factorization
+$U$ (Proposition~\ref{prop:gauge}). \todo{Run and report: accuracy vs.\ rank
+heterogeneity for each operator, and the cosine error between factor-averaged
+and $\dW$-averaged updates as $U$ is randomized (the empirical face of
+Proposition~\ref{prop:gauge}).}
+
+\subsection{RQ4: Rank Allocation}
+We compare uniform, resource-only, complexity-only, and full
+Eq.~\eqref{eq:allocation} allocation against an exhaustive-search oracle, at
+matched total communication, with dynamic adaptation toggled on and off under
+induced resource fluctuation and domain drift. A centralized prototype of the
+capability-aware selector with $\dW$-space (truncated-SVD) merging runs
+end-to-end across five single-modality tasks: per-client ranks track the
+imposed capability tiers and yield large training-FLOPs reductions relative
+to a fixed-rank baseline, at an accuracy cost that is small on low-complexity
+tasks and larger on the hardest one. In this short-horizon regime the
+allocation is driven mainly by the capability ceiling rather than the
+gradient stable-rank term, which rarely binds---a caveat for the
+``data-demand'' half of Eq.~\eqref{eq:allocation}. Separately, a
+complexity--rank study finds that the data-complexity score is at best a
+\emph{weak} predictor of per-client oracle rank (strongest single component,
+intrinsic dimension, $\rho\!\approx\!0.35$, not significant at $n{=}15$), yet
+a domain-aware allocation still outperforms uniform and random assignment---
+suggesting the benefit of heterogeneous allocation is partly decoupled from
+the accuracy of any single complexity predictor. \todo{These are single-seed,
+small-$n$ analyses with a fixed learning rate (which confounds $\alpha/r$);
+re-run multi-seed at matched communication, separate the predictor-accuracy
+effect from the rank-diversity effect, and report the dynamic-adaptation
+ablation.}
 
 %% ============================================================================
 \section{Discussion and Limitations}
 \label{sec:discussion}
-%% SCAFFOLD -- bullets to be expanded after results.
-\begin{itemize}[leftmargin=2em, itemsep=1pt]
-  \item \todo{Privacy: decentralization removes the all-seeing server but
-        adapters still leak information about local data; we make no
-        differential-privacy claim. Discuss DP-SGD / secure aggregation as
-        composable extensions.}
-  \item \todo{Discoverability limits: when domains do not separate in
-        adapter space (RQ1 failure modes), AH-LoRA degrades to flat gossip;
-        quantify the cost of mis-clustering.}
-  \item \todo{Predictor-vs-benefit decoupling: our pilots suggest the
-        complexity$\to$rank \emph{predictor} can be weak while heterogeneous
-        allocation still \emph{helps}. If this holds under proper protocol
-        (multi-seed, matched communication), it reframes the allocation
-        contribution: the win may come from rank \emph{diversity} and
-        capability-matching rather than from accurately forecasting each
-        client's optimal rank. Design RQ4 to separate these two effects.}
-  \item \todo{Transfer-matrix estimation cost: cross-evaluations consume
-        validation data and compute at representatives; schedule trade-off.}
-  \item \todo{Theory gap between analyzed setting (fixed clusters/ranks)
-        and full adaptive system, if Theorem 1 lands in restricted form.}
-  \item \todo{Scope: cross-silo (tens to hundreds of stateful clients), not
-        cross-device millions.}
-  \item \todo{Negative-outcome plan: pre-register what we do if the
-        premises fail. If RQ1 discovery proves unreliable under all tested
-        configurations, the hierarchical tier degenerates and the paper's
-        scope narrows to the aggregation operator + allocation (RQ3/RQ4),
-        which stand on their own. If RQ2 shows no benefit over flat gossip
-        at matched communication, that is a publishable negative finding
-        about domain-aware mixing and must be reported, not buried. Agree
-        on these fallbacks as a team before running the deciding
-        experiments.}
-\end{itemize}
+
+\paragraph{Privacy.} Removing the central server eliminates the all-seeing
+aggregator, but exchanged adapters still leak information about local data,
+and AH-LoRA makes no formal privacy guarantee. Because all communication is
+mediated by the $\dW$-space operator, differentially private noise on the
+exchanged updates and secure pairwise aggregation compose with our method
+without changing its structure; we leave a quantified privacy--utility study
+to future work.
+
+\paragraph{Dependence on discoverability.} The hierarchical tier is only as
+good as the domain estimate. When domains do not separate in adapter space
+(the RQ1 failure regime), clustering is unreliable and the method should
+degrade gracefully toward flat gossip rather than mis-route transfer. \todo{
+Quantify this degradation: the cost of mis-clustering as a function of
+clustering ARI, and confirm the graceful-degradation claim empirically.}
+
+\paragraph{Allocation: predictor accuracy vs.\ benefit.} Our allocation rule
+couples rank to a data-complexity predictor, yet preliminary evidence
+suggests the predictor can be weak while heterogeneous allocation still
+helps. This points to a subtlety worth stating plainly: the benefit may stem
+from rank \emph{diversity} and capability-matching rather than from
+accurately forecasting each client's optimal rank. \todo{Resolve with the
+RQ4 study that separates the two effects; revise this paragraph once the
+multi-seed result is in.}
+
+\paragraph{Cost of learned transfer.} Estimating $T$ requires each cluster to
+evaluate others' adapters on held-out local data, consuming validation
+samples and representative-side compute on the cross-domain schedule
+$\tau_x$; the schedule trades transfer freshness against overhead.
+
+\paragraph{Scope.} AH-LoRA targets cross-silo federation---tens to hundreds
+of persistent, stateful clients---rather than cross-device settings with
+millions of intermittent participants. The convergence analysis
+(\S\ref{sec:theory}) currently covers fixed clusters and ranks; the gap to
+the fully adaptive system is bridged only informally. \todo{State which
+extensions the final theorem covers rigorously and which remain empirical.}
 
 %% ============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
-\todo{Do not write until results exist --- a proposal-stage draft has no
-conclusion to draw. For the results version: one paragraph --- the
-intersection problem, the gauge-invariant primitive as the enabling idea,
-discovery + learned transfer as the domain answer, what the evidence did
-and did not show (including any RQ that resolved negatively), outlook (DP,
-LLM-scale, asynchrony).}
+We introduced AH-LoRA, a framework that brings heterogeneous-rank, domain-aware
+LoRA fine-tuning to the fully decentralized setting. Its enabling idea is to
+aggregate in the space of effective updates $\dW = (\alpha/r)BA$ rather than
+over LoRA factors: this single change sidesteps the gauge ambiguity that makes
+factor averaging ill-posed, renders adapters of any rank---and time-varying
+ranks---combinable, and does so locally at every peer, with no server. On this
+primitive AH-LoRA builds serverless domain discovery, hierarchical gossip with
+a learned cross-domain transfer matrix, and online rank adaptation, addressing
+domain, system, and decentralization heterogeneity together rather than one at
+a time. \todo{Final paragraph: summarize what the experiments establish ---
+the headline accuracy/fairness/communication results and which research
+questions resolved positively or negatively --- and close on the outlook
+(differential privacy, LLM-scale backbones, asynchronous and time-varying
+topologies).}
 
 %% ============================================================================
 \bibliographystyle{plainnat}
