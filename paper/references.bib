@@ -1,0 +1,200 @@
+%% ============================================================================
+%% references.bib -- AH-LoRA working draft
+%%
+%% IMPORTANT (team): every entry below was written from memory/reading-list
+%% notes and MUST be verified against the actual paper (authors, year, venue,
+%% title) before submission. Entries marked "VERIFY" have known uncertainty
+%% in venue/year/author list. Do not trust page numbers; none are included.
+%% ============================================================================
+
+%% ---------- LoRA and parameter-efficient fine-tuning ----------
+
+@inproceedings{hu2022lora,
+  author    = {Edward J. Hu and Yelong Shen and Phillip Wallis and Zeyuan Allen-Zhu and Yuanzhi Li and Shean Wang and Lu Wang and Weizhu Chen},
+  title     = {{LoRA}: Low-Rank Adaptation of Large Language Models},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2022}
+}
+
+@inproceedings{dettmers2023qlora,
+  author    = {Tim Dettmers and Artidoro Pagnoni and Ari Holtzman and Luke Zettlemoyer},
+  title     = {{QLoRA}: Efficient Finetuning of Quantized {LLM}s},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023}
+}
+
+@inproceedings{zhang2023adalora,
+  author    = {Qingru Zhang and Minshuo Chen and Alexander Bukharin and Pengcheng He and Yu Cheng and Weizhu Chen and Tuo Zhao},
+  title     = {Adaptive Budget Allocation for Parameter-Efficient Fine-Tuning},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2023},
+  note      = {AdaLoRA. VERIFY author list and exact title}
+}
+
+@inproceedings{valipour2023dylora,
+  author    = {Mojtaba Valipour and Mehdi Rezagholizadeh and Ivan Kobyzev and Ali Ghodsi},
+  title     = {{DyLoRA}: Parameter-Efficient Tuning of Pre-trained Models using Dynamic Search-Free Low-Rank Adaptation},
+  booktitle = {Proceedings of EACL},
+  year      = {2023},
+  note      = {VERIFY venue (EACL 2023) and author list}
+}
+
+%% ---------- Federated learning foundations ----------
+
+@inproceedings{mcmahan2017fedavg,
+  author    = {H. Brendan McMahan and Eider Moore and Daniel Ramage and Seth Hampson and Blaise Ag{\"u}era y Arcas},
+  title     = {Communication-Efficient Learning of Deep Networks from Decentralized Data},
+  booktitle = {Artificial Intelligence and Statistics (AISTATS)},
+  year      = {2017}
+}
+
+@inproceedings{li2020fedprox,
+  author    = {Tian Li and Anit Kumar Sahu and Manzil Zaheer and Maziar Sanjabi and Ameet Talwalkar and Virginia Smith},
+  title     = {Federated Optimization in Heterogeneous Networks},
+  booktitle = {Machine Learning and Systems (MLSys)},
+  year      = {2020},
+  note      = {FedProx}
+}
+
+@inproceedings{karimireddy2020scaffold,
+  author    = {Sai Praneeth Karimireddy and Satyen Kale and Mehryar Mohri and Sashank J. Reddi and Sebastian U. Stich and Ananda Theertha Suresh},
+  title     = {{SCAFFOLD}: Stochastic Controlled Averaging for Federated Learning},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2020}
+}
+
+@article{kairouz2021advances,
+  author    = {Peter Kairouz and H. Brendan McMahan and others},
+  title     = {Advances and Open Problems in Federated Learning},
+  journal   = {Foundations and Trends in Machine Learning},
+  year      = {2021},
+  note      = {VERIFY year (2019 arXiv / 2021 FnT) and author list abbreviation policy}
+}
+
+%% ---------- Federated LoRA / heterogeneous PEFT in FL ----------
+
+@article{zhang2023fedit,
+  author    = {Jianyi Zhang and Saeed Vahidian and Martin Kuo and Chunyuan Li and Ruiyi Zhang and Tong Yu and Guoyin Wang and Yiran Chen},
+  title     = {Towards Building the Federated {GPT}: Federated Instruction Tuning},
+  journal   = {arXiv preprint arXiv:2305.05644},
+  year      = {2023},
+  note      = {FedIT. VERIFY author list and whether a conference version exists}
+}
+
+@article{babakniya2023slora,
+  author    = {Sara Babakniya and Ahmed Roushdy Elkordy and Yahya H. Ezzeldin and Qingfeng Liu and Kee-Bong Song and Mostafa El-Khamy and Salman Avestimehr},
+  title     = {{SLoRA}: Federated Parameter Efficient Fine-Tuning of Language Models},
+  journal   = {arXiv preprint arXiv:2308.06522},
+  year      = {2023},
+  note      = {VERIFY author list and venue status}
+}
+
+@article{cho2024hetlora,
+  author    = {Yae Jee Cho and Luyang Liu and Zheng Xu and Aldi Fahrezi and Gauri Joshi},
+  title     = {Heterogeneous {LoRA} for Federated Fine-tuning of On-Device Foundation Models},
+  journal   = {arXiv preprint},
+  year      = {2024},
+  note      = {HetLoRA. VERIFY venue (EMNLP 2024?) and year (2023 arXiv?)}
+}
+
+@article{bai2024flexlora,
+  author    = {Jiamu Bai and Daoyuan Chen and Bingchen Qian and Liuyi Yao and Yaliang Li},
+  title     = {Federated Fine-tuning of Large Language Models under Heterogeneous Tasks and Client Resources},
+  journal   = {arXiv preprint arXiv:2402.11505},
+  year      = {2024},
+  note      = {FlexLoRA. VERIFY author list and venue status (NeurIPS 2024?)}
+}
+
+@inproceedings{sun2024ffalora,
+  author    = {Youbang Sun and Zitao Li and Yaliang Li and Bolin Ding},
+  title     = {Improving {LoRA} in Privacy-Preserving Federated Learning},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  note      = {FFA-LoRA. VERIFY -- reading list attributes 'FFA-LoRA: Federated Feature Alignment' to Zhang et al.; reconcile which paper we actually mean before citing}
+}
+
+%% ---------- Decentralized / gossip learning ----------
+
+@article{boyd2006gossip,
+  author    = {Stephen Boyd and Arpita Ghosh and Balaji Prabhakar and Devavrat Shah},
+  title     = {Randomized Gossip Algorithms},
+  journal   = {IEEE Transactions on Information Theory},
+  volume    = {52},
+  number    = {6},
+  year      = {2006}
+}
+
+@inproceedings{lian2017dpsgd,
+  author    = {Xiangru Lian and Ce Zhang and Huan Zhang and Cho-Jui Hsieh and Wei Zhang and Ji Liu},
+  title     = {Can Decentralized Algorithms Outperform Centralized Algorithms? {A} Case Study for Decentralized Parallel Stochastic Gradient Descent},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2017}
+}
+
+@inproceedings{koloskova2019choco,
+  author    = {Anastasia Koloskova and Sebastian U. Stich and Martin Jaggi},
+  title     = {Decentralized Stochastic Optimization and Gossip Algorithms with Compressed Communication},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2019}
+}
+
+@inproceedings{koloskova2020unified,
+  author    = {Anastasia Koloskova and Nicolas Loizou and Sadra Boreiri and Martin Jaggi and Sebastian U. Stich},
+  title     = {A Unified Theory of Decentralized {SGD} with Changing Topology and Local Updates},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2020}
+}
+
+@inproceedings{assran2019sgp,
+  author    = {Mahmoud Assran and Nicolas Loizou and Nicolas Ballas and Michael Rabbat},
+  title     = {Stochastic Gradient Push for Distributed Deep Learning},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2019}
+}
+
+@inproceedings{neglia2020topology,
+  author    = {Giovanni Neglia and Chuan Xu and Don Towsley and Gianmarco Calbi},
+  title     = {Decentralized Gradient Methods: Does Topology Matter?},
+  booktitle = {Artificial Intelligence and Statistics (AISTATS)},
+  year      = {2020},
+  note      = {VERIFY author list}
+}
+
+@inproceedings{tang2018compression,
+  author    = {Hanlin Tang and Shaoduo Gan and Ce Zhang and Tong Zhang and Ji Liu},
+  title     = {Communication Compression for Decentralized Training},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2018},
+  note      = {VERIFY exact title (DeepSqueeze is a different/companion paper)}
+}
+
+%% ---------- Clustered / personalized FL ----------
+
+@article{sattler2020cfl,
+  author    = {Felix Sattler and Klaus-Robert M{\"u}ller and Wojciech Samek},
+  title     = {Clustered Federated Learning: Model-Agnostic Distributed Multitask Optimization Under Privacy Constraints},
+  journal   = {IEEE Transactions on Neural Networks and Learning Systems},
+  year      = {2020},
+  note      = {VERIFY year (2020/2021)}
+}
+
+@inproceedings{ghosh2020ifca,
+  author    = {Avishek Ghosh and Jichan Chung and Dong Yin and Kannan Ramchandran},
+  title     = {An Efficient Framework for Clustered Federated Learning},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2020}
+}
+
+@inproceedings{marfoq2021fedem,
+  author    = {Othmane Marfoq and Giovanni Neglia and Aur{\'e}lien Bellet and Laetitia Kameni and Richard Vidal},
+  title     = {Federated Multi-Task Learning under a Mixture of Distributions},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2021}
+}
+
+@inproceedings{li2021ditto,
+  author    = {Tian Li and Shengyuan Hu and Ahmad Beirami and Virginia Smith},
+  title     = {Ditto: Fair and Robust Federated Learning Through Personalization},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2021}
+}
