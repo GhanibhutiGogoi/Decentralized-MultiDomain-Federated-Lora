@@ -1,66 +1,89 @@
-# Experiment 04: Domain-Aware Rank Allocation
+# Experiment 04: Allocation Strategy Comparison
 
-## Problem
+## Purpose
 
-Experiments 01–03 showed that the current complexity metric cannot reliably predict oracle ranks. Therefore, we evaluate whether a domain-aware allocation strategy can still improve federated learning performance compared with simple rank assignment approaches.
+This experiment compares different LoRA rank allocation strategies in heterogeneous federated learning.
 
-## Approach
+The compared strategies are:
 
-Three rank allocation strategies were compared:
+1. **Uniform allocation**
+   All clients receive the same LoRA rank.
 
-### Uniform (r=16)
-All clients receive the same LoRA rank of 16.
+2. **Random allocation**
+   Each client receives a randomly selected LoRA rank.
 
-### Random
-Each client receives a randomly selected rank from the candidate rank set.
+3. **Domain-Aware allocation**
+   LoRA rank is allocated based on the estimated domain complexity score.
 
-### Domain-Aware
-Ranks are allocated using the proposed domain-aware strategy based on complexity analysis and domain information.
+4. **Dynamic Allocation**
+   Gabriel-style adaptive rank assignments are connected with the Project 2 alpha/scaling policy.
 
-All methods were evaluated using the same federated learning setting and compared using:
+The Dynamic Allocation pipeline is:
 
-- Average accuracy
-- Per-domain accuracy
-- Training convergence
-- Fairness metrics
+```text
+client_i → rank r_i → alpha α_i → scaling α_i / r_i
+```
 
-## Results
+## Dynamic Allocation Equation
 
-Generated files:
+For each client `i`, the intended full dynamic allocation equation is:
 
-- allocation_comparison.json
-- allocation_convergence.png
-- allocation_per_domain.png
+```text
+r_i = GabrielRankPolicy(s(G_i), batch_i)
 
-Overall accuracy:
+α_i = AlphaPolicy(r_i, C_i)
 
-| Strategy | Average Accuracy |
-|-----------|-----------|
-| Uniform (r=16) | 0.0196 |
-| Random | 0.0458 |
-| Domain-Aware | 0.0796 |
+scaling_i = α_i / r_i
+```
 
-Domain-Aware achieved:
+The final allocation for each client is:
 
-- 4.06× higher accuracy than Uniform
-- 1.74× higher accuracy than Random
+```text
+client_i → {rank: r_i, alpha: α_i, scaling: α_i / r_i}
+```
 
-Per-domain performance:
+## Current Implementation
 
-| Domain | Domain-Aware |
-|----------|----------|
-| Domain 0 | 0.1045 |
-| Domain 1 | 0.0905 |
-| Domain 2 | 0.0930 |
-| Domain 3 | 0.0355 |
-| Domain 4 | 0.0745 |
+In the current implementation, Dynamic Allocation uses:
 
-The convergence curve shows that Domain-Aware consistently outperforms both Uniform and Random throughout training and converges to the highest final accuracy. :contentReference[oaicite:0]{index=0}
+* a temporary Gabriel-style rank pattern: `4 / 8 / 16`
+* global alpha: `α = 64`
+* effective LoRA scaling: `scaling = α / rank`
 
-## Findings
+This version is the first integration step between Gabriel's adaptive rank-selection direction and the Project 2 alpha/scaling policy.
 
-The proposed Domain-Aware allocation strategy substantially improves federated learning performance compared with both Uniform and Random rank assignment.
+## Outputs
 
-Although Experiment 03 revealed weak correlation between complexity scores and oracle ranks, allocating ranks using domain-aware information still produces significantly better learning outcomes.
+This experiment generates:
 
-The results suggest that adaptive rank allocation is beneficial, even when the underlying complexity metric is imperfect. Domain-Aware allocation achieves the highest accuracy across all evaluated strategies and demonstrates more effective utilization of LoRA capacity than fixed or randomly assigned ranks. :contentReference[oaicite:1]{index=1}
+* `allocation_comparison.json`
+* `allocation_convergence.png`
+* `allocation_per_domain.png`
+
+The JSON file includes:
+
+* final average accuracy
+* per-domain accuracy
+* fairness metrics
+* rank assignments
+* alpha value
+* allocation metadata
+* strategy metadata
+
+## Interpretation
+
+The results should be interpreted carefully.
+
+This experiment shows that the unified dynamic allocation policy can be integrated into the Experiment 04 allocation comparison pipeline and evaluated alongside Uniform, Random, and Domain-Aware allocation.
+
+However, this version should not be treated as the final paper-level dynamic allocation result yet, because the Dynamic Allocation strategy currently uses a temporary Gabriel-style rank pattern rather than Gabriel's actual per-client adaptive rank output file.
+
+## Future Work
+
+Future work should:
+
+1. Replace the temporary Gabriel-style `4 / 8 / 16` rank pattern with Gabriel's actual per-client adaptive rank output.
+2. Run multi-seed evaluation.
+3. Match communication or parameter budgets across allocation strategies.
+4. Check whether performance differences come from the allocation policy itself or mainly from rank diversity / total-rank differences.
+5. Extend the alpha policy from a global `α = 64` setting to a more adaptive client-specific alpha policy.
