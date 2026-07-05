@@ -61,8 +61,6 @@ The t-SNE visualization further demonstrates that predicted clusters do not alig
 
 ## Findings
 
-## Findings
-
 This experiment should be interpreted as a pipeline-validation run rather than a final research conclusion.
 
 The purpose of this run was to verify that client feature extraction, clustering, metric computation, and visualization generation work end-to-end.
