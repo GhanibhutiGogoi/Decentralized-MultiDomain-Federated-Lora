@@ -72,11 +72,17 @@ The JSON file includes:
 
 ## Interpretation
 
+## Interpretation
+
 The results should be interpreted carefully.
 
 This experiment shows that the unified dynamic allocation policy can be integrated into the Experiment 04 allocation comparison pipeline and evaluated alongside Uniform, Random, and Domain-Aware allocation.
 
-However, this version should not be treated as the final paper-level dynamic allocation result yet, because the Dynamic Allocation strategy currently uses a temporary Gabriel-style rank pattern rather than Gabriel's actual per-client adaptive rank output file.
+However, the current Experiment 04 numbers are near chance-level for this setup and should not be treated as a valid allocation-strategy comparison yet. The runs are undertrained / short-run evaluations, with average accuracies around 1–1.8%, so differences between strategies are not interpretable as evidence that one allocation policy is better.
+
+The apparent lead of Domain-Aware allocation is also confounded with total rank / capacity. In the current results, Domain-Aware uses the largest total rank budget, while Dynamic Allocation, Uniform, and Random use different total-rank budgets. Therefore, the observed ordering may reflect capacity differences rather than allocation smartness. In particular, the current result should not be quoted as “Domain-Aware is the best allocation strategy”; a fair comparison requires multi-seed evaluation under matched parameter or communication budgets.
+
+This version should therefore be treated as a first integration step rather than final paper-level RQ4 evidence.
 
 ## Future Work
 
