@@ -65,8 +65,6 @@ Training progress:
 
 ## Findings
 
-## Findings
-
 This experiment should be interpreted as a 2-round pipeline-validation run rather than a full research result.
 
 The purpose of this run was to verify that the Gossip pipeline, client-to-client communication, decentralized update flow, evaluation, and result logging work end-to-end.
