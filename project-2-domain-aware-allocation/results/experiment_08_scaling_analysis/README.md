@@ -12,7 +12,6 @@ For each client, we combined the oracle rank and oracle alpha from previous expe
 
 We computed:
 
-```text
 scaling = alpha / rank
 
 * Then we analyzed the relationship between:
@@ -42,5 +41,4 @@ The more meaningful direct analysis is rank vs best alpha. In this setting, the 
 The main takeaway is therefore limited but still useful: alpha should be interpreted jointly with rank because LoRA uses the effective scaling factor alpha / rank. However, this experiment does not prove that higher-rank adapters require smaller scaling factors.
 
 Because the analysis is based on a small number of clients and multiple correlation tests, the results should be treated as exploratory rather than confirmatory.
-```text
 
