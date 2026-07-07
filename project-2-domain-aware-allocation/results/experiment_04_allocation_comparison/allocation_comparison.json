@@ -1,19 +1,19 @@
 {
   "Uniform (r=16)": {
-    "avg_accuracy": 0.019597258427843135,
+    "avg_accuracy": 0.010198354276315295,
     "per_domain": {
-      "0": 0.02399250825037932,
-      "1": 0.023000511756133945,
-      "2": 0.014001257629443537,
-      "3": 0.016496256376316347,
-      "4": 0.020495758126942532
+      "0": 0.011997754876315596,
+      "1": 0.009502005753879817,
+      "2": 0.007497752625188907,
+      "3": 0.012997255126190656,
+      "4": 0.0089970030000015
     },
     "fairness": {
-      "accuracy_gap": 0.009991250620935784,
-      "accuracy_variance": 1.4527818917514168e-05,
-      "min_domain_accuracy": 0.014001257629443537,
-      "max_domain_accuracy": 0.02399250825037932,
-      "avg_domain_accuracy": 0.019597258427843135
+      "accuracy_gap": 0.0054995025010017495,
+      "accuracy_variance": 4.058616783715978e-06,
+      "min_domain_accuracy": 0.007497752625188907,
+      "max_domain_accuracy": 0.012997255126190656,
+      "avg_domain_accuracy": 0.010198354276315295
     },
     "rank_assignments": {
       "0": 16,
@@ -32,23 +32,52 @@
       "13": 16,
       "14": 16
     },
-    "total_rank": 240
+    "total_rank": 240,
+    "alpha": 64,
+    "allocation_metadata": {
+      "num_clients": 15,
+      "total_rank": 240,
+      "average_rank": 16.0,
+      "alpha": 64,
+      "average_scaling": 4.0,
+      "rank_assignments": {
+        "0": 16,
+        "1": 16,
+        "2": 16,
+        "3": 16,
+        "4": 16,
+        "5": 16,
+        "6": 16,
+        "7": 16,
+        "8": 16,
+        "9": 16,
+        "10": 16,
+        "11": 16,
+        "12": 16,
+        "13": 16,
+        "14": 16
+      }
+    },
+    "strategy_metadata": {
+      "type": "uniform",
+      "description": "All clients receive rank 16 and alpha 64."
+    }
   },
   "Random": {
-    "avg_accuracy": 0.04580262421341882,
+    "avg_accuracy": 0.015001058029543787,
     "per_domain": {
-      "0": 0.01100125612869241,
-      "1": 0.1265020642831737,
-      "2": 0.0,
-      "3": 0.00449925187556372,
-      "4": 0.08701054877966423
+      "0": 0.004497751124437782,
+      "1": 0.04200002101051576,
+      "2": 0.0015007511259385322,
+      "3": 0.005498752125438783,
+      "4": 0.021508014761388073
     },
     "fairness": {
-      "accuracy_gap": 0.1265020642831737,
-      "accuracy_variance": 0.00264509536930262,
-      "min_domain_accuracy": 0.0,
-      "max_domain_accuracy": 0.1265020642831737,
-      "avg_domain_accuracy": 0.04580262421341881
+      "accuracy_gap": 0.04049926988457723,
+      "accuracy_variance": 0.00023083120957751135,
+      "min_domain_accuracy": 0.0015007511259385322,
+      "max_domain_accuracy": 0.04200002101051576,
+      "avg_domain_accuracy": 0.015001058029543787
     },
     "rank_assignments": {
       "0": 4,
@@ -67,23 +96,52 @@
       "13": 32,
       "14": 32
     },
-    "total_rank": 388
+    "total_rank": 388,
+    "alpha": 64,
+    "allocation_metadata": {
+      "num_clients": 15,
+      "total_rank": 388,
+      "average_rank": 25.866666666666667,
+      "alpha": 64,
+      "average_scaling": 5.466666666666667,
+      "rank_assignments": {
+        "0": 4,
+        "1": 32,
+        "2": 32,
+        "3": 16,
+        "4": 16,
+        "5": 64,
+        "6": 4,
+        "7": 32,
+        "8": 8,
+        "9": 4,
+        "10": 16,
+        "11": 64,
+        "12": 32,
+        "13": 32,
+        "14": 32
+      }
+    },
+    "strategy_metadata": {
+      "type": "random",
+      "description": "Each client receives a random rank."
+    }
   },
   "Domain-Aware": {
-    "avg_accuracy": 0.07959803881842861,
+    "avg_accuracy": 0.018300609455032243,
     "per_domain": {
-      "0": 0.10450480465472968,
-      "1": 0.09049679364521944,
-      "2": 0.09298203750977364,
-      "3": 0.035501768635201915,
-      "4": 0.07450478964721845
+      "0": 0.01100125612869241,
+      "1": 0.020006513259886574,
+      "2": 0.02649351000175588,
+      "3": 0.012499756127942034,
+      "4": 0.02150201175688432
     },
     "fairness": {
-      "accuracy_gap": 0.06900303601952776,
-      "accuracy_variance": 0.0005777366986721834,
-      "min_domain_accuracy": 0.035501768635201915,
-      "max_domain_accuracy": 0.10450480465472968,
-      "avg_domain_accuracy": 0.07959803881842863
+      "accuracy_gap": 0.015492253873063471,
+      "accuracy_variance": 3.3442632432677336e-05,
+      "min_domain_accuracy": 0.01100125612869241,
+      "max_domain_accuracy": 0.02649351000175588,
+      "avg_domain_accuracy": 0.018300609455032243
     },
     "rank_assignments": {
       "0": 32,
@@ -102,6 +160,177 @@
       "13": 32,
       "14": 32
     },
-    "total_rank": 480
+    "total_rank": 480,
+    "alpha": 64,
+    "allocation_metadata": {
+      "num_clients": 15,
+      "total_rank": 480,
+      "average_rank": 32.0,
+      "alpha": 64,
+      "average_scaling": 2.0,
+      "rank_assignments": {
+        "0": 32,
+        "1": 32,
+        "2": 32,
+        "3": 32,
+        "4": 32,
+        "5": 32,
+        "6": 32,
+        "7": 32,
+        "8": 32,
+        "9": 32,
+        "10": 32,
+        "11": 32,
+        "12": 32,
+        "13": 32,
+        "14": 32
+      }
+    },
+    "strategy_metadata": {
+      "type": "domain_aware",
+      "description": "Rank allocated based on domain complexity score."
+    }
+  },
+  "Dynamic Allocation": {
+    "avg_accuracy": 0.011800256028142084,
+    "per_domain": {
+      "0": 0.008999254126690408,
+      "1": 0.010497754125940034,
+      "2": 0.013001757379568471,
+      "3": 0.012501256879067973,
+      "4": 0.014001257629443537
+    },
+    "fairness": {
+      "accuracy_gap": 0.005002003502753129,
+      "accuracy_variance": 3.2643077193171355e-06,
+      "min_domain_accuracy": 0.008999254126690408,
+      "max_domain_accuracy": 0.014001257629443537,
+      "avg_domain_accuracy": 0.011800256028142084
+    },
+    "rank_assignments": {
+      "0": 4,
+      "1": 8,
+      "2": 16,
+      "3": 4,
+      "4": 8,
+      "5": 16,
+      "6": 4,
+      "7": 8,
+      "8": 16,
+      "9": 4,
+      "10": 8,
+      "11": 16,
+      "12": 4,
+      "13": 8,
+      "14": 16
+    },
+    "total_rank": 140,
+    "alpha": 64,
+    "allocation_metadata": {
+      "num_clients": 15,
+      "total_rank": 140,
+      "average_rank": 9.333333333333334,
+      "alpha": 64,
+      "average_scaling": 9.333333333333334,
+      "rank_assignments": {
+        "0": 4,
+        "1": 8,
+        "2": 16,
+        "3": 4,
+        "4": 8,
+        "5": 16,
+        "6": 4,
+        "7": 8,
+        "8": 16,
+        "9": 4,
+        "10": 8,
+        "11": 16,
+        "12": 4,
+        "13": 8,
+        "14": 16
+      }
+    },
+    "strategy_metadata": {
+      "type": "dynamic_allocation",
+      "description": "Gabriel-style adaptive rank output connected with Project 2 alpha/scaling policy.",
+      "dynamic_allocations": {
+        "client_0": {
+          "rank": 4,
+          "alpha": 64,
+          "scaling": 16.0
+        },
+        "client_1": {
+          "rank": 8,
+          "alpha": 64,
+          "scaling": 8.0
+        },
+        "client_2": {
+          "rank": 16,
+          "alpha": 64,
+          "scaling": 4.0
+        },
+        "client_3": {
+          "rank": 4,
+          "alpha": 64,
+          "scaling": 16.0
+        },
+        "client_4": {
+          "rank": 8,
+          "alpha": 64,
+          "scaling": 8.0
+        },
+        "client_5": {
+          "rank": 16,
+          "alpha": 64,
+          "scaling": 4.0
+        },
+        "client_6": {
+          "rank": 4,
+          "alpha": 64,
+          "scaling": 16.0
+        },
+        "client_7": {
+          "rank": 8,
+          "alpha": 64,
+          "scaling": 8.0
+        },
+        "client_8": {
+          "rank": 16,
+          "alpha": 64,
+          "scaling": 4.0
+        },
+        "client_9": {
+          "rank": 4,
+          "alpha": 64,
+          "scaling": 16.0
+        },
+        "client_10": {
+          "rank": 8,
+          "alpha": 64,
+          "scaling": 8.0
+        },
+        "client_11": {
+          "rank": 16,
+          "alpha": 64,
+          "scaling": 4.0
+        },
+        "client_12": {
+          "rank": 4,
+          "alpha": 64,
+          "scaling": 16.0
+        },
+        "client_13": {
+          "rank": 8,
+          "alpha": 64,
+          "scaling": 8.0
+        },
+        "client_14": {
+          "rank": 16,
+          "alpha": 64,
+          "scaling": 4.0
+        }
+      },
+      "note": "This uses a temporary Gabriel-style 4/8/16 rank pattern. Future runs should replace it with Gabriel's actual per-client rank output file."
+    }
   }
 }
