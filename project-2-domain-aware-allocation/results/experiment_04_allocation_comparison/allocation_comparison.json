@@ -60,7 +60,8 @@
     },
     "strategy_metadata": {
       "type": "uniform",
-      "description": "All clients receive rank 16 and alpha 64."
+      "description": "All clients receive rank 16 and alpha 64.",
+      "matched_total_rank_budget": 240
     }
   },
   "Random": {
@@ -124,7 +125,73 @@
     },
     "strategy_metadata": {
       "type": "random",
-      "description": "Each client receives a random rank."
+      "description": "Each client receives a random rank. This baseline is not matched to a fixed total-rank budget."
+    }
+  },
+  "Random Matched-Budget": {
+    "avg_accuracy": 0.008700604652628641,
+    "per_domain": {
+      "0": 0.006501253877565723,
+      "1": 0.00499975237606422,
+      "2": 0.020505513009261133,
+      "3": 0.005498001749875813,
+      "4": 0.005998502250376313
+    },
+    "fairness": {
+      "accuracy_gap": 0.015505760633196912,
+      "accuracy_variance": 3.508946709163844e-05,
+      "min_domain_accuracy": 0.00499975237606422,
+      "max_domain_accuracy": 0.020505513009261133,
+      "avg_domain_accuracy": 0.008700604652628641
+    },
+    "rank_assignments": {
+      "0": 8,
+      "1": 8,
+      "2": 16,
+      "3": 4,
+      "4": 4,
+      "5": 16,
+      "6": 64,
+      "7": 16,
+      "8": 8,
+      "9": 4,
+      "10": 8,
+      "11": 32,
+      "12": 4,
+      "13": 32,
+      "14": 16
+    },
+    "total_rank": 240,
+    "alpha": 64,
+    "allocation_metadata": {
+      "num_clients": 15,
+      "total_rank": 240,
+      "average_rank": 16.0,
+      "alpha": 64,
+      "average_scaling": 7.8,
+      "rank_assignments": {
+        "0": 8,
+        "1": 8,
+        "2": 16,
+        "3": 4,
+        "4": 4,
+        "5": 16,
+        "6": 64,
+        "7": 16,
+        "8": 8,
+        "9": 4,
+        "10": 8,
+        "11": 32,
+        "12": 4,
+        "13": 32,
+        "14": 16
+      }
+    },
+    "strategy_metadata": {
+      "type": "random_matched_budget",
+      "description": "Heterogeneous random rank assignment with fixed total-rank budget.",
+      "target_total_rank_budget": 240,
+      "purpose": "Tests whether heterogeneous rank diversity alone explains performance differences under a matched capacity budget."
     }
   },
   "Domain-Aware": {
@@ -188,7 +255,8 @@
     },
     "strategy_metadata": {
       "type": "domain_aware",
-      "description": "Rank allocated based on domain complexity score."
+      "description": "Rank allocated based on domain complexity score.",
+      "note": "This strategy is kept as the original domain-aware baseline. Its total-rank budget may differ from matched-budget baselines."
     }
   },
   "Dynamic Allocation": {
@@ -252,7 +320,7 @@
     },
     "strategy_metadata": {
       "type": "dynamic_allocation",
-      "description": "Gabriel-style adaptive rank output connected with Project 2 alpha/scaling policy.",
+      "description": "Heterogeneous adaptive-rank-style assignments connected with Project 2 alpha/scaling policy.",
       "dynamic_allocations": {
         "client_0": {
           "rank": 4,
@@ -329,8 +397,341 @@
           "alpha": 64,
           "scaling": 4.0
         }
+      }
+    }
+  },
+  "Weighted Assignment": {
+    "avg_accuracy": 0.010198354276315295,
+    "per_domain": {
+      "0": 0.011997754876315596,
+      "1": 0.009502005753879817,
+      "2": 0.007497752625188907,
+      "3": 0.012997255126190656,
+      "4": 0.0089970030000015
+    },
+    "fairness": {
+      "accuracy_gap": 0.0054995025010017495,
+      "accuracy_variance": 4.058616783715978e-06,
+      "min_domain_accuracy": 0.007497752625188907,
+      "max_domain_accuracy": 0.012997255126190656,
+      "avg_domain_accuracy": 0.010198354276315295
+    },
+    "rank_assignments": {
+      "0": 16,
+      "1": 16,
+      "2": 16,
+      "3": 16,
+      "4": 16,
+      "5": 16,
+      "6": 16,
+      "7": 16,
+      "8": 16,
+      "9": 16,
+      "10": 16,
+      "11": 16,
+      "12": 16,
+      "13": 16,
+      "14": 16
+    },
+    "total_rank": 240,
+    "alpha": 64,
+    "allocation_metadata": {
+      "num_clients": 15,
+      "total_rank": 240,
+      "average_rank": 16.0,
+      "alpha": 64,
+      "average_scaling": 4.0,
+      "rank_assignments": {
+        "0": 16,
+        "1": 16,
+        "2": 16,
+        "3": 16,
+        "4": 16,
+        "5": 16,
+        "6": 16,
+        "7": 16,
+        "8": 16,
+        "9": 16,
+        "10": 16,
+        "11": 16,
+        "12": 16,
+        "13": 16,
+        "14": 16
+      }
+    },
+    "strategy_metadata": {
+      "type": "weighted_assignment",
+      "description": "Client/domain signals are converted into normalized weights and used to allocate a fixed total LoRA rank budget.",
+      "target_total_rank_budget": 240,
+      "weighted_assignment_results": {
+        "formula": {
+          "score": "score_i = lambda_complexity * complexity_i + lambda_entropy * entropy_i + lambda_imbalance * imbalance_i",
+          "weight": "w_i = score_i / sum_j score_j",
+          "raw_rank": "raw_rank_i = r_min + w_i * (B_total - N * r_min)",
+          "rank": "r_i = nearest_allowed_rank(raw_rank_i)",
+          "scaling": "scaling_i = alpha_i / r_i"
+        },
+        "hyperparameters": {
+          "total_rank_budget": 240,
+          "actual_total_rank": 240,
+          "budget_error": 0,
+          "allowed_ranks": [
+            4,
+            8,
+            16,
+            32,
+            64
+          ],
+          "min_rank": 4,
+          "alpha": 64,
+          "lambda_complexity": 1.0,
+          "lambda_entropy": 0.5,
+          "lambda_imbalance": 0.5
+        },
+        "allocations": {
+          "client_0": {
+            "score": 1.270130291911991,
+            "weight": 0.06625841033743535,
+            "raw_rank": 15.926513860738362,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 0,
+              "domain_id": 0,
+              "domain_name": "Aquatic & Nature",
+              "complexity_score": 0.6124228523104034,
+              "entropy": 0.8611452045283259,
+              "data_imbalance": 0.4542696746748492
+            }
+          },
+          "client_1": {
+            "score": 1.287658919036582,
+            "weight": 0.0671728196512426,
+            "raw_rank": 16.091107537223667,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 1,
+              "domain_id": 0,
+              "domain_name": "Aquatic & Nature",
+              "complexity_score": 0.6140146548423879,
+              "entropy": 0.8692986148437191,
+              "data_imbalance": 0.4779899135446686
+            }
+          },
+          "client_2": {
+            "score": 1.286717654981968,
+            "weight": 0.0671237170825033,
+            "raw_rank": 16.082269074850593,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 2,
+              "domain_id": 0,
+              "domain_name": "Aquatic & Nature",
+              "complexity_score": 0.6121596945641504,
+              "entropy": 0.829843193562908,
+              "data_imbalance": 0.5192727272727272
+            }
+          },
+          "client_3": {
+            "score": 1.2546541906559179,
+            "weight": 0.06545107437042604,
+            "raw_rank": 15.781193386676687,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 3,
+              "domain_id": 1,
+              "domain_name": "Household & Insects",
+              "complexity_score": 0.616352072560996,
+              "entropy": 0.9183210586596436,
+              "data_imbalance": 0.35828317753020017
+            }
+          },
+          "client_4": {
+            "score": 1.29596489272236,
+            "weight": 0.06760611426379433,
+            "raw_rank": 16.169100567482978,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 4,
+              "domain_id": 1,
+              "domain_name": "Household & Insects",
+              "complexity_score": 0.6004272907568399,
+              "entropy": 0.7746576167532191,
+              "data_imbalance": 0.6164175871778211
+            }
+          },
+          "client_5": {
+            "score": 1.2450844028011159,
+            "weight": 0.06495185083834952,
+            "raw_rank": 15.691333150902913,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 5,
+              "domain_id": 1,
+              "domain_name": "Household & Insects",
+              "complexity_score": 0.6189890364629235,
+              "entropy": 0.9399258574364617,
+              "data_imbalance": 0.31226487523992325
+            }
+          },
+          "client_6": {
+            "score": 1.2926671851053537,
+            "weight": 0.0674340839879621,
+            "raw_rank": 16.13813511783318,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 6,
+              "domain_id": 2,
+              "domain_name": "Large Animals & Outdoor",
+              "complexity_score": 0.6143493042573139,
+              "entropy": 0.8661491740479199,
+              "data_imbalance": 0.4904865876481597
+            }
+          },
+          "client_7": {
+            "score": 1.2893739790643313,
+            "weight": 0.06726228854415506,
+            "raw_rank": 16.10721193794791,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 7,
+              "domain_id": 2,
+              "domain_name": "Large Animals & Outdoor",
+              "complexity_score": 0.600912372769618,
+              "entropy": 0.8081288217680827,
+              "data_imbalance": 0.568794390821344
+            }
+          },
+          "client_8": {
+            "score": 1.2673649109045593,
+            "weight": 0.0661141497440958,
+            "raw_rank": 15.900546953937244,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 8,
+              "domain_id": 2,
+              "domain_name": "Large Animals & Outdoor",
+              "complexity_score": 0.6134708592170319,
+              "entropy": 0.8828661935133858,
+              "data_imbalance": 0.4249219098616689
+            }
+          },
+          "client_9": {
+            "score": 1.2790450097479926,
+            "weight": 0.06672346107764805,
+            "raw_rank": 16.010222993976647,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 9,
+              "domain_id": 3,
+              "domain_name": "Medium Animals & People",
+              "complexity_score": 0.6128344916556946,
+              "entropy": 0.8457469898630703,
+              "data_imbalance": 0.4866740463215259
+            }
+          },
+          "client_10": {
+            "score": 1.273966632433519,
+            "weight": 0.06645853927388241,
+            "raw_rank": 15.962537069298834,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 10,
+              "domain_id": 3,
+              "domain_name": "Medium Animals & People",
+              "complexity_score": 0.6223583538372804,
+              "entropy": 0.898750264720031,
+              "data_imbalance": 0.40446629247244625
+            }
+          },
+          "client_11": {
+            "score": 1.2962804094315374,
+            "weight": 0.06762257370556823,
+            "raw_rank": 16.172063267002283,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 11,
+              "domain_id": 3,
+              "domain_name": "Medium Animals & People",
+              "complexity_score": 0.6129458448568836,
+              "entropy": 0.8386803023336653,
+              "data_imbalance": 0.5279888268156424
+            }
+          },
+          "client_12": {
+            "score": 1.2746177686200801,
+            "weight": 0.0664925068509959,
+            "raw_rank": 15.968651233179264,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 12,
+              "domain_id": 4,
+              "domain_name": "Small Animals & Vehicles",
+              "complexity_score": 0.6126504978609749,
+              "entropy": 0.8819587701052173,
+              "data_imbalance": 0.4419757714129935
+            }
+          },
+          "client_13": {
+            "score": 1.284338792666333,
+            "weight": 0.06699961986472232,
+            "raw_rank": 16.05993157565002,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 13,
+              "domain_id": 4,
+              "domain_name": "Small Animals & Vehicles",
+              "complexity_score": 0.6139587566897953,
+              "entropy": 0.8825392851063345,
+              "data_imbalance": 0.45822078684674106
+            }
+          },
+          "client_14": {
+            "score": 1.2714794317136213,
+            "weight": 0.06632879040721892,
+            "raw_rank": 15.939182273299407,
+            "rank": 16,
+            "alpha": 64,
+            "scaling": 4.0,
+            "features": {
+              "client_id": 14,
+              "domain_id": 4,
+              "domain_name": "Small Animals & Vehicles",
+              "complexity_score": 0.6121299578448343,
+              "entropy": 0.8979143542996284,
+              "data_imbalance": 0.4207845934379458
+            }
+          }
+        }
       },
-      "note": "This uses a temporary Gabriel-style 4/8/16 rank pattern. Future runs should replace it with Gabriel's actual per-client rank output file."
+      "purpose": "Tests the weighted assignment formula under a matched total-rank budget."
     }
   }
 }
