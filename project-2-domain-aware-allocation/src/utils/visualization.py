@@ -306,7 +306,7 @@ def plot_allocation_comparison(results_dict, save_path=None):
     for i, strategy in enumerate(strategies):
         domain_accs = [results_dict[strategy]['per_domain'][d] for d in domain_ids]
         axes[1].bar(x + i * width, domain_accs, width,
-                    label=strategy, color=colors[i], edgecolor='black', linewidth=0.3)
+                    label=strategy, color=colors[i % len(colors)], edgecolor='black', linewidth=0.3)
 
     axes[1].set_xticks(x + width * (len(strategies) - 1) / 2)
     axes[1].set_xticklabels([f'Domain {d}' for d in domain_ids], fontsize=10)
