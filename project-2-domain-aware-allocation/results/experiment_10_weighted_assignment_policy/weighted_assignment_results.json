@@ -1,0 +1,268 @@
+{
+  "formula": {
+    "score": "score_i = lambda_complexity * complexity_i + lambda_entropy * entropy_i + lambda_imbalance * imbalance_i",
+    "weight": "w_i = score_i / sum_j score_j",
+    "raw_rank": "raw_rank_i = r_min + w_i * (B_total - N * r_min)",
+    "rank": "r_i = nearest_allowed_rank(raw_rank_i)",
+    "scaling": "scaling_i = alpha_i / r_i"
+  },
+  "hyperparameters": {
+    "total_rank_budget": 240,
+    "actual_total_rank": 240,
+    "budget_error": 0,
+    "allowed_ranks": [
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "min_rank": 4,
+    "alpha": 64,
+    "lambda_complexity": 1.0,
+    "lambda_entropy": 0.5,
+    "lambda_imbalance": 0.5
+  },
+  "allocations": {
+    "client_0": {
+      "score": 1.270130291911991,
+      "weight": 0.06625841033743535,
+      "raw_rank": 15.926513860738362,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 0,
+        "domain_id": 0,
+        "domain_name": "Aquatic & Nature",
+        "complexity_score": 0.6124228523104034,
+        "entropy": 0.8611452045283259,
+        "data_imbalance": 0.4542696746748492
+      }
+    },
+    "client_1": {
+      "score": 1.287658919036582,
+      "weight": 0.0671728196512426,
+      "raw_rank": 16.091107537223667,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 1,
+        "domain_id": 0,
+        "domain_name": "Aquatic & Nature",
+        "complexity_score": 0.6140146548423879,
+        "entropy": 0.8692986148437191,
+        "data_imbalance": 0.4779899135446686
+      }
+    },
+    "client_2": {
+      "score": 1.286717654981968,
+      "weight": 0.0671237170825033,
+      "raw_rank": 16.082269074850593,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 2,
+        "domain_id": 0,
+        "domain_name": "Aquatic & Nature",
+        "complexity_score": 0.6121596945641504,
+        "entropy": 0.829843193562908,
+        "data_imbalance": 0.5192727272727272
+      }
+    },
+    "client_3": {
+      "score": 1.2546541906559179,
+      "weight": 0.06545107437042604,
+      "raw_rank": 15.781193386676687,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 3,
+        "domain_id": 1,
+        "domain_name": "Household & Insects",
+        "complexity_score": 0.616352072560996,
+        "entropy": 0.9183210586596436,
+        "data_imbalance": 0.35828317753020017
+      }
+    },
+    "client_4": {
+      "score": 1.29596489272236,
+      "weight": 0.06760611426379433,
+      "raw_rank": 16.169100567482978,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 4,
+        "domain_id": 1,
+        "domain_name": "Household & Insects",
+        "complexity_score": 0.6004272907568399,
+        "entropy": 0.7746576167532191,
+        "data_imbalance": 0.6164175871778211
+      }
+    },
+    "client_5": {
+      "score": 1.2450844028011159,
+      "weight": 0.06495185083834952,
+      "raw_rank": 15.691333150902913,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 5,
+        "domain_id": 1,
+        "domain_name": "Household & Insects",
+        "complexity_score": 0.6189890364629235,
+        "entropy": 0.9399258574364617,
+        "data_imbalance": 0.31226487523992325
+      }
+    },
+    "client_6": {
+      "score": 1.2926671851053537,
+      "weight": 0.0674340839879621,
+      "raw_rank": 16.13813511783318,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 6,
+        "domain_id": 2,
+        "domain_name": "Large Animals & Outdoor",
+        "complexity_score": 0.6143493042573139,
+        "entropy": 0.8661491740479199,
+        "data_imbalance": 0.4904865876481597
+      }
+    },
+    "client_7": {
+      "score": 1.2893739790643313,
+      "weight": 0.06726228854415506,
+      "raw_rank": 16.10721193794791,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 7,
+        "domain_id": 2,
+        "domain_name": "Large Animals & Outdoor",
+        "complexity_score": 0.600912372769618,
+        "entropy": 0.8081288217680827,
+        "data_imbalance": 0.568794390821344
+      }
+    },
+    "client_8": {
+      "score": 1.2673649109045593,
+      "weight": 0.0661141497440958,
+      "raw_rank": 15.900546953937244,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 8,
+        "domain_id": 2,
+        "domain_name": "Large Animals & Outdoor",
+        "complexity_score": 0.6134708592170319,
+        "entropy": 0.8828661935133858,
+        "data_imbalance": 0.4249219098616689
+      }
+    },
+    "client_9": {
+      "score": 1.2790450097479926,
+      "weight": 0.06672346107764805,
+      "raw_rank": 16.010222993976647,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 9,
+        "domain_id": 3,
+        "domain_name": "Medium Animals & People",
+        "complexity_score": 0.6128344916556946,
+        "entropy": 0.8457469898630703,
+        "data_imbalance": 0.4866740463215259
+      }
+    },
+    "client_10": {
+      "score": 1.273966632433519,
+      "weight": 0.06645853927388241,
+      "raw_rank": 15.962537069298834,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 10,
+        "domain_id": 3,
+        "domain_name": "Medium Animals & People",
+        "complexity_score": 0.6223583538372804,
+        "entropy": 0.898750264720031,
+        "data_imbalance": 0.40446629247244625
+      }
+    },
+    "client_11": {
+      "score": 1.2962804094315374,
+      "weight": 0.06762257370556823,
+      "raw_rank": 16.172063267002283,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 11,
+        "domain_id": 3,
+        "domain_name": "Medium Animals & People",
+        "complexity_score": 0.6129458448568836,
+        "entropy": 0.8386803023336653,
+        "data_imbalance": 0.5279888268156424
+      }
+    },
+    "client_12": {
+      "score": 1.2746177686200801,
+      "weight": 0.0664925068509959,
+      "raw_rank": 15.968651233179264,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 12,
+        "domain_id": 4,
+        "domain_name": "Small Animals & Vehicles",
+        "complexity_score": 0.6126504978609749,
+        "entropy": 0.8819587701052173,
+        "data_imbalance": 0.4419757714129935
+      }
+    },
+    "client_13": {
+      "score": 1.284338792666333,
+      "weight": 0.06699961986472232,
+      "raw_rank": 16.05993157565002,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 13,
+        "domain_id": 4,
+        "domain_name": "Small Animals & Vehicles",
+        "complexity_score": 0.6139587566897953,
+        "entropy": 0.8825392851063345,
+        "data_imbalance": 0.45822078684674106
+      }
+    },
+    "client_14": {
+      "score": 1.2714794317136213,
+      "weight": 0.06632879040721892,
+      "raw_rank": 15.939182273299407,
+      "rank": 16,
+      "alpha": 64,
+      "scaling": 4.0,
+      "features": {
+        "client_id": 14,
+        "domain_id": 4,
+        "domain_name": "Small Animals & Vehicles",
+        "complexity_score": 0.6121299578448343,
+        "entropy": 0.8979143542996284,
+        "data_imbalance": 0.4207845934379458
+      }
+    }
+  }
+}
