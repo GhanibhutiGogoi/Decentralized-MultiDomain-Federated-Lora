@@ -1,8 +1,21 @@
 """
 Weighted assignment policy for Project 2.
 
-This module defines a weighted LoRA rank assignment formula for heterogeneous
-federated learning.
+This module defines the Project 2 allocation-side formula for heterogeneous
+federated LoRA training.
+
+The policy maps client/domain signals into normalized assignment weights,
+uses those weights to allocate a fixed total LoRA rank budget, and then
+computes alpha/scaling values for each client.
+
+This module does not replace Gabriel's adaptive rank work. Instead, it is
+intended to connect with Gabriel's adaptive-rank output or agreed rank-output
+format in the joint pipeline:
+
+    Gabriel adaptive rank signal / rank output
+        -> Project 2 weighted assignment
+        -> alpha / scaling allocation
+        -> matched-budget Experiment 04 evaluation
 
 Pipeline:
     client signals -> score_i -> weight_i -> rank_i -> alpha_i -> scaling_i
