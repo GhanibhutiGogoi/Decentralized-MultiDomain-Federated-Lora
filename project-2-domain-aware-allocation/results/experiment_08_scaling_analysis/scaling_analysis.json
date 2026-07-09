@@ -1,5 +1,8 @@
 {
   "description": "LoRA scaling analysis where scaling = alpha / rank.",
+  "analysis_status": "updated_after_review",
+  "main_caveat": "Rank-vs-scaling correlation should not be treated as a standalone research conclusion because scaling is defined as alpha / rank, so rank appears directly in the denominator.",
+  "valid_interpretation": "Alpha should be interpreted jointly with rank through the effective LoRA scaling factor alpha / rank. However, the previous rank-vs-scaling correlation should not be used as evidence that higher-rank adapters require smaller scaling factors.",
   "client_table": [
     {
       "client_id": 0,
@@ -199,6 +202,7 @@
   ],
   "correlations": {
     "complexity_vs_scaling": {
+      "interpretation": "Exploratory only. This correlation does not provide strong evidence of a reliable relationship between complexity score and LoRA scaling.",
       "pearson": {
         "r": -0.5080331009817531,
         "p_value": 0.05317564139234597
@@ -213,6 +217,7 @@
       }
     },
     "entropy_vs_scaling": {
+      "interpretation": "Exploratory only. The observed relationship is not statistically robust and should not be used as a confirmatory finding.",
       "pearson": {
         "r": -0.439335735924336,
         "p_value": 0.10131716532282152
@@ -227,6 +232,7 @@
       }
     },
     "data_imbalance_vs_scaling": {
+      "interpretation": "Exploratory only. The observed relationship is not statistically robust and should not be used as a confirmatory finding.",
       "pearson": {
         "r": 0.4505165499338841,
         "p_value": 0.09193809626020559
@@ -241,6 +247,9 @@
       }
     },
     "rank_vs_scaling": {
+      "status": "deprecated_as_standalone_finding",
+      "reason": "This correlation is misleading as a standalone research conclusion because scaling is defined as alpha / rank. Since rank appears directly in the denominator, a negative rank-vs-scaling relationship can arise mechanically from the definition.",
+      "interpretation": "Do not use this result to claim that higher-rank adapters require smaller scaling factors. The preferred direct check is rank vs best alpha, not rank vs alpha / rank.",
       "pearson": {
         "r": -0.5303576979007534,
         "p_value": 0.04197174211145832
@@ -255,6 +264,7 @@
       }
     },
     "alpha_vs_scaling": {
+      "interpretation": "Expected strong positive relationship because scaling is defined as alpha / rank. This should be interpreted as a formula-driven relationship rather than a separate scientific discovery.",
       "pearson": {
         "r": 0.9594119455666704,
         "p_value": 1.6052928670829268e-08
@@ -279,5 +289,17 @@
     "mean_scaling": 2.1,
     "min_scaling": 0.5,
     "max_scaling": 4.0
-  }
+  },
+  "updated_findings": {
+    "headline": "Alpha should be interpreted jointly with rank through the effective LoRA scaling factor alpha / rank.",
+    "rank_vs_scaling": "Deprecated as a standalone finding because scaling mechanically includes rank in the denominator.",
+    "rank_vs_best_alpha": "Recommended as the more meaningful direct analysis for checking whether selected alpha changes with rank.",
+    "overall_interpretation": "This experiment is exploratory and does not prove that higher-rank adapters require smaller scaling factors."
+  },
+  "limitations": [
+    "Small number of clients.",
+    "Multiple exploratory correlations.",
+    "Scaling mechanically depends on rank through alpha / rank.",
+    "The previous rank-vs-scaling correlation should not be treated as confirmatory evidence."
+  ]
 }

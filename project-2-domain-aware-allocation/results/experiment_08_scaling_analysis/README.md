@@ -14,8 +14,7 @@ We computed:
 
 scaling = alpha / rank
 
-Then we analyzed the relationship between:
-
+* Then we analyzed the relationship between:
 * oracle rank and best alpha
 * complexity score and scaling
 * entropy and scaling
@@ -35,7 +34,7 @@ This experiment is exploratory and should be interpreted with caution because it
 
 ## Findings
 
-The original rank-vs-scaling correlation is not used as a research conclusion because scaling is defined as alpha / rank. Since rank appears directly in the denominator, correlating rank with scaling can produce a negative relationship by construction.
+The original rank-vs-scaling correlation is deprecated as a standalone finding because scaling is defined as alpha / rank. Since rank appears directly in the denominator, correlating rank with scaling can produce a negative relationship by construction.
 
 The more meaningful direct analysis is rank vs best alpha. In this setting, the results do not provide strong evidence for a reliable proportional relationship between oracle rank and best alpha.
 
