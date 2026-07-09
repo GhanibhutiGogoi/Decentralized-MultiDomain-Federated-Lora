@@ -8,6 +8,23 @@ The goal is to map client/domain signals into normalized assignment weights and 
 
 This experiment is a formula / policy validation step, not a final performance comparison.
 
+## Relation to Gabriel's Adaptive Rank Work
+
+This experiment should be interpreted as the Project 2 allocation-side formula, not as a replacement for Gabriel's adaptive rank work.
+
+Gabriel's Project 1 direction focuses on adaptive LoRA rank selection. In other words, Gabriel's side studies how to choose or estimate the client-level rank using adaptive-rank signals such as stable rank, capability constraints, and hardware-aware ceilings.
+
+Project 2 focuses on the allocation side. Given client/domain signals and a controlled total-rank budget, this experiment defines how to convert those signals into normalized allocation weights and then assign rank, alpha, and scaling values.
+
+The intended joint pipeline is:
+
+Gabriel adaptive rank signal / rank output
+-> Project 2 weighted assignment
+-> alpha / scaling allocation
+-> matched-budget Experiment 04 evaluation
+
+In this first version, the weighted assignment formula is validated independently. The next step is to connect it more explicitly with Gabriel's actual adaptive-rank output or agreed rank-output format.
+
 ## Weighted Assignment Formula
 
 For each client `i`, we compute a client score:
