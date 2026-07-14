@@ -129,12 +129,12 @@ def correct_rank_budget(
         return sum(corrected.values())
 
     def lower_rank(rank: int):
-    lower = [
-        candidate
-        for candidate in allowed_ranks
-        if candidate < rank and candidate >= min_rank
-    ]
-    return max(lower) if lower else rank
+        lower = [
+            candidate
+            for candidate in allowed_ranks
+            if candidate < rank and candidate >= min_rank
+        ]
+        return max(lower) if lower else rank
 
     def higher_rank(rank: int):
         higher = [
