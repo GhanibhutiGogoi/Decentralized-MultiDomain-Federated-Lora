@@ -174,7 +174,7 @@ def main():
     # This is not a final training configuration. It is only a stress test
     # showing that the formula can produce non-uniform ranks when signals are
     # sufficiently dispersed.
-    signal_spread_factor = 20.0
+    signal_spread_factor = 50.0
 
     amplified_features = amplify_signal_spread(
         client_features=client_features,
