@@ -107,6 +107,7 @@ def correct_rank_budget(
     weights: Dict[str, float],
     target_budget: int,
     allowed_ranks: List[int],
+    min_rank: int = 4,
 ) -> Dict[str, int]:
     """
     Correct total rank after nearest-rank rounding.
@@ -128,12 +129,12 @@ def correct_rank_budget(
         return sum(corrected.values())
 
     def lower_rank(rank: int):
-        lower = [
-            candidate
-            for candidate in allowed_ranks
-            if candidate < rank
-        ]
-        return max(lower) if lower else rank
+    lower = [
+        candidate
+        for candidate in allowed_ranks
+        if candidate < rank and candidate >= min_rank
+    ]
+    return max(lower) if lower else rank
 
     def higher_rank(rank: int):
         higher = [
@@ -279,8 +280,8 @@ def weighted_assignment(
         weights=weights,
         target_budget=total_rank_budget,
         allowed_ranks=allowed_ranks,
+        min_rank=min_rank,
     )
-
     allocations = {}
 
     for client_id in client_features:
