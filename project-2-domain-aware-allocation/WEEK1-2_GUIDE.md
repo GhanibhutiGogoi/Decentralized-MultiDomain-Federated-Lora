@@ -30,7 +30,7 @@ In heterogeneous federated learning, clients have different data domains and com
 
 ## Architecture
 
-### Data Pipeline: `src/data/cifar100_domains.py`
+### Data Pipeline: `framework/datasets/cifar100_domains.py`
 
 Splits CIFAR-100 into 5 domains using the superclass hierarchy:
 
@@ -46,7 +46,7 @@ Each domain has 20 classes and 3 clients. Data is split using Dirichlet distribu
 
 **Key addition vs. P3:** The `train_indices` field is stored per client, and `get_client_labels()` provides numpy label arrays for complexity computation.
 
-### LoRA Model: `src/models/lora_resnet.py`
+### LoRA Model: `framework/models/lora_resnet.py`
 
 ResNet-18 with LoRA on the final FC layer. Supports **variable ranks** — each client can use a different rank from {4, 8, 16, 32, 64}.
 
@@ -58,7 +58,7 @@ ResNet-18 with LoRA on the final FC layer. Supports **variable ranks** — each 
 
 - `reset_lora_params(model)`: Re-initializes LoRA to start fresh (for oracle search).
 
-### Domain Complexity: `src/complexity/domain_complexity.py`
+### Domain Complexity: `framework/analysis/domain_complexity.py`
 
 **This is the core research contribution.**
 
@@ -104,9 +104,9 @@ Gini coefficient of the class distribution. High Gini = heavily imbalanced.
 score = 0.3 * entropy + 0.2 * diversity + 0.2 * intrinsic_dim + 0.2 * difficulty + 0.1 * imbalance
 ```
 
-The weights are configurable in `configs/default_config.yaml` for ablation studies.
+The weights are configurable in `framework/configuration/default_config.yaml` for ablation studies.
 
-### Rank Allocator: `src/allocation/rank_allocator.py`
+### Rank Allocator: `framework/rank_allocation/rank_allocator.py`
 
 Four strategies:
 
@@ -123,7 +123,7 @@ Domain-aware allocation maps:
 - complexity ≈ 0.5 → rank 32-64
 - complexity ≈ 1.0 → rank 64
 
-### Heterogeneous FedAvg: `src/federated/hetero_fedavg.py`
+### Heterogeneous FedAvg: `framework/federated/server.py`
 
 Standard FedAvg requires all clients to have the same LoRA rank. Our `HeteroFedAvgServer` solves this by aggregating in **delta_W space**:
 

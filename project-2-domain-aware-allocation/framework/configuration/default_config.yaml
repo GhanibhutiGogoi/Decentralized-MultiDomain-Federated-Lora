@@ -1,0 +1,46 @@
+data:
+  dataset: cifar100
+  n_domains: 5
+  clients_per_domain: 3
+  dirichlet_alpha: 0.5
+  batch_size: 64
+  data_dir: ./data
+
+model:
+  base: resnet18
+  pretrained: true
+  lora_alpha: 32
+  num_classes: 100
+
+complexity:
+  n_feature_samples: 500
+  weights:
+    entropy: 0.3
+    diversity: 0.2
+    dimensionality: 0.2
+    difficulty: 0.2
+    imbalance: 0.1
+
+oracle:
+  candidate_ranks: [4, 8, 16, 32, 64]
+  training_epochs: 20
+  learning_rate: 0.001
+
+allocation:
+  min_rank: 4
+  max_rank: 64
+  base_rank: 16
+
+training:
+  local_epochs: 5
+  learning_rate: 0.001
+  n_rounds: 50
+  optimizer: adam
+  weight_decay: 0.0001
+  seed: 42
+
+logging:
+  log_dir: ./logs
+  results_dir: ./results
+  save_every: 10
+  verbose: true

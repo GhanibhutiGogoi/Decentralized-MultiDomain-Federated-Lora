@@ -1,24 +1,45 @@
 # Project 2: Domain-Aware Allocation
 
-This repository is the initialization skeleton for the redesigned Project 2 architecture.
+Project 2 extends the validated Project 1 federated LoRA baseline. Experiment 1
+is implemented under `experiment1/` and reuses Project 1 runtime modules
+directly rather than copying or redefining their mathematics.
 
-No algorithms, lambda allocation logic, experiments, or Project 1 code have been implemented in this commit.
+No lambda allocation logic is implemented.
 
 ## Status
 
-Repository skeleton only.
+Experiment 1 support is available:
+
+- domain-heterogeneous Dirichlet label partitioning
+- Project 1-compatible IID partitioning
+- label-distribution signal logging
+- update dissimilarity logging
+- leave-one-client-out marginal contribution measurement
+- correlation and controlled-regression analysis
+- publication-oriented figures
+- outputs stored under `outputs/exp1/`
 
 ## Structure
 
-- `Federated/`
-- `Source/`
-- `Source/Models/`
-- `Source/datasets/`
+- `framework/`
+- `framework/datasets/`
+- `framework/models/`
+- `framework/federated/`
+- `framework/aggregation/`
+- `framework/rank_allocation/`
+- `framework/partitioning/`
+- `framework/analysis/`
+- `framework/visualization/`
+- `framework/configuration/`
+- `framework/utils/`
 - `experiment/`
-- `rank_allocation/`
-- `aggregation/`
-- `lambda_allocation/`
-- `result/`
-- `result/exp1/`
+- `experiment/data/`
+- `experiment/experiment1/`
+- `experiment/experiment2/`
+- `experiment/experiment3/`
+- `outputs/`
+- `outputs/exp1/`
+- `outputs/exp2/`
+- `outputs/exp3/`
 
-Each package currently contains only an `__init__.py` marker, except `experiment/`, which also contains the placeholder `exp1.py`.
+See `EXPERIMENT1.md` for run commands, architecture notes, and output schemas.
