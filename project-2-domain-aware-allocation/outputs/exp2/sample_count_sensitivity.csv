@@ -1,0 +1,11 @@
+analysis,form,sample_count_definition,target,n,pearson,spearman,intercept,slope,r_squared
+correlation,all,partition_samples,delta_accuracy,75,0.034332855764779756,0.25442518521118757,,,
+correlation,all,partition_samples,quality_score,75,0.38522876886650376,0.17975807309977426,,,
+ols,all,partition_samples,delta_accuracy,75,,,1.3817584497429272,2.65254524431672e-05,0.0011787449849652853
+correlation,all,train_samples_seen,delta_accuracy,75,0.034332855764779735,0.25442518521118757,,,
+correlation,all,train_samples_seen,quality_score,75,0.3852287688665034,0.17975807309977426,,,
+ols,all,train_samples_seen,delta_accuracy,75,,,1.381758449742927,8.841817481055754e-06,0.0011787449849652853
+correlation,form_a,partition_samples,lambda_weight,75,0.23296531837518739,0.08638651252851959,,,
+correlation,form_b,partition_samples,lambda_weight,75,0.24314621260356034,0.12573086476923148,,,
+correlation,form_a,train_samples_seen,lambda_weight,75,0.23296531837518725,0.08638651252851959,,,
+correlation,form_b,train_samples_seen,lambda_weight,75,0.24314621260356004,0.12573086476923148,,,
