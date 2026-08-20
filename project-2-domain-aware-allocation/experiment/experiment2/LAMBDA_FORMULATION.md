@@ -26,6 +26,22 @@ The role of \(\lambda_i\) is to adjust the contribution of client \(i\) using
 domain and update-space evidence measured in Experiment 1, while preserving the
 Project 1 aggregation behavior whenever \(\lambda\) is disabled.
 
+Experiment 2 has two distinct objectives:
+
+- **Calibration objective:** estimate a mathematically grounded \(\lambda\)
+  using the best available offline proxy for useful aggregation behavior,
+  namely Leave-One-Client-Out contribution \((\Delta\mathrm{accuracy})\)
+  measured in Experiment 1.
+- **Research objective:** determine whether the calibrated \(\lambda\), when
+  inserted into the federated aggregation rule, improves federated learning
+  behavior. Experiment 2 does not answer this second question directly;
+  Experiment 3 is required for that evaluation.
+
+Thus, the regression model in Experiment 2 is used as a calibration mechanism
+for constructing \(\lambda\). Its held-out prediction metrics are used to compare
+candidate calibrations, not to claim that offline contribution prediction is the
+final research endpoint.
+
 ## 2. Experiment 1 Motivation
 
 Experiment 1 measured relationships between client contribution and several
@@ -241,6 +257,29 @@ $$
 which is required because \(\lambda_i\) multiplicatively modifies the
 aggregation weight.
 
+### Origin of \(\gamma\)
+
+The scale parameter \(\gamma = 0.8863940762603306\) is the implemented scaling
+constant used to control the spread of \(\lambda\) after exponential mapping.
+It was empirically selected by the Experiment 2 calibration code to keep the
+coefficient of variation of \(\lambda\) below the configured stability target:
+
+$$
+\mathrm{CV}(\lambda) \le \min(0.5\,\mathrm{CV}(q), 0.20).
+$$
+
+The implementation obtains this value by binary search over the interval
+\([0, 5]\) using the already fitted Form A and Form B scores. It is not an
+independently optimized scientific parameter and was not tuned by rerunning
+federated learning. Its purpose is numerical: preserve enough score variation
+for \(\lambda\) to express the calibrated evidence, while preventing the
+exponential map from producing a factor that dominates the existing quality
+score \(q\).
+
+This value is reasonable because the resulting Form B distribution remains
+centered at mean 1, bounded by the implemented clipping and renormalization
+steps, and substantially less variable than \(q\).
+
 ## 7. Clipping
 
 After the positive mapping, the implementation first normalizes raw lambda by
@@ -377,9 +416,11 @@ Form A directly tests the minimal hypothesis suggested by Experiment 1: reward
 larger update L2 distance and penalize JS divergence from the global label
 distribution.
 
-Form B was selected as the primary formulation because it preserves this
-interpretable structure while using ridge regularization to shrink weak or
-uncertain signals. Its coefficients remain scientifically interpretable:
+Form B was selected as the primary formulation because it is the most stable
+and conservative calibrated formulation among the evaluated candidates. It
+preserves the interpretable structure suggested by Experiment 1 while using
+ridge regularization to shrink weak or uncertain signals. Its coefficients
+remain scientifically interpretable:
 
 - update L2 contributes positively;
 - JS divergence contributes negatively;
@@ -388,9 +429,16 @@ uncertain signals. Its coefficients remain scientifically interpretable:
 - class imbalance contributes negatively.
 
 Leave-one-task-out validation selected the Form B ridge parameter
-\(\alpha_{\mathrm{ridge}} = 100.0\). Form B also produced a more conservative
-lambda distribution than Form A, reducing the risk that \(\lambda\) dominates
-the existing Project 1 quality score \(q\).
+\(\alpha_{\mathrm{ridge}} = 100.0\). The held-out \(R^2\) values remain
+negative, and the predictive performance is weak. Form B should therefore be
+interpreted as the least-bad calibrated formulation among the evaluated
+candidates, not as a highly predictive contribution model.
+
+Despite weak predictive performance, Form B produced lower mean RMSE and MAE
+than Form A, applied ridge regularization, and yielded a more conservative
+lambda distribution. These properties reduce the risk that \(\lambda\) overfits
+the small Experiment 1 calibration set or dominates the existing Project 1
+quality score \(q\).
 
 Therefore, Form B is the primary \(\lambda\) formulation carried forward into
 Experiment 3. Form A is retained as an interpretable ablation baseline.
@@ -422,11 +470,32 @@ task-level correlations between \(\lambda\) and \(q\). Therefore, Experiment 2
 satisfies the global orthogonality objective, but task-level \(\lambda\)-\(q\)
 behavior should continue to be monitored in Experiment 3.
 
+The per-task \(\lambda\)-\(q\) correlations from
+`outputs/exp2/orthogonality_report.csv` are:
+
+| Form | Task | Pearson corr. \((\lambda, q)\) | Spearman corr. \((\lambda, q)\) |
+| --- | --- | ---: | ---: |
+| Form A | AGNews-LSTM | -0.4607450959405998 | -0.42499999999999993 |
+| Form A | Audio-1DCNN | 0.22608755180938953 | 0.3 |
+| Form A | CIFAR-CNN | -0.9421750624645309 | -0.8642857142857141 |
+| Form A | Fashion-MLP | -0.6749107574704369 | -0.5714285714285713 |
+| Form A | Tabular-MLP | 0.4929337929920553 | 0.5214285714285714 |
+| Form B | AGNews-LSTM | -0.7638906372108178 | -0.4535714285714285 |
+| Form B | Audio-1DCNN | 0.04104163294028534 | 0.25357142857142856 |
+| Form B | CIFAR-CNN | -0.9144866080672905 | -0.825 |
+| Form B | Fashion-MLP | -0.7980823743041282 | -0.5285714285714286 |
+| Form B | Tabular-MLP | 0.5058887839884542 | 0.5714285714285713 |
+
+The CIFAR-CNN exception is therefore quantitatively large: Form B has Pearson
+correlation \(-0.9144866080672905\) and Spearman correlation \(-0.825\) between
+\(\lambda\) and \(q\) on that task. This does not overturn the global
+orthogonality result, but it is an important task-level limitation.
+
 ## 13. Held-Out Validation Summary
 
-Experiment 2 used leave-one-task-out validation to evaluate whether the fitted
-scores generalize across the five benchmark tasks. The validation results are
-reported in `outputs/exp2/cross_validation.csv` and summarized in
+Experiment 2 used leave-one-task-out validation to evaluate the offline
+calibration behavior of the fitted scores across the five benchmark tasks. The
+validation results are reported in `outputs/exp2/cross_validation.csv` and summarized in
 `outputs/exp2/comparison_report.md`.
 
 The mean leave-one-task-out metrics were:
@@ -440,6 +509,13 @@ The mean leave-one-task-out metrics were:
 | Form B | 10.00 | 6.014593 | 4.696589 | 0.081332 | 0.083871 | -2.692933 |
 | Form B | 100.00 | 5.835653 | 4.352204 | 0.140555 | 0.210225 | -4.065864 |
 
+The negative \(R^2\) values mean that the held-out calibration models predict
+Leave-One-Client-Out contribution worse than a constant-mean predictor on the
+held-out task. This demonstrates weak predictive generalization of the offline
+calibration model. It does not, by itself, prove that the aggregation
+methodology fails, because the calibration model is only an intermediate step
+used to estimate \(\lambda\).
+
 Form B was not selected because it wins every validation metric. Form A retains
 stronger rank-order behavior, as shown by its higher mean Spearman correlation.
 Form B was selected as the primary Experiment 3 formulation because the
@@ -449,8 +525,41 @@ ridge regularization, and lower risk of overfitting weak Experiment 1 signals.
 
 Thus, the Form B selection is a scientific trade-off. Form B is the conservative
 primary candidate, while Form A remains the interpretable ablation baseline.
+Experiment 3 is required to determine whether either calibrated \(\lambda\)
+formulation is beneficial when incorporated into the federated aggregation
+process.
 
-## 14. Sample Count Discussion
+## 14. Interpretation of Predictive Performance
+
+Leave-One-Client-Out contribution was used because it is the best available
+offline proxy in Experiment 1 for whether a client update was useful to the
+current aggregation round. The regression models in Experiment 2 therefore use
+contribution prediction as a calibration mechanism: they translate observed
+domain and update-space signals into a bounded multiplicative aggregation
+factor.
+
+Weak held-out predictive performance does not automatically invalidate
+\(\lambda\). Aggregation weights do not necessarily require strong standalone
+prediction of \(\Delta\mathrm{accuracy}\) to be useful, because the final
+aggregation behavior depends on the interaction among \(w_i\), \(q_i\),
+\(\lambda_i\), LoRA update geometry, client sampling, and the subsequent
+training trajectory. Offline regression metrics only evaluate the calibration
+proxy in isolation.
+
+At the same time, the weak predictive performance is an important limitation.
+It means \(\lambda\) should be interpreted cautiously as a conservative,
+evidence-calibrated weighting factor, not as a precise contribution estimator.
+The final effectiveness of
+
+$$
+\text{Weight}_i = w_i \times q_i \times \lambda_i
+$$
+
+must be evaluated inside the federated learning process. Experiment 3 is the
+first experiment capable of answering whether the calibrated \(\lambda\)
+improves federated learning performance.
+
+## 15. Sample Count Discussion
 
 The final \(\lambda\) formulation does not include sample count as a feature.
 The implemented Form B feature set is:
@@ -495,25 +604,46 @@ Form B \(\lambda\) \((0.24314621260356034)\). A simple regression
 These results support documenting sample count as a monitored confound rather
 than changing the frozen \(\lambda\) formulation.
 
-## 15. Leave-One-Task-Out vs. Task Fixed Effects
+## 16. Leave-One-Task-Out vs. Task Fixed Effects
 
 Task fixed effects were intentionally omitted from the final Experiment 2
-formulation. The goal of Experiment 2 is not to maximize within-task regression
-fit. The goal is to construct a dataset-agnostic \(\lambda\) that can generalize
-across different federated learning tasks.
+formulation. The calibration objective is not to maximize within-task regression
+fit. The research objective is to construct a dataset-agnostic \(\lambda\)
+candidate for evaluation across different federated learning tasks.
 
 Task fixed effects can improve within-task fit by allowing task-specific
 offsets. However, such offsets are tied to the identities of the training tasks
 and do not directly define a portable aggregation rule for new or held-out
 tasks.
 
-Leave-one-task-out validation instead asks whether coefficients fitted on four
-tasks transfer to the fifth task. This directly evaluates the cross-task
-generalization behavior needed for a dataset-agnostic \(\lambda\). For that
-reason, leave-one-task-out validation is more closely aligned with the purpose
-of Experiment 2 than task fixed effects.
+Leave-one-task-out validation instead asks how coefficients fitted on four
+tasks behave on the fifth task. This directly evaluates the cross-task behavior
+needed for a dataset-agnostic \(\lambda\) calibration. For that reason,
+leave-one-task-out validation is more closely aligned with the purpose of
+Experiment 2 than task fixed effects, even though the resulting predictive
+performance remains weak.
 
-## 16. Summary
+## 17. Limitations
+
+Experiment 2 is complete as a calibration and validation step, but the following
+limitations should be carried into Experiment 3:
+
+- Held-out predictive performance is weak. The leave-one-task-out \(R^2\) values
+  are negative, meaning the offline calibration model predicts held-out
+  contribution worse than a constant-mean predictor.
+- Calibration is based on a single completed Experiment 1 output set.
+- The calibration inherits the single random seed used by Experiment 1.
+- The calibration inherits one Dirichlet partition setting from Experiment 1.
+- Global \(\lambda\)-\(q\) orthogonality is weak, but CIFAR-CNN shows a strong
+  task-level exception.
+- The scale \(\gamma\) is empirically calibrated to control \(\lambda\)'s spread;
+  it is not independently optimized through federated learning runs.
+- \(\lambda\) has been validated offline using Experiment 1 measurements only.
+- Experiment 3 is required to determine whether the frozen
+  \(w_i \times q_i \times \lambda_i\) aggregation rule improves federated
+  learning performance.
+
+## 18. Summary
 
 Experiment 2 defines a positive, calibrated, multi-factor Domain-Aware
 Aggregation Weight \(\lambda\). The final selected formulation is a
@@ -534,6 +664,16 @@ $$
 \text{Weight}_i = w_i \times q_i.
 $$
 
-Experiment 2 constructs and validates \(\lambda\). Experiment 3 evaluates
-whether this calibrated domain-aware factor improves federated learning
-performance when used during aggregation.
+Experiment 2 calibrates \(\lambda\), validates its mathematical properties,
+validates boundedness and stability, validates global orthogonality against
+\(q\), documents limitations, and prepares a finalized \(\lambda\) candidate
+for Experiment 3.
+
+Experiment 2 does not prove that \(\lambda\) improves federated learning.
+Experiment 3 is the first experiment capable of answering whether
+
+$$
+\text{Weight}_i = w_i \times q_i \times \lambda_i
+$$
+
+actually improves federated learning performance when used during aggregation.
