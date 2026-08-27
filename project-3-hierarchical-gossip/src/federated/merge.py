@@ -28,6 +28,28 @@ import math
 import torch
 
 
+def _check_alpha(alpha):
+    if not float(alpha) > 0.0:
+        # alpha == 0 makes the scale correction 0/0 and returns silent NaN;
+        # alpha < 0 would raise a bare math domain error from sqrt.
+        raise ValueError(f"alpha must be > 0, got {alpha}")
+
+
+def _compute_dtype(dtype):
+    """Work in float32 for headroom, but never *below* the caller's precision."""
+    return torch.float64 if dtype == torch.float64 else torch.float32
+
+
+def _layer_delta(params, alpha):
+    """(alpha / r) * B @ A for one layer, with the rank-0 guard."""
+    a, b = params['A'], params['B']
+    rank = a.shape[0]
+    work = _compute_dtype(a.dtype)
+    if rank == 0:
+        return torch.zeros(b.shape[0], a.shape[1], dtype=work, device=b.device)
+    return (float(alpha) / rank) * (b.to(work) @ a.to(work))
+
+
 def lora_to_delta(lora_state, alpha):
     """Per-layer effective update Delta W = (alpha / r) * B @ A.
 
@@ -38,17 +60,8 @@ def lora_to_delta(lora_state, alpha):
     Returns:
         {layer_name: tensor [out, in]}
     """
-    deltas = {}
-    for layer, params in lora_state.items():
-        a, b = params['A'], params['B']
-        rank = a.shape[0]
-        if rank == 0:
-            deltas[layer] = torch.zeros(
-                b.shape[0], a.shape[1], dtype=torch.float32, device=b.device
-            )
-            continue
-        deltas[layer] = (float(alpha) / rank) * (b.float() @ a.float())
-    return deltas
+    _check_alpha(alpha)
+    return {layer: _layer_delta(params, alpha) for layer, params in lora_state.items()}
 
 
 def factorize_delta(delta, target_rank, alpha, dtype=None):
@@ -60,15 +73,12 @@ def factorize_delta(delta, target_rank, alpha, dtype=None):
     """
     if target_rank < 1:
         raise ValueError(f"target_rank must be >= 1, got {target_rank}")
-    if not float(alpha) > 0.0:
-        # alpha == 0 would make the scale correction 0/0 and return silent NaN;
-        # alpha < 0 would raise a bare math domain error from sqrt.
-        raise ValueError(f"alpha must be > 0, got {alpha}")
+    _check_alpha(alpha)
     if dtype is None:
         dtype = delta.dtype
 
     out_f, in_f = delta.shape
-    u, s, vh = torch.linalg.svd(delta.float(), full_matrices=False)
+    u, s, vh = torch.linalg.svd(delta.to(_compute_dtype(dtype)), full_matrices=False)
     keep = min(target_rank, s.shape[0])
 
     root_s = torch.sqrt(torch.clamp(s[:keep], min=0.0))
@@ -124,20 +134,21 @@ def merge_states(states, weights, target_rank, alpha):
                 f"missing {sorted(missing)}, unexpected {sorted(extra)}"
             )
 
-    # Preserve the callers' parameter dtype: the merge itself is done in float32
-    # for numerical headroom, but returning float32 for a float64 or bfloat16
-    # model would silently change its precision.
-    out_dtype = states[0][next(iter(layers))]['A'].dtype
-
-    # Delegate to lora_to_delta rather than re-deriving (alpha / r) * B @ A here,
-    # so the rank-0 guard and the scaling rule cannot drift between the two.
-    per_state = [lora_to_delta(state, alpha) for state in states]
+    if not layers:
+        return {}
 
     merged = {}
     for layer in states[0]:
+        # Per-layer, so a mixed-precision model keeps each layer's own dtype
+        # rather than having one arbitrary layer's dtype applied to all of them.
+        out_dtype = states[0][layer]['A'].dtype
         total = None
-        for deltas, weight in zip(per_state, norm_w):
-            contribution = weight * deltas[layer]
+        # One layer at a time via the shared helper: this keeps the rank-0 guard
+        # and the scaling rule in a single place, without materialising every
+        # state's every layer as a dense delta up front (which put peak memory
+        # at n_states * n_layers dense matrices instead of two).
+        for state, weight in zip(states, norm_w):
+            contribution = weight * _layer_delta(state[layer], alpha)
             total = contribution if total is None else total + contribution
         merged[layer] = factorize_delta(total, target_rank, alpha, dtype=out_dtype)
     return merged

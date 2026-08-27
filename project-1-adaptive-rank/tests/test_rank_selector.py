@@ -52,10 +52,14 @@ def test_non_finite_stable_rank_falls_back_to_the_floor():
     for batch_size, max_rank in BATCH_TO_MAX_RANK.items():
         candidates = [r for r in ALL_CANDIDATE_RANKS if r <= max_rank]
         floor = max(candidates[0], GAMMA * capability_fraction(batch_size) * max_rank)
+        expected = rank_equation(0.0, batch_size)
         for bad in (float("nan"), float("inf"), float("-inf")):
             chosen = rank_equation(bad, batch_size)
             assert chosen in candidates
             assert chosen >= floor
+            # equality, not just >= floor: without the guard +inf would sail
+            # past the floor to the hardware ceiling instead of falling back.
+            assert chosen == expected
 
 
 def test_capability_floor_still_binds_at_top_tier():
@@ -77,3 +81,30 @@ def test_gamma_default_is_a_soft_prior():
 def test_returned_rank_is_always_a_candidate(batch_size):
     for s in STABLE_RANKS:
         assert rank_equation(s, batch_size) in ALL_CANDIDATE_RANKS
+
+
+def test_shipped_gamma_allocation_is_still_capability_dominated():
+    """Pins a known limitation so a future recalibration is visible.
+
+    s(G) is bounded by the probe rank (a stable rank cannot exceed the matrix
+    rank), and measured s(G) on the real project-1 models sits in roughly
+    [1.1, 4.2]. At GAMMA = 0.5 the top-tier floor is 8, so over that whole
+    observed range the allocation does not move: it is (2, 2, 8), down from the
+    pre-fix (2, 4, 16) but still a function of batch size alone.
+
+    This test asserts the limitation, not the desired behaviour. If someone
+    recalibrates GAMMA or changes the demand term, it should fail and be
+    updated deliberately.
+    """
+    observed = (1.1, 1.4, 1.9, 2.8, 3.4, 4.2)
+
+    # The top tier is pinned at its floor of 8 across the entire observed range:
+    # gamma * c * R_max = 0.5 * 1 * 16 = 8, and s(G) never gets near it.
+    assert {rank_equation(s, 256) for s in observed} == {8}
+    assert rank_equation(9.9, 256) == 8      # still pinned just below the knee
+    assert rank_equation(12.0, 256) == 12    # demand binds once it clears 8
+
+    # The two lower tiers do respond within the observed range, but only up to
+    # their hardware ceilings of 4 and 8 -- so their headroom is small.
+    assert rank_equation(1.1, 16) == 2 and rank_equation(4.2, 16) == 4
+    assert rank_equation(1.1, 64) == 2 and rank_equation(4.2, 64) == 4

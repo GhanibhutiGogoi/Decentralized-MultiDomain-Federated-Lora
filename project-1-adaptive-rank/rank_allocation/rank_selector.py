@@ -21,6 +21,28 @@ from Federated.client import set_lora_only_trainable
 # consequence at the middle tier of the shipped BATCH_TO_MAX_RANK: the floor
 # gamma * 0.5 * 8 = 2 coincides with the smallest candidate rank, so there the
 # prior is inert by construction and demand alone decides.
+#
+# CALIBRATION IS UNRESOLVED. Fixing the floor == ceiling defect makes the demand
+# term *reachable*, but it does not by itself make the shipped allocation
+# responsive. Two facts, measured on the real project-1 models:
+#
+#   1. s(G) is bounded above by the probe's own rank. The probe is built at
+#      BATCH_TO_MAX_RANK[batch_size], and the stable rank of an [r, in] or
+#      [out, r] gradient cannot exceed r, so s(G) <= R_i^max always and the
+#      min(s(G), R_i^max) cap below is mathematically redundant. It is kept
+#      because it documents the intended semantics and costs nothing.
+#   2. Observed s(G) on MLP and CNN backbones sits in roughly [1.1, 4.2] both at
+#      initialisation and after several epochs, while the top-tier floor at
+#      gamma = 0.5 is 8. The top tier therefore stays pinned at 8 across that
+#      whole range and only moves once s(G) clears 8. The two lower tiers do
+#      respond, but their ceilings are 4 and 8, so the headroom is small.
+#
+# Choosing a smaller gamma from these numbers alone would be guesswork: the
+# measurements above are from short synthetic probes, not the full benchmark
+# battery. Settling it needs a rank-vs-accuracy sweep on the real tasks. Until
+# then the honest description of this rule is capability-dominated, and
+# test_shipped_gamma_allocation_is_still_capability_dominated pins that so a
+# future recalibration is visible rather than silent.
 GAMMA = 0.5
 
 

@@ -191,3 +191,100 @@ def test_weight_count_mismatch_raises():
     states = [make_state(rank=4, seed=1), make_state(rank=4, seed=2)]
     with pytest.raises(ValueError, match="weights"):
         merge_states(states, [1.0], target_rank=4, alpha=ALPHA)
+
+
+# --- guards added after adversarial review (previously all untested) --------
+
+def _state(rank, out_f=6, in_f=8, dtype=torch.float32, device="cpu", seed=0):
+    g = torch.Generator().manual_seed(seed)
+    return {"fc": {"A": torch.randn(rank, in_f, generator=g).to(dtype).to(device),
+                   "B": torch.randn(out_f, rank, generator=g).to(dtype).to(device)}}
+
+
+def _accelerator():
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return None
+
+
+@pytest.mark.skipif(_accelerator() is None, reason="no accelerator available")
+def test_factorize_delta_pad_path_stays_on_device():
+    """The pad path once crashed off-CPU: torch.zeros without device= made
+    torch.cat mix mps/cuda with cpu."""
+    dev = _accelerator()
+    delta = torch.randn(6, 4, device=dev)
+    out = factorize_delta(delta, target_rank=8, alpha=32.0)   # 8 > min(6, 4)
+    assert out["A"].device.type == dev
+    assert out["B"].device.type == dev
+
+
+@pytest.mark.skipif(_accelerator() is None, reason="no accelerator available")
+def test_rank_zero_delta_stays_on_device():
+    """The rank-0 path did not crash -- it silently returned a CPU tensor."""
+    dev = _accelerator()
+    empty = {"fc": {"A": torch.zeros(0, 8, device=dev), "B": torch.zeros(6, 0, device=dev)}}
+    assert lora_to_delta(empty, 32.0)["fc"].device.type == dev
+
+
+@pytest.mark.skipif(_accelerator() is None, reason="no accelerator available")
+def test_merge_states_stays_on_device():
+    dev = _accelerator()
+    out = merge_states([_state(2, device=dev), _state(4, device=dev, seed=1)],
+                       [0.5, 0.5], target_rank=4, alpha=32.0)
+    assert out["fc"]["A"].device.type == dev
+
+
+@pytest.mark.parametrize("dtype", [torch.float32, torch.float64, torch.float16, torch.bfloat16])
+def test_merge_states_preserves_caller_dtype(dtype):
+    """Returning float32 for a float64 or bfloat16 model silently changes its
+    precision."""
+    out = merge_states([_state(2, dtype=dtype), _state(4, dtype=dtype, seed=1)],
+                       [0.5, 0.5], target_rank=4, alpha=32.0)
+    assert out["fc"]["A"].dtype == dtype
+    assert out["fc"]["B"].dtype == dtype
+
+
+def test_float64_merge_keeps_float64_accuracy():
+    """float32 headroom must be a floor, not a ceiling: a float64 caller should
+    not get float32 accuracy inside a float64 container."""
+    state = _state(4, dtype=torch.float64)
+    out = merge_states([state], [1.0], target_rank=8, alpha=32.0)
+    want = (32.0 / 4) * (state["fc"]["B"] @ state["fc"]["A"])
+    got = (32.0 / 8) * (out["fc"]["B"] @ out["fc"]["A"])
+    assert torch.linalg.norm(got - want) / torch.linalg.norm(want) < 1e-12
+
+
+def test_merge_states_preserves_per_layer_dtype():
+    """One layer's dtype must not be applied to every layer."""
+    mixed = {"fc1": _state(2, dtype=torch.float16)["fc"],
+             "fc2": _state(2, dtype=torch.float64, seed=3)["fc"]}
+    out = merge_states([mixed, mixed], [0.5, 0.5], target_rank=2, alpha=32.0)
+    assert out["fc1"]["A"].dtype == torch.float16
+    assert out["fc2"]["A"].dtype == torch.float64
+
+
+def test_merge_states_rejects_disagreeing_layer_sets():
+    """A layer present only in a later state used to vanish in silence."""
+    a = _state(2)
+    b = {"fc": _state(2, seed=1)["fc"], "out": _state(2, seed=2)["fc"]}
+    with pytest.raises(ValueError, match="different layer set"):
+        merge_states([a, b], [0.5, 0.5], target_rank=2, alpha=32.0)
+    with pytest.raises(ValueError, match="different layer set"):
+        merge_states([b, a], [0.5, 0.5], target_rank=2, alpha=32.0)
+
+
+@pytest.mark.parametrize("alpha", [0.0, -1.0])
+def test_non_positive_alpha_is_rejected_everywhere(alpha):
+    """alpha = 0 produced silent NaN; alpha < 0 a bare math domain error."""
+    with pytest.raises(ValueError, match="alpha must be"):
+        merge_states([_state(2)], [1.0], target_rank=2, alpha=alpha)
+    with pytest.raises(ValueError, match="alpha must be"):
+        factorize_delta(torch.randn(6, 8), target_rank=2, alpha=alpha)
+    with pytest.raises(ValueError, match="alpha must be"):
+        lora_to_delta(_state(2), alpha)
+
+
+def test_merge_states_with_no_layers_returns_empty():
+    assert merge_states([{}, {}], [0.5, 0.5], target_rank=2, alpha=32.0) == {}

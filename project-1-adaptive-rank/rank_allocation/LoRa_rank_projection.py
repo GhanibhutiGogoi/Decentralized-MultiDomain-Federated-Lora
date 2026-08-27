@@ -94,6 +94,11 @@ def load_global_state(model, global_state):
             continue
 
         l_a, l_b = local[a_key], local[b_key]
+        if l_b.shape[1] != l_a.shape[0]:
+            raise ValueError(
+                f"local LoRA pair {a_key!r}/{b_key!r} is inconsistent: B has "
+                f"{l_b.shape[1]} columns but A has {l_a.shape[0]} rows"
+            )
         if g_a.shape == l_a.shape and g_b.shape == l_b.shape:
             local[a_key] = g_a.clone()
             local[b_key] = g_b.clone()
