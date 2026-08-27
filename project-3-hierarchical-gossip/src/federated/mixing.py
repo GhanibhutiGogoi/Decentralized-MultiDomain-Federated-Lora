@@ -26,7 +26,7 @@ when given and `sorted(neighbors)` otherwise, since client ids need not be
 
 import numpy as np
 
-TOPOLOGIES = ("ring", "fully_connected")
+TOPOLOGIES = ("ring", "fully_connected", "star", "path")
 
 
 def build_topology(client_ids, topology="ring", seed=42):
@@ -34,7 +34,11 @@ def build_topology(client_ids, topology="ring", seed=42):
 
     Args:
         client_ids: ordered sequence of client identifiers.
-        topology: 'ring' or 'fully_connected'.
+        topology: 'ring', 'fully_connected', 'star' or 'path'. The latter two
+            are irregular (their nodes have differing degrees), which is what
+            makes the max(deg_i, deg_j) in `metropolis_hastings` bite -- on a
+            regular graph that max is a no-op and the construction is
+            indistinguishable from the naive 1/(1+deg_i) rule.
         seed: accepted for interface parity with future randomised topologies;
             unused by the deterministic ones below.
 
@@ -53,6 +57,25 @@ def build_topology(client_ids, topology="ring", seed=42):
     n = len(ids)
     if topology == "fully_connected":
         return {cid: [o for o in ids if o != cid] for cid in ids}
+
+    if topology == "star":
+        if n == 1:
+            return {ids[0]: []}
+        hub, leaves = ids[0], ids[1:]
+        neighbors = {hub: list(leaves)}
+        neighbors.update({leaf: [hub] for leaf in leaves})
+        return neighbors
+
+    if topology == "path":
+        neighbors = {}
+        for i, cid in enumerate(ids):
+            peers = []
+            if i > 0:
+                peers.append(ids[i - 1])
+            if i < n - 1:
+                peers.append(ids[i + 1])
+            neighbors[cid] = peers
+        return neighbors
 
     # ring -- dedupe because at n == 2 the two ring neighbours coincide, and
     # at n == 1 a node's only ring neighbour is itself.
@@ -126,6 +149,11 @@ def spectral_gap(w):
     if w.shape[0] < 2:
         raise ValueError("spectral gap needs at least two nodes")
 
-    eigenvalues = np.linalg.eigvals(w)
+    # Metropolis-Hastings matrices are symmetric, where eigvalsh is both faster
+    # and numerically better behaved; fall back to the general solver otherwise.
+    if np.allclose(w, w.T, atol=1e-12):
+        eigenvalues = np.linalg.eigvalsh(w)
+    else:
+        eigenvalues = np.linalg.eigvals(w)
     magnitudes = np.sort(np.abs(eigenvalues))[::-1]
     return float(1.0 - magnitudes[1])

@@ -26,11 +26,36 @@ def test_hardware_ceiling_is_never_exceeded():
             assert rank_equation(s, batch_size) <= max_rank
 
 
-def test_floor_prevents_collapse_below_smallest_candidate():
-    smallest = min(ALL_CANDIDATE_RANKS)
-    for batch_size in BATCH_TO_MAX_RANK:
-        for s in (0.0, 1e-6, 0.5):
-            assert rank_equation(s, batch_size) >= smallest
+@pytest.mark.parametrize("gamma", (0.25, 0.5, 0.875, 0.9, 1.0))
+def test_capability_floor_is_a_genuine_lower_bound(gamma):
+    """The chosen rank must never fall below the capability floor itself.
+
+    Asserting only `>= min(ALL_CANDIDATE_RANKS)` would be vacuous: the function
+    always returns an element of the candidate menu, so that holds for any
+    implementation, any gamma, and the pre-fix code. The binding claim is
+    against gamma * c_i * R_max, and it needs the upward snap in rank_equation
+    because _nearest_candidate breaks ties downward -- at gamma=0.875 the floor
+    is 14.0 and the nearest candidate is 12.
+    """
+    for batch_size, max_rank in BATCH_TO_MAX_RANK.items():
+        candidates = [r for r in ALL_CANDIDATE_RANKS if r <= max_rank]
+        floor = max(candidates[0], gamma * capability_fraction(batch_size) * max_rank)
+        reachable = [r for r in candidates if r >= floor]
+        if not reachable:
+            continue  # floor above the whole menu: the ceiling wins, tested elsewhere
+        for s in (0.0, 1e-6, 0.5, 1.0):
+            assert rank_equation(s, batch_size, gamma=gamma) >= floor
+
+
+def test_non_finite_stable_rank_falls_back_to_the_floor():
+    """A diverged gradient probe must not propagate NaN into the allocation."""
+    for batch_size, max_rank in BATCH_TO_MAX_RANK.items():
+        candidates = [r for r in ALL_CANDIDATE_RANKS if r <= max_rank]
+        floor = max(candidates[0], GAMMA * capability_fraction(batch_size) * max_rank)
+        for bad in (float("nan"), float("inf"), float("-inf")):
+            chosen = rank_equation(bad, batch_size)
+            assert chosen in candidates
+            assert chosen >= floor
 
 
 def test_capability_floor_still_binds_at_top_tier():

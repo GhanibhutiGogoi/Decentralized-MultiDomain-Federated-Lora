@@ -1,5 +1,7 @@
 """Capability-aware adaptive LoRA rank selection."""
 
+import math
+
 import numpy as np
 import torch
 
@@ -10,6 +12,15 @@ from Federated.client import set_lora_only_trainable
 # capability term a soft prior so the measured demand term can bind; gamma = 1
 # reproduces the pre-fix behaviour, where the floor equalled the hardware
 # ceiling at the top tier and the stable-rank measurement was discarded.
+#
+# 0.5 is the midpoint of the usable interval (0, 1) and is deliberately not
+# tuned: it reserves half of each client's hardware budget as a floor and
+# leaves the other half for the gradient measurement to claim. It is a
+# published constant of the allocation rule, so it is recorded alongside the
+# equation in the experiment artifact rather than left implicit. Note the
+# consequence at the middle tier of the shipped BATCH_TO_MAX_RANK: the floor
+# gamma * 0.5 * 8 = 2 coincides with the smallest candidate rank, so there the
+# prior is inert by construction and demand alone decides.
 GAMMA = 0.5
 
 
@@ -52,9 +63,26 @@ def rank_equation(stable_rank, batch_size, gamma=GAMMA):
     if not candidates:
         return min(ALL_CANDIDATE_RANKS)
 
+    # A non-finite measurement means the gradient probe diverged. Fall back to
+    # the capability floor deliberately rather than letting NaN propagate
+    # silently through max/min, where it would collapse to the floor anyway but
+    # by accident.
+    demand = float(stable_rank)
+    if not math.isfinite(demand):
+        demand = 0.0
+
     floor = max(candidates[0], gamma * capability_fraction(batch_size) * max_rank)
-    raw_rank = max(floor, min(float(stable_rank), float(max_rank)))
-    return _nearest_candidate(raw_rank, candidates)
+    raw_rank = max(floor, min(demand, float(max_rank)))
+
+    chosen = _nearest_candidate(raw_rank, candidates)
+    # _nearest_candidate breaks ties downward, which can land below the floor
+    # when the floor sits between two candidates. Snap back up so the floor is
+    # a genuine lower bound for any gamma, not just the shipped one.
+    if chosen < floor:
+        above = [r for r in candidates if r >= floor]
+        if above:
+            chosen = min(above)
+    return chosen
 
 
 def estimate_gradient_stable_rank(model, loader, loss_fn, num_batches=3):

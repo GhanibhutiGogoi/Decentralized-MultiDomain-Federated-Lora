@@ -8,7 +8,12 @@ from src.federated.gossip import GossipProtocol
 from src.federated.mixing import build_topology, metropolis_hastings, spectral_gap
 
 SIZES = (3, 4, 5, 8, 15)
-TOPOLOGIES = ('ring', 'fully_connected')
+TOPOLOGIES = ('ring', 'fully_connected', 'star', 'path')
+# star and path are IRREGULAR: their nodes have differing degrees, which is
+# what makes the max(deg_i, deg_j) in the Metropolis-Hastings rule bite. On a
+# regular graph that max is a no-op, so a suite of rings and cliques alone
+# cannot distinguish the correct rule from the naive 1/(1+deg_i) one.
+IRREGULAR = ('star', 'path')
 
 
 class _StubClient:
@@ -52,7 +57,12 @@ def test_ring_of_two_has_no_duplicate_neighbour():
 
 def test_unknown_topology_raises():
     with pytest.raises(ValueError, match="topology"):
-        build_topology([0, 1, 2], 'star')
+        build_topology([0, 1, 2], 'hypercube')
+
+
+def test_duplicate_client_ids_raise():
+    with pytest.raises(ValueError, match="unique"):
+        build_topology([0, 1, 1], 'ring')
 
 
 # --- mixing matrix ----------------------------------------------------------
@@ -148,15 +158,16 @@ def test_spectral_gap_needs_at_least_two_nodes():
 def test_repeated_mixing_drives_disagreement_to_zero(topology, seed):
     """Disagreement must contract, and at no worse than the |lambda_2| rate.
 
-    Asserted against the spectral bound rather than a fixed tolerance: the ring
-    contracts at |lambda_2| = 0.91 per round, so an absolute threshold like
-    1e-9 after 200 rounds is satisfied or violated depending on which random
-    vector you happen to draw, and passes only for some seeds.
+    Both the tolerance and the round count are derived from the spectral gap
+    rather than hard-coded: a fixed "1e-9 after 200 rounds" is satisfied or
+    violated depending on which random vector you draw (it passed for 1 seed in
+    6 on a ring), and a path graph at |lambda_2| = 0.977 needs ~1000 rounds to
+    reach the same place a clique reaches in one.
     """
     n = 12
-    rounds = 200
     w = metropolis_hastings(build_topology(list(range(n)), topology))
     lambda_2 = 1.0 - spectral_gap(w)
+    rounds = 1 if lambda_2 <= 0 else min(int(np.ceil(np.log(1e-10) / np.log(lambda_2))), 5000)
 
     x = np.random.default_rng(seed).normal(size=n)
     spread = [np.std(x)]
@@ -164,10 +175,65 @@ def test_repeated_mixing_drives_disagreement_to_zero(topology, seed):
         x = w @ x
         spread.append(np.std(x))
 
-    # monotone non-increasing: symmetric doubly stochastic W is a contraction
-    # on the disagreement subspace
+    # symmetric doubly stochastic W contracts the disagreement subspace
     assert all(b <= a + 1e-12 for a, b in zip(spread, spread[1:]))
-    # and it converged to consensus in relative terms
     assert spread[-1] <= spread[0] * 1e-6
-    # decaying no slower than the spectral rate (with slack for float error)
     assert spread[-1] <= spread[0] * lambda_2 ** rounds * 10 + 1e-15
+
+
+# --- the max(deg_i, deg_j) is load-bearing, and only irregular graphs show it --
+
+@pytest.mark.parametrize("topology", IRREGULAR)
+@pytest.mark.parametrize("n", (4, 5, 8, 15))
+def test_naive_degree_rule_is_not_doubly_stochastic_on_irregular_graphs(topology, n):
+    """Guards the specific thing Metropolis-Hastings buys over 1/(1 + deg_i).
+
+    Without this, reverting `max(degree[cid], degree[peer])` to `degree[cid]`
+    leaves the whole suite green, because every ring and clique is regular.
+    """
+    neighbors = build_topology(list(range(n)), topology)
+    order = sorted(neighbors)
+    degree = {c: len(v) for c, v in neighbors.items()}
+    assert len(set(degree.values())) > 1, "topology must be irregular for this test to bind"
+
+    naive = np.zeros((n, n))
+    for i, cid in enumerate(order):
+        for peer in neighbors[cid]:
+            naive[i, order.index(peer)] = 1.0 / (1.0 + degree[cid])
+        naive[i, i] = 1.0 - naive[i].sum()
+
+    assert np.allclose(naive.sum(axis=1), 1.0), "the naive rule is still row-stochastic"
+    assert not np.allclose(naive.sum(axis=0), 1.0), "naive rule must break column sums"
+    assert not np.allclose(naive, naive.T), "naive rule must break symmetry"
+
+    correct = metropolis_hastings(neighbors)
+    assert not np.allclose(correct, naive), "Metropolis-Hastings must differ from the naive rule"
+    assert np.allclose(correct.sum(axis=0), 1.0, atol=1e-12)
+
+
+@pytest.mark.parametrize("topology", IRREGULAR)
+def test_naive_degree_rule_loses_mass_where_metropolis_hastings_does_not(topology):
+    n = 8
+    neighbors = build_topology(list(range(n)), topology)
+    order = sorted(neighbors)
+    degree = {c: len(v) for c, v in neighbors.items()}
+
+    naive = np.zeros((n, n))
+    for i, cid in enumerate(order):
+        for peer in neighbors[cid]:
+            naive[i, order.index(peer)] = 1.0 / (1.0 + degree[cid])
+        naive[i, i] = 1.0 - naive[i].sum()
+
+    correct = metropolis_hastings(neighbors)
+    x0 = np.random.default_rng(0).normal(size=n)
+    start = x0.mean()
+
+    x = x0.copy()
+    for _ in range(200):
+        x = naive @ x
+    assert abs(x.mean() - start) > 1e-6, "naive rule should drift off the network mean"
+
+    x = x0.copy()
+    for _ in range(200):
+        x = correct @ x
+    assert abs(x.mean() - start) < 1e-12, "Metropolis-Hastings must conserve it exactly"

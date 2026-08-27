@@ -101,7 +101,15 @@ def load_global_state(model, global_state):
             continue
 
         if (g_b.shape[0], g_a.shape[1]) != (l_b.shape[0], l_a.shape[1]):
-            continue  # incompatible layer geometry, not just a rank mismatch
+            # Not a rank mismatch but a genuine architecture mismatch, which no
+            # re-ranking can reconcile. Falling through to the elementwise path
+            # would hand load_state_dict a wrongly shaped tensor and fail with a
+            # cryptic size-mismatch error, so say what is actually wrong.
+            raise ValueError(
+                f"layer geometry mismatch for {a_key!r}/{b_key!r}: global update is "
+                f"{g_b.shape[0]}x{g_a.shape[1]} but the local model expects "
+                f"{l_b.shape[0]}x{l_a.shape[1]}"
+            )
 
         device = l_a.device
         delta = g_b.to(device).float() @ g_a.to(device).float()

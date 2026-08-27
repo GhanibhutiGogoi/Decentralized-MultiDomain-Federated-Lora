@@ -43,13 +43,15 @@ def lora_to_delta(lora_state, alpha):
         a, b = params['A'], params['B']
         rank = a.shape[0]
         if rank == 0:
-            deltas[layer] = torch.zeros(b.shape[0], a.shape[1], dtype=a.dtype)
+            deltas[layer] = torch.zeros(
+                b.shape[0], a.shape[1], dtype=torch.float32, device=b.device
+            )
             continue
         deltas[layer] = (float(alpha) / rank) * (b.float() @ a.float())
     return deltas
 
 
-def factorize_delta(delta, target_rank, alpha):
+def factorize_delta(delta, target_rank, alpha, dtype=None):
     """Factor a dense Delta W back into LoRA A/B at target_rank.
 
     Returns {'A': [target_rank, in], 'B': [out, target_rank]} such that
@@ -58,6 +60,12 @@ def factorize_delta(delta, target_rank, alpha):
     """
     if target_rank < 1:
         raise ValueError(f"target_rank must be >= 1, got {target_rank}")
+    if not float(alpha) > 0.0:
+        # alpha == 0 would make the scale correction 0/0 and return silent NaN;
+        # alpha < 0 would raise a bare math domain error from sqrt.
+        raise ValueError(f"alpha must be > 0, got {alpha}")
+    if dtype is None:
+        dtype = delta.dtype
 
     out_f, in_f = delta.shape
     u, s, vh = torch.linalg.svd(delta.float(), full_matrices=False)
@@ -75,10 +83,14 @@ def factorize_delta(delta, target_rank, alpha):
 
     if keep < target_rank:
         pad = target_rank - keep
-        b = torch.cat([b, torch.zeros(out_f, pad, dtype=b.dtype)], dim=1)
-        a = torch.cat([a, torch.zeros(pad, in_f, dtype=a.dtype)], dim=0)
+        b = torch.cat(
+            [b, torch.zeros(out_f, pad, dtype=b.dtype, device=b.device)], dim=1
+        )
+        a = torch.cat(
+            [a, torch.zeros(pad, in_f, dtype=a.dtype, device=a.device)], dim=0
+        )
 
-    return {'A': a.to(delta.dtype), 'B': b.to(delta.dtype)}
+    return {'A': a.to(dtype), 'B': b.to(dtype)}
 
 
 def _normalised(weights, n_states):
@@ -103,15 +115,29 @@ def merge_states(states, weights, target_rank, alpha):
         raise ValueError("merge_states needs at least one state")
     norm_w = _normalised(weights, len(states))
 
+    layers = set(states[0])
+    for k, state in enumerate(states[1:], start=1):
+        if set(state) != layers:
+            missing, extra = layers - set(state), set(state) - layers
+            raise ValueError(
+                f"state {k} has a different layer set: "
+                f"missing {sorted(missing)}, unexpected {sorted(extra)}"
+            )
+
+    # Preserve the callers' parameter dtype: the merge itself is done in float32
+    # for numerical headroom, but returning float32 for a float64 or bfloat16
+    # model would silently change its precision.
+    out_dtype = states[0][next(iter(layers))]['A'].dtype
+
+    # Delegate to lora_to_delta rather than re-deriving (alpha / r) * B @ A here,
+    # so the rank-0 guard and the scaling rule cannot drift between the two.
+    per_state = [lora_to_delta(state, alpha) for state in states]
+
     merged = {}
     for layer in states[0]:
         total = None
-        for state, weight in zip(states, norm_w):
-            if layer not in state:
-                raise ValueError(f"layer {layer!r} missing from one of the states")
-            params = state[layer]
-            rank = params['A'].shape[0]
-            delta = (float(alpha) / rank) * (params['B'].float() @ params['A'].float())
-            total = weight * delta if total is None else total + weight * delta
-        merged[layer] = factorize_delta(total, target_rank, alpha)
+        for deltas, weight in zip(per_state, norm_w):
+            contribution = weight * deltas[layer]
+            total = contribution if total is None else total + contribution
+        merged[layer] = factorize_delta(total, target_rank, alpha, dtype=out_dtype)
     return merged

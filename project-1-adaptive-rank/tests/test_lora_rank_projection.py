@@ -1,5 +1,6 @@
 """Tests for LoRA rank projection / global-state loading (audit defect D2)."""
 
+import pytest
 import torch
 import torch.nn as nn
 
@@ -170,3 +171,15 @@ def test_unpaired_lora_key_still_uses_elementwise_projection():
     state["layer.A"] = a                      # B deliberately left at local shape
     load_global_state(model, state)
     assert model.state_dict()["layer.A"].shape == (3, 20)
+
+
+def test_layer_geometry_mismatch_raises_a_clear_error():
+    """An architecture mismatch, not a rank mismatch: no re-ranking can fix it,
+    so say what is wrong rather than falling through to the elementwise path and
+    failing later with a cryptic load_state_dict size error."""
+    model = _Model(out_f=10, in_f=20, rank=4)
+    a, b = _factors(out_f=10, in_f=30, rank=8, seed=11)   # in_f 30 != local 20
+    state = {k: v.clone() for k, v in model.state_dict().items()}
+    state["layer.A"], state["layer.B"] = a, b
+    with pytest.raises(ValueError, match="geometry mismatch"):
+        load_global_state(model, state)

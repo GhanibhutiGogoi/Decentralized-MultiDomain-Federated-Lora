@@ -46,7 +46,7 @@ from Federated.fedavg_aggregation import fedavg_quality_weighted  # noqa: E402
 from Federated.flops import compute_round_flops  # noqa: E402
 from Federated.utilities import evaluate, split_dataset  # noqa: E402
 from rank_allocation.LoRa_rank_projection import load_global_state  # noqa: E402
-from rank_allocation.rank_selector import estimate_optimal_rank  # noqa: E402
+from rank_allocation.rank_selector import GAMMA, estimate_optimal_rank  # noqa: E402
 from Source.Models import AudioCNN, CNN, LSTMModel, MLP, TabularMLP  # noqa: E402
 from Source.datasets.audio import get_audio  # noqa: E402
 from Source.datasets.image import get_cifar10, get_fashion_mnist  # noqa: E402
@@ -61,7 +61,8 @@ RESULT_DIR.mkdir(parents=True, exist_ok=True)
 RANK_EQUATION = (
     "s(G)=||G||_F^2/||G||_2^2; "
     "c_i=capability_index(batch_i)/(num_capabilities-1); "
-    "r_i=nearest_allowed_rank(max(r_min, gamma*c_i*R_i^max, min(s(G), R_i^max)))"
+    "r_i=nearest_allowed_rank(max(r_min, gamma*c_i*R_i^max, min(s(G), R_i^max))); "
+    f"gamma={GAMMA}"
 )
 
 
