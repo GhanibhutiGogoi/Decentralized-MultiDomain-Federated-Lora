@@ -21,12 +21,20 @@ def project_tensor_to_rank(t, target_rank, rank_dim=0):
       rank_dim=0  →  A matrices, shape [r, in_f]
       rank_dim=1  →  B matrices, shape [out_f, r]
 
-    Compression : SVD truncation to target_rank principal components.
+    Compression : SVD truncation to target_rank principal components,
+                  S[:r] * Vh[:r]. The singular values must be reapplied --
+                  Vh alone has orthonormal rows, so dropping S makes the
+                  output norm exactly sqrt(target_rank) regardless of the
+                  input's magnitude, destroying all scale information.
     Expansion   : zero-padding along rank_dim.
 
     Fix: SVD of [m×n] with m < n yields Vh with only m rows. If those
     rows are fewer than target_rank (e.g. out_f=10 < FIXED_RANK=32),
     we zero-pad up to target_rank so the shape is always correct.
+
+    Prefer `load_global_state`'s paired A/B path where possible: projecting
+    the two factors independently is not the best rank-r approximation of
+    the update B @ A.
     """
     cur_rank = t.shape[rank_dim]
     if cur_rank == target_rank:
@@ -35,16 +43,17 @@ def project_tensor_to_rank(t, target_rank, rank_dim=0):
     if cur_rank > target_rank:
         # Normalise so rank is always on dim-0 before SVD
         mat = t.float() if rank_dim == 0 else t.float().t()   # [cur_rank, d]
-        _, _, Vh = torch.linalg.svd(mat, full_matrices=False)  # [min(cur,d), d]
-        actual_rows = Vh.shape[0]
+        _, S, Vh = torch.linalg.svd(mat, full_matrices=False)  # [min(cur,d), d]
+        principal = S[:, None] * Vh                            # keep the scale
+        actual_rows = principal.shape[0]
         if actual_rows >= target_rank:
-            compressed = Vh[:target_rank, :]                   # [target_rank, d]
+            compressed = principal[:target_rank, :]            # [target_rank, d]
         else:
                
             pad = torch.zeros(
-                target_rank - actual_rows, Vh.shape[1],
-                dtype=Vh.dtype, device=Vh.device)
-            compressed = torch.cat([Vh, pad], dim=0)           # [target_rank, d]
+                target_rank - actual_rows, principal.shape[1],
+                dtype=principal.dtype, device=principal.device)
+            compressed = torch.cat([principal, pad], dim=0)     # [target_rank, d]
         result = compressed if rank_dim == 0 else compressed.t()
         return result.to(t.dtype)
 
@@ -57,14 +66,52 @@ def project_tensor_to_rank(t, target_rank, rank_dim=0):
 
 def load_global_state(model, global_state):
     """
-    Load global_state into model, projecting LoRA matrices to the
-    model's rank when sizes differ.
+    Load global_state into model, re-ranking LoRA matrices to the model's rank
+    when sizes differ.
+
+    Paired A/B keys are handled in *update space*: the global update
+    Delta W = B_g A_g is reconstructed and refactorised at the local rank with
+    the same truncated SVD the server uses (`_factorize_delta`). Projecting A
+    and B independently is not the best rank-r approximation of B A, and A and
+    B do not even live in comparable bases once ranks differ.
+
+    Unpaired LoRA keys fall back to the elementwise projection:
       A keys: rank on dim-0
       B keys: rank on dim-1
     """
+    # Imported here (not at module scope) because Federated.fedavg_aggregation
+    # imports this module -- a top-level import would be circular.
+    from Federated.fedavg_aggregation import _factorize_delta, _lora_pairs
+
     local = model.state_dict()
+    handled = set()
+
+    for a_key, b_key in _lora_pairs(local):
+        if a_key not in global_state or b_key not in global_state:
+            continue
+        g_a, g_b = global_state[a_key], global_state[b_key]
+        if g_a.dim() != 2 or g_b.dim() != 2 or g_b.shape[1] != g_a.shape[0]:
+            continue
+
+        l_a, l_b = local[a_key], local[b_key]
+        if g_a.shape == l_a.shape and g_b.shape == l_b.shape:
+            local[a_key] = g_a.clone()
+            local[b_key] = g_b.clone()
+            handled.update([a_key, b_key])
+            continue
+
+        if (g_b.shape[0], g_a.shape[1]) != (l_b.shape[0], l_a.shape[1]):
+            continue  # incompatible layer geometry, not just a rank mismatch
+
+        device = l_a.device
+        delta = g_b.to(device).float() @ g_a.to(device).float()
+        new_a, new_b = _factorize_delta(delta, l_a.shape[0], l_a.dtype)
+        local[a_key] = new_a.to(device=device, dtype=l_a.dtype)
+        local[b_key] = new_b.to(device=device, dtype=l_b.dtype)
+        handled.update([a_key, b_key])
+
     for k in local:
-        if k not in global_state:
+        if k in handled or k not in global_state:
             continue
         g = global_state[k]
         if g.shape == local[k].shape:
