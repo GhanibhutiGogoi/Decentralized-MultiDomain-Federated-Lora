@@ -61,7 +61,7 @@ RESULT_DIR.mkdir(parents=True, exist_ok=True)
 RANK_EQUATION = (
     "s(G)=||G||_F^2/||G||_2^2; "
     "c_i=capability_index(batch_i)/(num_capabilities-1); "
-    "r_i=nearest_allowed_rank(max(r_min, c_i*R_i^max, min(s(G), R_i^max)))"
+    "r_i=nearest_allowed_rank(max(r_min, gamma*c_i*R_i^max, min(s(G), R_i^max)))"
 )
 
 

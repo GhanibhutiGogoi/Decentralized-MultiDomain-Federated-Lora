@@ -6,6 +6,12 @@ import torch
 from config import ALL_CANDIDATE_RANKS, BATCH_TO_MAX_RANK
 from Federated.client import set_lora_only_trainable
 
+# Weight on the capability prior in the rank floor. gamma < 1 keeps the
+# capability term a soft prior so the measured demand term can bind; gamma = 1
+# reproduces the pre-fix behaviour, where the floor equalled the hardware
+# ceiling at the top tier and the stable-rank measurement was discarded.
+GAMMA = 0.5
+
 
 def _nearest_candidate(rank, candidates):
     return min(candidates, key=lambda r: (abs(r - rank), r))
@@ -21,26 +27,32 @@ def capability_fraction(batch_size):
     return batch_sizes.index(batch_size) / (len(batch_sizes) - 1)
 
 
-def rank_equation(stable_rank, batch_size):
+def rank_equation(stable_rank, batch_size, gamma=GAMMA):
     r"""
     Closed-form adaptive rank rule.
 
         s(G) = ||G||_F^2 / ||G||_2^2
         c_i  = (index(batch_i) / (num_capabilities - 1))
         r_i  = round_to_candidate(
-                 max(2, c_i * R_i^max, min(s(G), R_i^max))
+                 max(2, gamma * c_i * R_i^max, min(s(G), R_i^max))
                )
 
     The stable rank estimates update complexity from the gradient geometry.
-    The capability term prevents stronger clients from being under-allocated,
-    while the ceiling prevents weaker clients from exceeding their budget.
+    The capability term is a *soft prior* (weight gamma < 1) that keeps stronger
+    clients from being under-allocated without pinning them to their ceiling;
+    the ceiling prevents weaker clients from exceeding their budget.
+
+    With gamma = 1 the floor equals R_i^max whenever c_i = 1, and since the
+    demand term is capped at R_i^max the outer max always returns the floor --
+    the measured stable rank is computed and then discarded. gamma < 1 leaves
+    room between the floor and the ceiling for s(G) to bind.
     """
     max_rank = BATCH_TO_MAX_RANK.get(batch_size, min(ALL_CANDIDATE_RANKS))
     candidates = [r for r in ALL_CANDIDATE_RANKS if r <= max_rank]
     if not candidates:
         return min(ALL_CANDIDATE_RANKS)
 
-    floor = max(candidates[0], capability_fraction(batch_size) * max_rank)
+    floor = max(candidates[0], gamma * capability_fraction(batch_size) * max_rank)
     raw_rank = max(floor, min(float(stable_rank), float(max_rank)))
     return _nearest_candidate(raw_rank, candidates)
 
