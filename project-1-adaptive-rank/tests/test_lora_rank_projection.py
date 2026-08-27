@@ -183,3 +183,21 @@ def test_layer_geometry_mismatch_raises_a_clear_error():
     state["layer.A"], state["layer.B"] = a, b
     with pytest.raises(ValueError, match="geometry mismatch"):
         load_global_state(model, state)
+
+
+def test_inconsistent_local_lora_pair_raises_a_clear_error():
+    """The local pair is validated too, not just the global one.
+
+    _factorize_delta writes into both A and B using A's rank, so a local model
+    whose B columns disagree with A's rows would get a pair it cannot load, and
+    fail later with the same cryptic load_state_dict error the paired path was
+    added to eliminate.
+    """
+    model = _Model(out_f=10, in_f=20, rank=4)
+    with torch.no_grad():
+        model.layer.B = nn.Parameter(torch.zeros(10, 2))   # 2 cols vs A's 4 rows
+    a, b = _factors(out_f=10, in_f=20, rank=8, seed=13)
+    state = {k: v.clone() for k, v in model.state_dict().items()}
+    state["layer.A"], state["layer.B"] = a, b
+    with pytest.raises(ValueError, match="local LoRA pair"):
+        load_global_state(model, state)

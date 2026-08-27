@@ -101,8 +101,12 @@ def test_shipped_gamma_allocation_is_still_capability_dominated():
     # The top tier is pinned at its floor of 8 across the entire observed range:
     # gamma * c * R_max = 0.5 * 1 * 16 = 8, and s(G) never gets near it.
     assert {rank_equation(s, 256) for s in observed} == {8}
-    assert rank_equation(9.9, 256) == 8      # still pinned just below the knee
-    assert rank_equation(12.0, 256) == 12    # demand binds once it clears 8
+    # The knee is at 10.1, not 8: the menu quantises and ties round toward 8
+    # until s(G) passes the 8/12 midpoint.
+    assert rank_equation(9.9, 256) == 8
+    assert rank_equation(10.0, 256) == 8
+    assert rank_equation(10.1, 256) == 12
+    assert rank_equation(12.0, 256) == 12
 
     # The two lower tiers do respond within the observed range, but only up to
     # their hardware ceilings of 4 and 8 -- so their headroom is small.

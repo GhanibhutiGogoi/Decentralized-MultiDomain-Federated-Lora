@@ -34,8 +34,10 @@ from Federated.client import set_lora_only_trainable
 #   2. Observed s(G) on MLP and CNN backbones sits in roughly [1.1, 4.2] both at
 #      initialisation and after several epochs, while the top-tier floor at
 #      gamma = 0.5 is 8. The top tier therefore stays pinned at 8 across that
-#      whole range and only moves once s(G) clears 8. The two lower tiers do
-#      respond, but their ceilings are 4 and 8, so the headroom is small.
+#      whole range; it does not move until s(G) passes 10.1, because the rank
+#      menu quantises and _nearest_candidate rounds toward 8 until s(G) clears
+#      the 8/12 midpoint. The two lower tiers do respond, but their ceilings
+#      are 4 and 8, so the headroom is small.
 #
 # Choosing a smaller gamma from these numbers alone would be guesswork: the
 # measurements above are from short synthetic probes, not the full benchmark

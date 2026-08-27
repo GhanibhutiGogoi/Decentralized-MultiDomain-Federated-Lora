@@ -58,7 +58,10 @@ def lora_to_delta(lora_state, alpha):
         alpha: LoRA alpha used by the forward pass.
 
     Returns:
-        {layer_name: tensor [out, in]}
+        {layer_name: tensor [out, in]}, in float32 working precision -- promoted
+        to float64 when the caller's factors are float64, so a double-precision
+        model is not silently downgraded. float16 and bfloat16 inputs still
+        compute in float32.
     """
     _check_alpha(alpha)
     return {layer: _layer_delta(params, alpha) for layer, params in lora_state.items()}
