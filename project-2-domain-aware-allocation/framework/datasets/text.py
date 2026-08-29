@@ -8,13 +8,24 @@ from torch.utils.data import Dataset, DataLoader
 class AGNewsDataset(Dataset):
     """
     AG News topic classification dataset.
-    Falls back to synthetic data if torchtext is unavailable.
+    Synthetic data is used only when explicitly requested.
     """
     VOCAB_SIZE = 10000
     MAX_LEN = 64
 
-    def __init__(self, split="train"):
+    def __init__(self, split="train", synthetic=False):
         super().__init__()
+        self.is_synthetic = bool(synthetic)
+        if self.is_synthetic:
+            rng = np.random.RandomState(42 if split == "train" else 7)
+            n = 5000 if split == "train" else 1000
+            self.data = [
+                (torch.randint(1, self.VOCAB_SIZE, (self.MAX_LEN,)),
+                 rng.randint(0, 4))
+                for _ in range(n)
+            ]
+            return
+
         try:
             from torchtext.datasets import AG_NEWS
             from torchtext.data.utils import get_tokenizer
@@ -34,16 +45,12 @@ class AGNewsDataset(Dataset):
                 ids += [0] * (self.MAX_LEN - len(ids))
                 self.data.append(
                     (torch.tensor(ids, dtype=torch.long), int(label) - 1))
-
-        except Exception as e:
-            print(f"[AGNews] {e}. Using synthetic data.")
-            rng = np.random.RandomState(42 if split == "train" else 7)
-            n = 5000 if split == "train" else 1000
-            self.data = [
-                (torch.randint(1, self.VOCAB_SIZE, (self.MAX_LEN,)),
-                 rng.randint(0, 4))
-                for _ in range(n)
-            ]
+        except (ImportError, OSError, RuntimeError) as e:
+            raise RuntimeError(
+                "Unable to load real AG News data. Install a working torchtext "
+                "package and ensure AG_NEWS is available, or call "
+                "get_agnews(synthetic=True) explicitly."
+            ) from e
 
     def __len__(self):
         return len(self.data)
@@ -53,10 +60,9 @@ class AGNewsDataset(Dataset):
         return x, int(y)
 
 
-def get_agnews(batch_size=64):
+def get_agnews(batch_size=64, synthetic=False):
     """Returns (train_dataset, test_dataset, test_loader) for AG News."""
-    train = AGNewsDataset("train")
-    test = AGNewsDataset("test")
+    train = AGNewsDataset("train", synthetic=synthetic)
+    test = AGNewsDataset("test", synthetic=synthetic)
     test_loader = DataLoader(test, batch_size=batch_size)
     return train, test, test_loader
-

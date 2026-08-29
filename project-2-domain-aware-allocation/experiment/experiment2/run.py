@@ -23,7 +23,7 @@ from experiment2.lambda_calibration import (  # noqa: E402
     GROUP_COLS,
     TARGET,
     attach_lambda_values,
-    calibrate_lambda_scale,
+    calibrate_lambda_scales,
     coefficient_table,
     fit_form_a,
     fit_form_b,
@@ -207,7 +207,7 @@ def build_comparison_report(
     orthogonality: pd.DataFrame,
     cv: pd.DataFrame,
     selected_alpha: float,
-    lambda_scale: float,
+    lambda_calibrations: dict[str, dict[str, float]],
 ):
     corr_md = _markdown_table(correlations)
     reg_md = _markdown_table(regressions)
@@ -220,6 +220,13 @@ def build_comparison_report(
         .reset_index()
     )
     cv_md = _markdown_table(cv_summary)
+
+    calibration_md = _markdown_table(pd.DataFrame(
+        [
+            {"form": form, **values}
+            for form, values in sorted(lambda_calibrations.items())
+        ]
+    ))
 
     report = f"""# Experiment 2 Comparison Report
 
@@ -254,8 +261,8 @@ Interpretable formula fitted with standardized OLS:
 `score_A = beta_l2 * z(log(1 + update_l2_distance_to_mean)) + beta_js * z(js_to_global) + intercept`
 
 `lambda_A` is obtained by exponentiating the centered score inside each
-`(task, round)` aggregation context, clipping to `[0.5, 1.5]`, and renormalizing
-to mean one inside the same context.
+`(task, round)` aggregation context, then iteratively clipping to `[0.5, 1.5]`
+and renormalizing until both the documented bounds and mean-one invariant hold.
 
 ## Form B
 
@@ -273,11 +280,13 @@ For each candidate score s:
 
 `lambda_i = exp(scale * (s_i - mean_context(s)))`
 
-then clip to `[0.5, 1.5]` and renormalize so each `(task, round)` has mean
-lambda equal to one. The fitted scale is `{lambda_scale:.6f}` and is chosen so
-lambda's coefficient of variation is no more than half of q's coefficient of
-variation, capped at 0.20. This keeps lambda positive and numerically stable
-without allowing it to dominate q.
+then iteratively clip to `[0.5, 1.5]` and renormalize so each `(task, round)`
+has mean lambda equal to one while every final lambda remains inside the
+documented bounds. Gamma is calibrated independently for each form so that the
+form's achieved lambda coefficient of variation is no more than half of q's
+coefficient of variation, capped at 0.20.
+
+{calibration_md}
 
 ## Coefficients
 
@@ -318,6 +327,12 @@ def main():
     figure_dir = args.output_dir / "figures"
 
     measurements = _read_required_csv(args.exp1_dir / "per_round_client_measurements.csv")
+    exp1_manifest_path = args.exp1_dir / "manifest.json"
+    exp1_manifest = (
+        json.loads(exp1_manifest_path.read_text(encoding="utf-8"))
+        if exp1_manifest_path.exists()
+        else {}
+    )
     correlations = _read_required_csv(args.exp1_dir / "signal_contribution_correlations.csv")
     regressions = _read_required_csv(args.exp1_dir / "controlled_regression.csv")
     _read_required_csv(args.exp1_dir / "label_distribution_summary.csv")
@@ -330,8 +345,8 @@ def main():
         "form_a": predict_standardized_score(df, fit_a),
         "form_b": predict_standardized_score(df, fit_b),
     }
-    lambda_scale = calibrate_lambda_scale(df, scores)
-    lambda_values = attach_lambda_values(df, [fit_a, fit_b], lambda_scale)
+    lambda_calibrations = calibrate_lambda_scales(df, scores)
+    lambda_values = attach_lambda_values(df, [fit_a, fit_b], lambda_calibrations)
     coefficients = coefficient_table([fit_a, fit_b])
     validation, orthogonality = validation_tables(lambda_values)
 
@@ -351,7 +366,7 @@ def main():
         orthogonality=orthogonality,
         cv=cv,
         selected_alpha=selected_alpha,
-        lambda_scale=lambda_scale,
+        lambda_calibrations=lambda_calibrations,
     )
 
     manifest = {
@@ -359,10 +374,12 @@ def main():
         "experiment": "Experiment 2",
         "source_experiment": str(args.exp1_dir),
         "output_dir": str(args.output_dir),
+        "source_dataset_provenance": exp1_manifest.get("dataset_provenance", {}),
+        "is_synthetic_present": bool(df["is_synthetic"].astype(bool).any()),
         "form_a_features": FORM_A_FEATURES,
         "form_b_features": FORM_B_FEATURES,
         "selected_ridge_alpha": selected_alpha,
-        "lambda_scale": lambda_scale,
+        "lambda_calibration": lambda_calibrations,
         "normalization": {
             "context": GROUP_COLS,
             "positive_transform": "exp(scale * centered_score)",
@@ -399,7 +416,7 @@ def main():
     print("=== Experiment 2 Complete ===")
     print(f"Rows used: {len(df)}")
     print(f"Selected ridge alpha: {selected_alpha}")
-    print(f"Lambda scale: {lambda_scale:.6f}")
+    print(f"Lambda calibration: {lambda_calibrations}")
     print(f"Saved outputs to: {args.output_dir}")
 
 

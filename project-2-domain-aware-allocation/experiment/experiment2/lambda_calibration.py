@@ -23,6 +23,12 @@ FORM_B_FEATURES = [
     "log_class_imbalance_ratio",
 ]
 RIDGE_ALPHAS = [0.01, 0.1, 1.0, 10.0, 100.0]
+LAMBDA_MIN = 0.5
+LAMBDA_MAX = 1.5
+MAX_LAMBDA_CV = 0.20
+LAMBDA_CV_FRACTION_OF_Q = 0.5
+CV_TOLERANCE = 1e-9
+LAMBDA_BOUND_TOLERANCE = 1e-10
 
 
 @dataclass(frozen=True)
@@ -41,6 +47,8 @@ class LinearFit:
 def prepare_measurements(df: pd.DataFrame) -> pd.DataFrame:
     """Create stable transformed features used by both lambda forms."""
     out = df.copy()
+    if "is_synthetic" not in out:
+        out["is_synthetic"] = False
     out["log_update_l2"] = np.log1p(out["update_l2_distance_to_mean"].clip(lower=0.0))
     out["log_class_imbalance_ratio"] = np.log1p(
         out["class_imbalance_ratio"].clip(lower=0.0)
@@ -148,52 +156,124 @@ def predict_delta_accuracy(df: pd.DataFrame, fit: LinearFit) -> np.ndarray:
     return fit.target_mean + fit.target_std * predict_standardized_score(df, fit)
 
 
+def _clip_renormalize_to_mean_one(
+    values: np.ndarray,
+    lower: float = LAMBDA_MIN,
+    upper: float = LAMBDA_MAX,
+    max_iter: int = 1000,
+    tolerance: float = LAMBDA_BOUND_TOLERANCE,
+) -> np.ndarray:
+    """Iteratively clip and renormalize until bounds and mean-one both hold."""
+    lam = np.asarray(values, dtype=float)
+    if lam.size == 0:
+        return lam
+    if lower > 1.0 or upper < 1.0:
+        raise ValueError("Lambda bounds must contain 1.0 for mean-one feasibility.")
+    if not np.all(np.isfinite(lam)) or np.any(lam <= 0):
+        raise ValueError("Lambda normalization requires finite positive inputs.")
+
+    lam = lam / max(float(lam.mean()), EPS)
+    for _ in range(max_iter):
+        previous = lam.copy()
+        lam = np.clip(lam, lower, upper)
+        lam = lam / max(float(lam.mean()), EPS)
+        bounds_hold = (
+            float(lam.min()) >= lower - tolerance
+            and float(lam.max()) <= upper + tolerance
+        )
+        mean_holds = abs(float(lam.mean()) - 1.0) <= tolerance
+        converged = float(np.max(np.abs(lam - previous))) <= tolerance
+        if bounds_hold and mean_holds and converged:
+            return lam
+
+    raise RuntimeError(
+        "Lambda clipping failed to converge to the documented invariant: "
+        f"mean=1 and bounds=[{lower}, {upper}]."
+    )
+
+
 def _lambda_from_score(df: pd.DataFrame, score: np.ndarray, scale: float):
-    work = df[GROUP_COLS].copy()
+    work = df[GROUP_COLS].reset_index(drop=True).copy()
     work["score"] = score
     centered = work["score"] - work.groupby(GROUP_COLS)["score"].transform("mean")
     raw = np.exp(scale * centered.clip(lower=-20.0, upper=20.0))
     work["lambda_raw"] = raw
-    raw_mean = work.groupby(GROUP_COLS)["lambda_raw"].transform("mean")
-    lam = work["lambda_raw"] / raw_mean
-    lam = lam.clip(lower=0.5, upper=1.5)
-    work["lambda_clipped"] = lam
-    clipped_mean = work.groupby(GROUP_COLS)["lambda_clipped"].transform("mean")
-    return (work["lambda_clipped"] / clipped_mean).to_numpy(dtype=float)
+    lam = np.empty(len(work), dtype=float)
+    raw_values = work["lambda_raw"].to_numpy(dtype=float)
+    for _, indices in work.groupby(GROUP_COLS).groups.items():
+        group_positions = np.asarray(indices, dtype=int)
+        lam[group_positions] = _clip_renormalize_to_mean_one(
+            raw_values[group_positions]
+        )
+    return lam
 
 
-def calibrate_lambda_scale(df: pd.DataFrame, scores_by_form: dict[str, np.ndarray]) -> float:
-    """Choose one shared scale so lambda has lower CV than q."""
-    q_cv = float(df[QUALITY].std(ddof=0) / max(abs(df[QUALITY].mean()), EPS))
-    target_cv = min(0.5 * q_cv, 0.20)
-    if target_cv <= EPS:
+def _coefficient_of_variation(values: Iterable[float]) -> float:
+    arr = np.asarray(list(values), dtype=float)
+    if arr.size == 0:
         return 0.0
+    return float(arr.std(ddof=0) / max(abs(arr.mean()), EPS))
 
-    all_scores = np.concatenate(list(scores_by_form.values()))
-    repeated = pd.concat([df[GROUP_COLS]] * len(scores_by_form), ignore_index=True)
 
-    lo, hi = 0.0, 5.0
-    for _ in range(40):
-        mid = (lo + hi) / 2.0
-        lam = _lambda_from_score(repeated, all_scores, mid)
-        cv = float(lam.std(ddof=0) / max(abs(lam.mean()), EPS))
-        if cv > target_cv:
-            hi = mid
+def calibrate_lambda_scales(
+    df: pd.DataFrame,
+    scores_by_form: dict[str, np.ndarray],
+) -> dict[str, dict[str, float]]:
+    """Calibrate gamma independently for each lambda form.
+
+    The target for each form is CV(lambda_form) <= min(0.5 * CV(q), 0.20).
+    A form-specific binary search chooses the largest gamma satisfying that
+    bound. Failure to satisfy the bound raises instead of silently accepting an
+    invalid calibration.
+    """
+    q_cv = float(df[QUALITY].std(ddof=0) / max(abs(df[QUALITY].mean()), EPS))
+    target_cv = min(LAMBDA_CV_FRACTION_OF_Q * q_cv, MAX_LAMBDA_CV)
+    calibrations: dict[str, dict[str, float]] = {}
+
+    for form, scores in scores_by_form.items():
+        if target_cv <= EPS:
+            gamma = 0.0
+            achieved_cv = 0.0
         else:
-            lo = mid
-    return lo
+            lo, hi = 0.0, 5.0
+            for _ in range(40):
+                mid = (lo + hi) / 2.0
+                lam = _lambda_from_score(df, scores, mid)
+                cv = _coefficient_of_variation(lam)
+                if cv > target_cv:
+                    hi = mid
+                else:
+                    lo = mid
+            gamma = lo
+            achieved_cv = _coefficient_of_variation(_lambda_from_score(df, scores, gamma))
+
+        if achieved_cv > target_cv + CV_TOLERANCE:
+            raise RuntimeError(
+                f"Gamma calibration failed for {form}: achieved CV "
+                f"{achieved_cv:.12g} exceeds target CV {target_cv:.12g}."
+            )
+
+        calibrations[form] = {
+            "gamma": float(gamma),
+            "quality_cv": float(q_cv),
+            "target_cv": float(target_cv),
+            "achieved_cv": float(achieved_cv),
+        }
+
+    return calibrations
 
 
 def attach_lambda_values(
     df: pd.DataFrame,
     fits: list[LinearFit],
-    lambda_scale: float,
+    lambda_calibrations: dict[str, dict[str, float]],
 ) -> pd.DataFrame:
     rows = []
     base_cols = [
         "task",
         "round",
         "client_id",
+        "is_synthetic",
         "quality_score",
         "delta_accuracy",
         "js_to_global",
@@ -204,10 +284,14 @@ def attach_lambda_values(
     ]
     for fit in fits:
         score = predict_standardized_score(df, fit)
-        lam = _lambda_from_score(df, score, lambda_scale)
+        gamma = lambda_calibrations[fit.form]["gamma"]
+        lam = _lambda_from_score(df, score, gamma)
         pred = predict_delta_accuracy(df, fit)
         part = df[base_cols].copy()
         part["form"] = fit.form
+        part["gamma"] = gamma
+        part["target_lambda_cv"] = lambda_calibrations[fit.form]["target_cv"]
+        part["achieved_lambda_cv"] = lambda_calibrations[fit.form]["achieved_cv"]
         part["raw_lambda_score"] = score
         part["predicted_delta_accuracy"] = pred
         part["lambda_weight"] = lam

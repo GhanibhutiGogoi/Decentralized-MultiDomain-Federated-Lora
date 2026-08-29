@@ -1,4 +1,4 @@
-# tabular dataset (Heart Disease / synthetic)
+# tabular dataset (Heart Disease / explicit synthetic mode)
 
 import os
 import numpy as np
@@ -9,27 +9,12 @@ from torch.utils.data import Dataset, DataLoader
 class TabularDataset(Dataset):
     """
     UCI Heart Disease dataset.
-    Falls back to synthetic 4-class tabular data if unavailable.
+    Synthetic 4-class tabular data is used only when explicitly requested.
     """
-    def __init__(self, split="train"):
+    def __init__(self, split="train", synthetic=False):
         super().__init__()
-        try:
-            import urllib.request
-            import pandas as pd
-
-            url  = ("https://archive.ics.uci.edu/ml/machine-learning-databases/"
-                    "heart-disease/processed.cleveland.data")
-            path = "./data/heart.csv"
-            os.makedirs("./data", exist_ok=True)
-            if not os.path.exists(path):
-                urllib.request.urlretrieve(url, path)
-
-            df = pd.read_csv(path, header=None, na_values="?").dropna()
-            X  = df.iloc[:, :-1].values.astype(np.float32)
-            y  = (df.iloc[:, -1].values > 0).astype(np.int64)
-
-        except Exception as e:
-            print(f"[Tabular] {e}. Using synthetic data.")
+        self.is_synthetic = bool(synthetic)
+        if self.is_synthetic:
             rng = np.random.RandomState(0)
             n   = 4000 if split == "train" else 800
             centers = rng.randn(4, 20) * 2
@@ -38,6 +23,28 @@ class TabularDataset(Dataset):
             ).astype(np.float32)
             y = np.concatenate(
                 [np.full(n // 4, i, dtype=np.int64) for i in range(4)])
+        else:
+            try:
+                import urllib.error
+                import urllib.request
+                import pandas as pd
+
+                url  = ("https://archive.ics.uci.edu/ml/machine-learning-databases/"
+                        "heart-disease/processed.cleveland.data")
+                path = "./data/heart.csv"
+                os.makedirs("./data", exist_ok=True)
+                if not os.path.exists(path):
+                    urllib.request.urlretrieve(url, path)
+
+                df = pd.read_csv(path, header=None, na_values="?").dropna()
+                X  = df.iloc[:, :-1].values.astype(np.float32)
+                y  = (df.iloc[:, -1].values > 0).astype(np.int64)
+            except (ImportError, OSError, urllib.error.URLError, ValueError) as e:
+                raise RuntimeError(
+                    "Unable to load real UCI Heart Disease data from "
+                    "./data/heart.csv or the UCI source. Provide the real CSV "
+                    "or call get_tabular(synthetic=True) explicitly."
+                ) from e
 
         # Normalise
         X = (X - X.mean(0)) / (X.std(0) + 1e-8)
@@ -59,9 +66,9 @@ class TabularDataset(Dataset):
         return self.X[i], self.y[i]
 
 
-def get_tabular(batch_size=64):
+def get_tabular(batch_size=64, synthetic=False):
     """Returns (train_dataset, test_dataset, test_loader) for tabular data."""
-    train       = TabularDataset("train")
-    test        = TabularDataset("test")
+    train       = TabularDataset("train", synthetic=synthetic)
+    test        = TabularDataset("test", synthetic=synthetic)
     test_loader = DataLoader(test, batch_size=batch_size)
     return train, test, test_loader

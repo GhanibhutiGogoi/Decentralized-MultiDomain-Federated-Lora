@@ -227,9 +227,18 @@ class AGNewsDataset(Dataset):
     VOCAB_SIZE = 10000
     MAX_LEN = 64
 
-    def __init__(self, split="train"):
+    def __init__(self, split="train", synthetic=False):
         super().__init__()
-        self._use_synthetic = False
+        self.is_synthetic = bool(synthetic)
+        if self.is_synthetic:
+            rng = np.random.RandomState(42 if split == "train" else 7)
+            n = 5000 if split == "train" else 1000
+            self.data = [
+                (torch.randint(1, self.VOCAB_SIZE, (self.MAX_LEN,)), rng.randint(0, 4))
+                for _ in range(n)
+            ]
+            return
+
         try:
             from torchtext.datasets import AG_NEWS
             from torchtext.data.utils import get_tokenizer
@@ -254,16 +263,11 @@ class AGNewsDataset(Dataset):
                 ids = vocab(tokens)
                 ids += [0] * (self.MAX_LEN - len(ids))
                 self.data.append((torch.tensor(ids, dtype=torch.long), int(label) - 1))
-
-        except Exception as e:
-            print(f"[AGNews] torchtext not available ({e}). Using synthetic data.")
-            self._use_synthetic = True
-            rng = np.random.RandomState(42 if split == "train" else 7)
-            n = 5000 if split == "train" else 1000
-            self.data = [
-                (torch.randint(1, self.VOCAB_SIZE, (self.MAX_LEN,)), rng.randint(0, 4))
-                for _ in range(n)
-            ]
+        except (ImportError, OSError, RuntimeError) as e:
+            raise RuntimeError(
+                "Unable to load real AG News data. Install a working torchtext "
+                "package and ensure AG_NEWS is available, or pass synthetic=True explicitly."
+            ) from e
 
     def __len__(self):
         return len(self.data)
@@ -274,22 +278,10 @@ class AGNewsDataset(Dataset):
 
 
 class TabularDataset(Dataset):
-    def __init__(self, split="train"):
+    def __init__(self, split="train", synthetic=False):
         super().__init__()
-        try:
-            import urllib.request, os
-            url = ("https://archive.ics.uci.edu/ml/machine-learning-databases/"
-                   "heart-disease/processed.cleveland.data")
-            path = "./data/heart.csv"
-            os.makedirs("./data", exist_ok=True)
-            if not os.path.exists(path):
-                urllib.request.urlretrieve(url, path)
-            df = pd.read_csv(path, header=None, na_values="?").dropna()
-            X = df.iloc[:, :-1].values.astype(np.float32)
-            y = (df.iloc[:, -1].values > 0).astype(np.int64)
-            num_classes = 2
-        except Exception as e:
-            print(f"[Tabular] UCI Heart Disease unavailable ({e}). Using synthetic data.")
+        self.is_synthetic = bool(synthetic)
+        if self.is_synthetic:
             rng = np.random.RandomState(0)
             n = 4000 if split == "train" else 800
             centers = rng.randn(4, 20) * 2
@@ -301,6 +293,26 @@ class TabularDataset(Dataset):
             X = np.vstack(X_list).astype(np.float32)
             y = np.concatenate(y_list)
             num_classes = 4
+        else:
+            try:
+                import os
+                import urllib.error
+                import urllib.request
+                url = ("https://archive.ics.uci.edu/ml/machine-learning-databases/"
+                       "heart-disease/processed.cleveland.data")
+                path = "./data/heart.csv"
+                os.makedirs("./data", exist_ok=True)
+                if not os.path.exists(path):
+                    urllib.request.urlretrieve(url, path)
+                df = pd.read_csv(path, header=None, na_values="?").dropna()
+                X = df.iloc[:, :-1].values.astype(np.float32)
+                y = (df.iloc[:, -1].values > 0).astype(np.int64)
+                num_classes = 2
+            except (OSError, urllib.error.URLError, ValueError) as e:
+                raise RuntimeError(
+                    "Unable to load real UCI Heart Disease data from ./data/heart.csv "
+                    "or the UCI source. Provide the real CSV or pass synthetic=True explicitly."
+                ) from e
 
         X = (X - X.mean(0)) / (X.std(0) + 1e-8)
         rng = np.random.RandomState(1)
@@ -327,9 +339,20 @@ class AudioDataset(Dataset):
     SAMPLE_RATE = 16000
     NUM_CLASSES = 35
 
-    def __init__(self, split="train"):
+    def __init__(self, split="train", synthetic=False):
         super().__init__()
+        self.is_synthetic = bool(synthetic)
         self._loaded = False
+        if self.is_synthetic:
+            rng = np.random.RandomState(3 if split == "train" else 9)
+            n = 3000 if split == "train" else 600
+            self.synth = [
+                (torch.from_numpy(rng.randn(1, self.SAMPLE_RATE).astype(np.float32)),
+                 rng.randint(0, self.NUM_CLASSES))
+                for _ in range(n)
+            ]
+            return
+
         try:
             import torchaudio
             subset = "training" if split == "train" else "validation"
@@ -339,15 +362,11 @@ class AudioDataset(Dataset):
             self.NUM_CLASSES = len(self.label2idx)
             self.data = ds
             self._loaded = True
-        except Exception as e:
-            print(f"[Audio] torchaudio SpeechCommands unavailable ({e}). Using synthetic data.")
-            rng = np.random.RandomState(3 if split == "train" else 9)
-            n = 3000 if split == "train" else 600
-            self.synth = [
-                (torch.from_numpy(rng.randn(1, self.SAMPLE_RATE).astype(np.float32)),
-                 rng.randint(0, self.NUM_CLASSES))
-                for _ in range(n)
-            ]
+        except (ImportError, OSError, RuntimeError) as e:
+            raise RuntimeError(
+                "Unable to load real SpeechCommands data. Install a working torchaudio "
+                "package and ensure the dataset is available, or pass synthetic=True explicitly."
+            ) from e
 
     def __len__(self):
         if self._loaded:

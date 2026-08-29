@@ -15,6 +15,8 @@ def get_cifar10(data_root="./data", batch_size=64):
         data_root, train=True, download=True, transform=transform)
     test = torchvision.datasets.CIFAR10(
         data_root, train=False, download=True, transform=transform)
+    train.is_synthetic = False
+    test.is_synthetic = False
     test_loader = DataLoader(test, batch_size=batch_size)
     return train, test, test_loader
 
@@ -26,6 +28,7 @@ def get_fashion_mnist(data_root="./data", batch_size=64):
         data_root, train=True, download=True, transform=transform)
     test = torchvision.datasets.FashionMNIST(
         data_root, train=False, download=True, transform=transform)
+    train.is_synthetic = False
+    test.is_synthetic = False
     test_loader = DataLoader(test, batch_size=batch_size)
     return train, test, test_loader
-

@@ -122,6 +122,18 @@ $$
 Let \(r^{\mathrm{imb}}_i\) be the Experiment 1 measurement
 `class_imbalance_ratio`.
 
+Experiment 1 computes this ratio from the complete client class-count vector:
+
+$$
+r^{\mathrm{imb}}_i
+= \frac{\max_c n_{i,c}}{\max(\min_c n_{i,c}, \epsilon)}.
+$$
+
+Zero-count classes are therefore included through the denominator floor
+\(\epsilon\), so a one-class client distribution is not treated as balanced.
+If a client has no samples, the ratio is defined as \(0\) because no empirical
+class distribution exists.
+
 The implemented transformed feature is:
 
 $$
@@ -238,14 +250,14 @@ $$
 The raw positive lambda value is:
 
 $$
-\lambda^{\mathrm{raw}}_i
-= \exp(\gamma \tilde{s}^{\mathrm{clip20}}_i)
+\lambda^{\mathrm{raw}}_{i,f}
+= \exp(\gamma_f \tilde{s}^{\mathrm{clip20}}_{i,f})
 $$
 
-with the implemented scale:
+with a form-specific implemented scale:
 
 $$
-\gamma = 0.8863940762603306
+\gamma_f,\quad f \in \{\mathrm{Form\ A}, \mathrm{Form\ B}\}.
 $$
 
 The exponential mapping ensures:
@@ -257,51 +269,47 @@ $$
 which is required because \(\lambda_i\) multiplicatively modifies the
 aggregation weight.
 
-### Origin of \(\gamma\)
+### Origin of \(\gamma_f\)
 
-The scale parameter \(\gamma = 0.8863940762603306\) is the implemented scaling
-constant used to control the spread of \(\lambda\) after exponential mapping.
-It was empirically selected by the Experiment 2 calibration code to keep the
-coefficient of variation of \(\lambda\) below the configured stability target:
+The scale parameter \(\gamma_f\) is calibrated independently for each lambda
+form. This controls the spread of each form's \(\lambda\) after exponential
+mapping without pooling Form A and Form B score populations. For each form, the
+Experiment 2 calibration code keeps the achieved coefficient of variation of
+\(\lambda_f\) below the configured stability target:
 
 $$
-\mathrm{CV}(\lambda) \le \min(0.5\,\mathrm{CV}(q), 0.20).
+\mathrm{CV}(\lambda_f) \le \min(0.5\,\mathrm{CV}(q), 0.20).
 $$
 
-The implementation obtains this value by binary search over the interval
-\([0, 5]\) using the already fitted Form A and Form B scores. It is not an
-independently optimized scientific parameter and was not tuned by rerunning
-federated learning. Its purpose is numerical: preserve enough score variation
-for \(\lambda\) to express the calibrated evidence, while preventing the
-exponential map from producing a factor that dominates the existing quality
-score \(q\).
-
-This value is reasonable because the resulting Form B distribution remains
-centered at mean 1, bounded by the implemented clipping and renormalization
-steps, and substantially less variable than \(q\).
+The implementation obtains \(\gamma_f\) by binary search over \([0, 5]\) using
+only that form's fitted scores. After calibration, it records the target CV,
+achieved CV, and \(\gamma_f\). If the achieved CV exceeds the target, the run
+raises an exception instead of silently accepting an invalid calibration. The
+scale is not an independently optimized scientific parameter and is not tuned
+by rerunning federated learning. Its purpose is numerical: preserve enough
+score variation for \(\lambda_f\) to express the calibrated evidence, while
+preventing the exponential map from producing a factor that dominates the
+existing quality score \(q\).
 
 ## 7. Clipping
 
-After the positive mapping, the implementation first normalizes raw lambda by
-the raw context mean:
+After the positive mapping, the implementation enforces both the documented
+bounds and the mean-one context invariant with an iterative clip-renormalize
+procedure. Starting from \(\lambda^{(0)}\), each iteration clips to the
+implemented range:
 
 $$
-\lambda^{\mathrm{mean-raw}}_i
-= \frac{\lambda^{\mathrm{raw}}_i}
-{\frac{1}{|g|}\sum_{j \in g}\lambda^{\mathrm{raw}}_j}
+\lambda^{(t,\mathrm{clip})}_i
+= \min(\max(\lambda^{(t)}_i, 0.5), 1.5)
 $$
 
-Then it clips the result to the implemented range:
+and then renormalizes within aggregation context
+\(g = (\mathrm{task}, \mathrm{round})\):
 
 $$
-\lambda^{\mathrm{clip}}_i
-= \min(\max(\lambda^{\mathrm{mean-raw}}_i, 0.5), 1.5)
-$$
-
-The clipping range is therefore:
-
-$$
-0.5 \le \lambda^{\mathrm{clip}}_i \le 1.5
+\lambda^{(t+1)}_i
+= \frac{\lambda^{(t,\mathrm{clip})}_i}
+{\frac{1}{|g|}\sum_{j \in g}\lambda^{(t,\mathrm{clip})}_j}.
 $$
 
 Clipping prevents the domain-aware factor from overwhelming the original
@@ -311,20 +319,21 @@ aggregation weights.
 
 ## 8. Mean Normalization
 
-After clipping, the implementation renormalizes lambda within each aggregation
-context \(g = (\mathrm{task}, \mathrm{round})\):
+The iterative procedure stops only after both invariants hold for the final
+\(\lambda_i\):
 
 $$
-\lambda_i
-= \frac{\lambda^{\mathrm{clip}}_i}
-{\frac{1}{|g|}\sum_{j \in g}\lambda^{\mathrm{clip}}_j}
+0.5 \le \lambda_i \le 1.5
 $$
 
-This guarantees:
+and
 
 $$
 \frac{1}{|g|}\sum_{i \in g}\lambda_i = 1
 $$
+
+If the implementation cannot satisfy both invariants, it raises an exception
+instead of writing invalid lambda values.
 
 Mean normalization is performed within each `(task, round)` because aggregation
 occurs over the clients participating in a specific training round for a
@@ -636,8 +645,9 @@ limitations should be carried into Experiment 3:
 - The calibration inherits one Dirichlet partition setting from Experiment 1.
 - Global \(\lambda\)-\(q\) orthogonality is weak, but CIFAR-CNN shows a strong
   task-level exception.
-- The scale \(\gamma\) is empirically calibrated to control \(\lambda\)'s spread;
-  it is not independently optimized through federated learning runs.
+- The form-specific scale \(\gamma_f\) is empirically calibrated to control
+  each \(\lambda_f\)'s spread; it is not independently optimized through
+  federated learning runs.
 - \(\lambda\) has been validated offline using Experiment 1 measurements only.
 - Experiment 3 is required to determine whether the frozen
   \(w_i \times q_i \times \lambda_i\) aggregation rule improves federated
@@ -648,8 +658,8 @@ limitations should be carried into Experiment 3:
 Experiment 2 defines a positive, calibrated, multi-factor Domain-Aware
 Aggregation Weight \(\lambda\). The final selected formulation is a
 ridge-regularized linear score over standardized Experiment 1 signals, followed
-by exponential positive mapping, clipping to \([0.5, 1.5]\), and mean
-normalization within each `(task, round)` aggregation context.
+by exponential positive mapping and iterative bounded mean-one normalization
+within each `(task, round)` aggregation context.
 
 The mathematical contribution of Experiment 2 is the construction and
 validation of:

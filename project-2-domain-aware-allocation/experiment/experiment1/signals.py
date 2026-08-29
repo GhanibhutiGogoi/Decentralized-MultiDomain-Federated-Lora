@@ -25,11 +25,17 @@ def entropy(probs: np.ndarray) -> float:
 
 
 def class_imbalance_ratio(counts: np.ndarray) -> float:
+    """Return max class count divided by min class count over all classes.
+
+    The input is the complete class-count vector for a client. The ratio is
+    max(counts) / max(min(counts), EPS), so zero-count classes contribute
+    through the EPS denominator floor. Empty clients return 0.0 because no
+    empirical class distribution exists.
+    """
     counts = np.asarray(counts, dtype=float)
-    nonzero = counts[counts > 0]
-    if nonzero.size == 0:
+    if counts.size == 0 or counts.sum() <= 0:
         return 0.0
-    return float(nonzero.max() / max(nonzero.min(), EPS))
+    return float(counts.max() / max(float(counts.min()), EPS))
 
 
 def kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
@@ -54,6 +60,7 @@ def label_distribution_records(
     labels: np.ndarray,
     indices_by_client: list[list[int]],
     num_classes: int,
+    is_synthetic: bool = False,
 ):
     """Build per-client label distribution records and raw count matrix."""
     labels = np.asarray(labels, dtype=np.int64)
@@ -74,6 +81,7 @@ def label_distribution_records(
             {
                 "task": task_name,
                 "client_id": client_id,
+                "is_synthetic": bool(is_synthetic),
                 "num_samples": int(counts.sum()),
                 "raw_class_counts": counts.astype(int).tolist(),
                 "class_frequency": probs.tolist(),
@@ -90,6 +98,7 @@ def label_distribution_records(
 
     payload = {
         "task": task_name,
+        "is_synthetic": bool(is_synthetic),
         "num_classes": int(num_classes),
         "global_class_counts": global_counts.astype(int).tolist(),
         "global_class_frequency": global_freq.tolist(),
@@ -151,4 +160,3 @@ def save_label_distribution_outputs(
         json.dump(payloads, f, indent=2)
 
     return df
-

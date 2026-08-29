@@ -19,11 +19,17 @@ def entropy(probs: np.ndarray) -> float:
 
 
 def class_imbalance_ratio(counts: np.ndarray) -> float:
+    """Return max class count divided by min class count over all classes.
+
+    Zero-count classes are part of the complete class vector. The ratio is
+    max(counts) / max(min(counts), EPS), so absent classes contribute through
+    the EPS denominator floor. Empty clients return 0.0 because no empirical
+    distribution exists.
+    """
     counts = np.asarray(counts, dtype=float)
-    nonzero = counts[counts > 0]
-    if nonzero.size == 0:
+    if counts.size == 0 or counts.sum() <= 0:
         return 0.0
-    return float(nonzero.max() / max(nonzero.min(), EPS))
+    return float(counts.max() / max(float(counts.min()), EPS))
 
 
 def client_class_counts(labels, indices_by_client, num_classes: int):
@@ -32,4 +38,3 @@ def client_class_counts(labels, indices_by_client, num_classes: int):
         np.bincount(labels[np.asarray(indices, dtype=np.int64)], minlength=num_classes)
         for indices in indices_by_client
     ]
-

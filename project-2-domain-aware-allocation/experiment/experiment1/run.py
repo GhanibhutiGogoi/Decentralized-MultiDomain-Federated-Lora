@@ -75,14 +75,25 @@ EXPERIMENT_NAME = "exp1"
 OUTPUT_DIR = OUTPUT_ROOT / EXPERIMENT_NAME
 
 
-def load_experiments():
+def _is_synthetic(dataset) -> bool:
+    return bool(getattr(dataset, "is_synthetic", False))
+
+
+def load_experiments(synthetic_datasets: set[str] | None = None):
     """Load the exact five Project 1 benchmark tasks."""
+    synthetic_datasets = synthetic_datasets or set()
     print("\n=== Loading Project 1 Benchmark Suite ===")
     cifar_train, cifar_test, cifar_testloader = get_cifar10()
     fashion_train, fashion_test, fashion_testloader = get_fashion_mnist()
-    agnews_train, agnews_test, agnews_testloader = get_agnews()
-    tabular_train, tabular_test, tabular_testloader = get_tabular()
-    audio_train, audio_test, audio_testloader = get_audio()
+    agnews_train, agnews_test, agnews_testloader = get_agnews(
+        synthetic="AGNews-LSTM" in synthetic_datasets
+    )
+    tabular_train, tabular_test, tabular_testloader = get_tabular(
+        synthetic="Tabular-MLP" in synthetic_datasets
+    )
+    audio_train, audio_test, audio_testloader = get_audio(
+        synthetic="Audio-1DCNN" in synthetic_datasets
+    )
 
     print(f"  CIFAR-10  train={len(cifar_train)}, test={len(cifar_test)}")
     print(f"  Fashion   train={len(fashion_train)}, test={len(fashion_test)}")
@@ -146,6 +157,7 @@ def run_task(
         labels=metadata["labels"],
         indices_by_client=metadata["indices_by_client"],
         num_classes=metadata["num_classes"],
+        is_synthetic=_is_synthetic(trainset),
     )
     label_by_client = _records_by_client(label_records)
 
@@ -231,6 +243,7 @@ def run_task(
                     "task": task_name,
                     "round": round_id,
                     "client_id": client_id,
+                    "is_synthetic": _is_synthetic(trainset),
                     "partition_strategy": partition_config.strategy,
                     "partition_alpha": partition_config.alpha,
                     "partition_seed": partition_config.seed,
@@ -270,6 +283,7 @@ def run_task(
 
     return {
         "task": task_name,
+        "is_synthetic": _is_synthetic(trainset),
         "label_records": label_records,
         "label_payload": label_payload,
         "round_rows": round_rows,
@@ -318,6 +332,13 @@ def parse_args():
     )
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--pin-memory", action="store_true")
+    parser.add_argument(
+        "--synthetic-datasets",
+        nargs="*",
+        default=[],
+        choices=["AGNews-LSTM", "Tabular-MLP", "Audio-1DCNN"],
+        help="Explicitly use synthetic data for named fallback-capable tasks.",
+    )
     return parser.parse_args()
 
 
@@ -342,7 +363,7 @@ def main():
     print("Reusing Project 1 adaptive rank and aggregation implementations.")
     print(f"Output directory: {output_dir}")
 
-    experiments = load_experiments()
+    experiments = load_experiments(set(args.synthetic_datasets))
     if args.tasks:
         selected = set(args.tasks)
         experiments = [item for item in experiments if item[0] in selected]
@@ -390,6 +411,10 @@ def main():
         "num_clients": NUM_CLIENTS,
         "client_batch_sizes": list(CLIENT_BATCH_SIZES),
         "tasks": [result["task"] for result in task_results],
+        "dataset_provenance": {
+            result["task"]: {"is_synthetic": bool(result["is_synthetic"])}
+            for result in task_results
+        },
         "outputs": {
             "label_summary_csv": "label_distribution_summary.csv",
             "label_raw_json": "label_distribution_raw.json",

@@ -1,0 +1,14 @@
+[33mcommit 557bd18ac4046ef2656e1c3bd77d3747e215fa46[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mproject2-domain-aware[m[33m)[m
+Merge: 039aad2 7885349
+Author: gabjaswilliam-del <gabjaswilliam@gmail.com>
+Date:   Tue Aug 25 21:54:28 2026 +0700
+
+    Merge remote-tracking branch 'origin/main' into project2-domain-aware
+    
+    # Conflicts:
+    #       project-2-domain-aware-allocation/experiments/04_allocation_comparison.py
+    #       project-2-domain-aware-allocation/results/experiment_04_allocation_comparison/README.md
+    #       project-2-domain-aware-allocation/results/experiment_04_allocation_comparison/allocation_comparison.json
+    #       project-2-domain-aware-allocation/results/experiment_04_allocation_comparison/allocation_convergence.png
+    #       project-2-domain-aware-allocation/results/experiment_04_allocation_comparison/allocation_per_domain.png
+
