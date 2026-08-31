@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -32,6 +33,10 @@ CV_TOLERANCE = 1e-9
 LAMBDA_BOUND_TOLERANCE = 1e-10
 
 
+class RidgeAlphaBoundaryWarning(UserWarning):
+    """Warns when RMSE selects an alpha on the tested grid boundary."""
+
+
 @dataclass(frozen=True)
 class LinearFit:
     form: str
@@ -49,7 +54,38 @@ def prepare_measurements(df: pd.DataFrame) -> pd.DataFrame:
     """Create stable transformed features used by both lambda forms."""
     out = df.copy()
     if "is_synthetic" not in out:
-        out["is_synthetic"] = False
+        raise ValueError(
+            "Experiment 2 measurements are missing required provenance column "
+            "'is_synthetic'. Refusing to assume unknown data are real."
+        )
+    if out["is_synthetic"].isna().any():
+        raise ValueError(
+            "Experiment 2 measurements contain missing 'is_synthetic' values. "
+            "Synthetic status must be explicit for every row."
+        )
+    normalized_synthetic = out["is_synthetic"].map(
+        {
+            True: True,
+            False: False,
+            "True": True,
+            "False": False,
+            "true": True,
+            "false": False,
+            "1": True,
+            "0": False,
+            1: True,
+            0: False,
+        }
+    )
+    if normalized_synthetic.isna().any():
+        bad_values = sorted({str(value) for value in out.loc[
+            normalized_synthetic.isna(), "is_synthetic"
+        ].unique()})
+        raise ValueError(
+            "Experiment 2 measurements contain unrecognized 'is_synthetic' "
+            f"values: {bad_values}. Expected explicit boolean values."
+        )
+    out["is_synthetic"] = normalized_synthetic.astype(bool)
     out["log_update_l2"] = np.log1p(out["update_l2_distance_to_mean"].clip(lower=0.0))
     out["log_class_imbalance_ratio"] = np.log1p(
         out["class_imbalance_ratio"].clip(lower=0.0)
@@ -175,6 +211,28 @@ def ridge_alpha_grid(
     if not unique or any(alpha <= 0 for alpha in unique):
         raise ValueError("Ridge alphas must be positive.")
     return unique
+
+
+def warn_if_ridge_alpha_on_boundary(
+    selected_alpha: float,
+    ridge_alphas: Iterable[float],
+) -> None:
+    """Emit a warning when the selected alpha lies on the search boundary."""
+    alphas = sorted({float(alpha) for alpha in ridge_alphas})
+    if not alphas:
+        return
+    lower = alphas[0]
+    upper = alphas[-1]
+    if selected_alpha == lower or selected_alpha == upper:
+        side = "maximum" if selected_alpha == upper else "minimum"
+        warnings.warn(
+            "Selected Ridge alpha "
+            f"{selected_alpha:g} is the {side} tested value in {alphas}. "
+            "The optimum may lie outside the tested range. The search grid was "
+            "not expanded automatically.",
+            RidgeAlphaBoundaryWarning,
+            stacklevel=2,
+        )
 
 
 def _clip_renormalize_to_mean_one(
@@ -446,4 +504,5 @@ def leave_one_task_out(df: pd.DataFrame, ridge_alphas: Iterable[float] | None = 
     ridge_rows = cv[cv["form"] == "form_b"].copy()
     mean_rmse = ridge_rows.groupby("ridge_alpha")["rmse"].mean()
     selected_alpha = float(mean_rmse.idxmin())
+    warn_if_ridge_alpha_on_boundary(selected_alpha, ridge_alphas)
     return cv, selected_alpha

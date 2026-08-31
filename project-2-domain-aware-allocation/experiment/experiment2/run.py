@@ -369,6 +369,10 @@ def main():
         "ridge_alpha_grid": ridge_alphas,
         "extended_ridge_alpha_candidates": EXTENDED_RIDGE_ALPHAS,
         "selected_ridge_alpha": selected_alpha,
+        "selected_ridge_alpha_on_boundary": selected_alpha in {
+            min(ridge_alphas),
+            max(ridge_alphas),
+        },
         "alpha_selection_rule": "minimum mean leave-one-task-out RMSE",
         "ranking_metrics_not_used_for_selection": True,
         "evaluation": {

@@ -19,6 +19,7 @@ from experiment2.lambda_calibration import (
     predict_standardized_score,
     ridge_alpha_grid,
     spearman,
+    warn_if_ridge_alpha_on_boundary,
 )
 
 
@@ -288,6 +289,7 @@ def leave_one_task_out_evaluation(
     ridge_rows = cv[cv["form"] == "form_b"].copy()
     mean_rmse = ridge_rows.groupby("ridge_alpha")["rmse"].mean()
     selected_alpha = float(mean_rmse.idxmin())
+    warn_if_ridge_alpha_on_boundary(selected_alpha, alphas)
     return cv, selected_alpha
 
 

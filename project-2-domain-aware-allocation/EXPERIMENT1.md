@@ -152,6 +152,15 @@ One row per task/client:
 - `js_to_global`
 - `zero_class_count`
 
+`class_imbalance_ratio` is finite even when a client has missing classes:
+
+```text
+max_count / min_positive_count * (1 + zero_class_count / num_classes)
+```
+
+This preserves the imbalance signal from absent classes without using an
+EPS-sized denominator.
+
 ### `label_distribution_raw.json`
 
 Machine-readable raw vectors for downstream divergence work:

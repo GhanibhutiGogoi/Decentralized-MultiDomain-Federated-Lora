@@ -111,6 +111,18 @@ can opt into prepared larger candidates with:
 python project-2-domain-aware-allocation/experiment/experiment2/run.py --include-extended-ridge-alphas
 ```
 
+Experiment 2 requires explicit `is_synthetic` provenance in Experiment 1
+measurements. Missing provenance is an error.
+
+Experiment 1 computes class imbalance as:
+
+```text
+max_count / min_positive_count * (1 + zero_class_count / num_classes)
+```
+
+If Ridge alpha selection lands on a tested boundary, Experiment 2 emits a
+warning instead of expanding the search automatically.
+
 ## Legacy CIFAR-100 Scaffold
 
 `framework/datasets/cifar100_domains.py` remains available for domain-split

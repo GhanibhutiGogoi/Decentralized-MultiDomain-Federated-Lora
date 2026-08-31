@@ -86,6 +86,15 @@ The default Ridge alpha grid remains `[0.01, 0.1, 1.0, 10.0, 100.0]`. Larger
 prepared candidates `[300.0, 500.0, 1000.0]` can be enabled in a future rerun
 through the Experiment 2 CLI without another code change.
 
+## Phase 2A.5 Robustness Fixes
+
+- Class imbalance is finite for missing classes:
+  `max_count / min_positive_count * (1 + zero_class_count / num_classes)`.
+- Experiment 2 requires explicit `is_synthetic` provenance in measurements and
+  refuses to assume missing provenance means real data.
+- Ridge alpha selection emits a boundary warning when RMSE selects the minimum
+  or maximum tested alpha; the grid is not expanded automatically.
+
 ## Remaining Work After Mathematical Review
 
 After Project 1 mathematics are finalized, rerun Experiment 1 exactly once with

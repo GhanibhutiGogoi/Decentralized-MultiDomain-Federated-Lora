@@ -20,6 +20,10 @@ The dataset manifest is required so Experiment 2 can preserve dataset
 provenance from Experiment 1. Synthetic source measurements are rejected by
 default.
 
+The `is_synthetic` column in Experiment 1 measurements is required. Experiment
+2 raises an error if the column is missing, contains nulls, or contains
+unrecognized values.
+
 ## Evaluation Pipeline
 
 Reusable evaluation code lives in:
@@ -68,6 +72,22 @@ python project-2-domain-aware-allocation/experiment/experiment2/run.py --ridge-a
 ```
 
 The alpha selection rule remains minimum mean leave-one-task-out RMSE.
+
+If the selected alpha equals the minimum or maximum tested value, Experiment 2
+emits a `RidgeAlphaBoundaryWarning`. The warning states that the optimum may lie
+outside the tested range. The code does not automatically expand the search.
+
+## Class Imbalance Input
+
+Experiment 2 consumes `class_imbalance_ratio` from Experiment 1 and applies the
+existing `log1p` feature transform. Experiment 1 now computes that ratio as:
+
+```text
+max_count / min_positive_count * (1 + zero_class_count / num_classes)
+```
+
+This avoids EPS-driven extreme values while preserving the fact that missing
+classes indicate stronger imbalance.
 
 ## Future Outputs
 

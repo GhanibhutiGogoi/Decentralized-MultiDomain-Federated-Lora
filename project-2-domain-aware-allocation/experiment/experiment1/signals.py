@@ -25,17 +25,24 @@ def entropy(probs: np.ndarray) -> float:
 
 
 def class_imbalance_ratio(counts: np.ndarray) -> float:
-    """Return max class count divided by min class count over all classes.
+    """Return a finite imbalance ratio that accounts for absent classes.
 
-    The input is the complete class-count vector for a client. The ratio is
-    max(counts) / max(min(counts), EPS), so zero-count classes contribute
-    through the EPS denominator floor. Empty clients return 0.0 because no
-    empirical class distribution exists.
+    The base ratio is max(counts) / min(counts[counts > 0]). Missing classes
+    increase the score through a finite multiplier:
+
+    ``1 + zero_class_count / num_classes``.
+
+    This preserves the signal that absent classes imply stronger imbalance
+    while avoiding EPS-driven values disconnected from the observed data.
+    Empty clients return 0.0 because no empirical distribution exists.
     """
     counts = np.asarray(counts, dtype=float)
     if counts.size == 0 or counts.sum() <= 0:
         return 0.0
-    return float(counts.max() / max(float(counts.min()), EPS))
+    positive = counts[counts > 0]
+    base_ratio = float(counts.max() / positive.min())
+    missing_fraction = float(np.sum(counts == 0) / counts.size)
+    return base_ratio * (1.0 + missing_fraction)
 
 
 def kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
