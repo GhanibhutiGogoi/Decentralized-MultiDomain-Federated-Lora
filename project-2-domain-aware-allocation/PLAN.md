@@ -32,6 +32,16 @@ validation, partitioning, manifest creation, and reproducibility metadata.
 Experiment 2 consumes Experiment 1 outputs and now requires Experiment 1's
 dataset manifest before calibration.
 
+Experiment 2 evaluation is organized as reusable infrastructure:
+
+- `experiment/experiment2/evaluation.py`: regression metrics, ranking metrics,
+  and ranking permutation tests.
+- `experiment/experiment2/figures.py`: automatic SVG figure generation for
+  regression performance, ranking performance, alpha comparison, and form
+  comparison.
+- `experiment/experiment2/reporting.py`: neutral report generation from output
+  tables.
+
 ## Dataset Policy
 
 - Real datasets are the default.
@@ -54,6 +64,27 @@ Experiment runners should record:
 - output file inventory
 
 Random seeds should be applied through `framework/utils/reproducibility.py`.
+
+## Evaluation Policy
+
+Experiment 2 reports both regression and ranking metrics:
+
+- RMSE
+- MAE
+- R squared
+- Pearson correlation
+- Spearman rank correlation
+- pairwise ranking accuracy
+- Kendall tau
+- permutation p-value for positive Spearman association
+
+These metrics are evaluation outputs only. They do not select Form A or Form B
+and they do not change the existing Ridge-alpha selection rule, which remains
+minimum mean leave-one-task-out RMSE.
+
+The default Ridge alpha grid remains `[0.01, 0.1, 1.0, 10.0, 100.0]`. Larger
+prepared candidates `[300.0, 500.0, 1000.0]` can be enabled in a future rerun
+through the Experiment 2 CLI without another code change.
 
 ## Remaining Work After Mathematical Review
 

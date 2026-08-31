@@ -14,6 +14,8 @@ and aggregation code are not redefined here.
 - Existing outputs under `outputs/` are historical artifacts and should not be
   regenerated until the Project 1 mathematical review is complete.
 - Dataset loading is centralized in `framework/datasets/factory.py`.
+- Experiment 2 evaluation infrastructure is prepared in
+  `experiment/experiment2/evaluation.py`, `figures.py`, and `reporting.py`.
 
 ## Structure
 
@@ -100,5 +102,22 @@ Experiment 2:
 python project-2-domain-aware-allocation/experiment/experiment2/run.py
 ```
 
+Experiment 2 automatically computes regression metrics, ranking metrics, and
+ranking permutation tests during future reruns. The ranking metrics are reported
+only; Form A/Form B selection is not changed by them.
+
+Prepared optional Ridge-alpha controls for a future rerun:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment2/run.py --include-extended-ridge-alphas
+```
+
+or:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment2/run.py --ridge-alphas 0.01 0.1 1 10 100 300 500 1000
+```
+
 Do not rerun experiments during the current infrastructure hardening phase.
-See `EXPERIMENT1.md` for Experiment 1 details.
+See `EXPERIMENT1.md` for Experiment 1 details and `EXPERIMENT2.md` for
+Experiment 2 evaluation infrastructure.

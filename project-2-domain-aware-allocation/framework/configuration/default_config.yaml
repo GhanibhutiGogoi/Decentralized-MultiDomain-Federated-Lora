@@ -55,6 +55,14 @@ allocation:
   max_rank: 64
   base_rank: 16
 
+evaluation:
+  ridge_alphas: [0.01, 0.1, 1.0, 10.0, 100.0]
+  extended_ridge_alphas: [300.0, 500.0, 1000.0]
+  alpha_selection_rule: minimum mean leave-one-task-out RMSE
+  ranking_metrics_not_used_for_selection: true
+  permutation_seed: 42
+  permutation_count: 1000
+
 training:
   local_epochs: 5
   learning_rate: 0.001

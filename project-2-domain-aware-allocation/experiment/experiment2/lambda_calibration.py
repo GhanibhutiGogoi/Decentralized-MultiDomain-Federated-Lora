@@ -23,6 +23,7 @@ FORM_B_FEATURES = [
     "log_class_imbalance_ratio",
 ]
 RIDGE_ALPHAS = [0.01, 0.1, 1.0, 10.0, 100.0]
+EXTENDED_RIDGE_ALPHAS = [300.0, 500.0, 1000.0]
 LAMBDA_MIN = 0.5
 LAMBDA_MAX = 1.5
 MAX_LAMBDA_CV = 0.20
@@ -154,6 +155,26 @@ def predict_standardized_score(df: pd.DataFrame, fit: LinearFit) -> np.ndarray:
 
 def predict_delta_accuracy(df: pd.DataFrame, fit: LinearFit) -> np.ndarray:
     return fit.target_mean + fit.target_std * predict_standardized_score(df, fit)
+
+
+def ridge_alpha_grid(
+    *,
+    include_extended: bool = False,
+    custom_alphas: Iterable[float] | None = None,
+) -> list[float]:
+    """Return the Ridge alpha grid without changing the default search."""
+    if custom_alphas is not None:
+        alphas = [float(alpha) for alpha in custom_alphas]
+        if include_extended:
+            alphas.extend(EXTENDED_RIDGE_ALPHAS)
+    else:
+        alphas = list(RIDGE_ALPHAS)
+        if include_extended:
+            alphas.extend(EXTENDED_RIDGE_ALPHAS)
+    unique = sorted(set(alphas))
+    if not unique or any(alpha <= 0 for alpha in unique):
+        raise ValueError("Ridge alphas must be positive.")
+    return unique
 
 
 def _clip_renormalize_to_mean_one(
@@ -378,8 +399,9 @@ def _model_metrics(y_true, y_pred):
     return rmse, mae, r2
 
 
-def leave_one_task_out(df: pd.DataFrame):
+def leave_one_task_out(df: pd.DataFrame, ridge_alphas: Iterable[float] | None = None):
     rows = []
+    ridge_alphas = ridge_alpha_grid(custom_alphas=ridge_alphas)
     for held_out in sorted(df["task"].unique()):
         train = df[df["task"] != held_out].reset_index(drop=True)
         test = df[df["task"] == held_out].reset_index(drop=True)
@@ -402,7 +424,7 @@ def leave_one_task_out(df: pd.DataFrame):
             }
         )
 
-        for alpha in RIDGE_ALPHAS:
+        for alpha in ridge_alphas:
             fit_b = fit_form_b(train, alpha)
             pred_b = predict_delta_accuracy(test, fit_b)
             rmse, mae, r2 = _model_metrics(test[TARGET], pred_b)

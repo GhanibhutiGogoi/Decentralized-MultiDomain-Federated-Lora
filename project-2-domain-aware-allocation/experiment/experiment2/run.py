@@ -19,23 +19,30 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from experiment2.lambda_calibration import (  # noqa: E402
+    EXTENDED_RIDGE_ALPHAS,
     FORM_A_FEATURES,
     FORM_B_FEATURES,
     GROUP_COLS,
-    TARGET,
+    RIDGE_ALPHAS,
     attach_lambda_values,
     calibrate_lambda_scales,
     coefficient_table,
     fit_form_a,
     fit_form_b,
-    leave_one_task_out,
-    pearson,
     prepare_measurements,
     predict_standardized_score,
-    spearman,
+    ridge_alpha_grid,
     validation_tables,
 )
+from experiment2.evaluation import (  # noqa: E402
+    EvaluationConfig,
+    alpha_evaluation_table,
+    evaluation_table,
+    leave_one_task_out_evaluation,
+)
+from experiment2.figures import save_evaluation_figures  # noqa: E402
 from experiment2.lambda_aggregation import normalized_aggregation_weights  # noqa: E402
+from experiment2.reporting import build_evaluation_report  # noqa: E402
 from framework.utils import environment_manifest  # noqa: E402
 
 
@@ -211,149 +218,37 @@ def save_figures(lambda_values: pd.DataFrame, figure_dir: Path):
         )
 
 
-def _markdown_table(df: pd.DataFrame, max_rows: int | None = None) -> str:
-    """Render a compact Markdown table without optional tabulate dependency."""
-    if max_rows is not None:
-        df = df.head(max_rows)
-    if df.empty:
-        return "_No rows._"
-    display = df.copy()
-    for column in display.columns:
-        if pd.api.types.is_float_dtype(display[column]):
-            display[column] = display[column].map(lambda value: f"{value:.6g}")
-        else:
-            display[column] = display[column].astype(str)
-    headers = list(display.columns)
-    rows = display.values.tolist()
-    lines = [
-        "| " + " | ".join(headers) + " |",
-        "| " + " | ".join(["---"] * len(headers)) + " |",
-    ]
-    for row in rows:
-        lines.append("| " + " | ".join(str(value) for value in row) + " |")
-    return "\n".join(lines)
-
-
-def build_comparison_report(
-    output_dir: Path,
-    correlations: pd.DataFrame,
-    regressions: pd.DataFrame,
-    coefficients: pd.DataFrame,
-    validation: pd.DataFrame,
-    orthogonality: pd.DataFrame,
-    cv: pd.DataFrame,
-    selected_alpha: float,
-    lambda_calibrations: dict[str, dict[str, float]],
-):
-    corr_md = _markdown_table(correlations)
-    reg_md = _markdown_table(regressions)
-    coef_md = _markdown_table(coefficients)
-    val_md = _markdown_table(validation[validation["task"] == "ALL"])
-    orth_md = _markdown_table(orthogonality[orthogonality["task"] == "ALL"])
-    cv_summary = (
-        cv.groupby(["form", "ridge_alpha"], dropna=False)[["rmse", "mae", "spearman"]]
-        .mean()
-        .reset_index()
-    )
-    cv_md = _markdown_table(cv_summary)
-
-    calibration_md = _markdown_table(pd.DataFrame(
-        [
-            {"form": form, **values}
-            for form, values in sorted(lambda_calibrations.items())
-        ]
-    ))
-
-    report = f"""# Experiment 2 Comparison Report
-
-## Injection Point
-
-Project 1 aggregation computes normalized client weights from `samples * q`.
-Experiment 2 keeps that path unchanged when lambda is disabled. The optional
-plug-in in `experiment/experiment2/lambda_aggregation.py` passes `q * lambda`
-to the existing aggregator, producing `samples * q * lambda` without replacing
-the aggregation algorithm.
-
-The quality score q is computed as `1 / (1 + avg_train_loss)`. Because q already
-contains local loss information, Experiment 2 does not include local loss or q
-as lambda features.
-
-## Experiment 1 Evidence
-
-{corr_md}
-
-Controlled regressions from Experiment 1:
-
-{reg_md}
-
-The evidence supports a multi-factor lambda: update L2 is the strongest positive
-monotonic signal, JS divergence is a weak negative domain-distribution penalty,
-and update cosine is weak enough to be shrinkage-controlled rather than dominant.
-
-## Form A
-
-Interpretable formula fitted with standardized OLS:
-
-`score_A = beta_l2 * z(log(1 + update_l2_distance_to_mean)) + beta_js * z(js_to_global) + intercept`
-
-`lambda_A` is obtained by exponentiating the centered score inside each
-`(task, round)` aggregation context, then iteratively clipping to `[0.5, 1.5]`
-and renormalizing until both the documented bounds and mean-one invariant hold.
-
-## Form B
-
-Data-driven but interpretable ridge formula:
-
-`score_B = X_standardized * beta_ridge`
-
-Features: `{", ".join(FORM_B_FEATURES)}`.
-
-Selected ridge alpha from leave-one-task-out RMSE: `{selected_alpha}`.
-
-## Normalization
-
-For each candidate score s:
-
-`lambda_i = exp(scale * (s_i - mean_context(s)))`
-
-then iteratively clip to `[0.5, 1.5]` and renormalize so each `(task, round)`
-has mean lambda equal to one while every final lambda remains inside the
-documented bounds. Gamma is calibrated independently for each form so that the
-form's achieved lambda coefficient of variation is no more than half of q's
-coefficient of variation, capped at 0.20.
-
-{calibration_md}
-
-## Coefficients
-
-{coef_md}
-
-## Validation
-
-{val_md}
-
-## Orthogonality Against q
-
-{orth_md}
-
-## Leave-One-Task-Out Summary
-
-{cv_md}
-
-## Recommendation For Experiment 3
-
-Use Form B as the primary candidate because it retains interpretability while
-shrinking weak signals. Use Form A as the ablation baseline because it directly
-tests the Experiment 1 conclusion that update L2 reward plus JS penalty is the
-minimal sensible domain-aware construction.
-"""
-    (output_dir / "comparison_report.md").write_text(report, encoding="utf-8")
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exp1-dir", type=Path, default=EXP1_DIR)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument(
+        "--ridge-alphas",
+        nargs="*",
+        type=float,
+        default=None,
+        help=(
+            "Optional positive Ridge alpha grid. Defaults to the existing "
+            f"grid: {RIDGE_ALPHAS}."
+        ),
+    )
+    parser.add_argument(
+        "--include-extended-ridge-alphas",
+        action="store_true",
+        help=f"Append prepared larger alpha candidates: {EXTENDED_RIDGE_ALPHAS}.",
+    )
+    parser.add_argument(
+        "--ranking-permutations",
+        type=int,
+        default=1000,
+        help="Number of permutations for ranking significance tests.",
+    )
+    parser.add_argument(
+        "--ranking-permutation-seed",
+        type=int,
+        default=42,
+        help="Seed for ranking permutation tests.",
+    )
     parser.add_argument(
         "--allow-synthetic-source",
         action="store_true",
@@ -388,7 +283,19 @@ def main():
     _read_required_csv(args.exp1_dir / "label_distribution_summary.csv")
 
     df = prepare_measurements(measurements)
-    cv, selected_alpha = leave_one_task_out(df)
+    ridge_alphas = ridge_alpha_grid(
+        include_extended=args.include_extended_ridge_alphas,
+        custom_alphas=args.ridge_alphas,
+    )
+    evaluation_config = EvaluationConfig(
+        permutation_seed=args.ranking_permutation_seed,
+        permutations=args.ranking_permutations,
+    )
+    cv, selected_alpha = leave_one_task_out_evaluation(
+        df,
+        ridge_alphas=ridge_alphas,
+        config=evaluation_config,
+    )
     fit_a = fit_form_a(df)
     fit_b = fit_form_b(df, selected_alpha)
     scores = {
@@ -399,15 +306,36 @@ def main():
     lambda_values = attach_lambda_values(df, [fit_a, fit_b], lambda_calibrations)
     coefficients = coefficient_table([fit_a, fit_b])
     validation, orthogonality = validation_tables(lambda_values)
+    evaluation_metrics = evaluation_table(lambda_values, config=evaluation_config)
+    alpha_metrics = alpha_evaluation_table(cv, config=evaluation_config)
+    ranking_significance = evaluation_metrics[
+        ["form", "scope", "scope_value", "n", "spearman", "kendall_tau", "permutation_p_value"]
+    ].copy()
 
     lambda_values.to_csv(args.output_dir / "lambda_values.csv", index=False)
     validation.to_csv(args.output_dir / "lambda_validation.csv", index=False)
     orthogonality.to_csv(args.output_dir / "orthogonality_report.csv", index=False)
     cv.to_csv(args.output_dir / "cross_validation.csv", index=False)
     coefficients.to_csv(args.output_dir / "fitted_coefficients.csv", index=False)
+    evaluation_metrics.to_csv(args.output_dir / "evaluation_metrics.csv", index=False)
+    alpha_metrics.to_csv(args.output_dir / "alpha_evaluation.csv", index=False)
+    ranking_significance.to_csv(args.output_dir / "ranking_significance.csv", index=False)
 
     save_figures(lambda_values, figure_dir)
-    build_comparison_report(
+    figure_files = [
+        "figures/lambda_distribution.svg",
+        "figures/lambda_vs_contribution.svg",
+        "figures/lambda_vs_quality.svg",
+        "figures/form_a_vs_form_b.svg",
+    ]
+    figure_files.extend(
+        save_evaluation_figures(
+            figure_dir,
+            evaluation_metrics=evaluation_metrics,
+            alpha_metrics=alpha_metrics,
+        )
+    )
+    build_evaluation_report(
         output_dir=args.output_dir,
         correlations=correlations,
         regressions=regressions,
@@ -415,8 +343,15 @@ def main():
         validation=validation,
         orthogonality=orthogonality,
         cv=cv,
+        evaluation_metrics=evaluation_metrics,
+        alpha_metrics=alpha_metrics,
         selected_alpha=selected_alpha,
         lambda_calibrations=lambda_calibrations,
+        evaluation_config={
+            "permutations": args.ranking_permutations,
+            "permutation_seed": args.ranking_permutation_seed,
+        },
+        figure_files=figure_files,
     )
 
     manifest = {
@@ -431,7 +366,22 @@ def main():
         "environment": environment_manifest(),
         "form_a_features": FORM_A_FEATURES,
         "form_b_features": FORM_B_FEATURES,
+        "ridge_alpha_grid": ridge_alphas,
+        "extended_ridge_alpha_candidates": EXTENDED_RIDGE_ALPHAS,
         "selected_ridge_alpha": selected_alpha,
+        "alpha_selection_rule": "minimum mean leave-one-task-out RMSE",
+        "ranking_metrics_not_used_for_selection": True,
+        "evaluation": {
+            "regression_metrics": ["rmse", "mae", "r_squared", "pearson"],
+            "ranking_metrics": [
+                "spearman",
+                "pairwise_ranking_accuracy",
+                "kendall_tau",
+            ],
+            "statistical_tests": ["spearman_permutation_p_value"],
+            "permutations": args.ranking_permutations,
+            "permutation_seed": args.ranking_permutation_seed,
+        },
         "lambda_calibration": lambda_calibrations,
         "normalization": {
             "context": GROUP_COLS,
@@ -447,6 +397,9 @@ def main():
             "orthogonality_report.csv",
             "cross_validation.csv",
             "fitted_coefficients.csv",
+            "evaluation_metrics.csv",
+            "alpha_evaluation.csv",
+            "ranking_significance.csv",
             "comparison_report.md",
             "figures/",
         ],
