@@ -45,17 +45,21 @@ from Federated.utilities import evaluate  # noqa: E402
 from rank_allocation.LoRa_rank_projection import load_global_state  # noqa: E402
 from rank_allocation.rank_selector import estimate_optimal_rank  # noqa: E402
 from Source.Models import AudioCNN, CNN, LSTMModel, MLP, TabularMLP  # noqa: E402
-from Source.datasets.audio import get_audio  # noqa: E402
-from Source.datasets.image import get_cifar10, get_fashion_mnist  # noqa: E402
-from Source.datasets.tabular import get_tabular  # noqa: E402
-from Source.datasets.text import AGNewsDataset, get_agnews  # noqa: E402
 
 from experiment1.analysis import run_statistical_analysis  # noqa: E402
 from experiment1.contribution import (  # noqa: E402
     evaluate_leave_one_client_out,
     flatten_update_vector,
 )
-from experiment1.partitioning import PartitionConfig, make_client_loaders  # noqa: E402
+from framework.datasets import (  # noqa: E402
+    DEFAULT_DATA_ROOT,
+    DatasetConfig,
+    DatasetFactory,
+    write_dataset_manifest,
+)
+from framework.datasets.text import AGNewsDataset  # noqa: E402
+from framework.partitioning import PartitionConfig, make_client_loaders  # noqa: E402
+from framework.utils import environment_manifest, set_reproducibility_seed  # noqa: E402
 from experiment1.signals import (  # noqa: E402
     label_distribution_records,
     save_label_distribution_outputs,
@@ -73,57 +77,97 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 OUTPUT_ROOT = PROJECT2_ROOT / "outputs"
 EXPERIMENT_NAME = "exp1"
 OUTPUT_DIR = OUTPUT_ROOT / EXPERIMENT_NAME
+TASK_ORDER = [
+    "CIFAR-CNN",
+    "Fashion-MLP",
+    "AGNews-LSTM",
+    "Tabular-MLP",
+    "Audio-1DCNN",
+]
 
 
 def _is_synthetic(dataset) -> bool:
     return bool(getattr(dataset, "is_synthetic", False))
 
 
-def load_experiments(synthetic_datasets: set[str] | None = None):
+def load_experiments(
+    task_names: list[str],
+    data_root: Path,
+    download_datasets: bool,
+    num_workers: int,
+    pin_memory: bool,
+    synthetic_datasets: set[str] | None = None,
+):
     """Load the exact five Project 1 benchmark tasks."""
     synthetic_datasets = synthetic_datasets or set()
-    print("\n=== Loading Project 1 Benchmark Suite ===")
-    cifar_train, cifar_test, cifar_testloader = get_cifar10()
-    fashion_train, fashion_test, fashion_testloader = get_fashion_mnist()
-    agnews_train, agnews_test, agnews_testloader = get_agnews(
-        synthetic="AGNews-LSTM" in synthetic_datasets
-    )
-    tabular_train, tabular_test, tabular_testloader = get_tabular(
-        synthetic="Tabular-MLP" in synthetic_datasets
-    )
-    audio_train, audio_test, audio_testloader = get_audio(
-        synthetic="Audio-1DCNN" in synthetic_datasets
-    )
+    unknown = set(task_names) - set(TASK_ORDER)
+    if unknown:
+        raise ValueError(f"Unknown task name(s): {sorted(unknown)}")
 
-    print(f"  CIFAR-10  train={len(cifar_train)}, test={len(cifar_test)}")
-    print(f"  Fashion   train={len(fashion_train)}, test={len(fashion_test)}")
-    print(f"  AG News   train={len(agnews_train)}, test={len(agnews_test)}")
-    print(f"  Tabular   train={len(tabular_train)}, test={len(tabular_test)}")
-    print(f"  Audio     train={len(audio_train)}, test={len(audio_test)}")
+    print("\n=== Loading Project 1 Benchmark Suite ===")
+    factory = DatasetFactory(
+        DatasetConfig(
+            data_root=data_root,
+            download=download_datasets,
+            synthetic=False,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+        )
+    )
+    bundles = factory.load_tasks(task_names, synthetic_tasks=synthetic_datasets)
+
+    for task_name in task_names:
+        metadata = bundles[task_name].metadata
+        print(
+            f"  {task_name:12s} train={metadata.train_sample_count}, "
+            f"test={metadata.test_sample_count}, classes={metadata.class_count}, "
+            f"synthetic={metadata.synthetic}, cache={metadata.cache_status}, "
+            f"download={metadata.download_status}"
+        )
 
     vocab = AGNewsDataset.VOCAB_SIZE
-    return [
-        ("CIFAR-CNN", lambda r: CNN(3, 10, r), cifar_train, cifar_testloader),
-        ("Fashion-MLP", lambda r: MLP(28 * 28, 10, r), fashion_train, fashion_testloader),
-        (
-            "AGNews-LSTM",
-            lambda r: LSTMModel(vocab, 64, 128, 2, 4, r),
-            agnews_train,
-            agnews_testloader,
-        ),
-        (
-            "Tabular-MLP",
-            lambda r: TabularMLP(tabular_train.in_dim, tabular_train.num_classes, r),
-            tabular_train,
-            tabular_testloader,
-        ),
-        (
-            "Audio-1DCNN",
-            lambda r: AudioCNN(1, audio_train.NUM_CLASSES, r),
-            audio_train,
-            audio_testloader,
-        ),
-    ]
+    experiments = []
+    for task_name in task_names:
+        bundle = bundles[task_name]
+        if task_name == "CIFAR-CNN":
+            item = (
+                task_name,
+                lambda r, b=bundle: CNN(3, b.metadata.class_count, r),
+                bundle.train,
+                bundle.test_loader,
+            )
+        elif task_name == "Fashion-MLP":
+            item = (
+                task_name,
+                lambda r, b=bundle: MLP(28 * 28, b.metadata.class_count, r),
+                bundle.train,
+                bundle.test_loader,
+            )
+        elif task_name == "AGNews-LSTM":
+            item = (
+                task_name,
+                lambda r: LSTMModel(vocab, 64, 128, 2, 4, r),
+                bundle.train,
+                bundle.test_loader,
+            )
+        elif task_name == "Tabular-MLP":
+            item = (
+                task_name,
+                lambda r, b=bundle: TabularMLP(b.train.in_dim, b.train.num_classes, r),
+                bundle.train,
+                bundle.test_loader,
+            )
+        elif task_name == "Audio-1DCNN":
+            item = (
+                task_name,
+                lambda r, b=bundle: AudioCNN(1, b.train.NUM_CLASSES, r),
+                bundle.train,
+                bundle.test_loader,
+            )
+        else:
+            raise ValueError(f"Unknown task name: {task_name}")
+        experiments.append(item)
+    return experiments, bundles
 
 
 def _records_by_client(records):
@@ -330,6 +374,17 @@ def parse_args():
         default=OUTPUT_DIR,
         help="Directory for Experiment 1 outputs.",
     )
+    parser.add_argument(
+        "--data-root",
+        type=Path,
+        default=DEFAULT_DATA_ROOT,
+        help="Central dataset cache root.",
+    )
+    parser.add_argument(
+        "--download-datasets",
+        action="store_true",
+        help="Explicitly download missing real datasets instead of failing.",
+    )
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--pin-memory", action="store_true")
     parser.add_argument(
@@ -345,8 +400,7 @@ def parse_args():
 def main():
     args = parse_args()
     os.chdir(PROJECT2_ROOT)
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+    set_reproducibility_seed(args.seed)
 
     output_dir = args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -363,13 +417,20 @@ def main():
     print("Reusing Project 1 adaptive rank and aggregation implementations.")
     print(f"Output directory: {output_dir}")
 
-    experiments = load_experiments(set(args.synthetic_datasets))
-    if args.tasks:
-        selected = set(args.tasks)
-        experiments = [item for item in experiments if item[0] in selected]
-        missing = selected - {item[0] for item in experiments}
-        if missing:
-            raise ValueError(f"Unknown task name(s): {sorted(missing)}")
+    task_names = args.tasks if args.tasks else TASK_ORDER
+    experiments, dataset_bundles = load_experiments(
+        task_names=task_names,
+        data_root=args.data_root,
+        download_datasets=args.download_datasets,
+        num_workers=args.num_workers,
+        pin_memory=args.pin_memory,
+        synthetic_datasets=set(args.synthetic_datasets),
+    )
+    dataset_manifest = write_dataset_manifest(
+        output_dir=output_dir,
+        experiment_name="Experiment 1",
+        bundles=dataset_bundles,
+    )
 
     task_results = []
     label_records_all = []
@@ -411,10 +472,13 @@ def main():
         "num_clients": NUM_CLIENTS,
         "client_batch_sizes": list(CLIENT_BATCH_SIZES),
         "tasks": [result["task"] for result in task_results],
+        "dataset_manifest_file": "dataset_manifest.json",
+        "dataset_manifest": dataset_manifest,
         "dataset_provenance": {
-            result["task"]: {"is_synthetic": bool(result["is_synthetic"])}
+            result["task"]: dataset_manifest["datasets"][result["task"]]
             for result in task_results
         },
+        "environment": environment_manifest(),
         "outputs": {
             "label_summary_csv": "label_distribution_summary.csv",
             "label_raw_json": "label_distribution_raw.json",

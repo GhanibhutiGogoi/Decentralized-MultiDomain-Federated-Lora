@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+
+PROJECT2_ROOT = Path(__file__).resolve().parents[2]
+os.environ.setdefault("MPLCONFIGDIR", str(PROJECT2_ROOT / ".cache" / "matplotlib"))
 
 import matplotlib
 

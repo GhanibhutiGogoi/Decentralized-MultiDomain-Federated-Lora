@@ -1,11 +1,15 @@
-"""
-Visualization utilities for domain-aware LoRA allocation experiments.
+"""Visualization utilities for domain-aware LoRA allocation experiments.
 
 Includes standard FL plots (convergence, per-domain accuracy) plus
 Project 2-specific plots (complexity analysis, oracle heatmap, allocation comparison).
 """
 
 import os
+from pathlib import Path
+
+PROJECT2_ROOT = Path(__file__).resolve().parents[2]
+os.environ.setdefault("MPLCONFIGDIR", str(PROJECT2_ROOT / ".cache" / "matplotlib"))
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns

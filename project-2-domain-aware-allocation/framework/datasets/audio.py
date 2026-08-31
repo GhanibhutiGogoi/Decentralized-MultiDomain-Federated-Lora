@@ -1,8 +1,13 @@
-# audio dataset (Speech Commands / explicit synthetic mode)
+"""Audio dataset adapters used by the centralized dataset factory."""
+
+from pathlib import Path
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
+
+
+DEFAULT_DATA_ROOT = Path(__file__).resolve().parents[2] / "experiment" / "data"
 
 
 class AudioDataset(Dataset):
@@ -13,9 +18,18 @@ class AudioDataset(Dataset):
     SAMPLE_RATE = 16000
     NUM_CLASSES = 35
 
-    def __init__(self, split="train", synthetic=False):
+    def __init__(
+        self,
+        split="train",
+        data_root=None,
+        synthetic=False,
+        download=False,
+        label2idx=None,
+    ):
         super().__init__()
         self.is_synthetic = bool(synthetic)
+        data_root = str(data_root or DEFAULT_DATA_ROOT)
+        self.data_root = data_root
         self._loaded = False
         if self.is_synthetic:
             rng = np.random.RandomState(3 if split == "train" else 9)
@@ -32,10 +46,11 @@ class AudioDataset(Dataset):
             import torchaudio
             subset = "training" if split == "train" else "validation"
             ds = torchaudio.datasets.SPEECHCOMMANDS(
-                "./data", download=True, subset=subset)
-            all_labels = sorted(
-                {ds[i][2] for i in range(min(500, len(ds)))})
-            self.label2idx = {l: i for i, l in enumerate(all_labels)}
+                data_root, download=download, subset=subset)
+            if label2idx is None:
+                all_labels = sorted({ds[i][2] for i in range(len(ds))})
+                label2idx = {label: i for i, label in enumerate(all_labels)}
+            self.label2idx = dict(label2idx)
             self.NUM_CLASSES = len(self.label2idx)
             self.data = ds
             self._loaded = True
@@ -43,7 +58,8 @@ class AudioDataset(Dataset):
             raise RuntimeError(
                 "Unable to load real SpeechCommands audio data. Install a "
                 "working torchaudio package and ensure the dataset is "
-                "available, or call get_audio(synthetic=True) explicitly."
+                f"available under {data_root}, rerun with dataset downloads "
+                "enabled, or call get_audio(synthetic=True) explicitly."
             ) from e
 
     def __len__(self):
@@ -62,9 +78,28 @@ class AudioDataset(Dataset):
         return self.synth[i]
 
 
-def get_audio(batch_size=32, synthetic=False):
+def get_audio(
+    batch_size=32,
+    data_root=None,
+    synthetic=False,
+    download=False,
+    num_workers=0,
+    pin_memory=False,
+):
     """Returns (train_dataset, test_dataset, test_loader) for audio data."""
-    train = AudioDataset("train", synthetic=synthetic)
-    test = AudioDataset("test", synthetic=synthetic)
-    test_loader = DataLoader(test, batch_size=batch_size)
+    train = AudioDataset(
+        "train", data_root=data_root, synthetic=synthetic, download=download)
+    test = AudioDataset(
+        "test",
+        data_root=data_root,
+        synthetic=synthetic,
+        download=download,
+        label2idx=getattr(train, "label2idx", None),
+    )
+    test_loader = DataLoader(
+        test,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+    )
     return train, test, test_loader

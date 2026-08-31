@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import torch
 from torch.utils.data import DataLoader, Subset
 
 from framework.partitioning.dirichlet import dirichlet_label_partition_indices
@@ -63,15 +64,18 @@ def make_client_subsets(dataset, num_clients: int, config: PartitionConfig):
 def make_client_loaders(dataset, batch_sizes, config: PartitionConfig):
     """Create DataLoaders while keeping hardware batch sizes independent."""
     subsets, metadata = make_client_subsets(dataset, len(batch_sizes), config)
-    loaders = [
-        DataLoader(
-            subset,
-            batch_size=batch_sizes[client_id],
-            shuffle=True,
-            num_workers=config.num_workers,
-            pin_memory=config.pin_memory,
+    loaders = []
+    for client_id, subset in enumerate(subsets):
+        generator = torch.Generator().manual_seed(config.seed + client_id)
+        loaders.append(
+            DataLoader(
+                subset,
+                batch_size=batch_sizes[client_id],
+                shuffle=True,
+                num_workers=config.num_workers,
+                pin_memory=config.pin_memory,
+                generator=generator,
+            )
         )
-        for client_id, subset in enumerate(subsets)
-    ]
     return loaders, metadata
 

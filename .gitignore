@@ -38,6 +38,7 @@ ENV/
 **/logs/
 **/checkpoints/
 **/wandb/
+**/.cache/
 tensorboard/
 events.out.tfevents.*
 
@@ -46,6 +47,8 @@ events.out.tfevents.*
 **/data/cifar-100-python.tar.gz
 **/data/cifar-10-batches-py/
 **/data/cifar-10-python.tar.gz
+**/data/SpeechCommands/
+**/data/datasets/AG_NEWS/
 **/data/raw/
 **/data/processed/
 Adaptive_Lora/data/

@@ -10,7 +10,9 @@ Adapted from Project 3 with additional helpers for complexity analysis.
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Subset
-from torchvision import datasets, transforms
+from torchvision import transforms
+
+from framework.datasets.factory import DEFAULT_DATA_ROOT, DatasetConfig, DatasetFactory
 
 # CIFAR-100 has 20 superclasses, each with 5 fine classes (100 total).
 # We group superclasses into 5 domains of 4 superclasses each (20 classes per domain).
@@ -127,12 +129,13 @@ def partition_domain_data_dirichlet(indices, targets, n_clients, alpha=0.5, seed
 
 
 def create_federated_datasets(
-    data_dir="./data",
+    data_dir=DEFAULT_DATA_ROOT,
     n_domains=5,
     clients_per_domain=3,
     dirichlet_alpha=0.5,
     batch_size=64,
     seed=42,
+    download=False,
 ):
     """
     Create federated dataset splits for CIFAR-100.
@@ -150,14 +153,21 @@ def create_federated_datasets(
         train_dataset: full training dataset
         test_dataset: full test dataset
     """
-    train_dataset = datasets.CIFAR100(
-        root=data_dir, train=True, download=True,
-        transform=get_transforms(train=True)
-    )
-    test_dataset = datasets.CIFAR100(
-        root=data_dir, train=False, download=True,
-        transform=get_transforms(train=False)
-    )
+    dataset_bundle = DatasetFactory(
+        DatasetConfig(
+            data_root=data_dir,
+            download=download,
+            batch_size=batch_size,
+            loader_kwargs={
+                "train_transform": get_transforms(train=True),
+                "test_transform": get_transforms(train=False),
+            },
+        )
+    ).load("cifar100")
+    train_dataset = dataset_bundle.train
+    test_dataset = dataset_bundle.test
+    train_dataset.dataset_metadata = dataset_bundle.metadata
+    test_dataset.dataset_metadata = dataset_bundle.metadata
 
     train_targets = np.array(train_dataset.targets)
     test_targets = np.array(test_dataset.targets)

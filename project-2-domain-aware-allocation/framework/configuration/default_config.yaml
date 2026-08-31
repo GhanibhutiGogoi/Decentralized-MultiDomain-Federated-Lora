@@ -1,10 +1,34 @@
 data:
-  dataset: cifar100
+  data_dir: ./experiment/data
+  download: false
+  synthetic: false
+  manifest_filename: dataset_manifest.json
+  project1_benchmark_tasks:
+    CIFAR-CNN:
+      dataset: cifar10
+      expected_classes: 10
+      source_library: torchvision.datasets.CIFAR10
+    Fashion-MLP:
+      dataset: fashion_mnist
+      expected_classes: 10
+      source_library: torchvision.datasets.FashionMNIST
+    AGNews-LSTM:
+      dataset: ag_news
+      expected_classes: 4
+      source_library: torchtext.datasets.AG_NEWS
+    Tabular-MLP:
+      dataset: uci_heart_disease
+      expected_classes: 2
+      source_library: UCI processed.cleveland.data
+    Audio-1DCNN:
+      dataset: speech_commands
+      expected_classes: 35
+      source_library: torchaudio.datasets.SPEECHCOMMANDS
+  cifar100_domain_dataset: cifar100
   n_domains: 5
   clients_per_domain: 3
   dirichlet_alpha: 0.5
   batch_size: 64
-  data_dir: ./data
 
 model:
   base: resnet18

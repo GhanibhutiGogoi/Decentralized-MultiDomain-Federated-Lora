@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 PROJECT2_ROOT = Path(__file__).resolve().parents[2]
@@ -35,6 +36,7 @@ from experiment2.lambda_calibration import (  # noqa: E402
     validation_tables,
 )
 from experiment2.lambda_aggregation import normalized_aggregation_weights  # noqa: E402
+from framework.utils import environment_manifest  # noqa: E402
 
 
 EXP1_DIR = PROJECT2_ROOT / "outputs" / "exp1"
@@ -45,6 +47,40 @@ def _read_required_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Required Experiment 1 output is missing: {path}")
     return pd.read_csv(path)
+
+
+def _read_required_json(path: Path) -> dict:
+    if not path.exists():
+        raise FileNotFoundError(f"Required manifest is missing: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _manifest_contains_synthetic(dataset_manifest: dict) -> bool:
+    datasets = dataset_manifest.get("datasets", {})
+    return any(
+        bool(record.get("synthetic", False))
+        for record in datasets.values()
+        if isinstance(record, dict)
+    )
+
+
+def _write_experiment2_dataset_manifest(
+    output_dir: Path,
+    source_manifest_path: Path,
+    source_dataset_manifest: dict,
+) -> dict:
+    manifest = {
+        "experiment": "Experiment 2",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "raw_dataset_loading": "inherited_from_experiment1_measurements",
+        "source_dataset_manifest_file": str(source_manifest_path),
+        "source_dataset_manifest": source_dataset_manifest,
+    }
+    (output_dir / "dataset_manifest.json").write_text(
+        json.dumps(manifest, indent=2),
+        encoding="utf-8",
+    )
+    return manifest
 
 
 def _svg_scatter(path: Path, df: pd.DataFrame, x_col: str, y_col: str, title: str):
@@ -318,6 +354,11 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exp1-dir", type=Path, default=EXP1_DIR)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument(
+        "--allow-synthetic-source",
+        action="store_true",
+        help="Explicitly allow Experiment 1 measurements produced from synthetic data.",
+    )
     return parser.parse_args()
 
 
@@ -328,10 +369,19 @@ def main():
 
     measurements = _read_required_csv(args.exp1_dir / "per_round_client_measurements.csv")
     exp1_manifest_path = args.exp1_dir / "manifest.json"
-    exp1_manifest = (
-        json.loads(exp1_manifest_path.read_text(encoding="utf-8"))
-        if exp1_manifest_path.exists()
-        else {}
+    exp1_manifest = _read_required_json(exp1_manifest_path)
+    exp1_dataset_manifest_path = args.exp1_dir / "dataset_manifest.json"
+    exp1_dataset_manifest = _read_required_json(exp1_dataset_manifest_path)
+    if _manifest_contains_synthetic(exp1_dataset_manifest) and not args.allow_synthetic_source:
+        raise RuntimeError(
+            "Experiment 2 source measurements include synthetic datasets. "
+            "Real datasets are required by default; rerun Experiment 2 with "
+            "--allow-synthetic-source only for an explicit synthetic audit."
+        )
+    dataset_manifest = _write_experiment2_dataset_manifest(
+        output_dir=args.output_dir,
+        source_manifest_path=exp1_dataset_manifest_path,
+        source_dataset_manifest=exp1_dataset_manifest,
     )
     correlations = _read_required_csv(args.exp1_dir / "signal_contribution_correlations.csv")
     regressions = _read_required_csv(args.exp1_dir / "controlled_regression.csv")
@@ -374,8 +424,11 @@ def main():
         "experiment": "Experiment 2",
         "source_experiment": str(args.exp1_dir),
         "output_dir": str(args.output_dir),
+        "dataset_manifest_file": "dataset_manifest.json",
+        "dataset_manifest": dataset_manifest,
         "source_dataset_provenance": exp1_manifest.get("dataset_provenance", {}),
         "is_synthetic_present": bool(df["is_synthetic"].astype(bool).any()),
+        "environment": environment_manifest(),
         "form_a_features": FORM_A_FEATURES,
         "form_b_features": FORM_B_FEATURES,
         "selected_ridge_alpha": selected_alpha,

@@ -15,12 +15,14 @@ The runner activates the Project 1 root on `sys.path` before importing:
 - `rank_allocation.LoRa_rank_projection`
 - `rank_allocation.rank_selector`
 - `Source.Models`
-- `Source.datasets`
 
 This preserves the existing implementations of adaptive rank selection,
 stable-rank computation, capability constraints, quality score, rank
 projection, quality-weighted aggregation, SVD projection aggregation, training,
 and evaluation.
+
+Dataset loading is Project 2 infrastructure and goes through
+`framework.datasets.DatasetFactory`.
 
 No lambda allocation is implemented here.
 
@@ -44,9 +46,47 @@ Useful development options:
 python project-2-domain-aware-allocation/experiment/experiment1/run.py --tasks CIFAR-CNN --num-rounds 1
 ```
 
+Do not run these commands during the current infrastructure hardening phase.
+
+## Dataset Loading
+
+Experiment 1 loads every selected task through
+`framework/datasets/factory.py`.
+
+Defaults:
+
+- `--data-root project-2-domain-aware-allocation/experiment/data`
+- real datasets only
+- `--download-datasets` disabled
+- no automatic synthetic fallback
+
+If a real dataset cache is missing, execution aborts before training. To make a
+future rerun download missing real data explicitly:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment1/run.py --download-datasets
+```
+
+Synthetic datasets are allowed only for fallback-capable tasks and only through
+the explicit `--synthetic-datasets` option.
+
+## Dataset Validation
+
+Validation occurs immediately after dataset loading and before any training.
+The factory checks:
+
+- dataset object type
+- cache status
+- train/test sample counts when known
+- class count
+- synthetic flag
+- download status
+
 ## Partitioning
 
-Partitioning lives in `experiment1/partitioning.py`.
+Partitioning lives in `framework/partitioning/`. The historical
+`experiment/experiment1/partitioning.py` module is now only a compatibility
+re-export.
 
 Supported strategies:
 
@@ -78,6 +118,23 @@ The partitioner extracts labels from all five Project 1 benchmark datasets:
 
 Outputs are written to `project-2-domain-aware-allocation/outputs/exp1/` by
 default.
+
+### `dataset_manifest.json`
+
+One manifest is written for each run and contains:
+
+- dataset name
+- source library
+- dataset version when available
+- cache location and cache status
+- synthetic flag
+- train/test/total sample counts
+- class count
+- download request and download status
+- relevant package versions
+
+The top-level `manifest.json` embeds this dataset manifest and records the file
+name for downstream experiments.
 
 ### `label_distribution_summary.csv`
 
