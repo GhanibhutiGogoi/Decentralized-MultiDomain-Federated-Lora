@@ -29,10 +29,14 @@ import torch
 
 
 def _check_alpha(alpha):
-    if not float(alpha) > 0.0:
-        # alpha == 0 makes the scale correction 0/0 and returns silent NaN;
-        # alpha < 0 would raise a bare math domain error from sqrt.
-        raise ValueError(f"alpha must be > 0, got {alpha}")
+    value = float(alpha)
+    # NaN is already excluded by `not (nan > 0)`, but say so explicitly rather
+    # than relying on that: alpha = inf otherwise passes the positivity test and
+    # then makes scaling = sqrt(inf / r) = inf, so b / scaling silently returns
+    # an all-zero adapter from factorize_delta and non-finite values from
+    # lora_to_delta. A client that quietly learns nothing is worse than a crash.
+    if not math.isfinite(value) or value <= 0.0:
+        raise ValueError(f"alpha must be finite and > 0, got {alpha}")
 
 
 def _compute_dtype(dtype):
@@ -111,9 +115,32 @@ def _normalised(weights, n_states):
         raise ValueError(
             f"expected {n_states} weights, one per state, got {len(weights)}"
         )
-    total = float(sum(weights))
-    if total <= 0.0:
-        raise ValueError(f"weights must sum to a positive total, got {total}")
+    # Validate each weight, not just the total. [-1, 2] sums to 1 and would be
+    # accepted by a total-only check, but it extrapolates away from both clients
+    # instead of averaging them -- on two real states it produced a merged update
+    # of norm 301 from inputs of norm 141 and 120, i.e. outside their convex
+    # hull. Non-finite weights are worse still: they survive the sum and only
+    # surface much later as a bare torch _LinAlgError from inside the SVD,
+    # which names ill-conditioning rather than the bad input that caused it.
+    #
+    # Negative weights are rejected rather than supported. These are aggregation
+    # weights, so a negative one means "move away from this client", which no
+    # weighted average should do. Some accelerated-gossip schemes do use signed
+    # mixing weights; if project 3 ever wants that it should be a separate,
+    # explicitly named entry point, not a silent reinterpretation of this one.
+    for k, w in enumerate(weights):
+        value = float(w)
+        if not math.isfinite(value):
+            raise ValueError(f"weight {k} must be finite, got {w}")
+        if value < 0.0:
+            raise ValueError(
+                f"weight {k} must be >= 0, got {w}; negative weights extrapolate "
+                f"away from a client rather than averaging toward it"
+            )
+
+    total = float(sum(float(w) for w in weights))
+    if not math.isfinite(total) or total <= 0.0:
+        raise ValueError(f"weights must sum to a finite positive total, got {total}")
     return [float(w) / total for w in weights]
 
 

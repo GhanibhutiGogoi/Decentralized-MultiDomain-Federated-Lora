@@ -237,3 +237,30 @@ def test_naive_degree_rule_loses_mass_where_metropolis_hastings_does_not(topolog
     for _ in range(200):
         x = correct @ x
     assert abs(x.mean() - start) < 1e-12, "Metropolis-Hastings must conserve it exactly"
+
+
+# --- input validation (PR #40 review) --------------------------------------
+
+def test_duplicate_client_ids_are_rejected_even_when_the_set_matches():
+    """A set comparison alone misses this: over a two-node neighbour map,
+    set([0, 1, 1]) == {0, 1} passes, but the duplicate collides in the index map
+    and yields a 3x3 matrix with row sums [1.0, 0.0, 0.5] -- not doubly
+    stochastic, which is the one property this module guarantees."""
+    neighbors = build_topology([0, 1], 'ring')
+    for bad in ([0, 1, 1], [0, 0, 1], [0, 1, 1, 1]):
+        with pytest.raises(ValueError, match="unique"):
+            metropolis_hastings(neighbors, client_ids=bad)
+
+
+def test_client_ids_naming_the_wrong_clients_are_still_rejected():
+    neighbors = build_topology([0, 1, 2], 'ring')
+    with pytest.raises(ValueError, match="exactly the clients"):
+        metropolis_hastings(neighbors, client_ids=[0, 1, 3])
+
+
+def test_valid_reordered_client_ids_still_work():
+    """The uniqueness guard must not reject a legitimate custom ordering."""
+    ids = ['c2', 'c0', 'c1']
+    w = metropolis_hastings(build_topology(ids, 'ring'), client_ids=ids)
+    assert np.allclose(w.sum(axis=0), 1.0, atol=1e-12)
+    assert np.allclose(w.sum(axis=1), 1.0, atol=1e-12)

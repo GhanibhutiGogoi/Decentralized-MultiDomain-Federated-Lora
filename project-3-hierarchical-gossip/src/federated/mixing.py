@@ -118,6 +118,15 @@ def metropolis_hastings(neighbors, client_ids=None):
     """
     _validate(neighbors)
     order = list(client_ids) if client_ids is not None else sorted(neighbors)
+    # Uniqueness, not just set equality. A duplicate whose set still matches the
+    # neighbour map -- client_ids=[0, 1, 1] over a two-node map, where
+    # {0, 1} == {0, 1} -- passes a set comparison but builds an index map with a
+    # collision, yielding an oversized matrix that is not doubly stochastic
+    # (row sums [1.0, 0.0, 0.5]), which is the one property this module exists
+    # to guarantee.
+    if len(order) != len(set(order)):
+        duplicated = sorted({c for c in order if order.count(c) > 1})
+        raise ValueError(f"client_ids must be unique; duplicated: {duplicated}")
     if set(order) != set(neighbors):
         raise ValueError("client_ids must name exactly the clients in the neighbour map")
 

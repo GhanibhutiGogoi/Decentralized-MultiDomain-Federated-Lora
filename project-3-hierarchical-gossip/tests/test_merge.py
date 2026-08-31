@@ -288,3 +288,49 @@ def test_non_positive_alpha_is_rejected_everywhere(alpha):
 
 def test_merge_states_with_no_layers_returns_empty():
     assert merge_states([{}, {}], [0.5, 0.5], target_rank=2, alpha=32.0) == {}
+
+
+# --- input validation (PR #40 review) --------------------------------------
+
+@pytest.mark.parametrize("weights", [[-1.0, 2.0], [2.0, -1.0], [-0.5, -0.5, 2.0][:2]])
+def test_negative_merge_weights_are_rejected(weights):
+    """[-1, 2] sums to 1 so a total-only check accepts it, but it extrapolates
+    away from both clients instead of averaging them."""
+    states = [_state(2), _state(4, seed=1)]
+    with pytest.raises(ValueError, match="must be >= 0"):
+        merge_states(states, weights, target_rank=2, alpha=32.0)
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_merge_weights_are_rejected_before_the_svd(bad):
+    """Unguarded these survive the sum and surface as a bare torch _LinAlgError
+    from inside linalg.svd, which blames ill-conditioning rather than the input."""
+    states = [_state(2), _state(4, seed=1)]
+    with pytest.raises(ValueError, match="must be finite"):
+        merge_states(states, [bad, 1.0], target_rank=2, alpha=32.0)
+
+
+def test_weights_summing_to_zero_are_still_rejected():
+    with pytest.raises(ValueError, match="positive total"):
+        merge_states([_state(2), _state(2, seed=1)], [0.0, 0.0], target_rank=2, alpha=32.0)
+
+
+@pytest.mark.parametrize("bad", [float("inf"), float("-inf"), float("nan")])
+def test_non_finite_alpha_is_rejected_everywhere(bad):
+    """alpha=inf passes a bare positivity test, then makes scaling = sqrt(inf/r),
+    so b / scaling silently yields an all-zero adapter."""
+    for call in (
+        lambda: merge_states([_state(2)], [1.0], target_rank=2, alpha=bad),
+        lambda: factorize_delta(torch.randn(6, 8), target_rank=2, alpha=bad),
+        lambda: lora_to_delta(_state(2), bad),
+    ):
+        with pytest.raises(ValueError, match="finite and > 0"):
+            call()
+
+
+def test_positive_finite_weights_and_alpha_still_work():
+    """The guards must not reject anything legitimate, including unnormalised
+    weights, which are normalised rather than refused."""
+    out = merge_states([_state(2), _state(4, seed=1)], [3.0, 1.0], target_rank=4, alpha=32.0)
+    assert torch.isfinite(out["fc"]["A"]).all()
+    assert torch.isfinite(out["fc"]["B"]).all()
