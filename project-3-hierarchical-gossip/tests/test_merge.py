@@ -334,3 +334,19 @@ def test_positive_finite_weights_and_alpha_still_work():
     out = merge_states([_state(2), _state(4, seed=1)], [3.0, 1.0], target_rank=4, alpha=32.0)
     assert torch.isfinite(out["fc"]["A"]).all()
     assert torch.isfinite(out["fc"]["B"]).all()
+
+
+@pytest.mark.parametrize("bad", [float("inf"), float("-inf"), float("nan"), 0.0, -1.0])
+def test_merge_states_validates_alpha_at_the_entry_point(bad):
+    """merge_states must enforce the alpha contract itself, not only through
+    factorize_delta. With no layers the factorization path is never reached, so
+    relying on the downstream check let an invalid alpha through entirely."""
+    with pytest.raises(ValueError, match="finite and > 0"):
+        merge_states([{}, {}], [0.5, 0.5], target_rank=2, alpha=bad)
+    with pytest.raises(ValueError, match="finite and > 0"):
+        merge_states([_state(2), _state(2, seed=1)], [0.5, 0.5], target_rank=2, alpha=bad)
+
+
+def test_merge_states_still_returns_empty_for_valid_alpha_and_no_layers():
+    """The empty-layer path must stay working once alpha is valid."""
+    assert merge_states([{}, {}], [0.5, 0.5], target_rank=2, alpha=32.0) == {}

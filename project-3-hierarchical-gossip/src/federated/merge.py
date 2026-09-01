@@ -153,6 +153,13 @@ def merge_states(states, weights, target_rank, alpha):
     """
     if not states:
         raise ValueError("merge_states needs at least one state")
+    # Validate alpha at the public entry point, before any weight or layer work.
+    # Downstream factorize_delta also checks it, but relying on that alone leaves
+    # two gaps: an invalid alpha is used to build intermediate deltas in
+    # _layer_delta before anything rejects it, and for a state with no layers the
+    # factorization path is never reached at all, so merge_states([{}, {}], w, r,
+    # float("inf")) returned {} instead of raising.
+    _check_alpha(alpha)
     norm_w = _normalised(weights, len(states))
 
     layers = set(states[0])
