@@ -9,6 +9,48 @@ from torch.utils.data import Dataset, DataLoader
 
 
 DEFAULT_DATA_ROOT = Path(__file__).resolve().parents[2] / "experiment" / "data"
+HEART_DISEASE_URL = (
+    "https://archive.ics.uci.edu/ml/machine-learning-databases/"
+    "heart-disease/processed.cleveland.data"
+)
+
+
+def _deterministic_split_indices(n_samples: int):
+    rng = np.random.RandomState(1)
+    indices = rng.permutation(n_samples)
+    split_point = int(0.8 * n_samples)
+    return indices[:split_point], indices[split_point:]
+
+
+def _training_normalization_stats(X: np.ndarray, train_indices: np.ndarray):
+    train_X = X[train_indices]
+    return train_X.mean(0), train_X.std(0) + 1e-8
+
+
+def _load_real_uci_heart(data_root: str, download: bool):
+    try:
+        import urllib.error
+        import urllib.request
+        import pandas as pd
+
+        path = os.path.join(data_root, "heart.csv")
+        os.makedirs(data_root, exist_ok=True)
+        if not os.path.exists(path):
+            if not download:
+                raise FileNotFoundError(path)
+            urllib.request.urlretrieve(HEART_DISEASE_URL, path)
+
+        df = pd.read_csv(path, header=None, na_values="?").dropna()
+        X = df.iloc[:, :-1].values.astype(np.float32)
+        y = (df.iloc[:, -1].values > 0).astype(np.int64)
+        return X, y
+    except (ImportError, OSError, urllib.error.URLError, ValueError) as e:
+        raise RuntimeError(
+            "Unable to load real UCI Heart Disease data from "
+            f"{os.path.join(data_root, 'heart.csv')}. Provide the real CSV, "
+            "rerun with dataset downloads enabled, or call "
+            "get_tabular(synthetic=True) explicitly."
+        ) from e
 
 
 class TabularDataset(Dataset):
@@ -30,38 +72,24 @@ class TabularDataset(Dataset):
             ).astype(np.float32)
             y = np.concatenate(
                 [np.full(n // 4, i, dtype=np.int64) for i in range(4)])
+            X = (X - X.mean(0)) / (X.std(0) + 1e-8)
+            rng = np.random.RandomState(1)
+            idx = rng.permutation(len(X))
+            sp = int(0.8 * len(X))
+            idx = idx[:sp] if split == "train" else idx[sp:]
         else:
-            try:
-                import urllib.error
-                import urllib.request
-                import pandas as pd
-
-                url = ("https://archive.ics.uci.edu/ml/machine-learning-databases/"
-                       "heart-disease/processed.cleveland.data")
-                path = os.path.join(data_root, "heart.csv")
-                os.makedirs(data_root, exist_ok=True)
-                if not os.path.exists(path):
-                    if not download:
-                        raise FileNotFoundError(path)
-                    urllib.request.urlretrieve(url, path)
-
-                df = pd.read_csv(path, header=None, na_values="?").dropna()
-                X = df.iloc[:, :-1].values.astype(np.float32)
-                y = (df.iloc[:, -1].values > 0).astype(np.int64)
-            except (ImportError, OSError, urllib.error.URLError, ValueError) as e:
-                raise RuntimeError(
-                    "Unable to load real UCI Heart Disease data from "
-                    f"{os.path.join(data_root, 'heart.csv')}. Provide the real CSV, "
-                    "rerun with dataset downloads enabled, or call "
-                    "get_tabular(synthetic=True) explicitly."
-                ) from e
-
-        X = (X - X.mean(0)) / (X.std(0) + 1e-8)
-
-        rng = np.random.RandomState(1)
-        idx = rng.permutation(len(X))
-        sp = int(0.8 * len(X))
-        idx = idx[:sp] if split == "train" else idx[sp:]
+            X, y = _load_real_uci_heart(data_root, download)
+            train_idx, test_idx = _deterministic_split_indices(len(X))
+            mean, std = _training_normalization_stats(X, train_idx)
+            idx = train_idx if split == "train" else test_idx
+            self.normalization_provenance = {
+                "statistics_source": "train_split",
+                "split_seed": 1,
+                "split_ratio": 0.8,
+            }
+            self.normalization_mean = mean.astype(np.float32)
+            self.normalization_std = std.astype(np.float32)
+            X = (X - mean) / std
 
         self.X = torch.from_numpy(X[idx])
         self.y = torch.from_numpy(y[idx])
