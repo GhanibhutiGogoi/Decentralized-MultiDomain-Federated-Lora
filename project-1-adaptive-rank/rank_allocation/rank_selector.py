@@ -1,10 +1,51 @@
 """Capability-aware adaptive LoRA rank selection."""
 
+import math
+
 import numpy as np
 import torch
 
 from config import ALL_CANDIDATE_RANKS, BATCH_TO_MAX_RANK
 from Federated.client import set_lora_only_trainable
+
+# Weight on the capability prior in the rank floor. gamma < 1 keeps the
+# capability term a soft prior so the measured demand term can bind; gamma = 1
+# reproduces the pre-fix behaviour, where the floor equalled the hardware
+# ceiling at the top tier and the stable-rank measurement was discarded.
+#
+# 0.5 is the midpoint of the usable interval (0, 1) and is deliberately not
+# tuned: it reserves half of each client's hardware budget as a floor and
+# leaves the other half for the gradient measurement to claim. It is a
+# published constant of the allocation rule, so it is recorded alongside the
+# equation in the experiment artifact rather than left implicit. Note the
+# consequence at the middle tier of the shipped BATCH_TO_MAX_RANK: the floor
+# gamma * 0.5 * 8 = 2 coincides with the smallest candidate rank, so there the
+# prior is inert by construction and demand alone decides.
+#
+# CALIBRATION IS UNRESOLVED. Fixing the floor == ceiling defect makes the demand
+# term *reachable*, but it does not by itself make the shipped allocation
+# responsive. Two facts, measured on the real project-1 models:
+#
+#   1. s(G) is bounded above by the probe's own rank. The probe is built at
+#      BATCH_TO_MAX_RANK[batch_size], and the stable rank of an [r, in] or
+#      [out, r] gradient cannot exceed r, so s(G) <= R_i^max always and the
+#      min(s(G), R_i^max) cap below is mathematically redundant. It is kept
+#      because it documents the intended semantics and costs nothing.
+#   2. Observed s(G) on MLP and CNN backbones sits in roughly [1.1, 4.2] both at
+#      initialisation and after several epochs, while the top-tier floor at
+#      gamma = 0.5 is 8. The top tier therefore stays pinned at 8 across that
+#      whole range; it does not move until s(G) passes 10.1, because the rank
+#      menu quantises and _nearest_candidate rounds toward 8 until s(G) clears
+#      the 8/12 midpoint. The two lower tiers do respond, but their ceilings
+#      are 4 and 8, so the headroom is small.
+#
+# Choosing a smaller gamma from these numbers alone would be guesswork: the
+# measurements above are from short synthetic probes, not the full benchmark
+# battery. Settling it needs a rank-vs-accuracy sweep on the real tasks. Until
+# then the honest description of this rule is capability-dominated, and
+# test_shipped_gamma_allocation_is_still_capability_dominated pins that so a
+# future recalibration is visible rather than silent.
+GAMMA = 0.5
 
 
 def _nearest_candidate(rank, candidates):
@@ -21,28 +62,51 @@ def capability_fraction(batch_size):
     return batch_sizes.index(batch_size) / (len(batch_sizes) - 1)
 
 
-def rank_equation(stable_rank, batch_size):
+def rank_equation(stable_rank, batch_size, gamma=GAMMA):
     r"""
     Closed-form adaptive rank rule.
 
         s(G) = ||G||_F^2 / ||G||_2^2
         c_i  = (index(batch_i) / (num_capabilities - 1))
         r_i  = round_to_candidate(
-                 max(2, c_i * R_i^max, min(s(G), R_i^max))
+                 max(2, gamma * c_i * R_i^max, min(s(G), R_i^max))
                )
 
     The stable rank estimates update complexity from the gradient geometry.
-    The capability term prevents stronger clients from being under-allocated,
-    while the ceiling prevents weaker clients from exceeding their budget.
+    The capability term is a *soft prior* (weight gamma < 1) that keeps stronger
+    clients from being under-allocated without pinning them to their ceiling;
+    the ceiling prevents weaker clients from exceeding their budget.
+
+    With gamma = 1 the floor equals R_i^max whenever c_i = 1, and since the
+    demand term is capped at R_i^max the outer max always returns the floor --
+    the measured stable rank is computed and then discarded. gamma < 1 leaves
+    room between the floor and the ceiling for s(G) to bind.
     """
     max_rank = BATCH_TO_MAX_RANK.get(batch_size, min(ALL_CANDIDATE_RANKS))
     candidates = [r for r in ALL_CANDIDATE_RANKS if r <= max_rank]
     if not candidates:
         return min(ALL_CANDIDATE_RANKS)
 
-    floor = max(candidates[0], capability_fraction(batch_size) * max_rank)
-    raw_rank = max(floor, min(float(stable_rank), float(max_rank)))
-    return _nearest_candidate(raw_rank, candidates)
+    # A non-finite measurement means the gradient probe diverged. Fall back to
+    # the capability floor deliberately rather than letting NaN propagate
+    # silently through max/min, where it would collapse to the floor anyway but
+    # by accident.
+    demand = float(stable_rank)
+    if not math.isfinite(demand):
+        demand = 0.0
+
+    floor = max(candidates[0], gamma * capability_fraction(batch_size) * max_rank)
+    raw_rank = max(floor, min(demand, float(max_rank)))
+
+    chosen = _nearest_candidate(raw_rank, candidates)
+    # _nearest_candidate breaks ties downward, which can land below the floor
+    # when the floor sits between two candidates. Snap back up so the floor is
+    # a genuine lower bound for any gamma, not just the shipped one.
+    if chosen < floor:
+        above = [r for r in candidates if r >= floor]
+        if above:
+            chosen = min(above)
+    return chosen
 
 
 def estimate_gradient_stable_rank(model, loader, loss_fn, num_batches=3):
