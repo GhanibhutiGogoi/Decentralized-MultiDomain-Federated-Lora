@@ -18,6 +18,36 @@ PREDICTORS = [
 CONTROLS = ["adaptive_rank", "local_loss"]
 
 
+def _source_is_synthetic(measurements: pd.DataFrame) -> bool:
+    if measurements.empty:
+        return False
+    if "is_synthetic" not in measurements:
+        raise ValueError(
+            "Experiment 1 analysis requires measurement-level 'is_synthetic' "
+            "provenance before writing derived artifacts."
+        )
+    parsed = measurements["is_synthetic"].map(
+        {
+            True: True,
+            False: False,
+            "True": True,
+            "False": False,
+            "true": True,
+            "false": False,
+            "1": True,
+            "0": False,
+            1: True,
+            0: False,
+        }
+    )
+    if parsed.isna().any():
+        raise ValueError(
+            "Experiment 1 analysis found missing or ambiguous 'is_synthetic' "
+            "measurement provenance."
+        )
+    return bool(parsed.astype(bool).any())
+
+
 def _standardize(series: pd.Series) -> pd.Series:
     std = series.std(ddof=0)
     if std == 0 or np.isnan(std):
@@ -42,6 +72,7 @@ def _ols(y: np.ndarray, x: np.ndarray):
 def run_statistical_analysis(measurements: pd.DataFrame, output_dir: Path):
     """Save correlation and controlled-regression tables."""
     output_dir.mkdir(parents=True, exist_ok=True)
+    is_synthetic = _source_is_synthetic(measurements)
 
     needed = ["delta_accuracy", *PREDICTORS, *CONTROLS]
     df = measurements.dropna(subset=[col for col in needed if col in measurements])
@@ -56,6 +87,7 @@ def run_statistical_analysis(measurements: pd.DataFrame, output_dir: Path):
             rows.append(
                 {
                     "predictor": predictor,
+                    "is_synthetic": is_synthetic,
                     "pearson": pair[predictor].corr(pair["delta_accuracy"], method="pearson"),
                     "spearman": pair[predictor].corr(pair["delta_accuracy"], method="spearman"),
                     "n": len(pair),
@@ -77,6 +109,7 @@ def run_statistical_analysis(measurements: pd.DataFrame, output_dir: Path):
                 {
                     "model_predictor": predictor,
                     "term": col,
+                    "is_synthetic": is_synthetic,
                     "standardized_beta": beta[idx],
                     "standard_error": se[idx],
                     "r_squared": r2,

@@ -92,8 +92,10 @@ through the Experiment 2 CLI without another code change.
   `max_count / min_positive_count * (1 + zero_class_count / num_classes)`.
 - Experiment 2 requires explicit `is_synthetic` provenance in measurements and
   refuses to assume missing provenance means real data.
-- Ridge alpha selection emits a boundary warning when RMSE selects the minimum
-  or maximum tested alpha; the grid is not expanded automatically.
+- Ridge alpha selection fails with `RidgeAlphaBoundaryError` when RMSE selects
+  the minimum or maximum tested alpha; the grid is not expanded automatically.
+- Pooled Experiment 2 permutation p-values are stratified by the configured
+  aggregation context columns, currently `task` and `round`.
 
 ## Remaining Work After Mathematical Review
 

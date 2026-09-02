@@ -59,7 +59,13 @@ from framework.datasets import (  # noqa: E402
 )
 from framework.datasets.text import AGNewsDataset  # noqa: E402
 from framework.partitioning import PartitionConfig, make_client_loaders  # noqa: E402
-from framework.utils import environment_manifest, set_reproducibility_seed  # noqa: E402
+from framework.utils import (  # noqa: E402
+    ensure_disjoint_directory,
+    ensure_not_cleanup_parent,
+    environment_manifest,
+    prepare_output_directory,
+    set_reproducibility_seed,
+)
 from experiment1.signals import (  # noqa: E402
     label_distribution_records,
     save_label_distribution_outputs,
@@ -77,6 +83,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 OUTPUT_ROOT = PROJECT2_ROOT / "outputs"
 EXPERIMENT_NAME = "exp1"
 OUTPUT_DIR = OUTPUT_ROOT / EXPERIMENT_NAME
+EXPERIMENT2_OUTPUT_DIR = OUTPUT_ROOT / "exp2"
 TASK_ORDER = [
     "CIFAR-CNN",
     "Fashion-MLP",
@@ -375,6 +382,14 @@ def parse_args():
         help="Directory for Experiment 1 outputs.",
     )
     parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help=(
+            "Clean the Experiment 1 output directory before running. By default "
+            "a non-empty output directory is rejected."
+        ),
+    )
+    parser.add_argument(
         "--data-root",
         type=Path,
         default=DEFAULT_DATA_ROOT,
@@ -400,10 +415,29 @@ def parse_args():
 def main():
     args = parse_args()
     os.chdir(PROJECT2_ROOT)
-    set_reproducibility_seed(args.seed)
 
-    output_dir = args.output_dir
-    output_dir.mkdir(parents=True, exist_ok=True)
+    ensure_disjoint_directory(
+        args.output_dir,
+        EXPERIMENT2_OUTPUT_DIR,
+        output_label="Experiment 1 output directory",
+        protected_label="Experiment 2 output directory",
+    )
+    ensure_not_cleanup_parent(
+        args.output_dir,
+        OUTPUT_ROOT,
+        output_label="Experiment 1 output directory",
+        protected_label="shared Project 2 outputs directory",
+    )
+    output_dir = prepare_output_directory(
+        args.output_dir,
+        overwrite=args.overwrite,
+        experiment_name="Experiment 1",
+        allowed_cleanup_root=OUTPUT_DIR,
+        repository_root=PROJECT2_ROOT.parent,
+        project_root=PROJECT2_ROOT,
+        shared_outputs_root=OUTPUT_ROOT,
+    )
+    set_reproducibility_seed(args.seed)
 
     partition_config = PartitionConfig(
         strategy=args.partition,

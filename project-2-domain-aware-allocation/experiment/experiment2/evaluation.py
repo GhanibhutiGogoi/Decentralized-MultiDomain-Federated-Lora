@@ -12,6 +12,7 @@ from experiment2.lambda_calibration import (
     EPS,
     GROUP_COLS,
     TARGET,
+    enforce_ridge_alpha_not_on_boundary,
     fit_form_a,
     fit_form_b,
     pearson,
@@ -19,7 +20,6 @@ from experiment2.lambda_calibration import (
     predict_standardized_score,
     ridge_alpha_grid,
     spearman,
-    warn_if_ridge_alpha_on_boundary,
 )
 
 
@@ -116,27 +116,61 @@ def kendall_tau_b(
     return float((concordant - discordant) / denom) if denom > EPS else 0.0
 
 
+def _permutation_groups(
+    df: pd.DataFrame,
+    group_cols: tuple[str, ...],
+) -> list[object] | None:
+    """Return row-level permutation strata when group columns are available."""
+    cols = list(group_cols)
+    if not cols or not set(cols).issubset(df.columns):
+        return None
+    return [tuple(row) for row in df[cols].itertuples(index=False, name=None)]
+
+
 def permutation_rank_p_value(
     y_true: Iterable[float],
     y_score: Iterable[float],
     *,
+    groups: Iterable[object] | None = None,
     n_permutations: int = DEFAULT_PERMUTATIONS,
     seed: int = DEFAULT_PERMUTATION_SEED,
 ) -> float:
-    """One-sided permutation p-value for positive Spearman association."""
+    """One-sided permutation p-value for positive Spearman association.
+
+    When ``groups`` are supplied, targets are permuted only within those strata.
+    This preserves exchangeability for pooled evaluations over heterogeneous
+    aggregation contexts such as ``(task, round)``.
+    """
     actual = np.asarray(list(y_true), dtype=float)
     score = np.asarray(list(y_score), dtype=float)
     if actual.size < 2 or n_permutations <= 0:
         return 1.0
+    if groups is None:
+        group_values = np.zeros(actual.size, dtype=int)
+    else:
+        raw_groups = list(groups)
+        group_values = np.empty(len(raw_groups), dtype=object)
+        group_values[:] = raw_groups
+        if group_values.shape[0] != actual.shape[0]:
+            raise ValueError("Permutation groups must match the target length.")
 
     observed = spearman(score, actual)
     if observed <= 0:
         return 1.0
 
     rng = np.random.default_rng(seed)
+    positions_by_group: dict[object, list[int]] = {}
+    for idx, group in enumerate(group_values):
+        positions_by_group.setdefault(group, []).append(idx)
+    group_positions = [
+        np.asarray(positions, dtype=int)
+        for positions in positions_by_group.values()
+    ]
     exceedances = 0
     for _ in range(n_permutations):
-        permuted = rng.permutation(actual)
+        permuted = actual.copy()
+        for positions in group_positions:
+            permuted[positions] = rng.permutation(permuted[positions])
         if spearman(score, permuted) >= observed - EPS:
             exceedances += 1
     return float((exceedances + 1) / (n_permutations + 1))
@@ -146,6 +180,7 @@ def ranking_metrics(
     y_true: Iterable[float],
     y_score: Iterable[float],
     *,
+    groups: Iterable[object] | None = None,
     n_permutations: int = DEFAULT_PERMUTATIONS,
     seed: int = DEFAULT_PERMUTATION_SEED,
 ) -> dict[str, float]:
@@ -159,6 +194,7 @@ def ranking_metrics(
         "permutation_p_value": permutation_rank_p_value(
             actual,
             score,
+            groups=groups,
             n_permutations=n_permutations,
             seed=seed,
         ),
@@ -175,11 +211,13 @@ def evaluate_predictions(
 ) -> dict[str, float]:
     """Compute the full unified metric set for a prediction table."""
     cfg = config or EvaluationConfig()
+    groups = _permutation_groups(df, cfg.group_cols)
     metrics = regression_metrics(df[target_col], df[prediction_col])
     metrics.update(
         ranking_metrics(
             df[target_col],
             df[score_col],
+            groups=groups,
             n_permutations=cfg.permutations,
             seed=cfg.permutation_seed,
         )
@@ -246,6 +284,7 @@ def leave_one_task_out_evaluation(
             ranking_metrics(
                 test[TARGET],
                 score_a,
+                groups=_permutation_groups(test, cfg.group_cols),
                 n_permutations=cfg.permutations,
                 seed=cfg.permutation_seed,
             )
@@ -270,6 +309,7 @@ def leave_one_task_out_evaluation(
                 ranking_metrics(
                     test[TARGET],
                     score_b,
+                    groups=_permutation_groups(test, cfg.group_cols),
                     n_permutations=cfg.permutations,
                     seed=cfg.permutation_seed,
                 )
@@ -289,7 +329,7 @@ def leave_one_task_out_evaluation(
     ridge_rows = cv[cv["form"] == "form_b"].copy()
     mean_rmse = ridge_rows.groupby("ridge_alpha")["rmse"].mean()
     selected_alpha = float(mean_rmse.idxmin())
-    warn_if_ridge_alpha_on_boundary(selected_alpha, alphas)
+    enforce_ridge_alpha_not_on_boundary(selected_alpha, alphas)
     return cv, selected_alpha
 
 

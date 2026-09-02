@@ -1,6 +1,7 @@
 """Text dataset adapters used by the centralized dataset factory."""
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import torch
@@ -18,11 +19,23 @@ class AGNewsDataset(Dataset):
     VOCAB_SIZE = 10000
     MAX_LEN = 64
 
-    def __init__(self, split="train", data_root=None, synthetic=False, download=False):
+    def __init__(
+        self,
+        split="train",
+        data_root=None,
+        synthetic=False,
+        download=False,
+        vocab=None,
+        tokenizer=None,
+        vocab_provenance: dict[str, Any] | None = None,
+    ):
         super().__init__()
         self.is_synthetic = bool(synthetic)
         data_root = str(data_root or DEFAULT_DATA_ROOT)
         self.data_root = str(data_root)
+        self.vocab = vocab
+        self.tokenizer = tokenizer
+        self.vocab_provenance = vocab_provenance
         if self.is_synthetic:
             rng = np.random.RandomState(42 if split == "train" else 7)
             generator = torch.Generator().manual_seed(42 if split == "train" else 7)
@@ -46,17 +59,36 @@ class AGNewsDataset(Dataset):
                 if not matches:
                     raise FileNotFoundError(split_file)
 
-            tokenizer = get_tokenizer("basic_english")
             raw = list(AG_NEWS(root=str(data_root), split=split))
-            vocab = build_vocab_from_iterator(
-                (tokenizer(t) for _, t in raw),
-                specials=["<pad>", "<unk>"],
-                max_tokens=self.VOCAB_SIZE)
-            vocab.set_default_index(vocab["<unk>"])
+            if self.tokenizer is None:
+                self.tokenizer = get_tokenizer("basic_english")
+            if self.vocab is None:
+                if split != "train":
+                    raise ValueError(
+                        "A training-built AG News vocabulary is required for "
+                        "non-training splits."
+                    )
+                self.vocab = build_vocab_from_iterator(
+                    (self.tokenizer(t) for _, t in raw),
+                    specials=["<pad>", "<unk>"],
+                    max_tokens=self.VOCAB_SIZE)
+                self.vocab.set_default_index(self.vocab["<unk>"])
+                self.vocab_provenance = {
+                    "dataset": "AG News",
+                    "source_split": "train",
+                    "tokenizer": "basic_english",
+                    "max_tokens": self.VOCAB_SIZE,
+                    "specials": ["<pad>", "<unk>"],
+                    "pad_index": int(self.vocab["<pad>"]),
+                    "unk_index": int(self.vocab["<unk>"]),
+                    "vocab_size": len(self.vocab),
+                }
+            else:
+                self.vocab.set_default_index(self.vocab["<unk>"])
 
             self.data = []
             for label, text in raw:
-                ids = vocab(tokenizer(text)[:self.MAX_LEN])
+                ids = self.vocab(self.tokenizer(text)[:self.MAX_LEN])
                 ids += [0] * (self.MAX_LEN - len(ids))
                 self.data.append(
                     (torch.tensor(ids, dtype=torch.long), int(label) - 1))
@@ -88,7 +120,14 @@ def get_agnews(
     train = AGNewsDataset(
         "train", data_root=data_root, synthetic=synthetic, download=download)
     test = AGNewsDataset(
-        "test", data_root=data_root, synthetic=synthetic, download=download)
+        "test",
+        data_root=data_root,
+        synthetic=synthetic,
+        download=download,
+        vocab=getattr(train, "vocab", None),
+        tokenizer=getattr(train, "tokenizer", None),
+        vocab_provenance=getattr(train, "vocab_provenance", None),
+    )
     test_loader = DataLoader(
         test,
         batch_size=batch_size,

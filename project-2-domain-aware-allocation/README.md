@@ -103,8 +103,9 @@ python project-2-domain-aware-allocation/experiment/experiment2/run.py
 ```
 
 Experiment 2 automatically computes regression metrics, ranking metrics, and
-ranking permutation tests during future reruns. The ranking metrics are reported
-only; Form A/Form B selection is not changed by them.
+ranking permutation tests during future reruns. Pooled permutation tests are
+stratified by the configured aggregation context columns. The ranking metrics
+are reported only; Form A/Form B selection is not changed by them.
 
 Experiment 2 requires explicit `is_synthetic` provenance in Experiment 1
 measurement tables. It does not backfill missing provenance as real data.
@@ -113,6 +114,10 @@ Class imbalance is computed with a finite missing-class penalty:
 `max_count / min_positive_count * (1 + zero_class_count / num_classes)`.
 
 Prepared optional Ridge-alpha controls for a future rerun:
+
+If Ridge alpha selection lands on the minimum or maximum tested value,
+Experiment 2 raises `RidgeAlphaBoundaryError`; the search grid is not expanded
+automatically.
 
 ```powershell
 python project-2-domain-aware-allocation/experiment/experiment2/run.py --include-extended-ridge-alphas

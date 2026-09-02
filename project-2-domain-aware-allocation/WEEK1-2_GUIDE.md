@@ -120,8 +120,8 @@ Experiment 1 computes class imbalance as:
 max_count / min_positive_count * (1 + zero_class_count / num_classes)
 ```
 
-If Ridge alpha selection lands on a tested boundary, Experiment 2 emits a
-warning instead of expanding the search automatically.
+If Ridge alpha selection lands on a tested boundary, Experiment 2 raises a
+`RidgeAlphaBoundaryError` instead of expanding the search automatically.
 
 ## Legacy CIFAR-100 Scaffold
 

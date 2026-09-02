@@ -124,7 +124,9 @@ Per-task metrics:
 
 Permutation p-values are computed as one-sided tests for positive Spearman rank
 association using `{evaluation_config["permutations"]}` permutations and seed
-`{evaluation_config["permutation_seed"]}`.
+`{evaluation_config["permutation_seed"]}`. Pooled evaluations stratify
+permutations by the configured aggregation context columns when those columns
+are available.
 
 ## Figures
 

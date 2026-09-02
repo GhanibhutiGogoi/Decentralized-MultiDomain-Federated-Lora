@@ -42,10 +42,21 @@ from experiment2.evaluation import (  # noqa: E402
 )
 from experiment2.figures import save_evaluation_figures  # noqa: E402
 from experiment2.lambda_aggregation import normalized_aggregation_weights  # noqa: E402
+from experiment2.numeric_validation import validate_experiment1_numeric_inputs  # noqa: E402
+from experiment2.provenance import (  # noqa: E402
+    load_json_without_duplicate_keys,
+    validate_experiment1_measurement_inputs,
+)
 from experiment2.reporting import build_evaluation_report  # noqa: E402
-from framework.utils import environment_manifest  # noqa: E402
+from framework.utils import (  # noqa: E402
+    ensure_disjoint_directory,
+    ensure_not_cleanup_parent,
+    environment_manifest,
+    prepare_output_directory,
+)
 
 
+OUTPUT_ROOT = PROJECT2_ROOT / "outputs"
 EXP1_DIR = PROJECT2_ROOT / "outputs" / "exp1"
 OUTPUT_DIR = PROJECT2_ROOT / "outputs" / "exp2"
 
@@ -59,16 +70,7 @@ def _read_required_csv(path: Path) -> pd.DataFrame:
 def _read_required_json(path: Path) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"Required manifest is missing: {path}")
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _manifest_contains_synthetic(dataset_manifest: dict) -> bool:
-    datasets = dataset_manifest.get("datasets", {})
-    return any(
-        bool(record.get("synthetic", False))
-        for record in datasets.values()
-        if isinstance(record, dict)
-    )
+    return load_json_without_duplicate_keys(path)
 
 
 def _write_experiment2_dataset_manifest(
@@ -252,35 +254,99 @@ def parse_args():
     parser.add_argument(
         "--allow-synthetic-source",
         action="store_true",
-        help="Explicitly allow Experiment 1 measurements produced from synthetic data.",
+        help=(
+            "Retained for synthetic audits; scientific calibration still rejects "
+            "synthetic measurement provenance."
+        ),
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help=(
+            "Clean the Experiment 2 output directory before running. By default "
+            "a non-empty output directory is rejected."
+        ),
     )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    figure_dir = args.output_dir / "figures"
+    ensure_disjoint_directory(
+        args.output_dir,
+        args.exp1_dir,
+        output_label="Experiment 2 output directory",
+        protected_label="Experiment 1 input directory",
+    )
+    ensure_disjoint_directory(
+        args.output_dir,
+        EXP1_DIR,
+        output_label="Experiment 2 output directory",
+        protected_label="default Experiment 1 output directory",
+    )
+    ensure_not_cleanup_parent(
+        args.output_dir,
+        OUTPUT_ROOT,
+        output_label="Experiment 2 output directory",
+        protected_label="shared Project 2 outputs directory",
+    )
 
     measurements = _read_required_csv(args.exp1_dir / "per_round_client_measurements.csv")
     exp1_manifest_path = args.exp1_dir / "manifest.json"
     exp1_manifest = _read_required_json(exp1_manifest_path)
     exp1_dataset_manifest_path = args.exp1_dir / "dataset_manifest.json"
     exp1_dataset_manifest = _read_required_json(exp1_dataset_manifest_path)
-    if _manifest_contains_synthetic(exp1_dataset_manifest) and not args.allow_synthetic_source:
-        raise RuntimeError(
-            "Experiment 2 source measurements include synthetic datasets. "
-            "Real datasets are required by default; rerun Experiment 2 with "
-            "--allow-synthetic-source only for an explicit synthetic audit."
-        )
+    correlations = _read_required_csv(args.exp1_dir / "signal_contribution_correlations.csv")
+    regressions = _read_required_csv(args.exp1_dir / "controlled_regression.csv")
+    label_distribution = _read_required_csv(args.exp1_dir / "label_distribution_summary.csv")
+
+    normalized_inputs = validate_experiment1_measurement_inputs(
+        measurements=measurements,
+        label_distribution=label_distribution,
+        correlations=correlations,
+        regressions=regressions,
+        dataset_manifest=exp1_dataset_manifest,
+        measurement_label=args.exp1_dir / "per_round_client_measurements.csv",
+        label_distribution_label=args.exp1_dir / "label_distribution_summary.csv",
+        correlations_label=args.exp1_dir / "signal_contribution_correlations.csv",
+        regressions_label=args.exp1_dir / "controlled_regression.csv",
+    )
+    measurements = normalized_inputs["measurements"]
+    label_distribution = normalized_inputs["label_distribution"]
+    correlations = normalized_inputs["correlations"]
+    regressions = normalized_inputs["regressions"]
+    del label_distribution
+
+    numeric_inputs = validate_experiment1_numeric_inputs(
+        measurements=measurements,
+        label_distribution=normalized_inputs["label_distribution"],
+        correlations=correlations,
+        regressions=regressions,
+        measurement_label=args.exp1_dir / "per_round_client_measurements.csv",
+        label_distribution_label=args.exp1_dir / "label_distribution_summary.csv",
+        correlations_label=args.exp1_dir / "signal_contribution_correlations.csv",
+        regressions_label=args.exp1_dir / "controlled_regression.csv",
+    )
+    measurements = numeric_inputs["measurements"]
+    correlations = numeric_inputs["correlations"]
+    regressions = numeric_inputs["regressions"]
+
+    args.output_dir = prepare_output_directory(
+        args.output_dir,
+        overwrite=args.overwrite,
+        experiment_name="Experiment 2",
+        allowed_cleanup_root=OUTPUT_DIR,
+        repository_root=PROJECT2_ROOT.parent,
+        project_root=PROJECT2_ROOT,
+        shared_outputs_root=OUTPUT_ROOT,
+    )
+    figure_dir = args.output_dir / "figures"
+
     dataset_manifest = _write_experiment2_dataset_manifest(
         output_dir=args.output_dir,
         source_manifest_path=exp1_dataset_manifest_path,
         source_dataset_manifest=exp1_dataset_manifest,
     )
-    correlations = _read_required_csv(args.exp1_dir / "signal_contribution_correlations.csv")
-    regressions = _read_required_csv(args.exp1_dir / "controlled_regression.csv")
-    _read_required_csv(args.exp1_dir / "label_distribution_summary.csv")
 
     df = prepare_measurements(measurements)
     ridge_alphas = ridge_alpha_grid(

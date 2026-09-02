@@ -88,6 +88,7 @@ class DatasetMetadata:
     expected_train_sample_count: int | None
     expected_test_sample_count: int | None
     expected_class_count: int
+    vocabulary_provenance: dict[str, Any] | None
     download_requested: bool
     download_status: str
 
@@ -476,6 +477,7 @@ class DatasetFactory:
             expected_train_sample_count=expected_train,
             expected_test_sample_count=expected_test,
             expected_class_count=int(expected_classes),
+            vocabulary_provenance=getattr(train, "vocab_provenance", None),
             download_requested=download,
             download_status=download_status,
         )

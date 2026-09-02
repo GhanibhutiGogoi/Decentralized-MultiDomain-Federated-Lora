@@ -24,6 +24,46 @@ The `is_synthetic` column in Experiment 1 measurements is required. Experiment
 2 raises an error if the column is missing, contains nulls, or contains
 unrecognized values.
 
+Measurement-level provenance is mandatory for every Experiment 1 table consumed
+by Experiment 2. Scientific calibration accepts only explicit real-data
+provenance (`is_synthetic = false`) in:
+
+- `per_round_client_measurements.csv`
+- `label_distribution_summary.csv`
+- `signal_contribution_correlations.csv`
+- `controlled_regression.csv`
+
+Synthetic, mixed, missing, null, malformed, ambiguous, or manifest-disagreeing
+provenance fails closed before regression fitting, alpha search, lambda
+calibration, figures, reports, or Experiment 2 output writes. Existing
+historical artifacts must not be manually relabeled to satisfy this contract;
+future authorized Experiment 1 regeneration must write valid measurement-level
+provenance. Experiment 1/2 regeneration remains blocked until Project 1
+mathematics is finalized.
+
+Required numeric measurements in consumed Experiment 1 artifacts must also be
+present, genuinely numeric, and finite. Missing columns, nulls, NaN, infinities,
+malformed strings, empty strings, whitespace-only strings, and booleans in
+scientific numeric columns cause a hard failure. Invalid rows are not silently
+dropped, imputed, clipped, or replaced before calibration.
+
+## Output Safety
+
+Experiment 2 writes to `project-2-domain-aware-allocation/outputs/exp2/` by
+default. If the output directory exists and contains any file or subdirectory,
+the runner aborts before reading Experiment 1 measurements or writing new
+artifacts.
+
+To deliberately replace only Experiment 2 generated artifacts, use:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment2/run.py --overwrite
+```
+
+With `--overwrite`, the runner cleans only the selected Experiment 2 output
+directory. It refuses output directories that overlap the Experiment 1 input
+directory.
+
 ## Evaluation Pipeline
 
 Reusable evaluation code lives in:
@@ -74,8 +114,9 @@ python project-2-domain-aware-allocation/experiment/experiment2/run.py --ridge-a
 The alpha selection rule remains minimum mean leave-one-task-out RMSE.
 
 If the selected alpha equals the minimum or maximum tested value, Experiment 2
-emits a `RidgeAlphaBoundaryWarning`. The warning states that the optimum may lie
-outside the tested range. The code does not automatically expand the search.
+raises a `RidgeAlphaBoundaryError` before accepting the fit. The error states
+that the optimum may lie outside the tested range. The code does not
+automatically expand the search.
 
 ## Class Imbalance Input
 

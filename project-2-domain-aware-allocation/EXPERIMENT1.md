@@ -46,6 +46,13 @@ Useful development options:
 python project-2-domain-aware-allocation/experiment/experiment1/run.py --tasks CIFAR-CNN --num-rounds 1
 ```
 
+Output safety defaults to refusing non-empty output directories. To deliberately
+replace only Experiment 1 generated artifacts, use:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment1/run.py --overwrite
+```
+
 Do not run these commands during the current infrastructure hardening phase.
 
 ## Dataset Loading
@@ -117,7 +124,10 @@ The partitioner extracts labels from all five Project 1 benchmark datasets:
 ## Output Schema
 
 Outputs are written to `project-2-domain-aware-allocation/outputs/exp1/` by
-default.
+default. If that directory exists and contains any file or subdirectory, the
+runner aborts before dataset loading or training unless `--overwrite` is passed.
+With `--overwrite`, only the contents of the selected Experiment 1 output
+directory are cleaned before the run starts.
 
 ### `dataset_manifest.json`
 
@@ -142,6 +152,7 @@ One row per task/client:
 
 - `task`
 - `client_id`
+- `is_synthetic`
 - `num_samples`
 - `raw_class_counts`
 - `class_frequency`
@@ -185,6 +196,7 @@ raw input for later divergence computations.
 
 One row per task/round/client:
 
+- provenance: `is_synthetic`
 - partition metadata: `partition_strategy`, `partition_alpha`, `partition_seed`
 - hardware covariate: `hardware_batch_size`
 - Project 1 inherited covariates: `adaptive_rank`, `local_loss`,
@@ -201,9 +213,11 @@ One row per task/round/client:
 ### Analysis Tables
 
 - `signal_contribution_correlations.csv`: Pearson and Spearman correlations
-  between domain/update signals and marginal contribution.
+  between domain/update signals and marginal contribution. The table includes
+  `is_synthetic` source provenance for downstream validation.
 - `controlled_regression.csv`: standardized OLS coefficients for each signal
-  while controlling for `adaptive_rank` and `local_loss`.
+  while controlling for `adaptive_rank` and `local_loss`. The table includes
+  `is_synthetic` source provenance for downstream validation.
 
 ### Figures
 
