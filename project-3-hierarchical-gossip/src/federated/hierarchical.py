@@ -132,6 +132,22 @@ def affinity_mixing(affinity, neighbors, tau=1.0, w_min=0.1, client_ids=None,
         raise ValueError("client_ids must name exactly the clients in the neighbour map")
 
     n = len(order)
+    # The soft mixer assumes one connected graph. A disconnected map still
+    # yields a valid doubly stochastic W (block-diagonal), but its spectral gap
+    # is exactly zero and consensus never crosses the components -- a silent
+    # trap, not an error, unless refused here. (two_tier_mixing is exempt: its
+    # per-round matrix is block-diagonal by design and the bridge connects it.)
+    seen, frontier = {order[0]}, [order[0]]
+    while frontier:
+        for peer in neighbors[frontier.pop()]:
+            if peer not in seen:
+                seen.add(peer)
+                frontier.append(peer)
+    if len(seen) != n:
+        raise ValueError(
+            f"neighbour map is disconnected ({len(seen)} of {n} clients reachable from "
+            f"{order[0]!r}); affinity mixing on it would have spectral gap 0"
+        )
     a = np.asarray(affinity, dtype=float)
     if a.shape != (n, n):
         raise ValueError(f"affinity must have shape ({n}, {n}), got {a.shape}")

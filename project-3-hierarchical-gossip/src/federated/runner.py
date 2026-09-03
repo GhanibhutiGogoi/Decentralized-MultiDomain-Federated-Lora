@@ -144,9 +144,13 @@ class DecentralizedRunner:
 
             state, residual, tail = {}, {}, []
             for layer, y in mixed.items():
-                factors = factorize_delta(y, self.target_ranks[cid], self.alpha, dtype=y.dtype)
+                # Return factors in the client's own parameter dtype (y is in the
+                # float32/float64 working dtype); reconstruct x in the working
+                # dtype so the logged tail mass is truncation error, not rounding.
+                out_dtype = states[i][layer]['A'].dtype
+                factors = factorize_delta(y, self.target_ranks[cid], self.alpha, dtype=out_dtype)
                 r = factors['A'].shape[0]
-                x = (self.alpha / r) * (factors['B'] @ factors['A'])
+                x = (self.alpha / r) * (factors['B'].to(y.dtype) @ factors['A'].to(y.dtype))
                 state[layer] = factors
                 residual[layer] = y - x
                 y_energy = float(torch.sum(y * y))
@@ -230,5 +234,6 @@ class DecentralizedRunner:
         merged = {}
         for layer in deltas[0]:
             mean = torch.stack([d[layer] for d in deltas]).mean(dim=0)
-            merged[layer] = factorize_delta(mean, int(target_rank), self.alpha, dtype=mean.dtype)
+            out_dtype = states[0][layer]['A'].dtype
+            merged[layer] = factorize_delta(mean, int(target_rank), self.alpha, dtype=out_dtype)
         return merged

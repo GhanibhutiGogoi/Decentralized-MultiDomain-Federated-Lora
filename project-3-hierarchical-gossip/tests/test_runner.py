@@ -171,6 +171,23 @@ def test_error_feedback_memory_is_exactly_the_residual():
         assert torch.allclose(runner._memory[c.client_id]["fc"], mixed - x, atol=1e-5)
 
 
+@pytest.mark.parametrize("dtype", [torch.float16, torch.float32, torch.float64])
+def test_runner_returns_factors_in_the_clients_own_dtype(dtype):
+    """The mixed delta is computed in a float32/float64 working dtype; the
+    factors handed back must be in the dtype the client stores, exactly as
+    merge_states does per layer. float16 in must not come back as float32."""
+    n = 3
+    clients = [_Stub(i, 2, i) for i in range(n)]
+    for c in clients:
+        c.state = {k: {"A": v["A"].to(dtype), "B": v["B"].to(dtype)} for k, v in c.state.items()}
+    runner = DecentralizedRunner(clients, _uniform(n), {i: 4 for i in range(n)}, ALPHA)
+    new, diag = runner.gossip_round(0, [c.get_lora_state() for c in clients])
+    assert all(s["fc"]["A"].dtype == dtype and s["fc"]["B"].dtype == dtype for s in new)
+    assert np.isfinite(diag["mean_tail_mass"]) and np.isfinite(diag["consensus_distance"])
+    cs = runner.consensus_state(4)
+    assert cs["fc"]["A"].dtype == dtype
+
+
 # --- communication accounting ----------------------------------------------
 
 def test_messages_and_floats_count_nonzero_offdiagonal_entries():

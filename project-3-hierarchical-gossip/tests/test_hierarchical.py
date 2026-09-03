@@ -186,6 +186,25 @@ def test_affinity_mixing_validation():
         affinity_mixing(a, _ring(n), client_ids=[0, 1, 2, 9])
 
 
+def test_affinity_mixing_refuses_a_disconnected_neighbour_map():
+    """A disconnected map would produce a valid block-diagonal doubly
+    stochastic W with spectral gap exactly zero -- consensus never crosses the
+    components and nothing else says so. Refusing is the only loud option."""
+    nb = {0: [1], 1: [0], 2: [3], 3: [2]}
+    with pytest.raises(ValueError, match="disconnected"):
+        affinity_mixing(np.zeros((4, 4)), nb, tau=1.0, w_min=0.0)
+
+
+@pytest.mark.parametrize("n", (4, 6, 9))
+def test_equal_affinities_on_a_regular_graph_reproduce_metropolis_hastings(n):
+    """With every affinity equal the kernel is the graph's adjacency plus
+    self-loops; on a regular graph row-normalising already balances the
+    columns, so Sinkhorn returns exactly the Metropolis-Hastings matrix."""
+    nb = _ring(n)
+    wa = affinity_mixing(np.zeros((n, n)), nb, tau=1.0, w_min=0.0)
+    assert np.allclose(wa, metropolis_hastings(nb), atol=1e-9)
+
+
 def test_affinity_mixing_conserves_the_mean_to_tolerance_and_contracts_at_the_spectral_rate():
     """A Sinkhorn output is doubly stochastic to within SINKHORN_TOL, so the
     mean is conserved to about tol * max|x| per round -- not to 1e-12 the way
