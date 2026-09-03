@@ -38,6 +38,9 @@ and aggregation code are not redefined here.
 
 From the repository root:
 
+Prerequisite: Python 3.10 or newer. Project 2 uses modern Python type syntax
+that is evaluated at import time and is not supported by Python 3.9.
+
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1

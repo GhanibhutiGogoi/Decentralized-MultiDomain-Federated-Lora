@@ -9,6 +9,8 @@ from typing import Mapping, Sequence
 import numpy as np
 import pandas as pd
 
+from .diagnostics import format_diagnostic_value
+
 
 class MeasurementNumericValidationError(ValueError):
     """Raised when required Experiment 1 numeric measurements are invalid."""
@@ -95,7 +97,7 @@ def _context(df: pd.DataFrame, index: object) -> str:
         ("term", "term"),
     ]:
         if column in df.columns:
-            parts.append(f"{label}={df.at[index, column]!r}")
+            parts.append(f"{label}={format_diagnostic_value(df.at[index, column])}")
     return " ".join(parts)
 
 
@@ -113,7 +115,7 @@ def _invalid_message(
             context = " " + context
         examples.append(
             f"{_row_label(index)}{context} column={column!r} "
-            f"value={value!r} reason={reason}"
+            f"value={format_diagnostic_value(value)} reason={reason}"
         )
     suffix = "" if len(invalid) <= limit else f" ... (+{len(invalid) - limit} more)"
     return (

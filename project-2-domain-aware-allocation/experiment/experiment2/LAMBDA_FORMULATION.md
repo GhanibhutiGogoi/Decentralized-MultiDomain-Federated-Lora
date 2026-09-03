@@ -22,6 +22,11 @@ $$
 \text{Weight}_i = w_i \times q_i \times \lambda_i
 $$
 
+All existing fitted coefficients, validation metrics, correlations, and
+sensitivity values in this document are historical Experiment 2 outputs. They
+were not updated by this documentation synchronization and remain stale until
+the next authorized Experiment 1 and Experiment 2 rerun.
+
 The role of \(\lambda_i\) is to adjust the contribution of client \(i\) using
 domain and update-space evidence measured in Experiment 1, while preserving the
 Project 1 aggregation behavior whenever \(\lambda\) is disabled.
@@ -125,14 +130,26 @@ Let \(r^{\mathrm{imb}}_i\) be the Experiment 1 measurement
 Experiment 1 computes this ratio from the complete client class-count vector:
 
 $$
+\begin{aligned}
+\mathcal{P}_i &= \{n_{i,c}: n_{i,c} > 0\} \\
+r^{\mathrm{base}}_i
+&= \frac{\max_{n \in \mathcal{P}_i} n}{\min_{n \in \mathcal{P}_i} n} \\
 r^{\mathrm{imb}}_i
-= \frac{\max_c n_{i,c}}{\max(\min_c n_{i,c}, \epsilon)}.
+&= r^{\mathrm{base}}_i
+\left(1 + \frac{|\{c: n_{i,c}=0\}|}{C}\right).
+\end{aligned}
 $$
 
-Zero-count classes are therefore included through the denominator floor
-\(\epsilon\), so a one-class client distribution is not treated as balanced.
-If a client has no samples, the ratio is defined as \(0\) because no empirical
-class distribution exists.
+Zero-count classes are excluded from the denominator by computing the base
+ratio over positive class counts only. Missing classes are represented through
+the finite multiplicative penalty
+\(1 + \mathrm{zero\_class\_count}/\mathrm{num\_classes}\), so a one-class
+client distribution is not treated as balanced. If a client has no samples, the
+ratio is defined as \(0\) because no empirical class distribution exists.
+
+This implemented measure remains finite, increases monotonically with observed
+positive-count imbalance, and also increases monotonically as missing-class
+severity grows.
 
 The implemented transformed feature is:
 

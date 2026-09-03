@@ -145,7 +145,7 @@ class MeasurementProvenanceTest(unittest.TestCase):
     def test_one_synthetic_row_among_real_rows_is_rejected_with_task_and_row(self):
         with self.assertRaisesRegex(
             MeasurementProvenanceError,
-            "csv_row=3 task=TaskB",
+            "csv_row=3 task='TaskB'",
         ):
             _validate_all(measurements=_measurements([False, True]))
 

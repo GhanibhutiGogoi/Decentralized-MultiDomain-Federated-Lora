@@ -19,6 +19,7 @@ for path in (PROJECT2_ROOT, EXPERIMENT_ROOT):
         sys.path.insert(0, str(path))
 
 from experiment2.lambda_calibration import prepare_measurements
+from experiment2.diagnostics import format_diagnostic_value
 from experiment2.numeric_validation import (
     CORRELATION_SCHEMA,
     MEASUREMENT_SCHEMA,
@@ -222,6 +223,52 @@ class MeasurementNumericValidationTest(unittest.TestCase):
         self.assertIn("task='TaskA'", message)
         self.assertIn("client_id=1", message)
         self.assertIn("round=1", message)
+
+    def test_numpy_scalar_context_uses_stable_python_scalar_display(self):
+        df = _measurements()
+        df["round"] = df["round"].astype(object)
+        df["client_id"] = df["client_id"].astype(object)
+        df.loc[1, "round"] = np.int64(1)
+        df.loc[1, "client_id"] = np.int64(1)
+        df.loc[1, "quality_score"] = np.float64(np.nan)
+
+        with self.assertRaises(MeasurementNumericValidationError) as caught:
+            validate_numeric_table(df, MEASUREMENT_SCHEMA)
+
+        message = str(caught.exception)
+        self.assertIn("client_id=1", message)
+        self.assertIn("round=1", message)
+        self.assertNotIn("np.int64", message)
+
+    def test_diagnostic_value_formatting_is_stable_for_scalar_edge_cases(self):
+        cases = [
+            (1, "1"),
+            (np.int64(1), "1"),
+            (1.25, "1.25"),
+            (np.float64(1.25), "1.25"),
+            (np.bool_(True), "True"),
+            ("TaskA", "'TaskA'"),
+            (pd.NA, "pd.NA"),
+            (np.nan, "NaN"),
+            (np.inf, "+inf"),
+            (-np.inf, "-inf"),
+        ]
+
+        for value, expected in cases:
+            with self.subTest(value=value):
+                self.assertEqual(format_diagnostic_value(value), expected)
+
+    def test_numpy_bool_diagnostic_display_does_not_weaken_rejection(self):
+        df = _measurements()
+        df["quality_score"] = df["quality_score"].astype(object)
+        df.loc[1, "quality_score"] = np.bool_(True)
+
+        with self.assertRaises(MeasurementNumericValidationError) as caught:
+            validate_numeric_table(df, MEASUREMENT_SCHEMA)
+
+        message = str(caught.exception)
+        self.assertIn("value=True", message)
+        self.assertIn("boolean is not a scientific numeric value", message)
 
     def test_multiple_consumed_artifacts_are_validated_by_actual_schema(self):
         correlations = _correlations()

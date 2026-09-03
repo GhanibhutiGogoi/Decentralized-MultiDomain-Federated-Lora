@@ -10,6 +10,8 @@ from typing import Mapping
 import numpy as np
 import pandas as pd
 
+from .diagnostics import format_diagnostic_value
+
 
 PROVENANCE_COLUMN = "is_synthetic"
 
@@ -51,7 +53,7 @@ def _format_rows(df: pd.DataFrame, indices: list[object], limit: int = 8) -> str
     for index in indices[:limit]:
         detail = _format_row(index)
         if "task" in df.columns:
-            detail += f" task={df.at[index, 'task']}"
+            detail += f" task={format_diagnostic_value(df.at[index, 'task'])}"
         parts.append(detail)
     suffix = "" if len(indices) <= limit else f" ... (+{len(indices) - limit} more)"
     return ", ".join(parts) + suffix
