@@ -161,8 +161,13 @@ def affinity_mixing(affinity, neighbors, tau=1.0, w_min=0.1, client_ids=None,
         for peer in neighbors[cid]:
             support[index[cid], index[peer]] = True
 
-    # One global shift, not a per-row one: a per-row shift would break the
-    # symmetry that Sinkhorn needs to return a symmetric matrix.
+    # One global shift. A per-row shift would give the SAME fixed point --
+    # it is a positive diagonal row-scaling of the kernel, and Sinkhorn's
+    # doubly stochastic scaling is unique up to exactly such scalings -- so
+    # this is not a correctness choice. The global shift keeps the kernel
+    # itself symmetric, which is what triggers `sinkhorn`'s exact final
+    # symmetrisation; with an asymmetric kernel the output would be symmetric
+    # only to within the iteration tolerance.
     shift = a[support].max()
     spread_in_nats = (shift - a[support].min()) / float(tau)
     # Sinkhorn converges geometrically only while the kernel's dynamic range

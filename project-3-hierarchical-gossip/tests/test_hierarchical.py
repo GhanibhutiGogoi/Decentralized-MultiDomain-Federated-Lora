@@ -41,6 +41,19 @@ def test_sinkhorn_preserves_symmetry_exactly(seed):
     assert np.array_equal(w, w.T)
 
 
+@pytest.mark.parametrize("seed", range(3))
+def test_sinkhorn_fixed_point_is_invariant_to_positive_row_and_column_scaling(seed):
+    """Sinkhorn's doubly stochastic scaling is unique up to D1 K D2, so
+    pre-scaling rows or columns by any positive diagonal changes nothing.
+    This is why a per-row shift in affinity_mixing's kernel is behaviourally
+    identical to the global one (a mutation-test survivor, by design), and
+    why the global shift is chosen only to keep the kernel symmetric."""
+    rng = np.random.default_rng(seed)
+    k = rng.random((7, 7)) + 0.05
+    d1, d2 = np.diag(rng.random(7) + 0.1), np.diag(rng.random(7) + 0.1)
+    assert np.allclose(sinkhorn(k), sinkhorn(d1 @ k @ d2), atol=1e-8)
+
+
 def test_sinkhorn_respects_the_zero_pattern():
     m = np.array([[2.0, 1.0, 0.0], [1.0, 2.0, 1.0], [0.0, 1.0, 2.0]])
     w = sinkhorn(m)
