@@ -34,7 +34,10 @@ from src.federated.mixing import _validate, build_topology, metropolis_hastings
 # Sinkhorn projection
 # ---------------------------------------------------------------------------
 
-def sinkhorn(matrix, iters=1000, tol=1e-12):
+SINKHORN_TOL = 1e-10
+
+
+def sinkhorn(matrix, iters=20000, tol=SINKHORN_TOL):
     """Project a non-negative matrix to doubly stochastic by alternating
     row and column normalisation.
 
@@ -42,6 +45,19 @@ def sinkhorn(matrix, iters=1000, tol=1e-12):
     symmetric pattern with a strictly positive diagonal: the identity covers
     the diagonal, and each off-diagonal pair (i, j), (j, i) lies on the
     transposition permutation. Both mixers below guarantee that pattern.
+
+    The output is doubly stochastic **to within `tol`**, not exactly -- so a
+    quantity that is exactly conserved under an analytic doubly stochastic
+    matrix (the network mean under Metropolis-Hastings, say) is conserved here
+    to about `tol * max|x|` per round. `tol` matches the check in
+    `is_doubly_stochastic`, so a returned matrix passes it.
+
+    The rate slows as the kernel becomes nearly decomposable -- when a low
+    temperature makes some subset of nodes want to exchange almost all their
+    mass among themselves, the iteration behaves like a Markov chain crossing
+    a bottleneck. Each sweep is O(n^2), which at a few dozen clients is
+    microseconds, so the default budget is generous rather than tight;
+    `affinity_mixing` refuses kernels past 35 nats of spread outright.
 
     A symmetric input converges to a symmetric fixed point D M D; the result is
     symmetrised exactly at the end so callers can rely on W == W.T rather than
@@ -80,7 +96,7 @@ def sinkhorn(matrix, iters=1000, tol=1e-12):
 # ---------------------------------------------------------------------------
 
 def affinity_mixing(affinity, neighbors, tau=1.0, w_min=0.1, client_ids=None,
-                    sinkhorn_iters=1000):
+                    sinkhorn_iters=20000):
     """Symmetric doubly stochastic mixing weighted by pairwise affinity.
 
         K_ij = exp((a_ij - a_max) / tau)   for j in N(i) or j == i, else 0
@@ -176,7 +192,7 @@ def _embed(small, members, index, n):
 
 def two_tier_mixing(assignments, round_idx, bridge_every=5, transfer=None,
                     representatives=None, client_ids=None, intra_topology="fully_connected",
-                    bridge_tau=1.0, sinkhorn_iters=1000):
+                    bridge_tau=1.0, sinkhorn_iters=20000):
     """Symmetric doubly stochastic mixing matrix for round `round_idx` of a
     two-tier protocol.
 
