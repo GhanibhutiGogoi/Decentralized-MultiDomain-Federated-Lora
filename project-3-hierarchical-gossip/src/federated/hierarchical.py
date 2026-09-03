@@ -279,7 +279,14 @@ def two_tier_mixing(assignments, round_idx, bridge_every=5, transfer=None,
         representatives = {label: groups[label][0] for label in labels}
     reps = []
     for label in labels:
+        if label not in representatives:
+            raise ValueError(
+                f"representatives is missing cluster {label!r}; expected one entry per "
+                f"cluster label {labels}"
+            )
         rep = representatives[label]
+        if rep not in assignments:
+            raise ValueError(f"representative {rep!r} for cluster {label!r} is not a known client")
         if assignments[rep] != label:
             raise ValueError(f"representative {rep!r} is not a member of cluster {label!r}")
         reps.append(rep)

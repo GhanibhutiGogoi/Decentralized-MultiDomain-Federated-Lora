@@ -218,6 +218,72 @@ def test_lemma5_without_compression_the_recursion_is_geometric():
         assert b <= lam2 ** 2 * a + 1e-12
 
 
+@pytest.mark.parametrize("seed", range(3))
+def test_lemma5_one_step_recursion_holds_with_gradient_steps(seed):
+    """Lemma 5(a) with eta > 0, on the runner with real local steps:
+    sqrt(Xi^{t+1}) <= (1-rho)(sqrt(Xi^t) + ||X~ - X||_F) + ||(I-J)E^t||_F,
+    where X~ - X is whatever the local step did (the -eta G of the analysis)."""
+    n = 8
+    w = metropolis_hastings(build_topology(list(range(n)), "ring"))
+    lam2 = 1.0 - spectral_gap(w)
+    g = torch.Generator().manual_seed(100 + seed)
+    M = [torch.randn(6, 2, generator=g, dtype=torch.float64) @ torch.randn(2, 8, generator=g, dtype=torch.float64)
+         for _ in range(n)]
+
+    class C:
+        def __init__(self, i):
+            self.client_id, self.domain_id, self.i = i, 0, i
+            self.state = {"fc": factorize_delta(torch.randn(6, 8, generator=g, dtype=torch.float64), 2, ALPHA)}
+        def train(self):
+            X = _delta(self.state)
+            self.state = {"fc": factorize_delta(X - 0.3 * (X - M[self.i]), 2, ALPHA)}
+        def evaluate(self): return {"accuracy": 0.0}
+        def get_lora_state(self): return {k: {"A": v["A"].clone(), "B": v["B"].clone()} for k, v in self.state.items()}
+        def set_lora_state(self, s): self.state = s
+
+    cl = [C(i) for i in range(n)]
+    runner = DecentralizedRunner(cl, lambda r: w, {i: 2 for i in range(n)}, ALPHA)
+    xi = lambda X: torch.sum((X - X.mean(0)) ** 2).item()
+    W = torch.tensor(w)
+    for t in range(6):
+        X = torch.stack([_delta(c.get_lora_state()) for c in cl])
+        for c in cl:
+            c.train()
+        Xt = torch.stack([_delta(c.get_lora_state()) for c in cl])
+        step = torch.norm(Xt - X).item()
+        Y = torch.einsum("ij,jab->iab", W, Xt)
+        new, _ = runner.gossip_round(t, [c.get_lora_state() for c in cl])
+        for c, s in zip(cl, new):
+            c.set_lora_state(s)
+        Xn = torch.stack([_delta(s) for s in new])
+        E = Xn - Y
+        e_dev = torch.sum((E - E.mean(0)) ** 2).item()
+        assert np.sqrt(xi(Xn)) <= lam2 * (np.sqrt(xi(X)) + step) + np.sqrt(e_dev) + 1e-8
+
+
+def test_lemma5_unrolled_bound_holds_with_compression_only():
+    """The unrolled form of Lemma 5(a) at eta = 0, c = 1:
+    Xi^t <= (1-rho)^t Xi^0 + (2/rho^2) sup_s ||E^s||_F^2, for every t."""
+    n = 10
+    w = metropolis_hastings(build_topology(list(range(n)), "ring"))
+    rho = spectral_gap(w)
+    cl = _clients(n, 3, seed0=300)
+    runner = DecentralizedRunner(cl, lambda r: w, {i: 1 for i in range(n)}, ALPHA)
+    states = [c.get_lora_state() for c in cl]
+    X0 = torch.stack([_delta(s) for s in states])
+    xi0 = torch.sum((X0 - X0.mean(0)) ** 2).item()
+    W = torch.tensor(w)
+    sup_e2 = 0.0
+    for t in range(1, 31):
+        X = torch.stack([_delta(s) for s in states])
+        Y = torch.einsum("ij,jab->iab", W, X)
+        states, _ = runner.gossip_round(t, states)
+        Xn = torch.stack([_delta(s) for s in states])
+        sup_e2 = max(sup_e2, torch.sum((Xn - Y) ** 2).item())
+        xi_t = torch.sum((Xn - Xn.mean(0)) ** 2).item()
+        assert xi_t <= (1 - rho) ** t * xi0 + (2.0 / rho ** 2) * sup_e2 + 1e-8, t
+
+
 # --- Lemma 6: the self-weight floor -----------------------------------------------
 
 def test_lemma6_floor_shifts_eigenvalues_affinely():

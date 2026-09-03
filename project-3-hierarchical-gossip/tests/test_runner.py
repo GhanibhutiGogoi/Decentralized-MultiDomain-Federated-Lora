@@ -188,6 +188,17 @@ def test_runner_returns_factors_in_the_clients_own_dtype(dtype):
     assert cs["fc"]["A"].dtype == dtype
 
 
+def test_runner_refuses_adapters_on_different_devices():
+    """A raw torch.stack device error is not an explanation."""
+    n = 2
+    clients = [_Stub(i, 2, i) for i in range(n)]
+    runner = DecentralizedRunner(clients, _uniform(n), {i: 2 for i in range(n)}, ALPHA)
+    states = [c.get_lora_state() for c in clients]
+    states[1] = {k: {"A": v["A"].to("meta"), "B": v["B"].to("meta")} for k, v in states[1].items()}
+    with pytest.raises(ValueError, match="different devices"):
+        runner.gossip_round(0, states)
+
+
 # --- communication accounting ----------------------------------------------
 
 def test_messages_and_floats_count_nonzero_offdiagonal_entries():

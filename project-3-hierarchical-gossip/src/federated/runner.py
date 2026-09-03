@@ -124,6 +124,12 @@ class DecentralizedRunner:
         n = len(self.clients)
         deltas = [lora_to_delta(states[i], self.alpha) for i in range(n)]
         layers = list(deltas[0])
+        devices = {d[layer].device for d in deltas for layer in d}
+        if len(devices) > 1:
+            raise ValueError(
+                f"clients' adapters live on different devices {sorted(map(str, devices))}; "
+                "move them to one device before mixing"
+            )
         for k, d in enumerate(deltas[1:], start=1):
             if list(d) != layers:
                 raise ValueError(f"client {self.client_ids[k]!r} has a different layer set")
@@ -145,8 +151,12 @@ class DecentralizedRunner:
             state, residual, tail = {}, {}, []
             for layer, y in mixed.items():
                 # Return factors in the client's own parameter dtype (y is in the
-                # float32/float64 working dtype); reconstruct x in the working
-                # dtype so the logged tail mass is truncation error, not rounding.
+                # float32/float64 working dtype). The factors are already cast to
+                # that dtype, so the residual y - x below is truncation error PLUS
+                # storage-dtype quantisation -- deliberately: that is the whole
+                # discrepancy between what was mixed and what the client can hold,
+                # which is exactly what error feedback should carry forward. The
+                # upcast only keeps the matmul itself from adding a third error.
                 out_dtype = states[i][layer]['A'].dtype
                 factors = factorize_delta(y, self.target_ranks[cid], self.alpha, dtype=out_dtype)
                 r = factors['A'].shape[0]

@@ -367,6 +367,10 @@ def test_two_tier_validation():
         two_tier_mixing(assign, 0, bridge_every=1, transfer=np.full((2, 2), np.nan))
     with pytest.raises(ValueError, match="not a member"):
         two_tier_mixing(assign, 0, bridge_every=1, representatives={0: 2, 1: 3})
+    with pytest.raises(ValueError, match="missing cluster"):
+        two_tier_mixing(assign, 0, bridge_every=1, representatives={0: 0})
+    with pytest.raises(ValueError, match="not a known client"):
+        two_tier_mixing(assign, 0, bridge_every=1, representatives={0: 0, 1: 99})
     with pytest.raises(ValueError, match="unique"):
         two_tier_mixing(assign, 0, client_ids=[0, 0, 1, 2])
 
