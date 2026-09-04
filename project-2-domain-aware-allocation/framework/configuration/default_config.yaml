@@ -1,0 +1,78 @@
+data:
+  data_dir: ./experiment/data
+  download: false
+  synthetic: false
+  manifest_filename: dataset_manifest.json
+  project1_benchmark_tasks:
+    CIFAR-CNN:
+      dataset: cifar10
+      expected_classes: 10
+      source_library: torchvision.datasets.CIFAR10
+    Fashion-MLP:
+      dataset: fashion_mnist
+      expected_classes: 10
+      source_library: torchvision.datasets.FashionMNIST
+    AGNews-LSTM:
+      dataset: ag_news
+      expected_classes: 4
+      source_library: torchtext.datasets.AG_NEWS
+    Tabular-MLP:
+      dataset: uci_heart_disease
+      expected_classes: 2
+      source_library: UCI processed.cleveland.data
+    Audio-1DCNN:
+      dataset: speech_commands
+      expected_classes: 35
+      source_library: torchaudio.datasets.SPEECHCOMMANDS
+  cifar100_domain_dataset: cifar100
+  n_domains: 5
+  clients_per_domain: 3
+  dirichlet_alpha: 0.5
+  batch_size: 64
+
+model:
+  base: resnet18
+  pretrained: true
+  lora_alpha: 32
+  num_classes: 100
+
+complexity:
+  n_feature_samples: 500
+  weights:
+    entropy: 0.3
+    diversity: 0.2
+    dimensionality: 0.2
+    difficulty: 0.2
+    imbalance: 0.1
+
+oracle:
+  candidate_ranks: [4, 8, 16, 32, 64]
+  training_epochs: 20
+  learning_rate: 0.001
+
+allocation:
+  min_rank: 4
+  max_rank: 64
+  base_rank: 16
+
+evaluation:
+  ridge_alphas: [0.01, 0.1, 1.0, 10.0, 100.0]
+  extended_ridge_alphas: [300.0, 500.0, 1000.0]
+  alpha_selection_rule: minimum mean leave-one-task-out RMSE
+  ranking_metrics_not_used_for_selection: true
+  permutation_seed: 42
+  permutation_count: 1000
+
+training:
+  local_epochs: 5
+  learning_rate: 0.001
+  n_rounds: 50
+  optimizer: adam
+  weight_decay: 0.0001
+  seed: 42
+
+logging:
+  log_dir: ./logs
+  results_dir: ./results
+  save_every: 10
+  verbose: true

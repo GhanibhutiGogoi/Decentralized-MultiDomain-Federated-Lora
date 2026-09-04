@@ -1,59 +1,137 @@
-# Project 2: Domain-Aware LoRA Rank Allocation
+# Project 2: Domain-Aware Allocation
 
-**Part of the AH-LoRA (Adaptive Heterogeneous LoRA) research framework.**
+Project 2 extends the Project 1 federated LoRA runtime while keeping Project 2
+in its own redesigned repository structure. The current phase is infrastructure
+hardening before the final Experiment 1 and Experiment 2 rerun.
 
-## Research Question
+Project 1 mathematical formulations, adaptive rank logic, lambda calibration,
+and aggregation code are not redefined here.
 
-> Given a federated client with data distribution D and resource constraints R, what is the optimal LoRA rank r* that maximizes accuracy?
+## Current Status
 
-## Key Innovation
+- Experiment 1 runner exists at `experiment/experiment1/run.py`.
+- Experiment 2 runner exists at `experiment/experiment2/run.py`.
+- Existing outputs under `outputs/` are historical artifacts and should not be
+  regenerated until the Project 1 mathematical review is complete.
+- Dataset loading is centralized in `framework/datasets/factory.py`.
+- Experiment 2 evaluation infrastructure is prepared in
+  `experiment/experiment2/evaluation.py`, `figures.py`, and `reporting.py`.
 
-A **domain complexity metric** that automatically determines optimal LoRA rank for each client based on 5 data-driven sub-metrics, eliminating the need for manual rank tuning in heterogeneous federated learning.
+## Structure
 
-## Quick Start
+- `framework/datasets/`: centralized dataset factory plus modality adapters.
+- `framework/partitioning/`: IID and Dirichlet client partitioning utilities.
+- `framework/models/`: Project 2 model support code.
+- `framework/federated/`: Project 2 federated training infrastructure.
+- `framework/aggregation/`: aggregation utilities.
+- `framework/rank_allocation/`: rank allocation utilities.
+- `framework/analysis/`: analysis utilities.
+- `framework/visualization/`: plotting utilities.
+- `framework/configuration/`: default infrastructure configuration.
+- `framework/utils/`: reproducibility and runtime environment helpers.
+- `experiment/data/`: Project 2 dataset cache root.
+- `experiment/experiment1/`: domain-signal and marginal-contribution runner.
+- `experiment/experiment2/`: lambda calibration from Experiment 1 outputs.
+- `outputs/exp1/`, `outputs/exp2/`: experiment output directories.
 
-```bash
-cd project-2-domain-aware-allocation
+## Setup
 
-# Install dependencies
-pip install -r requirements.txt
+From the repository root:
 
-# Run experiments in order:
-python experiments/01_data_and_complexity.py   # ~5 min
-python experiments/02_oracle_rank_search.py    # ~2 hours
-python experiments/03_correlation_analysis.py  # seconds
-python experiments/04_allocation_comparison.py # ~30 min
+Prerequisite: Python 3.10 or newer. Project 2 uses modern Python type syntax
+that is evaluated at import time and is not supported by Python 3.9.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r project-2-domain-aware-allocation/requirements.txt
 ```
 
-## Project Structure
+Required core packages are declared in `requirements.txt`, including `torch`,
+`torchvision`, `torchtext`, `torchaudio`, `pandas`, `numpy`, `scipy`,
+`scikit-learn`, and `matplotlib`.
 
-```
-project-2-domain-aware-allocation/
-├── configs/default_config.yaml     # All hyperparameters
-├── src/
-│   ├── data/cifar100_domains.py    # CIFAR-100 → 5 domains, 15 clients
-│   ├── models/lora_resnet.py       # ResNet-18 + variable-rank LoRA
-│   ├── complexity/
-│   │   └── domain_complexity.py    # Core: 5 sub-metrics → complexity score
-│   ├── allocation/
-│   │   └── rank_allocator.py       # Uniform / Random / Domain-Aware / Oracle
-│   ├── federated/
-│   │   ├── client.py               # Local training client
-│   │   └── hetero_fedavg.py        # FedAvg with heterogeneous ranks
-│   └── utils/
-│       ├── metrics.py              # Tracking & fairness metrics
-│       └── visualization.py        # All plots
-├── experiments/
-│   ├── 01_data_and_complexity.py   # Compute complexity scores
-│   ├── 02_oracle_rank_search.py    # Brute-force optimal rank
-│   ├── 03_correlation_analysis.py  # Validate hypothesis
-│   └── 04_allocation_comparison.py # Strategy comparison
-└── results/                        # Auto-created outputs
+## Dataset Workflow
+
+All Project 2 experiments should load datasets through
+`framework.datasets.DatasetFactory`.
+
+Defaults:
+
+- data root: `project-2-domain-aware-allocation/experiment/data`
+- real datasets only
+- automatic synthetic fallback disabled
+- automatic download disabled
+- missing real datasets fail with a clear error
+
+To explicitly download missing real datasets during a future rerun:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment1/run.py --download-datasets
 ```
 
-## Week 1-2 Milestones
+Synthetic data is allowed only when requested explicitly for supported tasks:
 
-- **Milestone 1**: Prove domain complexity metric predicts optimal rank (Experiments 01-03)
-- **Milestone 2**: Show domain-aware allocation beats uniform/random in FedAvg (Experiment 04)
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment1/run.py --synthetic-datasets AGNews-LSTM
+```
 
-See [WEEK1-2_GUIDE.md](WEEK1-2_GUIDE.md) for detailed explanation of all code.
+## Validation And Manifests
+
+Before training begins, each loaded dataset is validated for:
+
+- cache presence
+- dataset object type
+- split sample counts when known
+- class count
+- synthetic flag
+- download status
+
+Each experiment output directory receives `dataset_manifest.json`. Experiment 1
+records raw dataset provenance directly. Experiment 2 requires Experiment 1's
+dataset manifest and stores it as its source dataset provenance.
+
+## Experiment Workflow
+
+Experiment 1:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment1/run.py --partition dirichlet --alpha 0.5 --seed 42
+```
+
+Experiment 2:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment2/run.py
+```
+
+Experiment 2 automatically computes regression metrics, ranking metrics, and
+ranking permutation tests during future reruns. Pooled permutation tests are
+stratified by the configured aggregation context columns. The ranking metrics
+are reported only; Form A/Form B selection is not changed by them.
+
+Experiment 2 requires explicit `is_synthetic` provenance in Experiment 1
+measurement tables. It does not backfill missing provenance as real data.
+
+Class imbalance is computed with a finite missing-class penalty:
+`max_count / min_positive_count * (1 + zero_class_count / num_classes)`.
+
+Prepared optional Ridge-alpha controls for a future rerun:
+
+If Ridge alpha selection lands on the minimum or maximum tested value,
+Experiment 2 raises `RidgeAlphaBoundaryError`; the search grid is not expanded
+automatically.
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment2/run.py --include-extended-ridge-alphas
+```
+
+or:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment2/run.py --ridge-alphas 0.01 0.1 1 10 100 300 500 1000
+```
+
+Do not rerun experiments during the current infrastructure hardening phase.
+See `EXPERIMENT1.md` for Experiment 1 details and `EXPERIMENT2.md` for
+Experiment 2 evaluation infrastructure.

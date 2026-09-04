@@ -1,4 +1,4 @@
-# audio dataset (Speech Commands / synthetic)
+# audio dataset (Speech Commands / explicit synthetic mode)
 
 import numpy as np
 import torch
@@ -8,14 +8,26 @@ from torch.utils.data import Dataset, DataLoader
 class AudioDataset(Dataset):
     """
     Google Speech Commands dataset.
-    Falls back to synthetic waveform data if torchaudio is unavailable.
+    Synthetic waveform data is used only when explicitly requested.
     """
     SAMPLE_RATE = 16000
     NUM_CLASSES = 35
 
-    def __init__(self, split="train"):
+    def __init__(self, split="train", synthetic=False):
         super().__init__()
+        self.is_synthetic = bool(synthetic)
         self._loaded = False
+        if self.is_synthetic:
+            rng = np.random.RandomState(3 if split == "train" else 9)
+            n   = 3000 if split == "train" else 600
+            self.synth = [
+                (torch.from_numpy(
+                    rng.randn(1, self.SAMPLE_RATE).astype(np.float32)),
+                 rng.randint(0, self.NUM_CLASSES))
+                for _ in range(n)
+            ]
+            return
+
         try:
             import torchaudio
             subset = "training" if split == "train" else "validation"
@@ -27,17 +39,12 @@ class AudioDataset(Dataset):
             self.NUM_CLASSES = len(self.label2idx)
             self.data        = ds
             self._loaded     = True
-
-        except Exception as e:
-            print(f"[Audio] {e}. Using synthetic data.")
-            rng = np.random.RandomState(3 if split == "train" else 9)
-            n   = 3000 if split == "train" else 600
-            self.synth = [
-                (torch.from_numpy(
-                    rng.randn(1, self.SAMPLE_RATE).astype(np.float32)),
-                 rng.randint(0, self.NUM_CLASSES))
-                for _ in range(n)
-            ]
+        except (ImportError, OSError, RuntimeError) as e:
+            raise RuntimeError(
+                "Unable to load real SpeechCommands audio data. Install a "
+                "working torchaudio package and ensure the dataset is "
+                "available, or call get_audio(synthetic=True) explicitly."
+            ) from e
 
     def __len__(self):
         return len(self.data) if self._loaded else len(self.synth)
@@ -55,9 +62,9 @@ class AudioDataset(Dataset):
         return self.synth[i]
 
 
-def get_audio(batch_size=32):
+def get_audio(batch_size=32, synthetic=False):
     """Returns (train_dataset, test_dataset, test_loader) for audio data."""
-    train       = AudioDataset("train")
-    test        = AudioDataset("test")
+    train       = AudioDataset("train", synthetic=synthetic)
+    test        = AudioDataset("test", synthetic=synthetic)
     test_loader = DataLoader(test, batch_size=batch_size)
     return train, test, test_loader

@@ -1,0 +1,36 @@
+{
+  "project": "Project 2",
+  "experiment": "Experiment 1",
+  "project1_reuse": true,
+  "partition": {
+    "strategy": "dirichlet",
+    "alpha": 0.5,
+    "seed": 42,
+    "min_client_size": 1,
+    "num_workers": 0,
+    "pin_memory": false
+  },
+  "num_rounds": 5,
+  "num_clients": 3,
+  "client_batch_sizes": [
+    16,
+    64,
+    256
+  ],
+  "tasks": [
+    "CIFAR-CNN",
+    "Fashion-MLP",
+    "AGNews-LSTM",
+    "Tabular-MLP",
+    "Audio-1DCNN"
+  ],
+  "outputs": {
+    "label_summary_csv": "label_distribution_summary.csv",
+    "label_raw_json": "label_distribution_raw.json",
+    "per_round_measurements_csv": "per_round_client_measurements.csv",
+    "accuracy_curves_csv": "accuracy_curves.csv",
+    "correlations_csv": "signal_contribution_correlations.csv",
+    "controlled_regression_csv": "controlled_regression.csv",
+    "figures_dir": "figures/"
+  }
+}

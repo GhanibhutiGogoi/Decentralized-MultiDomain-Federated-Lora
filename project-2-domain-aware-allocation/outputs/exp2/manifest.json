@@ -1,0 +1,52 @@
+{
+  "project": "Project 2",
+  "experiment": "Experiment 2",
+  "source_experiment": "C:\\Users\\eddyt\\Documents\\GitHub\\Decentralized-MultiDomain-Federated-Lora\\project-2-domain-aware-allocation\\outputs\\exp1",
+  "output_dir": "C:\\Users\\eddyt\\Documents\\GitHub\\Decentralized-MultiDomain-Federated-Lora\\project-2-domain-aware-allocation\\outputs\\exp2",
+  "form_a_features": [
+    "log_update_l2",
+    "js_to_global"
+  ],
+  "form_b_features": [
+    "log_update_l2",
+    "js_to_global",
+    "update_cosine_distance_to_mean",
+    "normalized_entropy",
+    "log_class_imbalance_ratio"
+  ],
+  "selected_ridge_alpha": 100.0,
+  "lambda_scale": 0.8863940762603306,
+  "normalization": {
+    "context": [
+      "task",
+      "round"
+    ],
+    "positive_transform": "exp(scale * centered_score)",
+    "clip": [
+      0.5,
+      1.5
+    ],
+    "renormalize_context_mean": 1.0
+  },
+  "aggregation_rule": "Weight = w * q * lambda",
+  "disabled_behavior": "lambda_weights=None preserves Weight = w * q",
+  "outputs": [
+    "lambda_values.csv",
+    "lambda_validation.csv",
+    "orthogonality_report.csv",
+    "cross_validation.csv",
+    "fitted_coefficients.csv",
+    "comparison_report.md",
+    "figures/"
+  ],
+  "sanity_check_weights": [
+    0.16666666666666666,
+    0.3333333333333333,
+    0.5
+  ],
+  "sanity_check_weights_with_lambda": [
+    0.16666666666666666,
+    0.3333333333333333,
+    0.5
+  ]
+}
