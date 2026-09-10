@@ -113,8 +113,13 @@ def affinity_mixing(affinity, neighbors, tau=1.0, w_min=0.1, client_ids=None,
             neighbours; large tau approaches uniform weighting on the support.
         w_min: self-weight floor in [0, 1). Applied as a convex combination
             with the identity, which keeps W symmetric and doubly stochastic
-            and guarantees W_ii >= w_min. It also shrinks the spectral gap by
-            a factor (1 - w_min): the price of never fully trusting peers.
+            and guarantees W_ii >= w_min. Every eigenvalue moves affinely,
+            lambda -> w_min + (1 - w_min) lambda, so the ALGEBRAIC gap 1 - lambda_2
+            scales by exactly (1 - w_min). The ABSOLUTE gap 1 - max|lambda| that
+            governs consensus satisfies rho(W) >= (1 - w_min) rho(W0), with
+            equality iff the dominant non-consensus eigenvalue of W0 is
+            non-negative; when it is negative the floor damps that oscillatory
+            mode and the gap can grow. See Lemma 6 of the analysis.
         client_ids: row/column order. Defaults to sorted(neighbors).
 
     Returns:
@@ -308,6 +313,35 @@ def two_tier_mixing(assignments, round_idx, bridge_every=5, transfer=None,
     return w_intra @ w_bridge @ w_intra
 
 
+def two_tier_message_cost(assignments, round_idx, bridge_every=5, client_ids=None,
+                          intra_topology="fully_connected"):
+    """Directed messages a two-tier round costs under its OPERATIONAL schedule.
+
+    `DecentralizedRunner` charges the support of the effective matrix it
+    applies, and on a bridge round W_intra @ W_bridge @ W_intra is dense across
+    clusters, so that count is what a client would pay to receive every
+    effective contributor directly. The protocol as designed instead runs three
+    stages -- intra exchange, representative bridge, intra exchange -- and this
+    is that cost:
+
+        non-bridge round:  sum over clusters of (directed intra edges)
+        bridge round:      2 * intra  +  K (K - 1) among the K representatives
+
+    Report both when comparing topologies; they answer different questions.
+    """
+    if int(bridge_every) < 1:
+        raise ValueError(f"bridge_every must be >= 1, got {bridge_every}")
+    order = list(client_ids) if client_ids is not None else sorted(assignments)
+    groups = clusters_from_assignments(assignments, client_ids=order)
+    intra = 0
+    for members in groups.values():
+        if len(members) > 1:
+            intra += sum(len(v) for v in build_topology(members, intra_topology).values())
+    k = len(groups)
+    bridge_round = int(round_idx) % int(bridge_every) == int(bridge_every) - 1 and k > 1
+    return 2 * intra + k * (k - 1) if bridge_round else intra
+
+
 def window_product(mixing_fn, start_round, length):
     """Product W_{t+L-1} ... W_{t+1} W_t of a time-varying mixing sequence.
 
@@ -326,11 +360,13 @@ def window_product(mixing_fn, start_round, length):
 
 
 def is_doubly_stochastic(w, atol=1e-10):
-    """True when rows and columns each sum to 1 and all entries are >= 0."""
+    """True when rows and columns each sum to 1 (to within `atol`, absolute --
+    `np.allclose`'s default relative tolerance of 1e-5 would silently widen
+    this to 1e-5 on sums of 1) and all entries are >= 0."""
     w = np.asarray(w, dtype=float)
     return (
         w.ndim == 2 and w.shape[0] == w.shape[1]
-        and np.allclose(w.sum(axis=1), 1.0, atol=atol)
-        and np.allclose(w.sum(axis=0), 1.0, atol=atol)
+        and bool(np.abs(w.sum(axis=1) - 1.0).max() <= atol)
+        and bool(np.abs(w.sum(axis=0) - 1.0).max() <= atol)
         and bool((w >= -atol).all())
     )

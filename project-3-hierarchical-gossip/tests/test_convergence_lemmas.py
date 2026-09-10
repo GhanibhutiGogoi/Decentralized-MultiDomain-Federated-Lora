@@ -299,6 +299,40 @@ def test_lemma6_floor_shifts_eigenvalues_affinely():
         assert (np.diag(w) >= w_min - 1e-12).all()
 
 
+def test_lemma6_absolute_gap_bound_and_exact_case():
+    """rho(W) = 1 - max_{k>=2} |w_min + (1 - w_min) lambda_k(W0)| >= (1 - w_min) rho(W0),
+    with equality iff W0's dominant non-consensus eigenvalue is non-negative."""
+    def nonconsensus(w):
+        ev = np.linalg.eigvalsh(w)
+        return np.delete(ev, np.argmin(np.abs(ev - 1.0)))
+
+    # Odd ring: dominant non-consensus mode positive -> equality.
+    n = 9
+    a = np.random.default_rng(2).normal(size=(n, n))
+    w0 = affinity_mixing(a, build_topology(list(range(n)), "ring"), tau=1.0, w_min=0.0)
+    ev0 = nonconsensus(w0)
+    assert ev0[np.argmax(np.abs(ev0))] > 0
+    for w_min in (0.2, 0.5):
+        w = affinity_mixing(a, build_topology(list(range(n)), "ring"), tau=1.0, w_min=w_min)
+        formula = 1 - np.max(np.abs(w_min + (1 - w_min) * ev0))
+        assert np.isclose(spectral_gap(w), formula, atol=1e-10)
+        assert np.isclose(spectral_gap(w), (1 - w_min) * spectral_gap(w0), atol=1e-10)
+
+    # Even ring with negligible self-affinity: dominant mode ~ -1 -> strict inequality.
+    n = 6
+    a = np.full((n, n), 0.0)
+    np.fill_diagonal(a, -12.0)
+    nb = build_topology(list(range(n)), "ring")
+    w0 = affinity_mixing(a, nb, tau=1.0, w_min=0.0)
+    ev0 = nonconsensus(w0)
+    assert ev0[np.argmax(np.abs(ev0))] < -0.99
+    for w_min in (0.2, 0.5):
+        w = affinity_mixing(a, nb, tau=1.0, w_min=w_min)
+        formula = 1 - np.max(np.abs(w_min + (1 - w_min) * ev0))
+        assert np.isclose(spectral_gap(w), formula, atol=1e-10)
+        assert spectral_gap(w) > (1 - w_min) * spectral_gap(w0) + 0.1
+
+
 # --- Theorem B vs Theorem A, qualitatively: the floor and what feedback does -------
 
 def _quadratic_run(n, target_rank, error_feedback, rounds=400, eta=0.3, seed=0, star_rank=2):

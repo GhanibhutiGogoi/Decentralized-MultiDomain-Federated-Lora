@@ -16,9 +16,21 @@ One round, for client i with target rank r_i:
     x_i  = SVD_{r_i}(y_i)                    # what the client can store
     m_i  = y_i - x_i                         # residual; kept only with feedback
 
-The residual's relative energy ||y_i - x_i||^2 / ||y_i||^2 is the tail-mass
-term epsilon_r in docs/research/2026-09-03-project3-convergence-analysis.md
-and is logged every round.
+Two residual diagnostics are logged every round, and they are different
+quantities:
+
+- `mean_residual_energy` = (1/N) sum_i ||y_i - x_i||_F^2, summed over layers.
+  This is the per-round estimate of the theorem's epsilon^2 (assumption A5 of
+  docs/research/2026-09-03-project3-convergence-analysis.md) and can be
+  substituted into Theorems A and B directly.
+- `mean_tail_mass` = mean over clients of ||y_i - x_i||^2 / ||y_i||^2, the
+  relative form. Dimensionless and easy to read, but NOT the theorem's epsilon.
+
+Communication accounting (`messages`, `floats`) charges the support of the
+effective matrix W applied in the round: every nonzero off-diagonal W_ij is one
+transmission of j's factors to i. For a two-tier schedule that is the dense
+bridge-round matrix; the operational three-stage cost is
+`hierarchical.two_tier_message_cost`. Report both when comparing topologies.
 
 Error feedback stores one dense (d_out x d_in) residual per LoRA layer per
 client. On the fc-only testbed that is 100 x 512 floats -- trivial. On a model
@@ -75,6 +87,7 @@ class DecentralizedRunner:
             'floats_per_round': [],
             'mean_tail_mass': [],
             'max_tail_mass': [],
+            'mean_residual_energy': [],
             'consensus_distance': [],
         }
 
@@ -90,6 +103,14 @@ class DecentralizedRunner:
             raise ValueError(
                 f"mixing matrix for round {round_idx} is not doubly stochastic; "
                 "mean preservation and the spectral-gap argument both need it"
+            )
+        if np.abs(w - w.T).max() > 1e-10:
+            # A permutation matrix is doubly stochastic and would pass the check
+            # above, but Lemma 1's contraction argument needs W = W^T. Every
+            # mixer in this package produces a symmetric matrix by construction.
+            raise ValueError(
+                f"mixing matrix for round {round_idx} is not symmetric; the "
+                "convergence analysis assumes W = W^T"
             )
         return w
 
@@ -134,7 +155,7 @@ class DecentralizedRunner:
             if list(d) != layers:
                 raise ValueError(f"client {self.client_ids[k]!r} has a different layer set")
 
-        new_states, tails = [], []
+        new_states, tails, energies = [], [], []
         for i, cid in enumerate(self.client_ids):
             mixed = {}
             for layer in layers:
@@ -148,7 +169,7 @@ class DecentralizedRunner:
                     total = total + self._memory[cid][layer]
                 mixed[layer] = total
 
-            state, residual, tail = {}, {}, []
+            state, residual, tail, energy = {}, {}, [], 0.0
             for layer, y in mixed.items():
                 # Return factors in the client's own parameter dtype (y is in the
                 # float32/float64 working dtype). The factors are already cast to
@@ -164,11 +185,14 @@ class DecentralizedRunner:
                 state[layer] = factors
                 residual[layer] = y - x
                 y_energy = float(torch.sum(y * y))
-                tail.append(float(torch.sum(residual[layer] ** 2)) / y_energy if y_energy > 0 else 0.0)
+                r_energy = float(torch.sum(residual[layer] ** 2))
+                energy += r_energy
+                tail.append(r_energy / y_energy if y_energy > 0 else 0.0)
             if self.error_feedback:
                 self._memory[cid] = residual
             new_states.append(state)
             tails.append(float(np.mean(tail)) if tail else 0.0)
+            energies.append(energy)
 
         messages, floats = self._communication(w, states)
         diagnostics = {
@@ -176,6 +200,7 @@ class DecentralizedRunner:
             'floats': floats,
             'mean_tail_mass': float(np.mean(tails)),
             'max_tail_mass': float(np.max(tails)),
+            'mean_residual_energy': float(np.mean(energies)),
             'consensus_distance': self._consensus_distance(new_states),
         }
         return new_states, diagnostics
@@ -210,6 +235,7 @@ class DecentralizedRunner:
             h['floats_per_round'].append(diag['floats'])
             h['mean_tail_mass'].append(diag['mean_tail_mass'])
             h['max_tail_mass'].append(diag['max_tail_mass'])
+            h['mean_residual_energy'].append(diag['mean_residual_energy'])
             h['consensus_distance'].append(diag['consensus_distance'])
             if verbose:
                 print(f"round {round_idx + 1}/{n_rounds}  acc={ev['avg_accuracy']:.4f}  "

@@ -9,6 +9,7 @@ from src.federated.hierarchical import (
     clusters_from_assignments,
     is_doubly_stochastic,
     sinkhorn,
+    two_tier_message_cost,
     two_tier_mixing,
     window_product,
 )
@@ -162,16 +163,49 @@ def test_temperature_too_small_for_the_affinity_range_is_refused():
         affinity_mixing(a, _ring(n), tau=0.01, w_min=0.0)
 
 
-def test_self_weight_floor_scales_the_spectral_gap_exactly():
-    """W = w_min I + (1 - w_min) W0 shifts every eigenvalue affinely, so the
-    gap shrinks by exactly (1 - w_min). This is the documented price of the
-    floor and should hold to machine precision."""
+def _dominant_nonconsensus_eigenvalue(w):
+    """The eigenvalue of largest magnitude after removing the single 1."""
+    ev = np.linalg.eigvalsh(w)
+    ev = np.delete(ev, np.argmin(np.abs(ev - 1.0)))
+    return ev[np.argmax(np.abs(ev))]
+
+
+def test_self_weight_floor_gap_bound_is_tight_only_for_nonnegative_spectra():
+    """Lemma 6. W = w_min I + (1 - w_min) W0 shifts every eigenvalue affinely.
+    The absolute gap therefore satisfies rho(W) >= (1 - w_min) rho(W0), with
+    equality iff W0's dominant non-consensus eigenvalue is non-negative. An
+    earlier version of this test (and of the docstring) asserted equality
+    unconditionally, which is false when that eigenvalue is negative."""
+    # Case 1: a random kernel on a ring. Dominant mode is positive -> exact scaling.
     n = 10
     a = np.random.default_rng(3).normal(size=(n, n))
-    g0 = spectral_gap(affinity_mixing(a, _ring(n), tau=1.0, w_min=0.0))
+    w0 = affinity_mixing(a, _ring(n), tau=1.0, w_min=0.0)
+    assert _dominant_nonconsensus_eigenvalue(w0) > 0
+    g0 = spectral_gap(w0)
     for w_min in (0.1, 0.3, 0.7):
         g = spectral_gap(affinity_mixing(a, _ring(n), tau=1.0, w_min=w_min))
         assert np.isclose(g, (1 - w_min) * g0, atol=1e-10)
+
+    # Case 2: a nearly bipartite kernel -- an even ring with almost no self-affinity.
+    # W0's dominant non-consensus eigenvalue is close to -1, so its gap is tiny;
+    # the floor damps that oscillatory mode and the gap GROWS, far past (1 - w_min) g0.
+    n = 4
+    a = np.zeros((n, n))
+    np.fill_diagonal(a, -10.0)
+    w0 = affinity_mixing(a, _ring(n), tau=1.0, w_min=0.0)
+    lam = _dominant_nonconsensus_eigenvalue(w0)
+    assert lam < -0.99
+    g0 = spectral_gap(w0)
+    assert g0 < 1e-3
+    for w_min in (0.1, 0.5):
+        w = affinity_mixing(a, _ring(n), tau=1.0, w_min=w_min)
+        g = spectral_gap(w)
+        ev0 = np.linalg.eigvalsh(w0)
+        predicted = 1.0 - max(abs(w_min + (1 - w_min) * e)
+                              for e in np.delete(ev0, np.argmin(np.abs(ev0 - 1.0))))
+        assert np.isclose(g, predicted, atol=1e-10)      # the general formula
+        assert g > (1 - w_min) * g0 + 0.05                 # strictly better than linear scaling
+        assert not np.isclose(g, (1 - w_min) * g0, atol=1e-3)
 
 
 def test_asymmetric_affinity_is_symmetrised():
@@ -243,6 +277,27 @@ def test_affinity_mixing_conserves_the_mean_to_tolerance_and_contracts_at_the_sp
 
 def _assign(n_clusters=3, per=4):
     return {i: i // per for i in range(n_clusters * per)}
+
+
+def test_two_tier_message_cost_follows_the_three_stage_schedule():
+    """The runner charges the support of the dense effective matrix; this
+    helper charges the operational schedule. They agree between bridges and
+    differ on bridge rounds, where the effective matrix is dense across
+    clusters but only the K representatives actually talk."""
+    assign = {i: i // 3 for i in range(9)}              # 3 clusters of K_3
+    intra = 3 * 6                                        # 3 edges x 2 directions per cluster
+    assert two_tier_message_cost(assign, 0, bridge_every=3) == intra
+    assert two_tier_message_cost(assign, 1, bridge_every=3) == intra
+    assert two_tier_message_cost(assign, 2, bridge_every=3) == 2 * intra + 3 * 2
+    # The effective bridge-round matrix is dense: 9 x 8 directed entries.
+    w = two_tier_mixing(assign, 2, bridge_every=3)
+    dense = int((w > 0).sum() - np.trace(w > 0))
+    assert dense == 72 > 2 * intra + 6
+    # Singleton clusters cost nothing internally; one cluster never bridges.
+    assert two_tier_message_cost({0: 0, 1: 1, 2: 2}, 4, bridge_every=5) == 3 * 2
+    assert two_tier_message_cost({0: 0, 1: 0, 2: 0}, 4, bridge_every=5) == 6
+    with pytest.raises(ValueError, match="bridge_every"):
+        two_tier_message_cost(assign, 0, bridge_every=0)
 
 
 def test_clusters_from_assignments_groups_and_sorts():
@@ -388,3 +443,9 @@ def test_is_doubly_stochastic():
     assert is_doubly_stochastic(metropolis_hastings(_ring(5)))
     assert not is_doubly_stochastic(np.array([[0.5, 0.5], [0.0, 1.0]]))
     assert not is_doubly_stochastic(np.array([[1.5, -0.5], [-0.5, 1.5]]))
+    # The tolerance is absolute: a 1e-6 row-sum defect must not hide behind
+    # np.allclose's default relative tolerance.
+    drift = np.full((3, 3), 1.0 / 3)
+    drift[0, 0] += 1e-6
+    assert not is_doubly_stochastic(drift)
+    assert is_doubly_stochastic(drift, atol=1e-5)

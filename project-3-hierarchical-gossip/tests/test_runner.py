@@ -65,6 +65,29 @@ def test_rejects_bad_construction():
         DecentralizedRunner([_Stub(0, 2, 0), _Stub(0, 2, 1)], _uniform(2), {0: 2}, ALPHA)
 
 
+def test_rejects_a_doubly_stochastic_matrix_that_is_not_symmetric():
+    """A directed-cycle permutation is doubly stochastic, so the stochasticity
+    check alone lets it through; Lemma 1 needs W = W^T, so it must be refused."""
+    c = [_Stub(i, 2, i) for i in range(3)]
+    cycle = np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]])
+    assert np.allclose(cycle.sum(0), 1) and np.allclose(cycle.sum(1), 1)
+    r = DecentralizedRunner(c, lambda k: cycle, {i: 2 for i in range(3)}, ALPHA)
+    with pytest.raises(ValueError, match="not symmetric"):
+        r.gossip_round(0, [x.get_lora_state() for x in c])
+    # A small circulation added to a valid matrix keeps it doubly stochastic
+    # but breaks symmetry by 2e-6; that must be refused too (an `np.allclose`
+    # check with its default rtol=1e-5 would let it through).
+    w = np.full((3, 3), 1.0 / 3)
+    e = 1e-6
+    for i, j in ((0, 1), (1, 2), (2, 0)):
+        w[i, j] += e
+        w[j, i] -= e
+    assert np.abs(w.sum(0) - 1).max() < 1e-12 and np.abs(w.sum(1) - 1).max() < 1e-12
+    r = DecentralizedRunner(c, lambda k: w, {i: 2 for i in range(3)}, ALPHA)
+    with pytest.raises(ValueError, match="not symmetric"):
+        r.gossip_round(0, [x.get_lora_state() for x in c])
+
+
 def test_rejects_a_mixing_matrix_that_is_not_doubly_stochastic():
     c = [_Stub(0, 2, 0), _Stub(1, 2, 1)]
     bad = lambda r: np.array([[0.5, 0.5], [0.0, 1.0]])   # row-stochastic only
@@ -123,6 +146,37 @@ def test_truncation_is_measured_as_tail_mass():
     _, diag = runner.gossip_round(0, [c.get_lora_state() for c in clients])
     assert 0.0 < diag["mean_tail_mass"] < 1.0
     assert diag["max_tail_mass"] >= diag["mean_tail_mass"]
+
+
+def test_mean_residual_energy_is_the_theorem_epsilon_squared():
+    """A5 defines eps^2 = (1/N) sum_i ||y_i - x_i||_F^2, an ABSOLUTE energy.
+    `mean_residual_energy` must equal that quantity computed by hand, and must
+    not be confused with the relative `mean_tail_mass`."""
+    n, r = 4, 2
+    clients = [_Stub(i, 3, 10 + i) for i in range(n)]
+    states = [c.get_lora_state() for c in clients]
+    w = np.array(metropolis_hastings(build_topology(list(range(n)), "ring")))
+    runner = DecentralizedRunner(clients, lambda k: w, {i: r for i in range(n)}, ALPHA)
+    _, diag = runner.gossip_round(0, states)
+
+    deltas = [lora_to_delta(s, ALPHA)["fc"] for s in states]
+    energies, ratios = [], []
+    for i in range(n):
+        y = sum(w[i, j] * deltas[j] for j in range(n))
+        u, s, vh = torch.linalg.svd(y, full_matrices=False)
+        x = (u[:, :r] * s[:r]) @ vh[:r]
+        e = float(torch.sum((y - x) ** 2))
+        energies.append(e)
+        ratios.append(e / float(torch.sum(y * y)))
+    expected = float(np.mean(energies))
+    assert expected > 0
+    assert np.isclose(diag["mean_residual_energy"], expected, rtol=1e-5)
+    assert np.isclose(diag["mean_tail_mass"], float(np.mean(ratios)), rtol=1e-5)
+    # Scaling every adapter by 3 scales the absolute energy by 9 and leaves the relative one alone.
+    scaled = [{"fc": {"A": s["fc"]["A"] * 3.0, "B": s["fc"]["B"]}} for s in states]
+    _, diag3 = runner.gossip_round(0, scaled)
+    assert np.isclose(diag3["mean_residual_energy"], 9.0 * diag["mean_residual_energy"], rtol=1e-5)
+    assert np.isclose(diag3["mean_tail_mass"], diag["mean_tail_mass"], rtol=1e-5)
 
 
 def test_tail_mass_is_bounded_by_one_minus_r_over_R():
@@ -232,7 +286,7 @@ def test_run_executes_rounds_and_logs_history():
     assert all(c.trained == 4 for c in clients)
     for key in ("rounds", "avg_accuracy", "per_domain_accuracy", "per_client_accuracy",
                 "messages_per_round", "floats_per_round", "mean_tail_mass",
-                "max_tail_mass", "consensus_distance"):
+                "max_tail_mass", "mean_residual_energy", "consensus_distance"):
         assert len(h[key]) == 4, key
     assert h["rounds"] == [0, 1, 2, 3]
     assert np.isclose(h["avg_accuracy"][0], 0.2)
