@@ -19,3 +19,5 @@ pdflatex -interaction=nonstopmode main.tex
 
 The generated `main.pdf` is the rendered paper artifact. Numerical source data
 are in `../docs/artifacts/`, with `claude_handoff.json` as the index.
+The figures included by the manuscript and their source contexts are documented
+in [`figures/README.md`](figures/README.md).

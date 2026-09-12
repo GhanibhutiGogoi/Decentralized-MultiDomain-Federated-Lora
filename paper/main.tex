@@ -4,6 +4,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{hyperref}
 \usepackage{microtype}
@@ -17,7 +18,7 @@
 \begin{document}\maketitle
 \sloppy
 \begin{abstract}
-Federated fine-tuning with Low-Rank Adaptation (LoRA) must handle statistical heterogeneity, unequal device budgets, and unreliable central coordination at the same time. We present AH-LoRA, a framework whose implemented core aggregates LoRA adapters in effective-update space rather than factor space. A client sends $\dW_i=(\alpha_i/r_i)B_iA_i$; neighbors mix these matrices and each receiver refactorizes the result to its own rank by truncated SVD. This operation is invariant to the LoRA factor gauge and supports heterogeneous ranks in a serverless graph. We implement Metropolis--Hastings gossip, an oracle two-tier hierarchy, heterogeneous-rank and error-feedback protocols, and direction-aware adapter signatures. On a real CIFAR-100 benchmark with 15 clients, five known domains, frozen ImageNet ResNet-18 features, 50 rounds, and three seeds, the oracle hierarchy reaches $68.98\pm0.95\%$ personalized accuracy at uniform rank 16, compared with $42.30\pm1.39\%$ for flat gossip and $23.20\pm0.29\%$ for centralized FedAvg under the same personalized evaluation. The heterogeneous-rank and factor zero-padding comparisons expose large quality differences, while offline signature ARI remains below 0.274, so automatic domain discovery is not solved. We also regenerate the Project 2 aggregation-weight calibration on five real datasets; its predictive fit is weak and should be treated as exploratory. The resulting artifact is a reproducible benchmark and implementation record rather than a claim of a complete adaptive-rank or domain-discovery solution.
+Federated fine-tuning with Low-Rank Adaptation (LoRA) must handle statistical heterogeneity, unequal device budgets, and unreliable central coordination at the same time. We present AH-LoRA, a framework whose implemented core aggregates LoRA adapters in effective-update space rather than factor space. A client sends $\dW_i=(\alpha_i/r_i)B_iA_i$; neighbors mix these matrices and each receiver refactorizes the result to its own rank by truncated SVD. This operation is invariant to the LoRA factor gauge and supports heterogeneous ranks in a serverless graph. We implement Metropolis--Hastings gossip, an oracle two-tier hierarchy, heterogeneous-rank and error-feedback protocols, and direction-aware adapter signatures. On a real CIFAR-100 benchmark with 15 clients, five known domains, frozen ImageNet ResNet-18 features, 50 rounds, and three seeds, the oracle hierarchy reaches $68.98\pm0.95\%$ personalized accuracy at uniform rank 16, compared with $42.30\pm1.39\%$ for flat gossip and $23.20\pm0.29\%$ for centralized FedAvg under the same personalized evaluation. The heterogeneous-rank and factor zero-padding comparisons expose large quality differences, while the stage-10 mean signature ARI reaches at most $0.274$, so automatic domain discovery is not solved. We also regenerate the Project 2 aggregation-weight calibration on five real datasets; its predictive fit is weak and should be treated as exploratory. The resulting artifact is a reproducible benchmark and implementation record rather than a claim of a complete adaptive-rank or domain-discovery solution.
 \end{abstract}
 \section{Introduction}
 Large pretrained models are commonly specialized with LoRA~\citep{hu2022lora}, which trains small factors $B\in\R^{d_o\times r}$ and $A\in\R^{r\times d_i}$ while freezing the backbone. Existing federated LoRA methods address parameter efficiency and, in some cases, rank heterogeneity~\citep{zhang2023fedit,babakniya2023slora,cho2024hetlora,bai2024flexlora}; decentralized optimization provides serverless gossip protocols~\citep{boyd2006gossip,lian2017dpsgd}. These lines of work leave a practical intersection under-specified: clients may have different ranks, different domains, and no trusted aggregation server.
@@ -57,13 +58,57 @@ Heterogeneous $4/12/32$, $\dW$ & Local & $53.60\pm0.62$ & $14.50\pm0.80$\\
 
 The oracle hierarchy provides the strongest personalized result in the uniform context, while centralized FedAvg is optimized for a single consensus adapter and is poorly matched to the personalized objective. The heterogeneous context is harder. These results establish protocol behavior under known domains; they do not establish that a discovery algorithm can recover those domains.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/p3_uniform_curves.png}
+\caption{Uniform-rank CIFAR-100 benchmark. Curves show mean $\pm$ sample standard deviation over seeds 42--44. Personalized and consensus accuracy are separate evaluation protocols; payload panels show simulated direct and staged float counts.}
+\label{fig:uniform-curves}
+\end{figure}
+
 Factor zero-padding under ranks $(4,12,32)$ gives personalized accuracy of $4.71\pm0.22\%$ for FedAvg, $20.63\pm4.40\%$ for MH, and $31.24\pm1.27\%$ for oracle hierarchy. The corresponding $\dW$ oracle result is $44.07\pm0.70\%$. Error feedback reaches $26.63\pm1.68\%$ for MH and $41.28\pm0.71\%$ for oracle hierarchy. These are finite-run comparisons, not universal rankings.
 
-The best descriptive stage-10 mean signature ARI is $0.274$ for local inverse-$\dW$-L2 signatures; all other local or MH variants are lower than $0.161$. This is below a reliable discovery threshold for this setup. The regenerated Project 2 calibration selects ridge alpha 1000. Form A has global Spearman correlation 0.368 and pairwise ranking accuracy 0.641; Form B has Spearman 0.369 and pairwise accuracy 0.630. Global $R^2$ is low (0.079 and 0.025), and task-level correlations change sign across modalities.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/p3_heterogeneous_curves.png}
+\caption{Heterogeneous-rank $(4,12,32)$ benchmark. The $\dW$ and factor-zero-padding arms use the same rank budget but different merge operators; error-feedback results are reported separately in the text and aggregate CSV.}
+\label{fig:heterogeneous-curves}
+\end{figure}
+
+The best descriptive stage-10 mean signature ARI is $0.274$ for local inverse-$\dW$-L2 signatures; all other local or MH variants are lower than $0.161$. This is below the preregistered soft-candidate threshold of $0.4$ and does not support automatic discovery in this setup. The regenerated Project 2 calibration selects ridge alpha 1000. Form A has global Spearman correlation 0.368 and pairwise ranking accuracy 0.641; Form B has Spearman 0.369 and pairwise accuracy 0.630. Global $R^2$ is low (0.079 and 0.025), and task-level correlations change sign across modalities.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/p3_signature_ari.png}
+\caption{Offline signature validation. Early row-norm scores can be high for an individual stage, but performance is not stable across stages or seeds; the preregistered stage-10 screen labels all methods as weak-signal.}
+\label{fig:signature-ari}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\linewidth]{figures/p2_lambda_validation.png}
+\caption{Regenerated Project 2 lambda calibration on 75 real-data observations. Form A and Form B have similar weak global rank association; this calibration is exploratory rather than a validated allocator.}
+\label{fig:p2-lambda}
+\end{figure}
 \section{Limitations and Reproducibility}
 The oracle hierarchy receives true domain assignments, and signatures are evaluated offline against those labels. The benchmark is one frozen-feature CIFAR-100 task; it does not establish behavior for LLMs, asynchronous churn, or other modalities. Communication is simulated payload accounting rather than measured network throughput. Three seeds provide variability estimates, not statistical proof. P2 calibration is a single-seed, five-round diagnostic with weak predictive fit. Project 1 adaptive-rank calibration and automatic domain discovery remain unresolved.
 
 All source code, manifests, compact CSV/JSON evidence, and logs are included. Start with \texttt{docs/artifacts/claude\_handoff.json}, then read \texttt{docs/artifacts/README.md} and the P3 aggregate report. Remote validation used Python 3.10, PyTorch 2.3 with CUDA 12.1, and Tesla V100 GPUs; no credentials are stored in the artifact bundle.
+\clearpage
+\subsection*{Per-domain diagnostics}
+The companion domain plots expose the fairness trade-off hidden by a single aggregate accuracy number. They are generated by the same aggregate report and retain the uniform versus heterogeneous protocol split.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/p3_uniform_domains.png}
+\caption{Uniform-rank per-domain personalized accuracy at the final round.}
+\label{fig:uniform-domains}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/p3_heterogeneous_domains.png}
+\caption{Heterogeneous-rank per-domain personalized accuracy at the final round.}
+\label{fig:heterogeneous-domains}
+\end{figure}
+\clearpage
 \section{Conclusion}
 AH-LoRA demonstrates a practical primitive for decentralized federated LoRA with heterogeneous ranks: mix scaled effective updates and refactorize locally. The completed benchmark shows that protocol choice and domain structure strongly affect personalized behavior, factor zero-padding can fail under rank heterogeneity, and error feedback changes the compression trade-off. Known-domain hierarchy is a useful oracle comparison, while automatic discovery and adaptive rank selection are not yet solved. The repository provides a complete, reproducible implementation milestone and a concrete base for future work.
 \bibliographystyle{plainnat}\bibliography{references}\end{document}
