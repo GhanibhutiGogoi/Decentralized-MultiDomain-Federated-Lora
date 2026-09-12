@@ -2,12 +2,12 @@
 Heterogeneous FedAvg: Federated Averaging with mixed LoRA ranks.
 
 Unlike standard FedAvg which requires all clients to have the same LoRA rank,
-this server aggregates in delta_W space (B @ A), which is rank-independent.
+this server aggregates in effective delta_W space ((alpha / rank) * B @ A).
 After averaging, it SVD-decomposes back to each client's assigned rank.
 
 Aggregation pipeline:
     1. Each client trains locally and sends LoRA params
-    2. Convert each client's LoRA (A, B) to delta_W = B @ A
+    2. Convert each client's LoRA to delta_W = (alpha / rank) * B @ A
     3. Weighted average of delta_W matrices (all same shape)
     4. For each client, SVD-decompose avg_delta_W to client's rank
     5. Send rank-specific LoRA params back to each client
@@ -38,7 +38,7 @@ class HeteroFedAvgServer:
         Args:
             clients: list of FederatedClient objects
             rank_assignments: dict mapping client_id -> rank
-            alpha: LoRA alpha (for decomposition scaling)
+            alpha: shared client LoRA alpha (for source and destination scaling)
             device: compute device
         """
         self.clients = clients
@@ -57,7 +57,7 @@ class HeteroFedAvgServer:
         """
         Weighted average in delta_W space.
 
-        All delta_W = B @ A have identical shape (out_features x in_features)
+        All effective delta_W have identical shape (out_features x in_features)
         regardless of the rank used to produce them.
 
         Args:
@@ -103,7 +103,7 @@ class HeteroFedAvgServer:
 
             # 2. Convert to delta_W space
             client_delta_ws = [
-                merge_lora_to_delta_w(state) for state in client_states
+                merge_lora_to_delta_w(state, alpha=self.alpha) for state in client_states
             ]
 
             # 3. Aggregate in delta_W space

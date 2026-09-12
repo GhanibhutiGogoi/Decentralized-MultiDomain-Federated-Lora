@@ -10,6 +10,8 @@ import argparse
 import json
 import os
 import sys
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 PROJECT2_ROOT = Path(__file__).resolve().parents[2]
@@ -181,6 +183,17 @@ def _records_by_client(records):
     return {record["client_id"]: record for record in records}
 
 
+def _record_progress(output_dir: Path, event: str, **payload):
+    """Persist completed work before later tasks or analysis can fail."""
+    record = {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "event": event,
+        **payload,
+    }
+    with (output_dir / "progress.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, allow_nan=False) + "\n")
+
+
 def run_task(
     task_name,
     model_fn,
@@ -196,6 +209,8 @@ def run_task(
         f"  partition={partition_config.strategy} "
         f"alpha={partition_config.alpha} seed={partition_config.seed}"
     )
+    task_started = time.monotonic()
+    _record_progress(output_dir, "task_started", task=task_name, num_rounds=num_rounds)
 
     loaders, metadata = make_client_loaders(
         trainset,
@@ -231,6 +246,8 @@ def run_task(
         update_vectors = []
 
         for client_id, loader in enumerate(loaders):
+            client_started = time.monotonic()
+            print(f"  Round {round_id}/{num_rounds} | client {client_id} training", flush=True)
             batch_size = CLIENT_BATCH_SIZES[client_id]
             probe_rank = BATCH_TO_MAX_RANK[batch_size]
             probe = model_fn(probe_rank).to(DEVICE)
@@ -258,6 +275,17 @@ def run_task(
                     LORA_B_SUFFIXES,
                     LORA_SUFFIXES,
                 )
+            )
+            _record_progress(
+                output_dir,
+                "client_completed",
+                task=task_name,
+                round=round_id,
+                client_id=client_id,
+                adaptive_rank=int(chosen_rank),
+                train_samples_seen=int(sample_count),
+                quality_score=float(quality),
+                elapsed_seconds=time.monotonic() - client_started,
             )
 
         update_records = update_dissimilarity_records(
@@ -331,6 +359,23 @@ def run_task(
         print(
             f"  Round {round_id}/{num_rounds} | acc={full_accuracy:.2f}% | {detail}"
         )
+        _record_progress(
+            output_dir,
+            "round_completed",
+            task=task_name,
+            round=round_id,
+            full_accuracy=float(full_accuracy),
+            measurements=round_rows[-len(loo_rows):],
+            task_elapsed_seconds=time.monotonic() - task_started,
+        )
+
+    _record_progress(
+        output_dir,
+        "task_completed",
+        task=task_name,
+        elapsed_seconds=time.monotonic() - task_started,
+        accuracy_curve=accuracy_curve,
+    )
 
     return {
         "task": task_name,
@@ -452,6 +497,14 @@ def main():
     print(f"Output directory: {output_dir}")
 
     task_names = args.tasks if args.tasks else TASK_ORDER
+    _record_progress(
+        output_dir,
+        "run_started",
+        tasks=task_names,
+        seed=args.seed,
+        num_rounds=args.num_rounds,
+        partition=partition_config.__dict__,
+    )
     experiments, dataset_bundles = load_experiments(
         task_names=task_names,
         data_root=args.data_root,
@@ -485,6 +538,12 @@ def main():
         label_records_all.extend(result["label_records"])
         label_payloads[task_name] = result["label_payload"]
         measurement_rows.extend(result["round_rows"])
+        # These cumulative files contain completed tasks only. The final
+        # manifest and run_completed event distinguish a finished experiment.
+        save_label_distribution_outputs(label_records_all, label_payloads, output_dir)
+        pd.DataFrame(measurement_rows).to_csv(
+            output_dir / "per_round_client_measurements.csv", index=False)
+        save_accuracy_curves(task_results, output_dir)
 
     label_df = save_label_distribution_outputs(
         label_records_all,
@@ -521,10 +580,12 @@ def main():
             "correlations_csv": "signal_contribution_correlations.csv",
             "controlled_regression_csv": "controlled_regression.csv",
             "figures_dir": "figures/",
+            "progress_jsonl": "progress.jsonl",
         },
     }
     with (output_dir / "manifest.json").open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
+    _record_progress(output_dir, "run_completed", measurement_rows=len(measurements))
 
     print("\n=== Experiment 1 Complete ===")
     print(f"Label rows: {len(label_df)}")

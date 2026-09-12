@@ -94,8 +94,9 @@ class AGNewsDataset(Dataset):
                     (torch.tensor(ids, dtype=torch.long), int(label) - 1))
         except (ImportError, OSError, RuntimeError, FileNotFoundError) as e:
             raise RuntimeError(
-                "Unable to load real AG News data. Install a working torchtext "
-                f"package and ensure AG_NEWS is cached under {data_root}, rerun "
+                "Unable to load real AG News data. Install compatible torchtext, "
+                "torchdata and portalocker packages from requirements.txt "
+                f"and ensure AG_NEWS is cached under {data_root}, rerun "
                 "with dataset downloads enabled, or call get_agnews(synthetic=True) "
                 "explicitly."
             ) from e
