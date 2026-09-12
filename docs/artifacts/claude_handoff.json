@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-09-12T14:00:00Z",
+  "updated_at": "2026-09-12T14:05:00Z",
   "status": "all_experiments_complete_artifacts_ready_for_review",
   "project": {
     "name": "AH-LoRA",
@@ -507,12 +507,19 @@
       "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/42",
       "commit": "dce4248973157f0217f6cc19a6f1ed0399254b8e",
       "scope": "Project 2 projection and real-data regeneration runtime fixes"
+    },
+    {
+      "number": 43,
+      "status": "open",
+      "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/43",
+      "commit": "d7b0db3",
+      "scope": "P3 completion benchmark, signatures, aggregate report, and evidence handoff"
     }
   ],
   "next_actions": [
     "Review aggregate P3 report and per-domain/paired CSVs for artifact presentation",
     "Review P2 real-data manifests and calibration limitations before citing lambda values",
-    "Open/merge the P3 implementation PR with remote test and experiment evidence",
+    "Merge PR #43 and PR #42 after review",
     "Keep automatic domain discovery and adaptive rank calibration as explicitly unresolved extensions"
   ]
 }
