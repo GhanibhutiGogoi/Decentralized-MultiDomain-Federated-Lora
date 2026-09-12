@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-09-12T14:05:00Z",
+  "updated_at": "2026-09-12T14:50:00Z",
   "status": "all_experiments_complete_artifacts_ready_for_review",
   "project": {
     "name": "AH-LoRA",
@@ -517,9 +517,16 @@
     }
   ],
   "next_actions": [
-    "Review aggregate P3 report and per-domain/paired CSVs for artifact presentation",
-    "Review P2 real-data manifests and calibration limitations before citing lambda values",
-    "Merge PR #43 and PR #42 after review",
-    "Keep automatic domain discovery and adaptive rank calibration as explicitly unresolved extensions"
-  ]
+    "Review and merge PR #42 and PR #43",
+    "Use the paper and handoff artifacts for the Claude explanation",
+    "Keep automatic domain discovery and adaptive rank calibration as future extensions"
+  ],
+  "paper": {
+    "status": "complete",
+    "source": "paper/main.tex",
+    "rendered_pdf": "paper/main.pdf",
+    "compile": "pdflatex + bibtex + pdflatex + pdflatex",
+    "pages": 5,
+    "scope": "Evidence-scoped technical paper; oracle hierarchy and unresolved discovery/adaptive-rank limitations are explicit."
+  }
 }
