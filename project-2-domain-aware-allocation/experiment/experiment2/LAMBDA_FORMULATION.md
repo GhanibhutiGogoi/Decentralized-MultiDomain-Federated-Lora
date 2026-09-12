@@ -22,10 +22,23 @@ $$
 \text{Weight}_i = w_i \times q_i \times \lambda_i
 $$
 
-All existing fitted coefficients, validation metrics, correlations, and
-sensitivity values in this document are historical Experiment 2 outputs. They
-were not updated by this documentation synchronization and remain stale until
-the next authorized Experiment 1 and Experiment 2 rerun.
+The values in the regenerated run are recorded under
+`docs/artifacts/p2-exp2-real-seed42/` and summarized in the current report
+below. Earlier tables in this design note are retained as historical context;
+the regenerated coefficients and validation metrics supersede them.
+
+## Regenerated real-data run (2026-09-12)
+
+Experiment 1 used five real datasets, one seed (42), five rounds and 75
+client-round observations. Experiment 2 selected ridge alpha `1000.0` from the
+expanded grid. Form A used gamma `2.444578`; Form B used gamma `5.0`. Global
+Spearman association with leave-one-client-out contribution was `0.3676` for
+Form A and `0.3693` for Form B, with global R² `0.0788` and `0.0254`
+respectively. Per-task behavior is heterogeneous, so this run does not claim
+a universal preferred form or a validated allocator.
+
+Use `docs/artifacts/p2-exp2-real-seed42/comparison_report.md` and its CSV
+tables as the authoritative regenerated values.
 
 The role of \(\lambda_i\) is to adjust the contribution of client \(i\) using
 domain and update-space evidence measured in Experiment 1, while preserving the
@@ -187,11 +200,11 @@ The fitted means and standard deviations used by the final Form B are:
 
 | Feature | Symbol | Mean \(\mu_k\) | Std. \(\sigma_k\) |
 | --- | --- | ---: | ---: |
-| `log_update_l2` | \(x_{i,1}\) | 1.7562762023044465 | 0.6296896253909049 |
-| `js_to_global` | \(x_{i,2}\) | 0.10389204405189059 | 0.06137239129252118 |
-| `update_cosine_distance_to_mean` | \(x_{i,3}\) | 0.1713374406436421 | 0.10745471690532812 |
-| `normalized_entropy` | \(x_{i,4}\) | 0.777420395326653 | 0.22268256994878355 |
-| `log_class_imbalance_ratio` | \(x_{i,5}\) | 3.806954209693196 | 2.1589594422348592 |
+| `log_update_l2` | \(x_{i,1}\) | 1.8883672674985266 | 1.0210197854954943 |
+| `js_to_global` | \(x_{i,2}\) | 0.10049756769211601 | 0.06212430993597597 |
+| `update_cosine_distance_to_mean` | \(x_{i,3}\) | 0.5017276868494069 | 0.4161764311366351 |
+| `normalized_entropy` | \(x_{i,4}\) | 0.7782734221962865 | 0.22432808028037712 |
+| `log_class_imbalance_ratio` | \(x_{i,5}\) | 4.147386055045582 | 2.4874350966084178 |
 
 Standardization is required because the raw signals are measured on different
 scales. Without standardization, the fitted coefficient magnitudes would reflect
@@ -203,7 +216,7 @@ The final selected formulation is Form B, an interpretable ridge-calibrated
 linear score. The ridge parameter selected by leave-one-task-out validation is:
 
 $$
-\alpha_{\mathrm{ridge}} = 100.0
+\alpha_{\mathrm{ridge}} = 1000.0
 $$
 
 The fitted intercept is:
@@ -224,11 +237,11 @@ s_i
 + \beta_4 z_{i,4}
 + \beta_5 z_{i,5} \\
 &= 0.0
-+ 0.04690965790495837\,z_{i,1}
-- 0.07468377369916912\,z_{i,2}
-- 0.01191288883367715\,z_{i,3}
-+ 0.035778085198657245\,z_{i,4}
-- 0.0626900688304372\,z_{i,5}.
++ 0.018210413515057963\,z_{i,1}
++ 0.006324207413926036\,z_{i,2}
++ 0.013998787520691848\,z_{i,3}
++ 0.004740807394714487\,z_{i,4}
++ 0.01754345937451533\,z_{i,5}.
 \end{aligned}
 $$
 
@@ -449,13 +462,13 @@ ridge regularization to shrink weak or uncertain signals. Its coefficients
 remain scientifically interpretable:
 
 - update L2 contributes positively;
-- JS divergence contributes negatively;
-- update cosine distance is shrunk close to zero;
+- JS divergence contributes positively in this regenerated fit;
+- update cosine distance contributes positively;
 - normalized entropy contributes mildly positively;
-- class imbalance contributes negatively.
+- class imbalance contributes positively.
 
 Leave-one-task-out validation selected the Form B ridge parameter
-\(\alpha_{\mathrm{ridge}} = 100.0\). The held-out \(R^2\) values remain
+\(\alpha_{\mathrm{ridge}} = 1000.0\). The held-out \(R^2\) values remain
 negative, and the predictive performance is weak. Form B should therefore be
 interpreted as the least-bad calibrated formulation among the evaluated
 candidates, not as a highly predictive contribution model.
@@ -542,12 +555,11 @@ calibration model. It does not, by itself, prove that the aggregation
 methodology fails, because the calibration model is only an intermediate step
 used to estimate \(\lambda\).
 
-Form B was not selected because it wins every validation metric. Form A retains
-stronger rank-order behavior, as shown by its higher mean Spearman correlation.
-Form B was selected as the primary Experiment 3 formulation because the
-\(\alpha_{\mathrm{ridge}} = 100.0\) model provides lower mean RMSE and MAE,
-more conservative \(\lambda\) values, stronger numerical stability, explicit
-ridge regularization, and lower risk of overfitting weak Experiment 1 signals.
+Form B was not selected because it wins every validation metric. The regenerated
+run shows similar global rank association for the two forms, while per-task
+behavior varies substantially. Form B is retained as a documented candidate
+because it uses all measured signals and explicit ridge regularization; this is
+an exploratory calibration choice, not evidence of a validated allocator.
 
 Thus, the Form B selection is a scientific trade-off. Form B is the conservative
 primary candidate, while Form A remains the interpretable ablation baseline.

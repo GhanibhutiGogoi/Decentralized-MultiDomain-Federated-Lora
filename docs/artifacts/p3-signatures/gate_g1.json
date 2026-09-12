@@ -1,0 +1,63 @@
+{
+  "interpretation": "Descriptive stage-10 screen per signature and training mode, not proof of end-to-end learned hierarchy",
+  "thresholds": {
+    "hard_candidate": 0.7,
+    "soft_candidate": 0.4
+  },
+  "results": [
+    {
+      "method": "local",
+      "signature": "spectral_baseline",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 0.127143778207608,
+      "sample_std_ari": 0.061591775507220566,
+      "screen": "weak_signal"
+    },
+    {
+      "method": "local",
+      "signature": "row_norms",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 0.06654861286786407,
+      "sample_std_ari": 0.052398335192134625,
+      "screen": "weak_signal"
+    },
+    {
+      "method": "local",
+      "signature": "inverse_delta_l2",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 0.27410012361692154,
+      "sample_std_ari": 0.31868922596298976,
+      "screen": "weak_signal"
+    },
+    {
+      "method": "mh",
+      "signature": "spectral_baseline",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": -0.05991902834008097,
+      "sample_std_ari": 0.1076923076923077,
+      "screen": "weak_signal"
+    },
+    {
+      "method": "mh",
+      "signature": "row_norms",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 0.1607188703465982,
+      "sample_std_ari": 0.07269126516718706,
+      "screen": "weak_signal"
+    },
+    {
+      "method": "mh",
+      "signature": "inverse_delta_l2",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 0.10974358974358973,
+      "sample_std_ari": 0.04707904581550155,
+      "screen": "weak_signal"
+    }
+  ]
+}

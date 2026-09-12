@@ -1,0 +1,518 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-09-12T14:00:00Z",
+  "status": "all_experiments_complete_artifacts_ready_for_review",
+  "project": {
+    "name": "AH-LoRA",
+    "description": "Adaptive heterogeneous LoRA for decentralized multi-domain federated learning",
+    "completion_target": "A reproducible real-data CIFAR-100 benchmark with trustworthy evaluation and artifacts, without requiring a paper",
+    "source_baseline": {
+      "commit": "8c22e76f5c2313abcfd6ddeb1313a04eb26834c4",
+      "branch": "main",
+      "note": "Starting snapshot; use each experiment manifest for the exact code actually run"
+    }
+  },
+  "scope": {
+    "required": [
+      "Protocol-correct benchmark using frozen ResNet-18 features and LoRA on the final classification layer",
+      "15 clients across 5 known CIFAR-100 domain groups with Dirichlet non-IID training partitions",
+      "Local-only, centralized delta-W FedAvg, flat Metropolis-Hastings gossip and oracle two-tier gossip",
+      "Both personalized and full-test consensus evaluation",
+      "Three-seed experiment outputs, per-domain fairness, communication and compression diagnostics",
+      "Heterogeneous-rank comparison of delta-W merging and factor zero-padding",
+      "Reviewable pull requests and a machine-readable evidence handoff"
+    ],
+    "extensions": [
+      "Error-feedback versus default compression experiment",
+      "Direction-aware signatures and automatic domain discovery",
+      "Project 2 real-data regeneration and lambda recalibration",
+      "Project 1 rank-policy calibration",
+      "A publication manuscript"
+    ],
+    "explicit_assumptions": [
+      "Oracle hierarchical gossip receives known domain labels",
+      "Cached features use a fixed frozen backbone protocol documented in each run manifest",
+      "This is a single image-classification benchmark; results do not establish behavior on LLMs or all data domains"
+    ]
+  },
+  "implementation": [
+    {
+      "component": "P3 delta-W merging",
+      "status": "implemented_at_baseline",
+      "source": "project-3-hierarchical-gossip/src/federated/merge.py",
+      "detail": "Merge scaled updates (alpha/rank) B A and refactorize by truncated SVD"
+    },
+    {
+      "component": "P3 mixing and hierarchy",
+      "status": "implemented_at_baseline",
+      "sources": [
+        "project-3-hierarchical-gossip/src/federated/mixing.py",
+        "project-3-hierarchical-gossip/src/federated/hierarchical.py"
+      ],
+      "detail": "Symmetric doubly stochastic Metropolis-Hastings, affinity and two-tier mixing"
+    },
+    {
+      "component": "P3 decentralized runner",
+      "status": "implemented_at_baseline",
+      "source": "project-3-hierarchical-gossip/src/federated/runner.py",
+      "detail": "Pluggable mixing, heterogeneous ranks, optional error feedback and residual diagnostics"
+    },
+    {
+      "component": "P3 protocol benchmark and feature cache",
+      "status": "complete_remote_battery_and_report",
+      "entry_point": "project-3-hierarchical-gossip/experiments/04_protocol_benchmark.py"
+    },
+    {
+      "component": "P3 direction-aware signature validation",
+      "status": "complete_remote_battery",
+      "sources": [
+        "project-3-hierarchical-gossip/src/clustering/signatures.py",
+        "project-3-hierarchical-gossip/experiments/05_signature_validation.py"
+      ],
+      "detail": "Offline comparison of legacy spectral features, row-norm cosine and inverse delta-W L2 under local-only and flat MH training; oracle labels are scoring-only"
+    },
+    {
+      "component": "P2 lambda calibration",
+      "status": "complete_real_data_seed42",
+      "detail": "All five datasets real; Experiment 1 and Experiment 2 regenerated for seed 42. Existing output tables now have provenance manifests."
+    },
+    {
+      "component": "P2 projection and real-data runtime fixes",
+      "status": "implemented_tests_passed_pull_request_open",
+      "commit": "dce4248973157f0217f6cc19a6f1ed0399254b8e",
+      "pull_request": 42,
+      "detail": "Ports correct SVD projection/scaled delta-W handling and hardens real AG News/SpeechCommands runtime"
+    },
+    {
+      "component": "P1 adaptive rank selection",
+      "status": "implemented_calibration_unresolved",
+      "detail": "Implementation runs, but the measured stable-rank signal has not been shown to select useful ranks"
+    }
+  ],
+  "experiment_plan": {
+    "dataset": "CIFAR-100",
+    "domains": 5,
+    "clients_per_domain": 3,
+    "dirichlet_alpha": 0.5,
+    "backbone": "ImageNet-pretrained ResNet-18, frozen",
+    "adapter_layer": "fc",
+    "adapter_matrix_shape": [
+      100,
+      512
+    ],
+    "alpha": 32,
+    "reference_rank": 16,
+    "reported_seeds": [
+      42,
+      43,
+      44
+    ],
+    "rounds": 50,
+    "uniform_ranks": [
+      16
+    ],
+    "heterogeneous_rank_cycle": [
+      4,
+      12,
+      32
+    ],
+    "rank_budget": {
+      "uniform_sum_over_15_clients": 240,
+      "heterogeneous_sum_over_15_clients": 240,
+      "note": "Both schedules have the same total rank; heterogeneous ranks repeat once per domain"
+    },
+    "methods": [
+      {
+        "id": "local",
+        "label": "Local-only",
+        "server": false,
+        "oracle_domains": false
+      },
+      {
+        "id": "fedavg",
+        "label": "Centralized delta-W FedAvg",
+        "server": true,
+        "oracle_domains": false
+      },
+      {
+        "id": "mh",
+        "label": "Flat Metropolis-Hastings gossip",
+        "server": false,
+        "oracle_domains": false
+      },
+      {
+        "id": "oracle",
+        "label": "Oracle two-tier gossip",
+        "server": false,
+        "oracle_domains": true
+      }
+    ],
+    "merge_comparison": [
+      "delta",
+      "factor_zero_pad"
+    ],
+    "rank_assignments": "Read per-client ranks from each run manifest; do not infer them from the method name",
+    "battery": [
+      {
+        "id": "uniform16",
+        "status": "complete",
+        "rounds": 50,
+        "ranks": [
+          16
+        ],
+        "merge": "delta",
+        "methods": [
+          "local",
+          "fedavg",
+          "mh",
+          "oracle"
+        ],
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "completed_runs": 12,
+        "wall_seconds": 354.24300599098206,
+        "completion_timestamp": "2026-09-12T13:35:34.153384Z",
+        "remote_path": "~/ahlora-runs/p3-uniform16"
+      },
+      {
+        "id": "heterogeneous_delta",
+        "status": "complete",
+        "rounds": 50,
+        "ranks": [
+          4,
+          12,
+          32
+        ],
+        "merge": "delta",
+        "methods": [
+          "local",
+          "fedavg",
+          "mh",
+          "oracle"
+        ],
+        "remote_path": "~/ahlora-runs/p3-heterogeneous-delta"
+      },
+      {
+        "id": "heterogeneous_factor",
+        "status": "complete",
+        "rounds": 50,
+        "ranks": [
+          4,
+          12,
+          32
+        ],
+        "merge": "factor_zero_pad",
+        "methods": [
+          "fedavg",
+          "mh",
+          "oracle"
+        ]
+      },
+      {
+        "id": "heterogeneous_feedback",
+        "status": "complete",
+        "rounds": 50,
+        "ranks": [
+          4,
+          12,
+          32
+        ],
+        "merge": "delta",
+        "error_feedback": true,
+        "methods": [
+          "mh",
+          "oracle"
+        ]
+      },
+      {
+        "id": "signatures",
+        "status": "complete",
+        "stages": [
+          2,
+          5,
+          10,
+          20
+        ],
+        "methods": [
+          "local",
+          "mh"
+        ],
+        "signatures": [
+          "spectral_baseline",
+          "row_norms",
+          "inverse_delta_l2"
+        ]
+      }
+    ]
+  },
+  "feature_cache": {
+    "status": "complete_and_verified",
+    "dataset": "CIFAR-100 official 50000 train / 10000 test images",
+    "feature_dimension": 512,
+    "image_size": [
+      224,
+      224
+    ],
+    "weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+    "train_sha256": "37c88fdb981dccbc117e2c3a0dc0065ab12bc667a18d991c66d312324fff3eb7",
+    "test_sha256": "960c63636ce8b68bdc6ef7df9762c61ce9c9b47ba47c3482aba53504242c73f2",
+    "cache_identity_sha256": "eff1ad00e14d86f46fc9d261fdbee194d05ed44678c2262bc975d11bdbe102df",
+    "protocol": "Frozen backbone in eval mode, bilinear resize with antialias, ImageNet normalization, no augmentation"
+  },
+  "result_sets": [
+    {
+      "id": "p3_smoke_v2",
+      "status": "complete",
+      "classification": "smoke",
+      "remote_path": "~/ahlora-runs/p3-smoke-v2",
+      "local_path": null,
+      "seeds": [
+        42
+      ],
+      "rounds": 2,
+      "methods": [
+        "local",
+        "fedavg",
+        "mh",
+        "oracle"
+      ],
+      "completed_runs": 4,
+      "wall_seconds": 46.50223517417908,
+      "use": "Execution and provenance validation only; not the primary benchmark",
+      "source_combined_sha256": "5e2e9b1fb2c1c932aaacc4136ad7e54e5e76cb089a1e86d5e9f6c337120f57be"
+    },
+    {
+      "id": "p3_uniform16",
+      "status": "complete",
+      "classification": "full_data_benchmark",
+      "remote_path": "~/ahlora-runs/p3-uniform16",
+      "local_path": null,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "rounds": 50,
+      "methods": [
+        "local",
+        "fedavg",
+        "mh",
+        "oracle"
+      ],
+      "completed_runs_at_observation": 3,
+      "expected_runs": 12,
+      "observed_at": "2026-09-12T13:31:59Z",
+      "use": "Primary homogeneous-rank benchmark after the full battery completes",
+      "source_combined_sha256": "5e2e9b1fb2c1c932aaacc4136ad7e54e5e76cb089a1e86d5e9f6c337120f57be",
+      "aggregate_local_path": "docs/artifacts/p3-completion-report",
+      "completed_runs": 12,
+      "final_metrics_note": "See aggregate.json; values are mean \u00b1 sample SD over seeds 42,43,44."
+    },
+    {
+      "id": "p3_completion_report",
+      "status": "complete",
+      "classification": "full_data_benchmark",
+      "local_path": "docs/artifacts/p3-completion-report",
+      "remote_source": "~/ahlora-runs/p3-completion-report",
+      "contexts": 2,
+      "completed_runs": 33,
+      "methods": "uniform and heterogeneous rank/merge/feedback arms",
+      "metrics": "aggregate.json, aggregate_metrics.csv, paired_aggregate.csv, per_domain_aggregate.csv",
+      "interpretation": "No winner claim; compare contexts separately."
+    },
+    {
+      "id": "p3_signatures",
+      "status": "complete",
+      "classification": "full_data_benchmark",
+      "local_path": "docs/artifacts/p3-signatures",
+      "remote_source": "~/ahlora-runs/p3-signatures",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "stages": [
+        2,
+        5,
+        10,
+        20
+      ],
+      "methods": [
+        "local",
+        "mh"
+      ],
+      "metrics": [
+        "spectral_baseline",
+        "row_norms",
+        "inverse_delta_l2"
+      ],
+      "gate_summary": "All stage-10 mean ARIs below 0.4; descriptive weak-signal screen."
+    },
+    {
+      "id": "p2_real_seed42",
+      "status": "complete",
+      "classification": "real_data_seed42",
+      "local_paths": [
+        "docs/artifacts/p2-exp1-real-seed42",
+        "docs/artifacts/p2-exp2-real-seed42"
+      ],
+      "datasets": 5,
+      "exp1_rounds": 5,
+      "exp2_contexts": 75,
+      "lambda_form_a": {
+        "gamma": 2.44458,
+        "spearman_all": 0.36760303109541914,
+        "pairwise_ranking_accuracy": 0.6413284132841328,
+        "permutation_p": 0.16183816183816183
+      },
+      "lambda_form_b": {
+        "gamma": 5.0,
+        "spearman_all": 0.36927,
+        "pairwise_ranking_accuracy": 0.630258,
+        "permutation_p": 0.206793
+      },
+      "ridge_alpha_form_b": 1000.0,
+      "coefficients_form_a": {
+        "log_update_l2": 0.26506535809983633,
+        "js_to_global": 0.06284568235890463
+      },
+      "coefficients_form_b": {
+        "log_update_l2": 0.018210413515057963,
+        "js_to_global": 0.006324207413926036,
+        "update_cosine_distance_to_mean": 0.013998787520691848,
+        "normalized_entropy": 0.004740807394714487,
+        "log_class_imbalance_ratio": 0.01754345937451533
+      },
+      "interpretation": "Form A and B have similar weak global rank association; per-task behavior is heterogeneous, so no universal preferred form is claimed."
+    }
+  ],
+  "test_evidence": [
+    {
+      "evidence_type": "prior_review_record",
+      "source": "Prior review of baseline 8c22e76 on the documented GPU server, 2026-09-12",
+      "status": "reported_pass",
+      "counts": {
+        "project_1_passed": 28,
+        "project_3_passed": 352,
+        "project_2_passed": 78,
+        "project_2_subtests_passed": 46
+      },
+      "environment": {
+        "torch": "2.3.0",
+        "cuda_runtime": "12.1",
+        "gpu_family": "NVIDIA Tesla V100"
+      },
+      "limitation": "Historical validation, not validation of the new benchmark changes"
+    },
+    {
+      "evidence_type": "current_change_validation",
+      "source": "Root agent's remote test report, 2026-09-12",
+      "status": "pass",
+      "suite": "Project 2",
+      "counts": {
+        "passed": 100,
+        "subtests_passed": 46
+      },
+      "wall_seconds": 3.31,
+      "commit": "dce4248973157f0217f6cc19a6f1ed0399254b8e",
+      "execution_location": "authorized SSH GPU machine"
+    },
+    {
+      "evidence_type": "current_change_validation",
+      "source": "Root agent's remote test report, 2026-09-12; ~/ahlora-runs/p3-tests.log",
+      "status": "pass",
+      "suite": "Project 3 including benchmark/cache/signature changes",
+      "counts": {
+        "passed": 375
+      },
+      "wall_seconds": 10.26,
+      "execution_location": "authorized SSH GPU machine"
+    },
+    {
+      "evidence_type": "real_data_preflight",
+      "source": "Root agent's remote Project 2 preflight report, 2026-09-12",
+      "status": "pass",
+      "tasks": [
+        "CIFAR-10",
+        "FashionMNIST",
+        "heart-disease tabular",
+        "AG News",
+        "SpeechCommands"
+      ],
+      "speechcommands": {
+        "train_examples": 84843,
+        "official_validation_examples": 9981,
+        "classes": 35
+      },
+      "limitation": "Data availability and loader validation; full experiment measurements are still running"
+    },
+    {
+      "evidence_type": "p3_full_battery",
+      "status": "complete",
+      "source": "docs/artifacts/p3-completion-report/aggregate.json",
+      "contexts": 2,
+      "completed_runs": 33,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "rounds": 50,
+      "limitation": "Metrics are empirical finite-run results under frozen-feature CIFAR-100 protocol; no statistical superiority claim."
+    },
+    {
+      "evidence_type": "p3_signature_battery",
+      "status": "complete",
+      "source": "docs/artifacts/p3-signatures/gate_g1.json",
+      "stage10_ari": {
+        "local_spectral": 0.127143778207608,
+        "local_row_norms": 0.06654861286786407,
+        "local_inverse_delta_l2": 0.27410012361692154,
+        "mh_spectral": -0.05991902834008097,
+        "mh_row_norms": 0.1607188703465982,
+        "mh_inverse_delta_l2": 0.10974358974358973
+      },
+      "interpretation": "All descriptive stage-10 means are below the soft-candidate threshold 0.4; automatic domain discovery remains unsupported."
+    }
+  ],
+  "evidence_rules": {
+    "primary_endpoint": "Final communication round; never select the best seed or round silently",
+    "accuracy_unit": "fraction_0_to_1",
+    "display_accuracy": "Multiply by 100 for percent; accuracy differences are percentage points",
+    "seed_aggregation": "Report individual seeds, arithmetic mean and sample standard deviation",
+    "smoke_tests": "Single-seed or short runs validate execution, not scientific conclusions",
+    "historical_p3_results": "Experiments 01-03 are two-round smoke tests from an older protocol and are not directly comparable",
+    "historical_p2_results": "Stale-marked outputs must not be cited as regenerated real-data results",
+    "compression": "mean_residual_energy is absolute squared error; mean_tail_mass is relative squared error",
+    "communication": "Keep effective-matrix and operational staged accounting separate; preserve payload dtype and representation",
+    "privacy": "No privacy guarantee follows from decentralized communication or adapter-only sharing",
+    "oracle": "Known domain assignments are inputs, not a successful domain-discovery result"
+  },
+  "artifact_sources": {
+    "reading_guide": "docs/artifacts/README.md",
+    "work_log": "docs/artifacts/progress.jsonl",
+    "metric_definitions": "docs/artifacts/README.md#metric-dictionary",
+    "convergence_analysis": "docs/research/2026-09-03-project3-convergence-analysis.md",
+    "research_context": "docs/research/2026-07-20-project3-research-framing.md",
+    "historical_code_inventory": "docs/research/mathematical-inventory-code-only.md"
+  },
+  "pull_requests": [
+    {
+      "number": 42,
+      "status": "open",
+      "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/42",
+      "commit": "dce4248973157f0217f6cc19a6f1ed0399254b8e",
+      "scope": "Project 2 projection and real-data regeneration runtime fixes"
+    }
+  ],
+  "next_actions": [
+    "Review aggregate P3 report and per-domain/paired CSVs for artifact presentation",
+    "Review P2 real-data manifests and calibration limitations before citing lambda values",
+    "Open/merge the P3 implementation PR with remote test and experiment evidence",
+    "Keep automatic domain discovery and adaptive rank calibration as explicitly unresolved extensions"
+  ]
+}

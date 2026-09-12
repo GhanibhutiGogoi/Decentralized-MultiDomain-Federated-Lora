@@ -1,0 +1,169 @@
+Using device: cuda
+Reusing Project 1 adaptive rank and aggregation implementations.
+Output directory: /home/gogoi/ahlora-runs/p2-exp1-real-seed42
+
+=== Loading Project 1 Benchmark Suite ===
+/home/gogoi/ahlora-venv/lib/python3.10/site-packages/torchtext/datasets/__init__.py:4: UserWarning: 
+/!\ IMPORTANT WARNING ABOUT TORCHTEXT STATUS /!\ 
+Torchtext is deprecated and the last released version will be 0.18 (this one). You can silence this warning by calling the following at the beginnign of your scripts: `import torchtext; torchtext.disable_torchtext_deprecation_warning()`
+  warnings.warn(torchtext._TORCHTEXT_DEPRECATION_MSG)
+/home/gogoi/ahlora-venv/lib/python3.10/site-packages/torchtext/data/__init__.py:4: UserWarning: 
+/!\ IMPORTANT WARNING ABOUT TORCHTEXT STATUS /!\ 
+Torchtext is deprecated and the last released version will be 0.18 (this one). You can silence this warning by calling the following at the beginnign of your scripts: `import torchtext; torchtext.disable_torchtext_deprecation_warning()`
+  warnings.warn(torchtext._TORCHTEXT_DEPRECATION_MSG)
+/home/gogoi/ahlora-venv/lib/python3.10/site-packages/torchtext/vocab/__init__.py:4: UserWarning: 
+/!\ IMPORTANT WARNING ABOUT TORCHTEXT STATUS /!\ 
+Torchtext is deprecated and the last released version will be 0.18 (this one). You can silence this warning by calling the following at the beginnign of your scripts: `import torchtext; torchtext.disable_torchtext_deprecation_warning()`
+  warnings.warn(torchtext._TORCHTEXT_DEPRECATION_MSG)
+/home/gogoi/ahlora-venv/lib/python3.10/site-packages/torchtext/utils.py:4: UserWarning: 
+/!\ IMPORTANT WARNING ABOUT TORCHTEXT STATUS /!\ 
+Torchtext is deprecated and the last released version will be 0.18 (this one). You can silence this warning by calling the following at the beginnign of your scripts: `import torchtext; torchtext.disable_torchtext_deprecation_warning()`
+  warnings.warn(torchtext._TORCHTEXT_DEPRECATION_MSG)
+/home/gogoi/ahlora-venv/lib/python3.10/site-packages/torchdata/datapipes/__init__.py:18: UserWarning: 
+################################################################################
+WARNING!
+The 'datapipes', 'dataloader2' modules are deprecated and will be removed in a
+future torchdata release! Please see https://github.com/pytorch/data/issues/1196
+to learn more and leave feedback.
+################################################################################
+
+  deprecation_warning()
+  CIFAR-CNN    train=50000, test=10000, classes=10, synthetic=False, cache=present, download=disabled_cache_hit
+  Fashion-MLP  train=60000, test=10000, classes=10, synthetic=False, cache=present, download=disabled_cache_hit
+  AGNews-LSTM  train=120000, test=7600, classes=4, synthetic=False, cache=present, download=disabled_cache_hit
+  Tabular-MLP  train=237, test=60, classes=2, synthetic=False, cache=present, download=disabled_cache_hit
+  Audio-1DCNN  train=84843, test=9981, classes=35, synthetic=False, cache=present, download=disabled_cache_hit
+
+======================================================================
+  EXPERIMENT 1 TASK: CIFAR-CNN
+======================================================================
+  partition=dirichlet alpha=0.5 seed=42
+  Round 1/5 | client 0 training
+  Round 1/5 | client 1 training
+  Round 1/5 | client 2 training
+  Round 1/5 | acc=24.11% | C0(r=2,q=0.397,dacc=2.450) | C1(r=2,q=0.409,dacc=-2.310) | C2(r=8,q=0.411,dacc=2.290)
+  Round 2/5 | client 0 training
+  Round 2/5 | client 1 training
+  Round 2/5 | client 2 training
+  Round 2/5 | acc=30.00% | C0(r=2,q=0.393,dacc=1.100) | C1(r=2,q=0.439,dacc=0.620) | C2(r=8,q=0.497,dacc=3.030)
+  Round 3/5 | client 0 training
+  Round 3/5 | client 1 training
+  Round 3/5 | client 2 training
+  Round 3/5 | acc=31.19% | C0(r=2,q=0.381,dacc=0.800) | C1(r=2,q=0.452,dacc=0.460) | C2(r=8,q=0.513,dacc=1.670)
+  Round 4/5 | client 0 training
+  Round 4/5 | client 1 training
+  Round 4/5 | client 2 training
+  Round 4/5 | acc=33.04% | C0(r=2,q=0.420,dacc=-0.280) | C1(r=2,q=0.470,dacc=4.470) | C2(r=8,q=0.522,dacc=0.290)
+  Round 5/5 | client 0 training
+  Round 5/5 | client 1 training
+  Round 5/5 | client 2 training
+  Round 5/5 | acc=32.87% | C0(r=2,q=0.464,dacc=0.300) | C1(r=2,q=0.442,dacc=2.730) | C2(r=8,q=0.511,dacc=1.510)
+
+======================================================================
+  EXPERIMENT 1 TASK: Fashion-MLP
+======================================================================
+  partition=dirichlet alpha=0.5 seed=42
+  Round 1/5 | client 0 training
+  Round 1/5 | client 1 training
+  Round 1/5 | client 2 training
+  Round 1/5 | acc=34.17% | C0(r=2,q=0.594,dacc=3.430) | C1(r=2,q=0.585,dacc=-16.950) | C2(r=8,q=0.586,dacc=-6.340)
+  Round 2/5 | client 0 training
+  Round 2/5 | client 1 training
+  Round 2/5 | client 2 training
+  Round 2/5 | acc=60.36% | C0(r=2,q=0.581,dacc=7.260) | C1(r=2,q=0.645,dacc=2.990) | C2(r=8,q=0.685,dacc=9.860)
+  Round 3/5 | client 0 training
+  Round 3/5 | client 1 training
+  Round 3/5 | client 2 training
+  Round 3/5 | acc=63.75% | C0(r=2,q=0.517,dacc=4.180) | C1(r=2,q=0.651,dacc=0.870) | C2(r=8,q=0.691,dacc=14.650)
+  Round 4/5 | client 0 training
+  Round 4/5 | client 1 training
+  Round 4/5 | client 2 training
+  Round 4/5 | acc=64.60% | C0(r=2,q=0.612,dacc=7.430) | C1(r=2,q=0.701,dacc=4.620) | C2(r=8,q=0.680,dacc=10.950)
+  Round 5/5 | client 0 training
+  Round 5/5 | client 1 training
+  Round 5/5 | client 2 training
+  Round 5/5 | acc=68.22% | C0(r=2,q=0.565,dacc=7.540) | C1(r=2,q=0.641,dacc=3.840) | C2(r=8,q=0.692,dacc=15.680)
+
+======================================================================
+  EXPERIMENT 1 TASK: AGNews-LSTM
+======================================================================
+  partition=dirichlet alpha=0.5 seed=42
+  Round 1/5 | client 0 training
+  Round 1/5 | client 1 training
+  Round 1/5 | client 2 training
+  Round 1/5 | acc=25.00% | C0(r=2,q=0.437,dacc=0.000) | C1(r=2,q=0.501,dacc=0.000) | C2(r=8,q=0.468,dacc=0.000)
+  Round 2/5 | client 0 training
+  Round 2/5 | client 1 training
+  Round 2/5 | client 2 training
+  Round 2/5 | acc=25.26% | C0(r=2,q=0.445,dacc=0.263) | C1(r=2,q=0.514,dacc=0.263) | C2(r=8,q=0.458,dacc=0.263)
+  Round 3/5 | client 0 training
+  Round 3/5 | client 1 training
+  Round 3/5 | client 2 training
+  Round 3/5 | acc=25.25% | C0(r=2,q=0.435,dacc=0.145) | C1(r=2,q=0.514,dacc=0.132) | C2(r=8,q=0.461,dacc=0.026)
+  Round 4/5 | client 0 training
+  Round 4/5 | client 1 training
+  Round 4/5 | client 2 training
+  Round 4/5 | acc=25.45% | C0(r=2,q=0.446,dacc=0.303) | C1(r=2,q=0.502,dacc=0.303) | C2(r=8,q=0.461,dacc=-0.211)
+  Round 5/5 | client 0 training
+  Round 5/5 | client 1 training
+  Round 5/5 | client 2 training
+  Round 5/5 | acc=25.46% | C0(r=2,q=0.451,dacc=0.289) | C1(r=2,q=0.523,dacc=0.329) | C2(r=8,q=0.469,dacc=0.000)
+
+======================================================================
+  EXPERIMENT 1 TASK: Tabular-MLP
+======================================================================
+  partition=dirichlet alpha=0.5 seed=42
+  Round 1/5 | client 0 training
+  Round 1/5 | client 1 training
+  Round 1/5 | client 2 training
+  Round 1/5 | acc=66.67% | C0(r=2,q=0.591,dacc=-10.000) | C1(r=2,q=0.591,dacc=1.667) | C2(r=8,q=0.591,dacc=11.667)
+  Round 2/5 | client 0 training
+  Round 2/5 | client 1 training
+  Round 2/5 | client 2 training
+  Round 2/5 | acc=56.67% | C0(r=2,q=0.591,dacc=-31.667) | C1(r=2,q=0.591,dacc=0.000) | C2(r=8,q=0.591,dacc=1.667)
+  Round 3/5 | client 0 training
+  Round 3/5 | client 1 training
+  Round 3/5 | client 2 training
+  Round 3/5 | acc=55.00% | C0(r=2,q=0.591,dacc=-16.667) | C1(r=2,q=0.591,dacc=0.000) | C2(r=8,q=0.591,dacc=0.000)
+  Round 4/5 | client 0 training
+  Round 4/5 | client 1 training
+  Round 4/5 | client 2 training
+  Round 4/5 | acc=55.00% | C0(r=2,q=0.591,dacc=-6.667) | C1(r=2,q=0.591,dacc=0.000) | C2(r=8,q=0.591,dacc=0.000)
+  Round 5/5 | client 0 training
+  Round 5/5 | client 1 training
+  Round 5/5 | client 2 training
+  Round 5/5 | acc=61.67% | C0(r=2,q=0.592,dacc=-1.667) | C1(r=2,q=0.591,dacc=0.000) | C2(r=8,q=0.591,dacc=0.000)
+
+======================================================================
+  EXPERIMENT 1 TASK: Audio-1DCNN
+======================================================================
+  partition=dirichlet alpha=0.5 seed=42
+  Round 1/5 | client 0 training
+/home/gogoi/ahlora-venv/lib/python3.10/site-packages/torch/nn/modules/conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+  Round 1/5 | client 1 training
+  Round 1/5 | client 2 training
+  Round 1/5 | acc=3.85% | C0(r=2,q=0.242,dacc=0.170) | C1(r=2,q=0.240,dacc=0.321) | C2(r=8,q=0.242,dacc=0.281)
+  Round 2/5 | client 0 training
+  Round 2/5 | client 1 training
+  Round 2/5 | client 2 training
+  Round 2/5 | acc=3.85% | C0(r=2,q=0.240,dacc=0.170) | C1(r=2,q=0.238,dacc=0.060) | C2(r=8,q=0.241,dacc=0.381)
+  Round 3/5 | client 0 training
+  Round 3/5 | client 1 training
+  Round 3/5 | client 2 training
+  Round 3/5 | acc=3.84% | C0(r=2,q=0.251,dacc=0.180) | C1(r=2,q=0.241,dacc=-0.140) | C2(r=8,q=0.242,dacc=0.271)
+  Round 4/5 | client 0 training
+  Round 4/5 | client 1 training
+  Round 4/5 | client 2 training
+  Round 4/5 | acc=3.86% | C0(r=2,q=0.238,dacc=0.180) | C1(r=2,q=0.239,dacc=0.070) | C2(r=8,q=0.242,dacc=0.110)
+  Round 5/5 | client 0 training
+  Round 5/5 | client 1 training
+  Round 5/5 | client 2 training
+  Round 5/5 | acc=3.85% | C0(r=2,q=0.249,dacc=0.170) | C1(r=2,q=0.239,dacc=0.060) | C2(r=8,q=0.240,dacc=0.150)
+
+=== Experiment 1 Complete ===
+Label rows: 15
+Measurement rows: 75
+Correlation rows: 4
+Regression rows: 12
+Saved outputs to: /home/gogoi/ahlora-runs/p2-exp1-real-seed42

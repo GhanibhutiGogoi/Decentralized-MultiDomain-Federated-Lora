@@ -1,0 +1,11 @@
+# Tested Python 3.10 environment for the documented CentOS 7 / V100 host.
+# Install wheels through the documented mirror; newer torch wheels need newer glibc.
+torch==2.3.0
+torchvision==0.18.0
+numpy==1.26.4
+scipy==1.15.3
+scikit-learn==1.7.2
+matplotlib==3.10.9
+PyYAML==6.0.3
+pytest==9.1.1
+

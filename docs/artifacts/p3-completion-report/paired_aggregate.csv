@@ -1,0 +1,463 @@
+context_id,left_variant_id,right_variant_id,left_label,right_label,metric,n,mean,sample_std,min,max
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,personalized_accuracy,3,-0.21924838381609998,0.014622571894302569,-0.2281826053939997,-0.2023734379056718
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,personalized_sample_weighted_accuracy,3,-0.21916666666666668,0.014615516868497446,-0.22810000000000002,-0.2023
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,consensus_accuracy,3,-0.05266666666666667,0.016642515835453883,-0.0712,-0.03900000000000001
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,accuracy_gap,3,-0.16516666666666663,0.10095337207509877,-0.27899999999999997,-0.08650000000000001
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,worst_domain_accuracy,3,-0.15733333333333333,0.05163655036244514,-0.211,-0.108
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,consensus_distance,3,7386.071302625868,2605.263182277756,5170.588972981771,10256.2326171875
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,total_effective_messages,3,9000.0,0.0,9000.0,9000.0
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,total_effective_floats,3,88128000.0,0.0,88128000.0,88128000.0
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,total_operational_floats,3,7344000.0,0.0,7344000.0,7344000.0
+b729ad24b6b0,076ae68a5277,0bcde22a1ce1,MH / ΔW / feedback / ring,FedAvg / factor zero-pad,wall_seconds,3,-5.521739544036488,2.2259738328367624,-7.961848087608814,-3.6021409733220935
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,personalized_accuracy,3,-0.20890595743169457,0.02178356313572748,-0.22797550173862022,-0.1851659755707732
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,personalized_sample_weighted_accuracy,3,-0.20883333333333334,0.021778276638277267,-0.22790000000000002,-0.18510000000000001
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,consensus_accuracy,3,-0.04883333333333334,0.009943004240838544,-0.0603,-0.042600000000000006
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,accuracy_gap,3,-0.126,0.11463747205865979,-0.2555,-0.037500000000000006
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,worst_domain_accuracy,3,-0.15783333333333333,0.04751403301481925,-0.206,-0.11099999999999999
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,consensus_distance,3,-129.3486931178305,12.497763079880787,-143.32380429108937,-119.24404228528341
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,total_effective_messages,3,9000.0,0.0,9000.0,9000.0
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,total_effective_floats,3,88128000.0,0.0,88128000.0,88128000.0
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,total_operational_floats,3,31056000.0,0.0,31056000.0,31056000.0
+b729ad24b6b0,076ae68a5277,0eac0e17d3ed,MH / ΔW / feedback / ring,FedAvg / ΔW,wall_seconds,3,-1.1572069252530734,1.9798018222460119,-2.870903109200299,1.0100034438073635
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,personalized_accuracy,3,-0.05998387192789991,0.029821664712715402,-0.08774351562957258,-0.02845799322560938
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,personalized_sample_weighted_accuracy,3,-0.05993333333333334,0.02982890097427884,-0.0877,-0.02840000000000001
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,consensus_accuracy,3,-0.028633333333333334,0.026911212037612375,-0.0489,0.001899999999999999
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,accuracy_gap,3,-0.00016666666666665755,0.05025518215401604,-0.04999999999999999,0.05049999999999999
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,worst_domain_accuracy,3,-0.0675,0.06846166810705098,-0.1215,0.009500000000000008
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,consensus_distance,3,3239.6934380425346,143.18102419036953,3081.1940755208334,3359.677254231771
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,total_effective_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,total_effective_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,total_operational_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,1bf906c2712a,MH / ΔW / feedback / ring,MH / factor zero-pad / ring,wall_seconds,3,-6.315729910197358,1.9731299690348576,-8.470834077335894,-4.59795411862433
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,personalized_accuracy,3,0.26970348659504084,0.01059253073136666,0.2625637631634633,0.2818739279009145
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,personalized_sample_weighted_accuracy,3,0.2697333333333333,0.010588830593287166,0.26259999999999994,0.28190000000000004
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,consensus_accuracy,3,0.03886666666666667,0.015118641914316683,0.02840000000000001,0.0562
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,accuracy_gap,3,-0.08666666666666666,0.13206090766511236,-0.2385,0.001500000000000029
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,worst_domain_accuracy,3,0.29533333333333334,0.05775018037489865,0.25050000000000006,0.3605
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,consensus_distance,3,1187.9708685980902,95.72718161395589,1132.6947021484375,1298.5070963541666
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,total_effective_messages,3,-1500.0,0.0,-1500.0,-1500.0
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,total_effective_floats,3,-14688000.0,0.0,-14688000.0,-14688000.0
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,total_operational_messages,3,-1500.0,0.0,-1500.0,-1500.0
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,total_operational_floats,3,-14688000.0,0.0,-14688000.0,-14688000.0
+b729ad24b6b0,076ae68a5277,51d33462378d,MH / ΔW / feedback / ring,Local / ΔW,wall_seconds,3,-7.551806105300784,1.542309017483355,-9.287001511082053,-6.337020005099475
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,personalized_accuracy,3,0.17441879660770215,0.010126530573825876,0.16764485625055336,0.18605997301649477
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,personalized_sample_weighted_accuracy,3,0.17446666666666666,0.010119453213159949,0.16770000000000002,0.1861
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,consensus_accuracy,3,0.008533333333333329,0.018334212100151268,-0.0023999999999999994,0.02969999999999999
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,accuracy_gap,3,-0.06583333333333331,0.10685309229654207,-0.1885,0.007000000000000034
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,worst_domain_accuracy,3,0.18283333333333332,0.06396548548501242,0.13749999999999998,0.256
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,consensus_distance,3,1.48562825520834,18.949147322472104,-20.38661295572915,12.945182291666654
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,total_effective_messages,3,1800.0,0.0,1800.0,1800.0
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,total_effective_floats,3,17625600.0,0.0,17625600.0,17625600.0
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,total_operational_floats,3,25600000.0,0.0,25600000.0,25600000.0
+b729ad24b6b0,076ae68a5277,658f968893fe,MH / ΔW / feedback / ring,Oracle / ΔW / bridge 5,wall_seconds,3,-1.928912332902352,1.754066955829722,-3.8684310419484973,-0.4537311065942049
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,personalized_accuracy,3,0.14650167408788095,0.021072001201640576,0.1298963131047089,0.17020648834741783
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,personalized_sample_weighted_accuracy,3,0.1465,0.02106727319801973,0.12990000000000002,0.17020000000000002
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,consensus_accuracy,3,-0.011633333333333338,0.00381750354725878,-0.014500000000000013,-0.007300000000000001
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,accuracy_gap,3,-0.09483333333333333,0.14396729952782097,-0.26099999999999995,-0.007500000000000034
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,worst_domain_accuracy,3,0.17750000000000002,0.06758513150094478,0.12800000000000003,0.2545
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,consensus_distance,3,-74.27988823784722,16.84115024137231,-91.52672526041665,-57.87609049479167
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,total_effective_messages,3,1800.0,0.0,1800.0,1800.0
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,total_effective_floats,3,17625600.0,0.0,17625600.0,17625600.0
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,total_operational_floats,3,25600000.0,0.0,25600000.0,25600000.0
+b729ad24b6b0,076ae68a5277,8fbe5acc92e3,MH / ΔW / feedback / ring,Oracle / ΔW / feedback / bridge 5,wall_seconds,3,-0.8727400489151478,1.0700485696160837,-2.0675734085962176,-0.002772688865661621
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,personalized_accuracy,3,0.018231574903239022,0.011796481113228905,0.009553931742837252,0.031663297480388874
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,0.01826666666666667,0.011795903243640708,0.009599999999999997,0.031700000000000006
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,consensus_accuracy,3,-0.037899999999999996,0.013604043516543157,-0.053599999999999995,-0.0296
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,accuracy_gap,3,0.03216666666666668,0.03440324597088674,-0.007000000000000006,0.05750000000000005
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,worst_domain_accuracy,3,0.001666666666666668,0.022783400390050085,-0.02400000000000002,0.019500000000000017
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,consensus_distance,3,47.23071560329862,58.154517138047666,-15.709578450520823,98.96998697916668
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,total_effective_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,total_effective_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,total_operational_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,076ae68a5277,cad564bfe53c,MH / ΔW / feedback / ring,MH / ΔW / ring,wall_seconds,3,-2.018193168565631,1.5949006766932143,-3.852358954027295,-0.9576352881267667
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,0.04606195400798097,0.005886109605347906,0.03959356658007329,0.051103427265346196
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,0.046166666666666654,0.005882459802950892,0.03970000000000001,0.05119999999999997
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,-0.024900000000000002,0.02373099239391391,-0.0479,-0.0005000000000000004
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,-0.11416666666666665,0.10007164100449903,-0.2075,-0.008500000000000008
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,0.07500000000000001,0.05202163011671203,0.015000000000000013,0.10750000000000001
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,consensus_distance,3,1975.1544623480902,403.4775773530895,1510.374609375,2235.453556315104
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,1800.0,0.0,1800.0,1800.0
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,17625600.0,0.0,17625600.0,17625600.0
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,9792000.0,0.0,9792000.0,9792000.0
+b729ad24b6b0,076ae68a5277,d6881822b57c,MH / ΔW / feedback / ring,Oracle / factor zero-pad / bridge 5,wall_seconds,3,-5.999134981073439,2.5353692640955465,-8.59329420607537,-3.526959312148392
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,personalized_accuracy,3,0.010342426384405391,0.008959583166557436,0.00020710365537950082,0.01720746233489861
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,personalized_sample_weighted_accuracy,3,0.010333333333333332,0.008958422480176592,0.0001999999999999988,0.0172
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,consensus_accuracy,3,0.0038333333333333323,0.007839855440844132,-0.0046,0.0109
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,accuracy_gap,3,0.03916666666666666,0.013714347718113817,0.02349999999999998,0.049
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,worst_domain_accuracy,3,-0.0005000000000000008,0.004769696007084728,-0.0035000000000000014,0.004999999999999999
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,consensus_distance,3,-7515.419995743699,2615.884841791137,-10399.55642147859,-5296.06720575889
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,total_effective_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,total_effective_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,total_operational_floats,3,23712000.0,0.0,23712000.0,23712000.0
+b729ad24b6b0,0bcde22a1ce1,0eac0e17d3ed,FedAvg / factor zero-pad,FedAvg / ΔW,wall_seconds,3,4.364532618783414,0.876843651744045,3.3905084608122706,5.0909449784085155
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,personalized_accuracy,3,0.15926451188820007,0.042288103706666774,0.11462992227609922,0.19873111492301904
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,personalized_sample_weighted_accuracy,3,0.15923333333333334,0.04228738976732109,0.11460000000000001,0.1987
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,consensus_accuracy,3,0.024033333333333334,0.016070262391552088,0.008899999999999998,0.040900000000000006
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,accuracy_gap,3,0.165,0.0555697759577992,0.129,0.22899999999999998
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,worst_domain_accuracy,3,0.08983333333333333,0.027501515109777743,0.0625,0.11750000000000001
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,consensus_distance,3,-4146.377864583334,2748.427393383295,-7175.038541666667,-1810.91171875
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,total_effective_messages,3,-9000.0,0.0,-9000.0,-9000.0
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,total_effective_floats,3,-88128000.0,0.0,-88128000.0,-88128000.0
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,total_operational_floats,3,-7344000.0,0.0,-7344000.0,-7344000.0
+b729ad24b6b0,0bcde22a1ce1,1bf906c2712a,FedAvg / factor zero-pad,MH / factor zero-pad / ring,wall_seconds,3,-0.7939903661608696,0.2538494700554612,-0.9958131453022361,-0.5089859897270799
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,personalized_accuracy,3,0.48895187041114085,0.004112221100474953,0.4842473658065863,0.4918618768693732
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,personalized_sample_weighted_accuracy,3,0.4889,0.004107310555582526,0.4842000000000001,0.4918
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,consensus_accuracy,3,0.09153333333333334,0.010396794377755737,0.07980000000000001,0.09960000000000001
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,accuracy_gap,3,0.0785,0.034252737116907905,0.04049999999999998,0.10699999999999997
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,worst_domain_accuracy,3,0.45266666666666666,0.02164678575062204,0.428,0.46849999999999997
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,consensus_distance,3,-6198.100434027778,2514.0927124126642,-8957.725520833334,-4037.8942708333334
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,total_effective_messages,3,-10500.0,0.0,-10500.0,-10500.0
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,total_effective_floats,3,-102816000.0,0.0,-102816000.0,-102816000.0
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,total_operational_messages,3,-1500.0,0.0,-1500.0,-1500.0
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,total_operational_floats,3,-22032000.0,0.0,-22032000.0,-22032000.0
+b729ad24b6b0,0bcde22a1ce1,51d33462378d,FedAvg / factor zero-pad,Local / ΔW,wall_seconds,3,-2.0300665612642965,0.7048628095434935,-2.734879031777382,-1.325153423473239
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,personalized_accuracy,3,0.3936671804238021,0.004758891641560446,0.3884334109221666,0.397734165950058
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,personalized_sample_weighted_accuracy,3,0.39363333333333334,0.004758501164582556,0.38839999999999997,0.3977
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,consensus_accuracy,3,0.0612,0.013077079184588586,0.046099999999999995,0.0688
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,accuracy_gap,3,0.09933333333333333,0.012789970028633102,0.09049999999999997,0.11399999999999998
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,worst_domain_accuracy,3,0.3401666666666667,0.028915105625491547,0.308,0.364
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,consensus_distance,3,-7384.58567437066,2623.185779418993,-10276.61923014323,-5158.690657552083
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,total_effective_messages,3,-7200.0,0.0,-7200.0,-7200.0
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,total_effective_floats,3,-70502400.0,0.0,-70502400.0,-70502400.0
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,total_operational_floats,3,18256000.0,0.0,18256000.0,18256000.0
+b729ad24b6b0,0bcde22a1ce1,658f968893fe,FedAvg / factor zero-pad,Oracle / ΔW / bridge 5,wall_seconds,3,3.5928272111341357,0.4750012142544082,3.1484098667278886,4.093417045660317
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,personalized_accuracy,3,0.3657500579039809,0.007908520869105396,0.3570854212533373,0.37257992625308967
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,personalized_sample_weighted_accuracy,3,0.3656666666666667,0.007910962857537243,0.357,0.37250000000000005
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,consensus_accuracy,3,0.04103333333333333,0.01680634800702798,0.024499999999999994,0.0581
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,accuracy_gap,3,0.07033333333333332,0.04858326186386965,0.018000000000000016,0.11399999999999998
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,worst_domain_accuracy,3,0.3348333333333333,0.029968038529962774,0.303,0.3625
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,consensus_distance,3,-7460.351190863716,2617.209972084085,-10347.759342447916,-5244.025821940104
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,total_effective_messages,3,-7200.0,0.0,-7200.0,-7200.0
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,total_effective_floats,3,-70502400.0,0.0,-70502400.0,-70502400.0
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,total_operational_floats,3,18256000.0,0.0,18256000.0,18256000.0
+b729ad24b6b0,0bcde22a1ce1,8fbe5acc92e3,FedAvg / factor zero-pad,Oracle / ΔW / feedback / bridge 5,wall_seconds,3,4.64899949512134,1.1598949362500632,3.599368284456432,5.894274679012597
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,personalized_accuracy,3,0.237479958719339,0.02200674037549976,0.21585093339216274,0.2598459028743886
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,0.23743333333333336,0.022009164757739754,0.21580000000000002,0.25980000000000003
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,consensus_accuracy,3,0.014766666666666671,0.0046500896048714295,0.009400000000000006,0.017600000000000005
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,accuracy_gap,3,0.1973333333333333,0.12304504595201438,0.0795,0.32499999999999996
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,worst_domain_accuracy,3,0.159,0.062187217336041024,0.11750000000000001,0.2305
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,consensus_distance,3,-7338.84058702257,2579.3524302017518,-10197.80087890625,-5186.298551432292
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,total_effective_messages,3,-9000.0,0.0,-9000.0,-9000.0
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,total_effective_floats,3,-88128000.0,0.0,-88128000.0,-88128000.0
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,total_operational_floats,3,-7344000.0,0.0,-7344000.0,-7344000.0
+b729ad24b6b0,0bcde22a1ce1,cad564bfe53c,FedAvg / factor zero-pad,MH / ΔW / ring,wall_seconds,3,3.5035463754708567,0.7645835784667193,2.644505685195327,4.109489133581519
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,0.265310337824081,0.010813511552920065,0.25347686517101803,0.27467797632715185
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,0.2653333333333333,0.010813109327725006,0.25349999999999995,0.27469999999999994
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,0.02776666666666667,0.009338807918215977,0.0215,0.038500000000000006
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,0.05099999999999999,0.04126439142893059,0.0034999999999999892,0.078
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,0.23233333333333334,0.020738450601077544,0.2155,0.2555
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,consensus_distance,3,-5410.916840277778,2575.9860405365253,-8076.597395833333,-2935.135416666667
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,-7200.0,0.0,-7200.0,-7200.0
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,-70502400.0,0.0,-70502400.0,-70502400.0
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,2448000.0,0.0,2448000.0,2448000.0
+b729ad24b6b0,0bcde22a1ce1,d6881822b57c,FedAvg / factor zero-pad,Oracle / factor zero-pad / bridge 5,wall_seconds,3,-0.47739543703695136,0.4939111087980166,-0.8759218538179994,0.07518166117370129
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,personalized_accuracy,3,0.14892208550379468,0.04580707379508656,0.09742245994120062,0.18511840176008096
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,personalized_sample_weighted_accuracy,3,0.1489,0.045808187041182925,0.09740000000000001,0.1851
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,consensus_accuracy,3,0.020200000000000003,0.022246123257772355,0.003700000000000002,0.045500000000000006
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,accuracy_gap,3,0.12583333333333332,0.06902233937888033,0.08399999999999999,0.20550000000000002
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,worst_domain_accuracy,3,0.09033333333333333,0.027714316396644772,0.066,0.1205
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,consensus_distance,3,3369.042131160365,132.6211702884216,3224.5178798119227,3485.1554870088894
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,total_effective_messages,3,-9000.0,0.0,-9000.0,-9000.0
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,total_effective_floats,3,-88128000.0,0.0,-88128000.0,-88128000.0
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,total_operational_floats,3,-31056000.0,0.0,-31056000.0,-31056000.0
+b729ad24b6b0,0eac0e17d3ed,1bf906c2712a,FedAvg / ΔW,MH / factor zero-pad / ring,wall_seconds,3,-5.158522984944284,0.7715027268204976,-5.607957562431693,-4.2676804242655635
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,personalized_accuracy,3,0.47860944402673544,0.011753822711824064,0.46703990347168767,0.49053926490208355
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,personalized_sample_weighted_accuracy,3,0.47856666666666664,0.011754289996989707,0.467,0.49049999999999994
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,consensus_accuracy,3,0.0877,0.012629726837901126,0.0746,0.0998
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,accuracy_gap,3,0.03933333333333334,0.022501851775650214,0.017,0.06199999999999997
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,worst_domain_accuracy,3,0.45316666666666666,0.020207259421636894,0.4315,0.4715
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,consensus_distance,3,1317.3195617159208,107.87479449728966,1251.9548495769502,1441.830900645256
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_effective_messages,3,-10500.0,0.0,-10500.0,-10500.0
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_effective_floats,3,-102816000.0,0.0,-102816000.0,-102816000.0
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_operational_messages,3,-1500.0,0.0,-1500.0,-1500.0
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_operational_floats,3,-45744000.0,0.0,-45744000.0,-45744000.0
+b729ad24b6b0,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,wall_seconds,3,-6.39459918004771,0.9633538213385794,-7.347023448906839,-5.420675689354539
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,personalized_accuracy,3,0.38332475403939675,0.013276132290493667,0.371225948587268,0.3975270622946785
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,personalized_sample_weighted_accuracy,3,0.3833,0.013275164782404763,0.3712,0.39749999999999996
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,consensus_accuracy,3,0.05736666666666667,0.016206583024602487,0.0409,0.0733
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,accuracy_gap,3,0.06016666666666667,0.01360453355809498,0.04450000000000004,0.06899999999999998
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,worst_domain_accuracy,3,0.3406666666666667,0.02785827226037776,0.3115,0.367
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,consensus_distance,3,130.83432137303882,7.3144089805137495,122.93719133536021,137.37654820680618
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_effective_messages,3,-7200.0,0.0,-7200.0,-7200.0
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_effective_floats,3,-70502400.0,0.0,-70502400.0,-70502400.0
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_operational_floats,3,-5456000.0,0.0,-5456000.0,-5456000.0
+b729ad24b6b0,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,wall_seconds,3,-0.7717054076492786,0.8283573599110979,-1.4637345504015684,0.146146260201931
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,personalized_accuracy,3,0.35540763151957555,0.011952546032130593,0.3434727080903992,0.36737772255013634
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,personalized_sample_weighted_accuracy,3,0.35533333333333333,0.01195003486745258,0.34340000000000004,0.36729999999999996
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,consensus_accuracy,3,0.0372,0.009198369420718002,0.029099999999999994,0.0472
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,accuracy_gap,3,0.031166666666666662,0.03726369994154272,-0.005499999999999963,0.06899999999999998
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,worst_domain_accuracy,3,0.3353333333333333,0.02952259022059774,0.3065,0.3655
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,consensus_distance,3,55.06880487998327,5.456588683188427,51.79707903067271,61.36795179049174
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,total_effective_messages,3,-7200.0,0.0,-7200.0,-7200.0
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,total_effective_floats,3,-70502400.0,0.0,-70502400.0,-70502400.0
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,total_operational_floats,3,-5456000.0,0.0,-5456000.0,-5456000.0
+b729ad24b6b0,0eac0e17d3ed,8fbe5acc92e3,FedAvg / ΔW,Oracle / ΔW / feedback / bridge 5,wall_seconds,3,0.2844668763379256,1.1309141803949092,-1.0127761326730251,1.0628470610827208
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,personalized_accuracy,3,0.2271375323349336,0.03069447486061211,0.19864347105726415,0.2596387992190091
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,0.2271,0.030696090956341644,0.19860000000000003,0.2596
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,consensus_accuracy,3,0.010933333333333338,0.0037872593432894635,0.0067000000000000046,0.014000000000000005
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,accuracy_gap,3,0.15816666666666668,0.13617758014200917,0.0305,0.3015
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,worst_domain_accuracy,3,0.1595,0.05747173218200406,0.1205,0.2255
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,consensus_distance,3,176.5794087211291,58.442092049509824,109.76865432659785,218.2140292644501
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_effective_messages,3,-9000.0,0.0,-9000.0,-9000.0
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_effective_floats,3,-88128000.0,0.0,-88128000.0,-88128000.0
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_operational_floats,3,-31056000.0,0.0,-31056000.0,-31056000.0
+b729ad24b6b0,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,wall_seconds,3,-0.8609862433125576,1.171541992324889,-1.9676387319341302,0.3661358468234539
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,0.25496791143967557,0.016516674555424497,0.2362694028361194,0.26756906831869354
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,0.255,0.01651756640670775,0.23629999999999998,0.2676
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,0.023933333333333338,0.016712969016106426,0.012400000000000001,0.043100000000000006
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,0.01183333333333333,0.04715488663259974,-0.04150000000000001,0.048
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,0.23283333333333334,0.022695447414257636,0.2185,0.259
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,consensus_distance,3,2104.503155465921,411.70007488096775,1629.6186516602836,2360.9317890922225
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,-7200.0,0.0,-7200.0,-7200.0
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,-70502400.0,0.0,-70502400.0,-70502400.0
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,-21264000.0,0.0,-21264000.0,-21264000.0
+b729ad24b6b0,0eac0e17d3ed,d6881822b57c,FedAvg / ΔW,Oracle / factor zero-pad / bridge 5,wall_seconds,3,-4.8419280558203655,0.7744083712421097,-5.7223910968750715,-4.26643031463027
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,personalized_accuracy,3,0.3296873585229408,0.038354770669155304,0.2931307619463542,0.36961744353048703
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,personalized_sample_weighted_accuracy,3,0.32966666666666666,0.038360961058520604,0.2931,0.36960000000000004
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,consensus_accuracy,3,0.0675,0.011870973001401363,0.0543,0.07730000000000001
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,accuracy_gap,3,-0.0865,0.08936022605163889,-0.1885,-0.02200000000000002
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,worst_domain_accuracy,3,0.36283333333333334,0.010750968948580101,0.351,0.372
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,consensus_distance,3,-2051.722569444444,236.52703327393564,-2226.9825520833338,-1782.6869791666666
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,total_effective_messages,3,-1500.0,0.0,-1500.0,-1500.0
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,total_effective_floats,3,-14688000.0,0.0,-14688000.0,-14688000.0
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,total_operational_messages,3,-1500.0,0.0,-1500.0,-1500.0
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,total_operational_floats,3,-14688000.0,0.0,-14688000.0,-14688000.0
+b729ad24b6b0,1bf906c2712a,51d33462378d,MH / factor zero-pad / ring,Local / ΔW,wall_seconds,3,-1.2360761951034267,0.46702485930776644,-1.7390658864751458,-0.8161674337461591
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,personalized_accuracy,3,0.23440266853560204,0.03886201853144917,0.19610284947616274,0.27380348864606735
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,personalized_sample_weighted_accuracy,3,0.2344,0.03886167778158836,0.19610000000000002,0.2738
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,consensus_accuracy,3,0.03716666666666666,0.009350044563173664,0.02779999999999999,0.0465
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,accuracy_gap,3,-0.06566666666666666,0.06466516321276344,-0.1385,-0.015000000000000013
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,worst_domain_accuracy,3,0.25033333333333335,0.007522189397597846,0.2455,0.259
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,consensus_distance,3,-3238.2078097873264,125.30927601410097,-3347.7789388020833,-3101.5806884765625
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,total_effective_messages,3,1800.0,0.0,1800.0,1800.0
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,total_effective_floats,3,17625600.0,0.0,17625600.0,17625600.0
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,total_operational_floats,3,25600000.0,0.0,25600000.0,25600000.0
+b729ad24b6b0,1bf906c2712a,658f968893fe,MH / factor zero-pad / ring,Oracle / ΔW / bridge 5,wall_seconds,3,4.386817577295005,0.23028102907883852,4.144223012030125,4.602403035387397
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,personalized_accuracy,3,0.20648554601578084,0.04988144450080775,0.15835430633031827,0.2579500039769904
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,personalized_sample_weighted_accuracy,3,0.20643333333333333,0.04988359783870178,0.15830000000000002,0.2579
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,consensus_accuracy,3,0.016999999999999998,0.029001379277544724,-0.016400000000000012,0.0358
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,accuracy_gap,3,-0.09466666666666666,0.103016179958943,-0.21099999999999997,-0.015000000000000013
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,worst_domain_accuracy,3,0.245,0.004500000000000018,0.2405,0.24950000000000003
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,consensus_distance,3,-3313.973326280382,131.59735960158238,-3433.1141031901043,-3172.72080078125
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,total_effective_messages,3,1800.0,0.0,1800.0,1800.0
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,total_effective_floats,3,17625600.0,0.0,17625600.0,17625600.0
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,total_operational_floats,3,25600000.0,0.0,25600000.0,25600000.0
+b729ad24b6b0,1bf906c2712a,8fbe5acc92e3,MH / factor zero-pad / ring,Oracle / ΔW / feedback / bridge 5,wall_seconds,3,5.44298986128221,0.9092708469477416,4.595181429758668,6.4032606687396765
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,personalized_accuracy,3,0.07821544683113893,0.034938151804857064,0.03801192496844663,0.10122101111606352
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,0.0782,0.03493479640702089,0.038000000000000006,0.10120000000000001
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,consensus_accuracy,3,-0.009266666666666664,0.020338223455683965,-0.0315,0.008400000000000005
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,accuracy_gap,3,0.03233333333333333,0.08002551676392557,-0.057499999999999996,0.09599999999999997
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,worst_domain_accuracy,3,0.06916666666666667,0.07053781491748476,0.0,0.14100000000000001
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,consensus_distance,3,-3192.462722439236,176.6837821492788,-3375.3868326822917,-3022.7623372395833
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,total_effective_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,total_effective_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,total_operational_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,1bf906c2712a,cad564bfe53c,MH / factor zero-pad / ring,MH / ΔW / ring,wall_seconds,3,4.297536741631727,0.5692190920379165,3.640318830497563,4.633816271089017
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,0.10604582593588088,0.03153698279309722,0.07594686140413281,0.13884694289491878
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,0.10609999999999999,0.031536803896400144,0.07599999999999998,0.13889999999999997
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,0.0037333333333333337,0.00786468901694996,-0.0023999999999999994,0.0126
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,-0.114,0.050246890451051796,-0.1575,-0.059
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,0.14250000000000002,0.04778336530634903,0.098,0.193
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,consensus_distance,3,-1264.5389756944444,449.8606477367817,-1767.8343749999997,-901.5588541666666
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,1800.0,0.0,1800.0,1800.0
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,17625600.0,0.0,17625600.0,17625600.0
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,9792000.0,0.0,9792000.0,9792000.0
+b729ad24b6b0,1bf906c2712a,d6881822b57c,MH / factor zero-pad / ring,Oracle / factor zero-pad / bridge 5,wall_seconds,3,0.31659492912391823,0.6562510472229677,-0.1224601287394762,1.0709948064759374
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,personalized_accuracy,3,-0.0952846899873387,0.002059507811099938,-0.09702791247019144,-0.093012202607405
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,personalized_sample_weighted_accuracy,3,-0.09526666666666667,0.0020526405757787655,-0.09699999999999998,-0.09299999999999997
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,consensus_accuracy,3,-0.03033333333333334,0.0036226141573914997,-0.03370000000000001,-0.02650000000000001
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,accuracy_gap,3,0.020833333333333332,0.025270206436302272,0.005500000000000005,0.04999999999999999
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,worst_domain_accuracy,3,-0.1125,0.0077620873481300205,-0.12,-0.10449999999999998
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,consensus_distance,3,-1186.485240342882,114.6702559867715,-1318.8937093098957,-1119.765625
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_effective_messages,3,3300.0,0.0,3300.0,3300.0
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_effective_floats,3,32313600.0,0.0,32313600.0,32313600.0
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_operational_messages,3,2000.0,0.0,2000.0,2000.0
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_operational_floats,3,40288000.0,0.0,40288000.0,40288000.0
+b729ad24b6b0,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,wall_seconds,3,5.622893772398432,0.23737910952112787,5.418570469133556,5.8832888985052705
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,personalized_accuracy,3,-0.1232018125071599,0.011554560662730771,-0.1347764556160359,-0.11166743955349662
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,personalized_sample_weighted_accuracy,3,-0.12323333333333332,0.011550036074979713,-0.13479999999999998,-0.11170000000000002
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,consensus_accuracy,3,-0.05050000000000001,0.017528262891684396,-0.07070000000000001,-0.0393
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,accuracy_gap,3,-0.008166666666666674,0.014767644813352363,-0.022499999999999964,0.007000000000000006
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,worst_domain_accuracy,3,-0.11783333333333333,0.010323920443965727,-0.125,-0.10599999999999998
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,consensus_distance,3,-1262.2507568359374,110.93598512150992,-1390.0338216145833,-1190.5868977864584
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,total_effective_messages,3,3300.0,0.0,3300.0,3300.0
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,total_effective_floats,3,32313600.0,0.0,32313600.0,32313600.0
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,total_operational_messages,3,2000.0,0.0,2000.0,2000.0
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,total_operational_floats,3,40288000.0,0.0,40288000.0,40288000.0
+b729ad24b6b0,51d33462378d,8fbe5acc92e3,Local / ΔW,Oracle / ΔW / feedback / bridge 5,wall_seconds,3,6.679066056385636,0.47388199423838867,6.334247316233814,7.2194281024858356
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,personalized_accuracy,3,-0.25147191169180183,0.01901215212203598,-0.2683964324144235,-0.23090046568307443
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,-0.25146666666666667,0.019012189072627462,-0.2684,-0.23089999999999994
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,consensus_accuracy,3,-0.07676666666666666,0.012500533321956043,-0.0858,-0.0625
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,accuracy_gap,3,0.11883333333333333,0.15021429137513292,-0.008500000000000035,0.2845
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,worst_domain_accuracy,3,-0.2936666666666667,0.060177515180782695,-0.351,-0.231
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,consensus_distance,3,-1140.7401529947917,103.38055671716472,-1240.0753580729167,-1033.7408203125
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_effective_messages,3,1500.0,0.0,1500.0,1500.0
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_effective_floats,3,14688000.0,0.0,14688000.0,14688000.0
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_operational_messages,3,1500.0,0.0,1500.0,1500.0
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_operational_floats,3,14688000.0,0.0,14688000.0,14688000.0
+b729ad24b6b0,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,wall_seconds,3,5.533612936735153,0.2210101927343963,5.379384716972709,5.786811536177993
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,-0.22364153258705988,0.006818133508996505,-0.23077050063556825,-0.21718390054222136
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,-0.22356666666666666,0.006824465791058945,-0.23070000000000007,-0.21710000000000002
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,-0.06376666666666667,0.010883626846476013,-0.0763,-0.0567
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,-0.027500000000000007,0.06893656504352387,-0.10349999999999998,0.031
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,-0.22033333333333333,0.042338910393789474,-0.253,-0.1725
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,consensus_distance,3,787.18359375,371.56411270838527,377.6638020833334,1102.7588541666667
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,3300.0,0.0,3300.0,3300.0
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,32313600.0,0.0,32313600.0,32313600.0
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,2000.0,0.0,2000.0,2000.0
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,24480000.0,0.0,24480000.0,24480000.0
+b729ad24b6b0,51d33462378d,d6881822b57c,Local / ΔW,Oracle / factor zero-pad / bridge 5,wall_seconds,3,1.552671124227345,1.1130117807401012,0.6937073050066829,2.810060692951083
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,personalized_accuracy,3,-0.027917122519821203,0.011116901174743947,-0.03774854314584447,-0.015853484669076934
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,personalized_sample_weighted_accuracy,3,-0.027966666666666657,0.011119502386947616,-0.0378,-0.01589999999999997
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,consensus_accuracy,3,-0.020166666666666666,0.020969104256818732,-0.0442,-0.005599999999999994
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,accuracy_gap,3,-0.02900000000000001,0.03836339401043652,-0.07249999999999995,0.0
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,worst_domain_accuracy,3,-0.005333333333333319,0.004010403138505296,-0.009499999999999953,-0.0015000000000000013
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,consensus_distance,3,-75.76551649305556,8.28909134253003,-85.33516438802084,-70.82127278645832
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,total_effective_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,total_effective_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,total_operational_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,658f968893fe,8fbe5acc92e3,Oracle / ΔW / bridge 5,Oracle / ΔW / feedback / bridge 5,wall_seconds,3,1.0561722839872043,0.6856720747086917,0.4509584177285433,1.8008576333522797
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,personalized_accuracy,3,-0.15618722170446311,0.017425274529348788,-0.17258247753000383,-0.13788826307566943
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,-0.15619999999999998,0.017427851273177662,-0.17259999999999998,-0.13789999999999997
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,consensus_accuracy,3,-0.046433333333333326,0.015798839619837066,-0.05929999999999999,-0.028799999999999992
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,accuracy_gap,3,0.09799999999999999,0.12604860173758375,-0.01400000000000004,0.2345
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,worst_domain_accuracy,3,-0.18116666666666667,0.06427739364141435,-0.2465,-0.11799999999999997
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,consensus_distance,3,45.74508734809028,63.62765227590106,-27.607893880208337,86.02480468750002
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_effective_messages,3,-1800.0,0.0,-1800.0,-1800.0
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_effective_floats,3,-17625600.0,0.0,-17625600.0,-17625600.0
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_operational_messages,3,-500.0,0.0,-500.0,-500.0
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_operational_floats,3,-25600000.0,0.0,-25600000.0,-25600000.0
+b729ad24b6b0,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,wall_seconds,3,-0.08928083566327889,0.3732693073022855,-0.5039041815325618,0.2199895866215229
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,-0.12835684259972116,0.007529069743368907,-0.13495654575114857,-0.12015598807202993
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,-0.1283,0.007528612089887468,-0.13490000000000002,-0.12010000000000004
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,-0.03343333333333333,0.010818656724997489,-0.0455,-0.024599999999999997
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,-0.04833333333333334,0.05386634694624587,-0.11049999999999999,-0.015500000000000042
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,-0.10783333333333332,0.049652123150307814,-0.1485,-0.05249999999999999
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,consensus_distance,3,1973.668834092882,412.60324150189007,1497.4294270833334,2223.5552408854164
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,-15808000.0,0.0,-15808000.0,-15808000.0
+b729ad24b6b0,658f968893fe,d6881822b57c,Oracle / ΔW / bridge 5,Oracle / factor zero-pad / bridge 5,wall_seconds,3,-4.070222648171087,0.8774275852855675,-4.724863164126873,-3.0732282055541873
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,personalized_accuracy,3,-0.1282700991846419,0.025439010604615772,-0.1567289928609269,-0.10773892333112722
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,-0.12823333333333334,0.025445104309735775,-0.1567,-0.10769999999999996
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,consensus_accuracy,3,-0.02626666666666666,0.012974719007875793,-0.040499999999999994,-0.015099999999999988
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,accuracy_gap,3,0.127,0.16010074952978823,0.0005000000000000282,0.30699999999999994
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,worst_domain_accuracy,3,-0.17583333333333334,0.06826846514558044,-0.245,-0.10850000000000001
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,consensus_distance,3,121.51060384114585,55.345234797165766,57.727270507812506,156.84607747395836
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,total_effective_messages,3,-1800.0,0.0,-1800.0,-1800.0
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,total_effective_floats,3,-17625600.0,0.0,-17625600.0,-17625600.0
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,total_operational_messages,3,-500.0,0.0,-500.0,-500.0
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,total_operational_floats,3,-25600000.0,0.0,-25600000.0,-25600000.0
+b729ad24b6b0,8fbe5acc92e3,cad564bfe53c,Oracle / ΔW / feedback / bridge 5,MH / ΔW / ring,wall_seconds,3,-1.1454531196504831,0.5685244035091777,-1.7847855454310775,-0.6967112142592669
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,-0.10043972007989997,0.018355945749098584,-0.11910306108207164,-0.08240744492618546
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,-0.10033333333333334,0.0183581952635147,-0.11900000000000005,-0.08230000000000004
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,-0.013266666666666663,0.024900066934314326,-0.0348,0.014000000000000012
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,-0.01933333333333333,0.08352295093765144,-0.11049999999999999,0.053499999999999964
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,-0.1025,0.050574202910179424,-0.147,-0.04749999999999999
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,consensus_distance,3,2049.4343505859374,417.1440260097003,1568.2506998697918,2308.8904052734374
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,0.0,0.0,0.0,0.0
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,-15808000.0,0.0,-15808000.0,-15808000.0
+b729ad24b6b0,8fbe5acc92e3,d6881822b57c,Oracle / ΔW / feedback / bridge 5,Oracle / factor zero-pad / bridge 5,wall_seconds,3,-5.126394932158291,1.5110171455494124,-6.525720797479153,-3.5241866232827306
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,personalized_accuracy,3,0.027830379104741954,0.01723469334306616,0.007930269099684417,0.037934936435686184
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,personalized_sample_weighted_accuracy,3,0.02789999999999998,0.01723455830591545,0.008000000000000007,0.03799999999999998
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,consensus_accuracy,3,0.012999999999999998,0.013963165830140387,0.004199999999999995,0.0291
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,accuracy_gap,3,-0.14633333333333332,0.13015407536198523,-0.25349999999999995,-0.0015000000000000013
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,worst_domain_accuracy,3,0.07333333333333335,0.06889545219630491,-0.004500000000000004,0.12650000000000003
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,consensus_distance,3,1927.9237467447917,452.0136968396902,1411.4046223958335,2251.163134765625
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,total_effective_messages,3,1800.0,0.0,1800.0,1800.0
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,total_effective_floats,3,17625600.0,0.0,17625600.0,17625600.0
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,total_operational_floats,3,9792000.0,0.0,9792000.0,9792000.0
+b729ad24b6b0,cad564bfe53c,d6881822b57c,MH / ΔW / ring,Oracle / factor zero-pad / bridge 5,wall_seconds,3,-3.980941812507808,1.2236970828301534,-4.740935252048075,-2.5693240240216255
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,personalized_accuracy,3,0.3473520997259128,0.007498964453382398,0.3394146770458615,0.3543178861019941
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,personalized_sample_weighted_accuracy,3,0.34733333333333327,0.0074968882433536065,0.3393999999999999,0.35429999999999995
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,consensus_accuracy,3,-0.08966666666666667,0.0152214760563269,-0.10439999999999999,-0.07400000000000001
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,accuracy_gap,3,-0.028500000000000008,0.012500000000000039,-0.041000000000000036,-0.01599999999999996
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,worst_domain_accuracy,3,0.3681666666666667,0.013650396819628829,0.35350000000000004,0.3805
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,consensus_distance,3,384.4780273437381,10.602412374413309,372.27031249998856,391.38183593748823
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_effective_messages,3,-10500.0,0.0,-10500.0,-10500.0
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_effective_floats,3,-102816000.0,0.0,-102816000.0,-102816000.0
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_operational_messages,3,-1500.0,0.0,-1500.0,-1500.0
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,total_operational_floats,3,-45744000.0,0.0,-45744000.0,-45744000.0
+ded87b4e7797,0eac0e17d3ed,51d33462378d,FedAvg / ΔW,Local / ΔW,wall_seconds,3,-6.92912175009648,1.123029305410912,-8.176985974423587,-5.99970481172204
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,personalized_accuracy,3,0.4577968773371073,0.009106425317643429,0.4484966225595912,0.4666962314638477
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,personalized_sample_weighted_accuracy,3,0.4578,0.009106591019695565,0.4485,0.4667
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,consensus_accuracy,3,-0.12943333333333334,0.00914184518209171,-0.1353,-0.11889999999999999
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,accuracy_gap,3,-0.00033333333333335213,0.0034034296427770884,-0.003000000000000058,0.0035000000000000586
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,worst_domain_accuracy,3,0.4671666666666667,0.01491922696835646,0.44999999999999996,0.47700000000000004
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,consensus_distance,3,23.96668836804369,1.4093045752910096,22.824707031238567,25.54169514972719
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_effective_messages,3,-7200.0,0.0,-7200.0,-7200.0
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_effective_floats,3,-70502400.0,0.0,-70502400.0,-70502400.0
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_operational_messages,3,500.0,0.0,500.0,500.0
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,total_operational_floats,3,-5456000.0,0.0,-5456000.0,-5456000.0
+ded87b4e7797,0eac0e17d3ed,658f968893fe,FedAvg / ΔW,Oracle / ΔW / bridge 5,wall_seconds,3,-0.4503111842398842,0.8933863859623473,-1.192187175154686,0.5413958868011832
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,personalized_accuracy,3,0.19104711908310118,0.016843988326648535,0.17919463691577647,0.21032846939893418
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,0.19103333333333333,0.016829834619904425,0.1792,0.21030000000000001
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,consensus_accuracy,3,-0.08059999999999999,0.048720324301055315,-0.124,-0.02789999999999998
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,accuracy_gap,3,0.16966666666666666,0.09358196051234094,0.08949999999999997,0.2725
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,worst_domain_accuracy,3,0.13833333333333334,0.05503710869343822,0.07550000000000001,0.178
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,consensus_distance,3,55.78496907550896,8.901668151793812,46.37061360675843,64.06525878905106
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_effective_messages,3,-9000.0,0.0,-9000.0,-9000.0
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_effective_floats,3,-88128000.0,0.0,-88128000.0,-88128000.0
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_operational_messages,3,0.0,0.0,0.0,0.0
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,total_operational_floats,3,-31056000.0,0.0,-31056000.0,-31056000.0
+ded87b4e7797,0eac0e17d3ed,cad564bfe53c,FedAvg / ΔW,MH / ΔW / ring,wall_seconds,3,-0.37752486765384674,1.2692133344152767,-1.8131857514381409,0.5953758750110865
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,personalized_accuracy,3,0.11044477761119449,0.007341789488594492,0.10387989188588886,0.11837249543396489
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,personalized_sample_weighted_accuracy,3,0.11046666666666671,0.0073459739540331715,0.10389999999999999,0.11840000000000006
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,consensus_accuracy,3,-0.03976666666666666,0.008718562572656869,-0.04489999999999998,-0.029700000000000004
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,accuracy_gap,3,0.028166666666666656,0.010263202878893754,0.019500000000000017,0.03949999999999998
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,worst_domain_accuracy,3,0.09899999999999999,0.02086264604502508,0.07949999999999996,0.121
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,consensus_distance,3,-360.51133897569446,9.751519958496157,-367.8481730143229,-349.44560546875
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_effective_messages,3,3300.0,0.0,3300.0,3300.0
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_effective_floats,3,32313600.0,0.0,32313600.0,32313600.0
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_operational_messages,3,2000.0,0.0,2000.0,2000.0
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,total_operational_floats,3,40288000.0,0.0,40288000.0,40288000.0
+ded87b4e7797,51d33462378d,658f968893fe,Local / ΔW,Oracle / ΔW / bridge 5,wall_seconds,3,6.4788105658565955,1.0246776858375575,5.29956254735589,7.152070350944996
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,personalized_accuracy,3,-0.1563049806428116,0.012577554560236813,-0.16912909911410634,-0.14398941670305992
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,-0.15629999999999997,0.012557467897629687,-0.16909999999999997,-0.14399999999999996
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,consensus_accuracy,3,0.009066666666666676,0.06366367357711408,-0.04999999999999999,0.07650000000000001
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,accuracy_gap,3,0.19816666666666669,0.09814572498755789,0.10549999999999993,0.30100000000000005
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,worst_domain_accuracy,3,-0.22983333333333333,0.04376737750120899,-0.278,-0.1925
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,consensus_distance,3,-328.69305826822915,18.298572228238587,-343.41131998697915,-308.2050537109375
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_effective_messages,3,1500.0,0.0,1500.0,1500.0
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_effective_floats,3,14688000.0,0.0,14688000.0,14688000.0
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_operational_messages,3,1500.0,0.0,1500.0,1500.0
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,total_operational_floats,3,14688000.0,0.0,14688000.0,14688000.0
+ded87b4e7797,51d33462378d,cad564bfe53c,Local / ΔW,MH / ΔW / ring,wall_seconds,3,6.551596882442634,0.5836717736580552,6.084940085187554,7.206050339154899
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,personalized_accuracy,3,-0.2667497582540061,0.019882305915633513,-0.2875015945480712,-0.2478693085889488
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,personalized_sample_weighted_accuracy,3,-0.26676666666666665,0.019865883653473228,-0.28750000000000003,-0.24789999999999995
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,consensus_accuracy,3,0.04883333333333333,0.05572937585630521,-0.005100000000000007,0.10620000000000002
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,accuracy_gap,3,0.17,0.09656215614825518,0.08599999999999991,0.2755000000000001
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,worst_domain_accuracy,3,-0.3288333333333333,0.06454133042735745,-0.399,-0.27199999999999996
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,consensus_distance,3,31.818280707465277,10.295655618921636,20.828918457031246,41.2405517578125
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_effective_messages,3,-1800.0,0.0,-1800.0,-1800.0
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_effective_floats,3,-17625600.0,0.0,-17625600.0,-17625600.0
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_operational_messages,3,-500.0,0.0,-500.0,-500.0
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,total_operational_floats,3,-25600000.0,0.0,-25600000.0,-25600000.0
+ded87b4e7797,658f968893fe,cad564bfe53c,Oracle / ΔW / bridge 5,MH / ΔW / ring,wall_seconds,3,0.07278631658603747,0.70337664311422,-0.6209985762834549,0.7853775378316641

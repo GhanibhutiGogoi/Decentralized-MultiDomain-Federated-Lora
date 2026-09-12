@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="460" viewBox="0 0 760 460">
+<rect width="100%" height="100%" fill="white"/>
+<text x="380.0" y="28" text-anchor="middle" font-size="20" font-family="Arial">Regression Performance</text>
+<line x1="72" y1="374" x2="728" y2="374" stroke="#222"/>
+<line x1="72" y1="50" x2="72" y2="374" stroke="#222"/>
+<text x="20" y="212.0" text-anchor="middle" transform="rotate(-90 20 212.0)" font-size="13" font-family="Arial">RMSE</text>
+<text x="64" y="374" text-anchor="end" font-size="11" font-family="Arial">0</text>
+<text x="64" y="50" text-anchor="end" font-size="11" font-family="Arial">6.09</text>
+<rect x="198.00" y="59.01" width="76.00" height="314.99" fill="#1f77b4" fill-opacity="0.78"/>
+<text x="236.00" y="412" text-anchor="middle" font-size="12" font-family="Arial">Form A</text>
+<text x="236.00" y="53.01" text-anchor="middle" font-size="11" font-family="Arial">5.92</text>
+<rect x="526.00" y="50.00" width="76.00" height="324.00" fill="#d62728" fill-opacity="0.78"/>
+<text x="564.00" y="412" text-anchor="middle" font-size="12" font-family="Arial">Form B</text>
+<text x="564.00" y="44.00" text-anchor="middle" font-size="11" font-family="Arial">6.09</text>
+</svg>

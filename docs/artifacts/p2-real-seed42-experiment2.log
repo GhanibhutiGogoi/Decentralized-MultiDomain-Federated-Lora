@@ -1,0 +1,5 @@
+=== Experiment 2 Complete ===
+Rows used: 75
+Selected ridge alpha: 1000.0
+Lambda calibration: {'form_a': {'gamma': 2.4445781941403766, 'quality_cv': 0.29390874287015895, 'target_cv': 0.14695437143507947, 'achieved_cv': 0.14695437143488213}, 'form_b': {'gamma': 4.9999999999954525, 'quality_cv': 0.29390874287015895, 'target_cv': 0.14695437143507947, 'achieved_cv': 0.09486930438733199}}
+Saved outputs to: /home/gogoi/ahlora-runs/p2-exp2-real-seed42
