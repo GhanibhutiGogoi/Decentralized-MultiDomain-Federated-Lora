@@ -4,6 +4,8 @@ This is the Project 1 quality-weighted aggregation implementation migrated
 into the reusable framework namespace without changing its behavior.
 """
 
+import math
+
 import torch
 
 from framework.aggregation.projection import (
@@ -35,14 +37,14 @@ def _normalised_client_weights(samples, quality_scores):
             quality = float(quality)
         except (TypeError, ValueError) as exc:
             raise ValueError(f"client weight at index {idx} is not numeric") from exc
-        if not (torch.isfinite(torch.tensor(sample_count)) and torch.isfinite(torch.tensor(quality))):
+        if not (math.isfinite(sample_count) and math.isfinite(quality)):
             raise ValueError(f"client weight at index {idx} must be finite")
         if sample_count < 0 or quality < 0:
             raise ValueError(f"client weight at index {idx} must be nonnegative")
         raw.append(sample_count * quality)
 
     total = sum(raw)
-    if not torch.isfinite(torch.tensor(total)) or total <= 0:
+    if not math.isfinite(total) or total <= 0:
         raise ValueError("client weights must have a finite, positive total")
     return [r / total for r in raw]
 
@@ -91,7 +93,11 @@ def fedavg_quality_weighted(weights, samples, quality_scores, target_rank, ref_s
     FedAvg weighted by samples times quality, with heterogeneous LoRA handled
     in update space.
     """
+    if weights is None or len(weights) == 0:
+        raise ValueError("at least one client state is required")
     norm_w = _normalised_client_weights(samples, quality_scores)
+    if len(weights) != len(norm_w):
+        raise ValueError("client states, samples, and quality_scores must have matching lengths")
     agg = {}
     handled = set()
 

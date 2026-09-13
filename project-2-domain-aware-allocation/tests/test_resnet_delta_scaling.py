@@ -54,6 +54,7 @@ class _NoTrainingClient:
         self.client_id = client_id
         self.domain_id = 0
         self.samples = samples
+        self.alpha = alpha
         self.state = decompose_delta_w({"fc": torch.diag(torch.tensor([value, 0.0]))}, rank, alpha)
 
     def train(self):

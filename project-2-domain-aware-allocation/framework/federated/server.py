@@ -44,9 +44,12 @@ class HeteroFedAvgServer:
         """
         self.clients = list(clients)
         self.rank_assignments = rank_assignments
-        self.alpha = alpha
+        try:
+            self.alpha = float(alpha)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("alpha must be finite and positive") from exc
         self.device = device
-        if not math.isfinite(float(alpha)) or float(alpha) <= 0:
+        if not math.isfinite(self.alpha) or self.alpha <= 0:
             raise ValueError("alpha must be finite and positive")
         self._validate_shared_alpha()
         self.history = {
@@ -91,7 +94,9 @@ class HeteroFedAvgServer:
             for layer_name in layer_names:
                 tensor = delta_w[layer_name]
                 ref_tensor = reference[layer_name]
-                if not isinstance(tensor, torch.Tensor) or tensor.shape != ref_tensor.shape:
+                if not isinstance(ref_tensor, torch.Tensor) or not isinstance(tensor, torch.Tensor):
+                    raise ValueError(f"client update for layer {layer_name!r} must be a tensor")
+                if tensor.shape != ref_tensor.shape:
                     raise ValueError(f"incompatible tensor shape for layer {layer_name!r}")
                 if not torch.isfinite(tensor).all():
                     raise ValueError(f"non-finite update for layer {layer_name!r}")
@@ -114,23 +119,27 @@ class HeteroFedAvgServer:
             if obj is None:
                 continue
             if hasattr(obj, "alpha"):
-                values.append(float(obj.alpha))
+                try:
+                    values.append(float(obj.alpha))
+                except (TypeError, ValueError) as exc:
+                    raise ValueError("client alpha must be numeric") from exc
             named_modules = getattr(obj, "named_modules", None)
             if named_modules is not None:
                 for _, module in named_modules():
                     if hasattr(module, "alpha"):
-                        values.append(float(module.alpha))
+                        try:
+                            values.append(float(module.alpha))
+                        except (TypeError, ValueError) as exc:
+                            raise ValueError("client alpha must be numeric") from exc
         return values
 
     def _validate_shared_alpha(self):
         discovered = [self._client_alphas(client) for client in self.clients]
         present = [value for values in discovered for value in values]
-        if not present:
-            return  # lightweight test doubles may not expose model metadata
-        if any(not math.isfinite(value) or value <= 0 for value in present):
-            raise ValueError("client alpha values must be finite and positive")
         if any(not values for values in discovered):
             raise ValueError("all clients must expose a shared alpha value")
+        if any(not math.isfinite(value) or value <= 0 for value in present):
+            raise ValueError("client alpha values must be finite and positive")
         for client, values in zip(self.clients, discovered):
             if any(not math.isclose(value, self.alpha, rel_tol=1e-6, abs_tol=1e-8) for value in values):
                 raise ValueError(
