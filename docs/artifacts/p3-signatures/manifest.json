@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "experiment": "05_signature_validation",
+  "run_classification": "full_data_benchmark",
+  "started_unix": 1789220922.3955047,
+  "config": {
+    "output": "/home/gogoi/ahlora-runs/p3-signatures",
+    "data_dir": "/home/gogoi/ahlora-data",
+    "feature_cache": "/home/gogoi/ahlora-data/features-v2",
+    "methods": [
+      "local",
+      "mh"
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "rounds": 20,
+    "ranks": [
+      16
+    ],
+    "consensus_rank": 16,
+    "alpha": 32.0,
+    "merge": "delta",
+    "error_feedback": false,
+    "n_domains": 5,
+    "clients_per_domain": 3,
+    "dirichlet_alpha": 0.5,
+    "bridge_every": 5,
+    "topology": "ring",
+    "local_epochs": 1,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 128,
+    "eval_batch_size": 2048,
+    "image_size": 224,
+    "feature_batch_size": 256,
+    "num_workers": 2,
+    "torch_threads": 2,
+    "max_train_per_client": 0,
+    "max_test_per_domain": 0,
+    "device": "cuda",
+    "prepare_only": false,
+    "stages": [
+      2,
+      5,
+      10,
+      20
+    ],
+    "n_clusters": 5
+  },
+  "git": {
+    "commit": "unavailable",
+    "working_tree_status": "unavailable"
+  },
+  "source": {
+    "files_sha256": {
+      "experiments/._01_fedavg_baseline.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/._02_gossip_baseline.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/._03_clustering_validation.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/._04_protocol_benchmark.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/._05_signature_validation.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/._feature_cache.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/._protocol_benchmark.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/._summarize_completion.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "experiments/01_fedavg_baseline.py": "b81e20a61be01f7b4187b287443935d7cb5309c1d7c9a9ec18b35a215084262e",
+      "experiments/02_gossip_baseline.py": "586de0b4df94c562c278ccf47606846e55c6da3020a1a2505018215e8bd5ea39",
+      "experiments/03_clustering_validation.py": "8ac711d5fd26f38398c86f6297fa606afb7759ff454494766e78999be9839349",
+      "experiments/04_protocol_benchmark.py": "06e600e298306f165d55208abeb53acc1f9e50d4e136bff182b46bdf91f2b4e3",
+      "experiments/05_signature_validation.py": "09e3b2bb60e9746757d01cafcf62dbefd5f9e4f1f9700186ef38d6703fd6bf6f",
+      "experiments/feature_cache.py": "90a849a31cea7e0c9620bf09a631ad5d0ad10dbba5a41398af3756310dd8637b",
+      "experiments/protocol_benchmark.py": "b68c867919e493188206187ad655d4ca60385743cabb5c6213a617150b1f3dbb",
+      "experiments/summarize_completion.py": "06045a56ebbf0b76a53ec5f23465728b28cfd0eab5cfa41260311a7fa07f0c0d",
+      "src/.___init__.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/clustering/.___init__.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/clustering/._domain_clustering.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/clustering/._signatures.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/clustering/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/clustering/domain_clustering.py": "b86f813be93304765b657a208291dfd1c3fcd378dcd9bd806ef540b10e450fbd",
+      "src/clustering/signatures.py": "c609bedd956baf16f5ed9866950d497022b24bd0288382f6c3bf45545f21805f",
+      "src/data/.___init__.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/data/._cifar100_domains.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/data/cifar100_domains.py": "b2b7bff51c68f287b8e37b2253e015644b9d01acac1c0384913259af57d44658",
+      "src/federated/.___init__.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/._client.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/._fedavg.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/._gossip.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/._hierarchical.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/._merge.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/._mixing.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/._runner.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/federated/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/federated/client.py": "90b13aacb65b70f1d9d1b33e0f759ff0dcdb265d996ac6fe45efa990c411d67d",
+      "src/federated/fedavg.py": "8c93ba865f825b3161ec1046ee66617c77006a9890d3de7240dd3bd78a25f10d",
+      "src/federated/gossip.py": "eea7c000f40c719ef2dcc1da2c427b4300bdfe658bf4edf089c6fd6756cb8e78",
+      "src/federated/hierarchical.py": "627dc4a61056fa5b963370a2115b67a5fa14b8908703bf93c2f6c5a24e593faa",
+      "src/federated/merge.py": "8f0f05aea939d83e27df8f1711c9e603f8244accd04bfa5daee5d8fbaa9d01e3",
+      "src/federated/mixing.py": "642913f9ba59bd7113eafe112d41bcb20fbce8b97c89b500f4b95bfd6b2efb4e",
+      "src/federated/runner.py": "0035175f4c12f1e7514f5c0ff34f9a7278e59d7cf892357fc98233a4fe4c02ba",
+      "src/models/.___init__.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/models/._lora_resnet.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/models/lora_resnet.py": "a2c51890283268ede0bb0f87b04d953cafa48f683bfec4d6e42771749f676c20",
+      "src/utils/.___init__.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/utils/._metrics.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/utils/._visualization.py": "0cb671a7018d34f87216204817f66f816263353d8ed898a99ea736673be99e63",
+      "src/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/utils/metrics.py": "a878b22457aa6dcdf0eb1feb58ffbd700029748040fbfb5fa50844f6cdb3bc96",
+      "src/utils/visualization.py": "dc956b9c8341eaf0088a96b943fd402b865e3ef14ceb0cc7d5db9dfdfc6a170f"
+    },
+    "combined_sha256": "3ed0ade4b0f5fcb433179cac359d6a1422ef70835265af917a054fbffa73e70c"
+  },
+  "invocation": {
+    "executable": "/home/gogoi/ahlora-venv/bin/python",
+    "argv": [
+      "/home/gogoi/ahlora-review-20260912-8c22e76/project-3-hierarchical-gossip/experiments/05_signature_validation.py",
+      "--data-dir",
+      "/home/gogoi/ahlora-data",
+      "--feature-cache",
+      "/home/gogoi/ahlora-data/features-v2",
+      "--seeds",
+      "42",
+      "43",
+      "44",
+      "--alpha",
+      "32",
+      "--consensus-rank",
+      "16",
+      "--torch-threads",
+      "2",
+      "--output",
+      "/home/gogoi/ahlora-runs/p3-signatures",
+      "--ranks",
+      "16",
+      "--stages",
+      "2",
+      "5",
+      "10",
+      "20"
+    ],
+    "cwd": "/home/gogoi/ahlora-review-20260912-8c22e76/project-3-hierarchical-gossip"
+  },
+  "environment": {
+    "python": "3.10.12",
+    "torch": "2.3.0+cu121",
+    "cuda": "12.1",
+    "device": "cuda",
+    "packages": {
+      "torch": "2.3.0",
+      "torchvision": "0.18.0",
+      "numpy": "1.26.4",
+      "scikit-learn": "1.7.2"
+    },
+    "CUDA_VISIBLE_DEVICES": "0",
+    "gpu": "Tesla V100S-PCIE-32GB"
+  },
+  "protocol": {
+    "representation": "cached frozen eval-mode ResNet-18; deterministic resize and ImageNet normalization; no augmentation",
+    "training": "paired seed/shared head and partitions; Adam reset each round; homogeneous rank",
+    "signature_timing": "after local training and, in MH mode, after delta-W gossip",
+    "labels": "known domains construct benchmark shards and score clusters only; no labels in signatures or clustering",
+    "cluster_count": "prespecified; not inferred from adapters",
+    "topology": "flat topology client order is permuted by training seed, independently of domain labels",
+    "clustering_order": "seeded client permutation at each stage to remove domain-sorted tie-breaking",
+    "spectral_baseline": "original standardized singular values of A, B, BA plus factor norms; Ward linkage",
+    "row_norms": "L1 normalized per-output-row norms of scaled delta-W; cosine affinity; average linkage",
+    "inverse_delta_l2": "1/(1+L2 distance between flattened scaled delta-W); average linkage",
+    "evaluation": "both personalized client mean and merged consensus on the union of disjoint test shards",
+    "limitation": "offline diagnostic with global visibility of adapters; no distributed discovery overhead or end-to-end learned hierarchy is claimed"
+  },
+  "completed_runs": [
+    {
+      "seed": 42,
+      "method": "local",
+      "file": "seed42_local.json"
+    },
+    {
+      "seed": 42,
+      "method": "mh",
+      "file": "seed42_mh.json"
+    },
+    {
+      "seed": 43,
+      "method": "local",
+      "file": "seed43_local.json"
+    },
+    {
+      "seed": 43,
+      "method": "mh",
+      "file": "seed43_mh.json"
+    },
+    {
+      "seed": 44,
+      "method": "local",
+      "file": "seed44_local.json"
+    },
+    {
+      "seed": 44,
+      "method": "mh",
+      "file": "seed44_mh.json"
+    }
+  ],
+  "feature_cache": {
+    "schema_version": 1,
+    "dataset": "CIFAR-100 official train/test split",
+    "representation": "frozen ResNet-18, fc replaced by Identity, eval mode",
+    "weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "weights_url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+    "transform": {
+      "resize": [
+        224,
+        224
+      ],
+      "interpolation": "bilinear",
+      "antialias": true,
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ],
+      "augmentation": "none"
+    },
+    "torch_version": "2.3.0+cu121",
+    "torchvision_version": "0.18.0+cu121",
+    "cache_path": "/home/gogoi/ahlora-data/features-v2/cifar100-resnet18-imagenet1k-v1-resize224-v1",
+    "train": {
+      "n_samples": 50000,
+      "feature_dim": 512,
+      "sha256": "37c88fdb981dccbc117e2c3a0dc0065ab12bc667a18d991c66d312324fff3eb7"
+    },
+    "test": {
+      "n_samples": 10000,
+      "feature_dim": 512,
+      "sha256": "960c63636ce8b68bdc6ef7df9762c61ce9c9b47ba47c3482aba53504242c73f2"
+    },
+    "weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+    "cache_identity_sha256": "eff1ad00e14d86f46fc9d261fdbee194d05ed44678c2262bc975d11bdbe102df",
+    "extraction_wall_seconds": 39.99093856476247
+  },
+  "wall_seconds": 74.91290545463562
+}

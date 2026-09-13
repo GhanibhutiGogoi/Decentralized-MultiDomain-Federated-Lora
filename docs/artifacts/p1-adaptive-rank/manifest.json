@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "experiment": "project1_exp1_adaptive_rank",
+  "remote_host": "gpu003 (10.120.16.19)",
+  "remote_output": "~/ahlora-runs/p1-adaptive-rank",
+  "command": "PYTHONPATH=~/pystubs:$PWD ~/ahlora-venv/bin/python experiment/exp1.py",
+  "source_commit": "22cd4ca46150f4fdfeef4dd9f7480d1b9676bc8e",
+  "source_files_sha256": {
+    "project-1-adaptive-rank/experiment/exp1.py": "50b4dbd4a4cb234f4cad7dea5ea51a082e7117182d8751dec9d373c8a9ea997c",
+    "project-1-adaptive-rank/rank_allocation/rank_selector.py": "bc00dc60466f95b15f81804e3facc5716dab5105589aab146da2a95c44ee67c3",
+    "project-1-adaptive-rank/config.py": "4e5d0f2e8c559bcb751203a15287f225a227301760238d2aa00ca1c2dcc78dce"
+  },
+  "datasets": [
+    "CIFAR-10",
+    "FashionMNIST",
+    "AG News",
+    "UCI Heart Disease",
+    "SpeechCommands"
+  ],
+  "rounds": 5,
+  "seeds": [
+    42
+  ],
+  "fixed_rank": 32,
+  "gamma": 0.5,
+  "client_batch_sizes": [
+    16,
+    64,
+    256
+  ],
+  "capability_max_ranks": {
+    "16": 4,
+    "64": 8,
+    "256": 16
+  },
+  "result": "rank 2 for every client and round; 93.75% FLOP savings; 0 capability violations; accuracy gate fails on CIFAR, Fashion, Tabular",
+  "captured_at": "2026-09-13T05:00:00Z"
+}

@@ -149,3 +149,26 @@ produce:
 - summary SVG figures under `figures/`
 
 Do not generate these outputs during Phase 2A.
+
+### Conservative deployment weighting
+
+The calibrated predictor can be applied through the conservative wrapper in
+`experiment/experiment2/lambda_aggregation.py`.  It shrinks the predicted
+domain factor toward one (`blend_strength=0.10` by default), limits each
+factor to `[0.85, 1.15]`, and renormalizes under the existing
+`samples * quality` weights.  This keeps the original quality-weighted rule as
+the safe reference while allowing a small, evidence-backed redistribution.
+
+The offline contribution benchmark compares the ranking and weighted
+contribution of both policies:
+
+```bash
+PYTHONPATH=project-2-domain-aware-allocation \
+python experiment/experiment2/weight_benchmark.py \
+  --measurements outputs/exp1/per_round_client_measurements.csv \
+  --predictions outputs/exp2/lambda_values.csv \
+  --output outputs/exp2/domain_weight_benchmark.csv
+```
+
+The benchmark is a model-free allocation check; it must not be interpreted as
+an end-to-end training-accuracy result.

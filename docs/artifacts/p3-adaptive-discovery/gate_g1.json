@@ -1,0 +1,36 @@
+{
+  "interpretation": "Descriptive stage-10 screen per signature and training mode, not proof of end-to-end learned hierarchy",
+  "thresholds": {
+    "hard_candidate": 0.7,
+    "soft_candidate": 0.4
+  },
+  "results": [
+    {
+      "method": "adaptive",
+      "signature": "spectral_baseline",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 0.1336539433190942,
+      "sample_std_ari": 0.13342127346145286,
+      "screen": "weak_signal"
+    },
+    {
+      "method": "adaptive",
+      "signature": "row_norms",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 1.0,
+      "sample_std_ari": 0.0,
+      "screen": "hard_candidate"
+    },
+    {
+      "method": "adaptive",
+      "signature": "inverse_delta_l2",
+      "stage": 10,
+      "n_seeds": 3,
+      "mean_ari": 0.667906976744186,
+      "sample_std_ari": 0.04511388149946844,
+      "screen": "soft_candidate"
+    }
+  ]
+}

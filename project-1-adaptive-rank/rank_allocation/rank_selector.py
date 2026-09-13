@@ -48,8 +48,182 @@ from Federated.client import set_lora_only_trainable
 GAMMA = 0.5
 
 
+class AdaptiveRankController:
+    """Stateful adaptive-rank policy with EMA, hysteresis and patience.
+
+    ``rank_equation`` is intentionally stateless and useful for one-off probes,
+    but a federated client should not oscillate between adjacent ranks because
+    of noisy mini-batches.  This controller smooths the demand signal and only
+    changes rank after ``patience`` consecutive requests in the same direction.
+    A residual ratio (if supplied) raises demand when the current rank is
+    losing update energy; it is clipped to keep a bad probe from exploding the
+    allocation.  All decisions remain bounded by the client's capability menu.
+    """
+
+    def __init__(self, batch_size, initial_rank=None, candidates=None, gamma=GAMMA,
+                 ema_decay=0.7, up_margin=0.10, down_margin=0.15, patience=2,
+                 residual_weight=0.5, warmup_rounds=0, min_rank=None,
+                 quality_drop_tolerance=0.05):
+        self.batch_size = batch_size
+        capability_max = BATCH_TO_MAX_RANK.get(batch_size, min(ALL_CANDIDATE_RANKS))
+        # An explicit menu can narrow the choices but may not bypass the
+        # hardware ceiling advertised by BATCH_TO_MAX_RANK.
+        menu = candidates if candidates is not None else ALL_CANDIDATE_RANKS
+        self.candidates = tuple(sorted({int(r) for r in menu if int(r) <= capability_max}))
+        if not self.candidates:
+            self.candidates = (min(ALL_CANDIDATE_RANKS),)
+        self.gamma = float(gamma)
+        self.ema_decay = float(ema_decay)
+        self.up_margin = float(up_margin)
+        self.down_margin = float(down_margin)
+        self.patience = max(1, int(patience))
+        self.residual_weight = float(residual_weight)
+        self.warmup_rounds = max(0, int(warmup_rounds))
+        self.rounds_seen = 0
+        if min_rank is None:
+            # Generic controller instances retain the historical menu floor;
+            # experiment drivers can opt into a conservative capability floor.
+            min_rank = (max(self.candidates[0], int(math.ceil(0.5 * capability_max)))
+                        if initial_rank == "max" else self.candidates[0])
+        self.min_rank = _ceil_candidate(float(min_rank), self.candidates)
+        self.quality_drop_tolerance = max(0.0, float(quality_drop_tolerance))
+        self.quality_ema = None
+        self._quality_alarm = False
+        if initial_rank == "max":
+            self.rank = self.max_rank
+        else:
+            self.rank = int(initial_rank) if initial_rank in self.candidates else self.candidates[0]
+            self.rank = max(self.rank, self.min_rank)
+        self.ema_demand = None
+        self._direction = 0
+        self._streak = 0
+        # Last decision details are intentionally public read-only-by-convention
+        # attributes.  Experiment drivers can persist these alongside rank
+        # histories so an allocation curve remains auditable after the run.
+        self.last_demand = None
+        self.last_stable_rank = None
+        self.last_residual_ratio = None
+        self.last_target_rank = self.rank
+        self.last_direction = 0
+        self.last_changed = False
+
+    def observe_quality(self, quality):
+        """Record post-training quality for a conservative next-round guard.
+
+        A sudden quality drop after a rank decrease arms an increase to the
+        capability ceiling on the next update.  The guard is deliberately
+        relative, since absolute losses differ substantially by task.
+        """
+        try:
+            q = float(quality)
+        except (TypeError, ValueError):
+            return
+        if not math.isfinite(q) or q <= 0:
+            return
+        if self.quality_ema is not None and q < self.quality_ema * (1.0 - self.quality_drop_tolerance):
+            self._quality_alarm = True
+        self.quality_ema = q if self.quality_ema is None else 0.8 * self.quality_ema + 0.2 * q
+
+    @property
+    def max_rank(self):
+        return self.candidates[-1]
+
+    def update(self, stable_rank, residual_ratio=None):
+        """Update state and return the rank to use on the next local step."""
+        try:
+            demand = float(stable_rank)
+        except (TypeError, ValueError):
+            demand = 0.0
+        if not math.isfinite(demand):
+            demand = 0.0
+        self.rounds_seen += 1
+        self.last_stable_rank = demand
+        self.last_residual_ratio = None
+        if residual_ratio is not None:
+            try:
+                rr = float(residual_ratio)
+            except (TypeError, ValueError):
+                rr = 0.0
+            if math.isfinite(rr):
+                self.last_residual_ratio = rr
+                demand *= 1.0 + self.residual_weight * min(max(rr, 0.0), 1.0)
+        demand = min(max(demand, 0.0), float(self.max_rank))
+        self.last_demand = demand
+        self.ema_demand = demand if self.ema_demand is None else (
+            self.ema_decay * self.ema_demand + (1.0 - self.ema_decay) * demand
+        )
+        target = rank_equation(self.ema_demand, self.batch_size, gamma=self.gamma)
+        force_restore = self.rounds_seen <= self.warmup_rounds or self._quality_alarm
+        restored = False
+        if force_restore:
+            # Begin from the richest feasible adapter so the global model can
+            # establish a useful update.  If quality regresses after a
+            # reduction, restore the ceiling before considering reductions.
+            target = self.max_rank
+            self._quality_alarm = False
+            if self.rank < self.max_rank:
+                self.rank = self.max_rank
+                self._direction, self._streak = 0, 0
+                restored = True
+        # Restrict to an explicitly supplied menu as well as the global menu.
+        target = _nearest_candidate(target, self.candidates)
+        self.last_target_rank = target
+        direction = 1 if target > self.rank and self.ema_demand >= self.rank * (1.0 + self.up_margin) else \
+            -1 if target < self.rank and self.ema_demand <= self.rank * (1.0 - self.down_margin) else 0
+        self.last_direction = direction
+        self.last_changed = restored
+        if direction == 0:
+            self._direction, self._streak = 0, 0
+            return self.rank
+        if direction == self._direction:
+            self._streak += 1
+        else:
+            self._direction, self._streak = direction, 1
+        if self._streak >= self.patience:
+            idx = self.candidates.index(self.rank) + direction
+            idx = min(max(idx, 0), len(self.candidates) - 1)
+            if self.candidates[idx] < self.min_rank:
+                idx = self.candidates.index(self.min_rank)
+            old_rank = self.rank
+            self.rank = self.candidates[idx]
+            self.last_changed = self.rank != old_rank
+            self._streak = 0
+        return self.rank
+
+    def diagnostics(self):
+        """Return a serialisable snapshot of the latest controller decision."""
+        return {
+            "rank": int(self.rank),
+            "demand": None if self.last_demand is None else float(self.last_demand),
+            "stable_rank": None if self.last_stable_rank is None else float(self.last_stable_rank),
+            "residual_ratio": self.last_residual_ratio,
+            # Tail mass is a ΔW compression diagnostic and is unavailable to
+            # the gradient-only controller; retain an explicit null field so
+            # downstream artifact schemas stay stable across policies.
+            "tail_mass": None,
+            "ema_demand": None if self.ema_demand is None else float(self.ema_demand),
+            "target_rank": int(self.last_target_rank),
+            "direction": int(self.last_direction),
+            "streak": int(self._streak),
+            "changed": bool(self.last_changed),
+            "max_rank": int(self.max_rank),
+            "gamma": float(self.gamma),
+            "warmup_rounds": int(self.warmup_rounds),
+            "rounds_seen": int(self.rounds_seen),
+            "min_rank": int(self.min_rank),
+            "quality_ema": None if self.quality_ema is None else float(self.quality_ema),
+            "quality_alarm": bool(self._quality_alarm),
+        }
+
+
 def _nearest_candidate(rank, candidates):
     return min(candidates, key=lambda r: (abs(r - rank), r))
+
+
+def _ceil_candidate(rank, candidates):
+    """Choose the smallest menu entry greater than or equal to ``rank``."""
+    above = [r for r in candidates if r >= rank]
+    return min(above) if above else max(candidates)
 
 
 def capability_fraction(batch_size):

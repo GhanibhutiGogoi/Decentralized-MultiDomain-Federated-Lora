@@ -1,0 +1,7 @@
+{
+  "timestamp_utc": "2026-09-12T13:49:22.521306+00:00",
+  "stage": "pipeline",
+  "state": "completed",
+  "exp1": "/home/gogoi/ahlora-runs/p2-exp1-real-seed42",
+  "exp2": "/home/gogoi/ahlora-runs/p2-exp2-real-seed42"
+}

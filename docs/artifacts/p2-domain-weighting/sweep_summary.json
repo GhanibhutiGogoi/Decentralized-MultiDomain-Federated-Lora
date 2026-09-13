@@ -1,0 +1,21 @@
+{
+  "experiment": "project2_conservative_domain_weight_sweep",
+  "source": "docs/artifacts/p2-exp1-real-seed42/per_round_client_measurements.csv",
+  "seed": 42,
+  "observations": 75,
+  "blend_strength": 0.10,
+  "max_deviation": 0.15,
+  "mean_metrics": {
+    "quality": {
+      "spearman_delta": 0.152174,
+      "pairwise_accuracy": 0.520000,
+      "weighted_delta": 0.575943
+    },
+    "conservative_domain": {
+      "spearman_delta": 0.195652,
+      "pairwise_accuracy": 0.546667,
+      "weighted_delta": 0.577445
+    }
+  },
+  "interpretation": "Improved model-free contribution ranking; no end-to-end accuracy or privacy claim."
+}
