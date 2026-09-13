@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -161,9 +162,15 @@ def save_label_distribution_outputs(
     """Save CSV summaries and raw machine-readable frequency vectors."""
     output_dir.mkdir(parents=True, exist_ok=True)
     df = pd.DataFrame(records)
-    df.to_csv(output_dir / "label_distribution_summary.csv", index=False)
+    csv_path = output_dir / "label_distribution_summary.csv"
+    csv_tmp = csv_path.with_suffix(".csv.tmp")
+    df.to_csv(csv_tmp, index=False)
+    os.replace(csv_tmp, csv_path)
 
-    with (output_dir / "label_distribution_raw.json").open("w", encoding="utf-8") as f:
-        json.dump(payloads, f, indent=2)
+    json_path = output_dir / "label_distribution_raw.json"
+    json_tmp = json_path.with_suffix(".json.tmp")
+    with json_tmp.open("w", encoding="utf-8") as f:
+        json.dump(payloads, f, indent=2, allow_nan=False)
+    os.replace(json_tmp, json_path)
 
     return df

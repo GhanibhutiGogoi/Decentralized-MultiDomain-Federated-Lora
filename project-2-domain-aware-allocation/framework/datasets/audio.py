@@ -47,10 +47,23 @@ class AudioDataset(Dataset):
             subset = "training" if split == "train" else "validation"
             ds = torchaudio.datasets.SPEECHCOMMANDS(
                 data_root, download=download, subset=subset)
+            # get_metadata reads the label from the file path; indexing ds
+            # would decode every waveform before training even starts.
+            labels = [ds.get_metadata(i)[2] for i in range(len(ds))]
             if label2idx is None:
-                all_labels = sorted({ds[i][2] for i in range(len(ds))})
+                all_labels = sorted(set(labels))
                 label2idx = {label: i for i, label in enumerate(all_labels)}
             self.label2idx = dict(label2idx)
+            unknown_labels = set(labels) - self.label2idx.keys()
+            if unknown_labels:
+                raise ValueError(
+                    "SpeechCommands split contains labels missing from the "
+                    f"training mapping: {sorted(unknown_labels)}"
+                )
+            # Partitioning and metadata validation can now obtain labels
+            # without a second complete pass through the audio decoder.
+            self.targets = np.asarray(
+                [self.label2idx[label] for label in labels], dtype=np.int64)
             self.NUM_CLASSES = len(self.label2idx)
             self.data = ds
             self._loaded = True
@@ -74,7 +87,7 @@ class AudioDataset(Dataset):
                     waveform, (0, t - waveform.shape[-1]))
                 if waveform.shape[-1] < t
                 else waveform[:, :t])
-            return waveform, self.label2idx.get(label, 0)
+            return waveform, self.label2idx[label]
         return self.synth[i]
 
 

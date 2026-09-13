@@ -135,9 +135,9 @@ def reset_lora_params(model):
             nn.init.zeros_(module.lora_B)
 
 
-def merge_lora_to_delta_w(lora_state):
+def merge_lora_to_delta_w(lora_state, alpha=32):
     """
-    Compute delta_W = B @ A for each LoRA layer.
+    Compute the effective delta_W = (alpha / rank) * B @ A per layer.
 
     This produces a rank-independent representation: the effective weight
     update is always (out_features x in_features) regardless of the rank
@@ -145,21 +145,26 @@ def merge_lora_to_delta_w(lora_state):
 
     Args:
         lora_state: dict mapping layer_name -> {'A': tensor, 'B': tensor}
+        alpha: the LoRA alpha used by the source model (shared across layers)
 
     Returns:
         dict mapping layer_name -> delta_W tensor (out_features x in_features)
     """
+    if not math.isfinite(alpha) or alpha <= 0:
+        raise ValueError("alpha must be finite and positive")
     delta_w = {}
     for layer_name, params in lora_state.items():
         A = params['A']  # (rank, in_features)
         B = params['B']  # (out_features, rank)
-        delta_w[layer_name] = B @ A  # (out_features, in_features)
+        if A.ndim != 2 or B.ndim != 2 or A.shape[0] <= 0 or B.shape[1] != A.shape[0]:
+            raise ValueError(f"inconsistent LoRA factors for {layer_name!r}")
+        delta_w[layer_name] = (alpha / A.shape[0]) * (B @ A)
     return delta_w
 
 
 def decompose_delta_w(delta_w_dict, target_rank, alpha=32):
     """
-    SVD-decompose delta_W back into A, B matrices at target_rank.
+    SVD-decompose an effective delta_W into factors at target_rank.
 
     Given delta_W = U @ S @ V^T, we take the top-r singular values:
         B_new = U[:, :r] @ sqrt(S[:r])  -> (out_features, r)
@@ -168,14 +173,22 @@ def decompose_delta_w(delta_w_dict, target_rank, alpha=32):
     Args:
         delta_w_dict: dict mapping layer_name -> delta_W tensor
         target_rank: desired rank for the decomposition
-        alpha: LoRA alpha for scaling
+        alpha: destination model's LoRA alpha; its forward scaling is undone
+            in the factors, so merging them recovers the effective delta_W
 
     Returns:
         lora_state dict compatible with set_lora_state
     """
+    if target_rank <= 0:
+        raise ValueError("target_rank must be positive")
+    if not math.isfinite(alpha) or alpha <= 0:
+        raise ValueError("alpha must be finite and positive")
     lora_state = {}
     for layer_name, delta_w in delta_w_dict.items():
-        U, S, Vh = torch.linalg.svd(delta_w, full_matrices=False)
+        # CPU SVD does not implement half/bfloat16, but preserve double input
+        # precision and restore the original dtype before returning.
+        work = delta_w if delta_w.dtype == torch.float64 else delta_w.float()
+        U, S, Vh = torch.linalg.svd(work, full_matrices=False)
 
         r = min(target_rank, len(S))
         sqrt_s = torch.sqrt(S[:r])
@@ -188,8 +201,14 @@ def decompose_delta_w(delta_w_dict, target_rank, alpha=32):
         B_new = B_new / math.sqrt(scaling)
         A_new = A_new / math.sqrt(scaling)
 
+        # The requested LoRA rank may exceed the layer's intrinsic dimension.
+        # Still return tensors that can be loaded into the destination model.
+        if r < target_rank:
+            B_new = torch.cat([B_new, B_new.new_zeros(B_new.shape[0], target_rank - r)], dim=1)
+            A_new = torch.cat([A_new, A_new.new_zeros(target_rank - r, A_new.shape[1])], dim=0)
+
         lora_state[layer_name] = {
-            'A': A_new,
-            'B': B_new,
+            'A': A_new.to(delta_w.dtype),
+            'B': B_new.to(delta_w.dtype),
         }
     return lora_state

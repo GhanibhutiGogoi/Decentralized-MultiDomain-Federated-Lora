@@ -4,6 +4,8 @@ This is the Project 1 quality-weighted aggregation implementation migrated
 into the reusable framework namespace without changing its behavior.
 """
 
+import math
+
 import torch
 
 from framework.aggregation.projection import (
@@ -14,10 +16,36 @@ from framework.aggregation.projection import (
 
 
 def _normalised_client_weights(samples, quality_scores):
-    raw = [float(s) * float(q) for s, q in zip(samples, quality_scores)]
+    """Return sample/quality weights after strict input validation.
+
+    Silent fallback to uniform weights hides malformed experiments (for example
+    an empty client list or a zero/NaN total), so callers receive a clear error.
+    """
+    if samples is None or quality_scores is None:
+        raise ValueError("samples and quality_scores are required")
+    if len(samples) == 0:
+        raise ValueError("at least one client is required")
+    if len(samples) != len(quality_scores):
+        raise ValueError(
+            "samples and quality_scores must have matching lengths"
+        )
+
+    raw = []
+    for idx, (sample_count, quality) in enumerate(zip(samples, quality_scores)):
+        try:
+            sample_count = float(sample_count)
+            quality = float(quality)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"client weight at index {idx} is not numeric") from exc
+        if not (math.isfinite(sample_count) and math.isfinite(quality)):
+            raise ValueError(f"client weight at index {idx} must be finite")
+        if sample_count < 0 or quality < 0:
+            raise ValueError(f"client weight at index {idx} must be nonnegative")
+        raw.append(sample_count * quality)
+
     total = sum(raw)
-    if total <= 0:
-        return [1.0 / len(raw)] * len(raw)
+    if not math.isfinite(total) or total <= 0:
+        raise ValueError("client weights must have a finite, positive total")
     return [r / total for r in raw]
 
 
@@ -65,7 +93,11 @@ def fedavg_quality_weighted(weights, samples, quality_scores, target_rank, ref_s
     FedAvg weighted by samples times quality, with heterogeneous LoRA handled
     in update space.
     """
+    if weights is None or len(weights) == 0:
+        raise ValueError("at least one client state is required")
     norm_w = _normalised_client_weights(samples, quality_scores)
+    if len(weights) != len(norm_w):
+        raise ValueError("client states, samples, and quality_scores must have matching lengths")
     agg = {}
     handled = set()
 
