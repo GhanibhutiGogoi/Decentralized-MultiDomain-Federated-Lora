@@ -4,6 +4,8 @@
 
 **simulate_ai Research Project · Experiment 1 Report**
 
+> **Status (13 September 2026): historical record.** This report describes the July 2026 run of the original rank equation, whose ranks (2, 16, 16) and FLOP figures came from the pre-#40 controller and partly synthetic task data. It is preserved unchanged for provenance. The current evidence is in `docs/artifacts/p1-adaptive-rank/`: the original controller's five-task battery against fixed rank 32 (gate failed, rank 2 throughout) and the revised controller's capability-matched Fashion-MNIST comparison (parity at 82.85%, 10.0% fewer FLOPs, one task, one seed). Read `docs/artifacts/README.md` for the evidence-scoped conclusion.
+
 ---
 
 ## 1. Introduction

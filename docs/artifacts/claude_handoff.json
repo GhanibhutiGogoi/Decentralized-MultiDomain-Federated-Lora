@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-09-13T04:00:00Z",
-  "status": "discovery_and_rank_measured_paper_updated",
+  "updated_at": "2026-09-13T12:00:00Z",
+  "status": "merged_main_775e986_revised_rank_and_domain_weighting_recorded",
   "project": {
     "name": "AH-LoRA",
     "description": "Adaptive heterogeneous LoRA for decentralized multi-domain federated learning",
@@ -9,7 +9,7 @@
     "source_baseline": {
       "commit": "8c22e76f5c2313abcfd6ddeb1313a04eb26834c4",
       "branch": "main",
-      "note": "Starting snapshot; use each experiment manifest for the exact code actually run"
+      "note": "Starting snapshot for the completion work. PRs #42 (bd9f321) and #43 (f0109b9) are merged; latest handoff update is 775e986. Use each experiment manifest for the exact code actually run."
     }
   },
   "scope": {
@@ -78,15 +78,25 @@
     },
     {
       "component": "P2 projection and real-data runtime fixes",
-      "status": "implemented_tests_passed_pull_request_open",
+      "status": "merged",
       "commit": "dce4248973157f0217f6cc19a6f1ed0399254b8e",
       "pull_request": 42,
-      "detail": "Ports correct SVD projection/scaled delta-W handling and hardens real AG News/SpeechCommands runtime"
+      "detail": "Ports correct SVD projection/scaled delta-W handling and hardens real AG News/SpeechCommands runtime",
+      "merge_commit": "bd9f32155be1832807f88f0c334a4af852041323"
     },
     {
       "component": "P1 adaptive rank selection",
-      "status": "implemented_remote_battery_complete_gate_failed",
-      "detail": "Five real tasks, five rounds on gpu003. Rank 2 throughout, 93.75% FLOP savings, zero capability violations, accuracy-preservation gate failed on three tasks."
+      "status": "revised_controller_parity_on_one_task_historical_gate_failed",
+      "detail": "Historical: original controller on five real tasks, five rounds, seed 42, against fixed rank 32 -- rank 2 throughout, 93.75% FLOP savings, zero capability violations, accuracy gate failed on three tasks (preserved). Revised: two-round warm-up at each client's feasible maximum rank, half-capability minimum rank, relative quality-drop safeguard restoring the feasible maximum; capability-matched fixed baseline [4, 8, 16]. Fashion-MNIST, 5 rounds, seed 42 on gpu003: matched 82.85%, adaptive 82.85%, FLOPs 26.64144B vs 23.977296B (10.0% reduction), transient round-4 dip. Five-task parity unproven."
+    },
+    {
+      "component": "P2 conservative domain weighting",
+      "status": "implemented_measured_ranking_only",
+      "sources": [
+        "project-2-domain-aware-allocation/framework/aggregation/domain_weighting.py",
+        "project-2-domain-aware-allocation/experiment/experiment2/weight_benchmark.py"
+      ],
+      "detail": "Bounded domain-aware factors from standardized domain signals; default blend strength 0.10; factors clipped to [0.85, 1.15] and normalized under base sample-times-quality weights. Model-free contribution-ranking improvement only; no end-to-end accuracy or privacy claim."
     }
   ],
   "experiment_plan": {
@@ -405,7 +415,7 @@
     {
       "id": "p1_adaptive_rank",
       "status": "complete_gate_failed",
-      "classification": "extension_complete",
+      "classification": "historical_extension_complete",
       "local_path": "docs/artifacts/p1-adaptive-rank",
       "required_files": [
         "manifest.json",
@@ -413,7 +423,7 @@
         "rank_history.csv",
         "figures/"
       ],
-      "use": "Adaptive-rank implementation evidence; calibration gate failed.",
+      "use": "Historical adaptive-rank evidence for the ORIGINAL controller against the infeasible fixed rank-32 reference; calibration gate failed. Superseded as the operational comparison by p1_fashion_capability_matched; preserved, not erased.",
       "seed": 42,
       "tasks": [
         "CIFAR-CNN",
@@ -438,7 +448,8 @@
         26.05,
         83.33,
         96.36
-      ]
+      ],
+      "reference_feasibility": "fixed rank 32 exceeds every client's capability maximum (4, 8, 16)"
     },
     {
       "id": "p3_adaptive_discovery_full_data",
@@ -478,6 +489,111 @@
       "signature_dimension": 64,
       "signature_payload_bytes_fp32": 3840,
       "caveat": "Coordinator-visible full-state observation; soft affinity mixer only."
+    },
+    {
+      "id": "p1_fashion_capability_matched",
+      "status": "complete",
+      "classification": "extension_single_task_seed42",
+      "local_path": "docs/artifacts/p1-adaptive-rank/adaptive_vs_matched_fashion.json",
+      "machine": "gpu003",
+      "task": "Fashion-MNIST (cached)",
+      "seed": 42,
+      "rounds": 5,
+      "clients": {
+        "0": {
+          "batch_size": 16,
+          "max_rank": 4
+        },
+        "1": {
+          "batch_size": 64,
+          "max_rank": 8
+        },
+        "2": {
+          "batch_size": 256,
+          "max_rank": 16
+        }
+      },
+      "controller_policy": "two-round warm-up at feasible maximum rank; half-capability minimum rank; relative quality-drop safeguard restoring the feasible maximum",
+      "matched_baseline": {
+        "ranks": [
+          4,
+          8,
+          16
+        ],
+        "final_accuracy_percent": 82.85,
+        "total_flops": 26641440000
+      },
+      "adaptive": {
+        "final_accuracy_percent": 82.85,
+        "total_flops": 23977296000,
+        "rank_history": [
+          [
+            4,
+            8,
+            16
+          ],
+          [
+            4,
+            8,
+            16
+          ],
+          [
+            4,
+            8,
+            16
+          ],
+          [
+            2,
+            6,
+            12
+          ],
+          [
+            4,
+            6,
+            12
+          ]
+        ],
+        "accuracy_curve_percent": [
+          70.92,
+          80.84,
+          82.23,
+          70.24,
+          82.85
+        ]
+      },
+      "flop_reduction_percent": 10.0,
+      "final_accuracy_delta_percentage_points": 0.0,
+      "interpretation": "Parity with a FEASIBLE capability-matched baseline on one task and one seed, with a transient round-4 dip. Not five-task parity; not a comparison with the infeasible fixed rank-32 reference."
+    },
+    {
+      "id": "p2_conservative_domain_weighting",
+      "status": "complete",
+      "classification": "model_free_ranking_seed42",
+      "local_paths": [
+        "docs/artifacts/p2-domain-weighting/README.md",
+        "docs/artifacts/p2-domain-weighting/sweep_summary.json"
+      ],
+      "source_observations": "docs/artifacts/p2-exp1-real-seed42/per_round_client_measurements.csv",
+      "observations": 75,
+      "seed": 42,
+      "blend_strength": 0.1,
+      "factor_clip": [
+        0.85,
+        1.15
+      ],
+      "mean_metrics": {
+        "quality_only": {
+          "spearman": 0.152174,
+          "pairwise_accuracy": 0.52,
+          "weighted_contribution": 0.575943
+        },
+        "conservative_domain": {
+          "spearman": 0.195652,
+          "pairwise_accuracy": 0.546667,
+          "weighted_contribution": 0.577445
+        }
+      },
+      "interpretation": "Modest model-free contribution-ranking improvement against the leave-one-client-out target. No end-to-end training-accuracy result and no privacy claim."
     }
   ],
   "test_evidence": [
@@ -567,6 +683,17 @@
         "mh_inverse_delta_l2": 0.10974358974358973
       },
       "interpretation": "All descriptive stage-10 means are below the soft-candidate threshold 0.4; automatic domain discovery remains unsupported."
+    },
+    {
+      "evidence_type": "current_change_validation",
+      "source": "Remote test report on gpu003, 2026-09-13",
+      "status": "pass",
+      "suite": "Adaptive-rank controller and conservative domain-weighting regression tests",
+      "counts": {
+        "passed": 27
+      },
+      "execution_location": "gpu003 (documented SSH GPU machine)",
+      "limitation": "Local development-machine test runs do not replace SSH validation and are not recorded as evidence."
     }
   ],
   "evidence_rules": {
@@ -580,7 +707,10 @@
     "compression": "mean_residual_energy is absolute squared error; mean_tail_mass is relative squared error",
     "communication": "Keep effective-matrix and operational staged accounting separate; preserve payload dtype and representation",
     "privacy": "No privacy guarantee follows from decentralized communication or adapter-only sharing",
-    "oracle": "Known domain assignments are inputs, not a successful domain-discovery result"
+    "oracle": "Known domain assignments are inputs, not a successful domain-discovery result",
+    "feasible_baseline": "Compare adaptive rank against a capability-matched fixed baseline (ranks within each client's maximum). The fixed rank-32 reference is infeasible for every client and is a compute reference only; label it as such wherever it appears.",
+    "test_machine": "gpu003 is the required test and experiment machine. Local tests do not replace SSH validation.",
+    "historical_results": "Superseded results are preserved and labeled historical; they are never deleted or silently overwritten."
   },
   "artifact_sources": {
     "reading_guide": "docs/artifacts/README.md",
@@ -607,12 +737,21 @@
       "commit": "f0109b90af954de643f1eed84ae767e41fe56ed5",
       "scope": "P3 completion benchmark, signatures, aggregate report, and evidence handoff",
       "merge_commit": "f0109b90af954de643f1eed84ae767e41fe56ed5"
+    },
+    {
+      "number": 41,
+      "status": "merged",
+      "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/41",
+      "merge_commit": "8c22e76f5c2313abcfd6ddeb1313a04eb26834c4",
+      "scope": "Hierarchical and affinity-weighted gossip, delta-W runner, convergence analysis"
     }
   ],
   "next_actions": [
-    "Use the updated paper and handoff artifacts for the Claude explanation",
-    "Future work: calibrate rank demand and implement neighborhood-local discovery/hard hierarchy gating.",
-    "Use merged main branch and updated artifacts for the Claude explanation"
+    "Run the revised adaptive-rank controller against capability-matched baselines on the remaining four tasks and at least three seeds on gpu003 before claiming broader parity.",
+    "Test conservative domain weighting end to end (training accuracy, not ranking metrics) on gpu003.",
+    "Run a privacy evaluation (differential privacy, membership inference, reconstruction, or secure aggregation) before any privacy statement.",
+    "Implement neighborhood-local discovery and hard-hierarchy gating; the current discovery result is coordinator-visible.",
+    "Keep docs/artifacts/README.md, this handoff, progress.jsonl, the paper and the explainer artifact in step with main."
   ],
   "paper": {
     "status": "complete",
@@ -627,9 +766,25 @@
     "p3_discovery_targeted_remote": "30 passed",
     "p1_rank_selector_remote": "20 passed",
     "p1_full_battery": "complete_gate_failed",
-    "p1_summary": "93.75% FLOP savings, rank 2 throughout, accuracy gate failed on CIFAR/Fashion/Tabular",
+    "p1_summary": "HISTORICAL original controller vs fixed rank 32: 93.75% FLOP savings, rank 2 throughout, accuracy gate failed on CIFAR/Fashion/Tabular (reference infeasible for every client)",
     "p2_review_fixes": "PR #42 final head 1939c9c: 127 passed, 46 subtests passed on gpu003",
     "p1_fashion_capability_matched": "gpu003: fixed [4,8,16] 82.85%; revised adaptive 82.85%; 10.0% FLOP savings; transient round-4 dip",
-    "p2_conservative_domain_weighting": "gpu003 sweep: Spearman 0.152->0.196; pairwise 0.520->0.547; weighted contribution 0.575943->0.577445"
-  }
+    "p2_conservative_domain_weighting": "gpu003 sweep: Spearman 0.152->0.196; pairwise 0.520->0.547; weighted contribution 0.575943->0.577445",
+    "p1_p2_regression_remote": "gpu003: adaptive-rank and domain-weighting regression tests, 27 passed",
+    "required_test_machine": "gpu003; local tests do not replace SSH validation"
+  },
+  "scientific_conclusion": {
+    "as_of": "2026-09-13",
+    "main_commit": "775e986",
+    "end_to_end_goal_achieved": false,
+    "statements": [
+      "The project's original end-to-end goal is not yet achieved.",
+      "Adaptive rank reaches final-accuracy parity with a feasible capability-matched baseline on one Fashion-MNIST experiment (seed 42, 5 rounds, 10.0% FLOP saving); broader five-task parity is unproven.",
+      "Conservative domain weighting improves model-free contribution ranking modestly (Spearman 0.152 to 0.196; pairwise accuracy 0.520 to 0.547); end-to-end accuracy improvement is unproven.",
+      "No privacy guarantee has been demonstrated.",
+      "Low-rank adapters and decentralized exchange alone do not establish privacy.",
+      "Privacy claims require separate differential-privacy, membership-inference, reconstruction, or secure-aggregation experiments; none has been run."
+    ]
+  },
+  "handoff_commit": "775e986"
 }

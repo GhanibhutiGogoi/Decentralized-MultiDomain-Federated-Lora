@@ -2,7 +2,7 @@
 
 Start with [`claude_handoff.json`](claude_handoff.json). It records the intended completion scope, which evidence is current, where to find the measured data, and which claims the data can support. [`progress.jsonl`](progress.jsonl) is an append-only work log; each line is one JSON object. New experiments should be added to the handoff only after their files exist.
 
-The deliverable is a reproducible CIFAR-100 benchmark of decentralized LoRA with known domain groups. The repository now also contains a measured coordinator-visible online-discovery extension and a measured adaptive-rank controller. Discovery is supported by full-data evidence; adaptive rank is implemented but fails its accuracy-preservation gate. Project 2's old lambda estimates remain separate and exploratory.
+The deliverable is a reproducible CIFAR-100 benchmark of decentralized LoRA with known domain groups. The repository now also contains a measured coordinator-visible online-discovery extension, a measured adaptive-rank controller, and a conservative domain-weighting iteration. Discovery is supported by full-data evidence. The original adaptive-rank controller failed its accuracy-preservation gate against a fixed rank-32 reference (historical, preserved below); the revised controller reaches final-accuracy parity with a feasible capability-matched baseline on one Fashion-MNIST run while saving 10.0% FLOPs, and broader five-task parity is unproven. Project 2's regenerated lambda estimates remain exploratory, and the conservative domain-weighting sweep improves contribution ranking modestly without an end-to-end accuracy result. See [Scientific conclusion](#scientific-conclusion) for what the evidence does and does not support.
 
 ## Reading a benchmark run
 
@@ -69,7 +69,40 @@ The historical P3 signature report is [`p3-signatures/gate_g1.json`](p3-signatur
 
 The regenerated P2 artifacts are [`p2-exp1-real-seed42`](p2-exp1-real-seed42) and [`p2-exp2-real-seed42`](p2-exp2-real-seed42). All five datasets are marked real in `dataset_manifest.json`. Form A uses gamma 2.44458 and has global Spearman 0.368, pairwise ranking accuracy 0.641 and permutation p 0.162. Form B uses gamma 5 and has global Spearman 0.369, pairwise ranking accuracy 0.630 and permutation p 0.207. Form B's selected ridge alpha is 1000. These seed-42, five-round results show weak and task-dependent ranking behavior; they do not establish a universal preferred form or cross-task generalization.
 
-The follow-up conservative domain-weighting sweep is [`p2-domain-weighting`](p2-domain-weighting). At blend strength 0.10 it improves mean model-free contribution ranking over quality-only weights (Spearman 0.152 to 0.196; pairwise accuracy 0.520 to 0.547), while preserving bounded redistribution. It has not yet demonstrated an end-to-end accuracy gain or a privacy guarantee.
+The follow-up conservative domain-weighting sweep is [`p2-domain-weighting`](p2-domain-weighting) (`README.md`, `sweep_summary.json`). Bounded domain-aware factors are computed from standardized domain signals with default blend strength 0.10, clipped to [0.85, 1.15], and normalized under the base sample-times-quality weights. On the 75 recorded real-data client-round observations at seed 42 the mean metrics move from quality-only to conservative-domain as follows: Spearman correlation 0.152174 to 0.195652; pairwise accuracy 0.520000 to 0.546667; weighted contribution 0.575943 to 0.577445. These are model-free contribution-ranking improvements against the measured leave-one-client-out target. They are not an end-to-end training-accuracy result and carry no privacy claim.
+
+### Adaptive-rank controller: historical gate failure and the revised controller
+
+Two adaptive-rank results exist and must not be conflated.
+
+**Historical (preserved, superseded as the operational comparison).** The original shipped controller (`gamma = 0.5`, no warm-up) was run on five real tasks for five rounds at seed 42 against a **fixed rank-32 reference**; see [`p1-adaptive-rank/summary.csv`](p1-adaptive-rank/summary.csv) and `manifest.json`. It selected rank 2 for every client in every round, saved 93.75% FLOPs, made zero capability violations, and failed the preregistered accuracy gate on CIFAR, Fashion and Tabular. Rank 32 exceeds every client's capability maximum (4, 8, 16), so that comparison is a compute reference, not a feasible hardware-matched baseline.
+
+**Revised controller (current).** The controller now has a two-round warm-up at each client's feasible maximum rank, a half-capability minimum rank, and a relative quality-drop safeguard that restores the client to its feasible maximum. It is compared with a **capability-matched fixed baseline** at ranks [4, 8, 16]. On gpu003 with cached Fashion-MNIST data, 5 rounds, seed 42 ([`p1-adaptive-rank/adaptive_vs_matched_fashion.json`](p1-adaptive-rank/adaptive_vs_matched_fashion.json)):
+
+| Quantity | Matched fixed [4, 8, 16] | Revised adaptive |
+|---|---:|---:|
+| Final accuracy | 82.85% | 82.85% |
+| Total FLOPs | 26.64144 B | 23.977296 B |
+| FLOP reduction | — | 10.0% |
+| Rank history | constant | [4,8,16], [4,8,16], [4,8,16], [2,6,12], [4,6,12] |
+
+The adaptive run dipped at round 4 (70.24% against 83.08%) and recovered by round 5. This is parity with a feasible baseline on one task and one seed; it is not five-task parity, and it does not revisit the fixed rank-32 reference.
+
+## Scientific conclusion
+
+Stated once, so that no summary drifts past the evidence:
+
+- The project's original end-to-end goal (broadly accuracy-preserving adaptive heterogeneous LoRA with a validated decentralized and privacy benefit) is **not yet achieved**.
+- Adaptive rank now reaches parity with a feasible capability-matched baseline on **one** Fashion-MNIST experiment (seed 42, five rounds, 10.0% FLOP saving). Broader five-task parity is **unproven**; the historical five-task battery against the infeasible fixed rank-32 reference failed its gate and is preserved as such.
+- Conservative domain weighting improves model-free contribution ranking **modestly** (Spearman 0.152 to 0.196, pairwise accuracy 0.520 to 0.547). An end-to-end accuracy improvement is **unproven**.
+- **No privacy guarantee has been demonstrated.** Low-rank adapters and decentralized exchange alone do not establish privacy. Any privacy claim requires separate differential-privacy, membership-inference, reconstruction, or secure-aggregation experiments, none of which has been run.
+- The decentralized benchmark results (oracle hierarchy 68.98 ± 0.95% personalized at uniform rank 16 versus 42.30 ± 1.39% flat gossip and 23.20 ± 0.29% centralized FedAvg) are three-seed finite-run measurements under one frozen-feature protocol, with the hierarchy receiving true domain labels. The online-discovery result is coordinator-visible, not neighborhood-local.
+
+## Validation and the required test machine
+
+The adaptive-rank and domain-weighting regression tests pass on gpu003: **27 passed**. Earlier remote counts on the same host: Project 3 full suite 378 passed, Project 2 127 passed with 46 subtests (PR #42), adaptive-rank controller suite 20 passed, discovery/runner/protocol suite 30 passed.
+
+gpu003 (the documented SSH GPU machine, Tesla V100S, Python 3.10.12, torch 2.3.0+cu121) remains the **required** test and experiment machine. Local runs on a development laptop do not replace SSH validation and must not be reported as if they did. Access details are not part of this bundle.
 
 ## Pending completion extensions
 
@@ -78,4 +111,4 @@ The automatic-discovery and adaptive-rank drivers are implemented and their meas
 - [`p3-adaptive-discovery/`](p3-adaptive-discovery/) records online signature discovery, realised mixing matrices, and the ARI/NMI scoring view.
 - [`p1-adaptive-rank/`](p1-adaptive-rank/) records controller diagnostics, rank histories, budget checks, and fixed-rank/oracle comparisons.
 
-The P3 discovery directory contains the completed manifest, per-seed records, aggregate table, and graph. The P1 directory contains the completed five-task summary, rank histories, diagnostics, manifest, and figures; its preregistered gate fails because every client stays at rank 2 and accuracy drops on three tasks.
+The P3 discovery directory contains the completed manifest, per-seed records, aggregate table, and graph. The P1 directory contains the completed five-task summary, rank histories, diagnostics, manifest, and figures of the **original** controller, whose preregistered gate failed because every client stayed at rank 2 and accuracy dropped on three tasks against the fixed rank-32 reference (historical, preserved). It also contains `adaptive_vs_matched_fashion.json`, the revised controller's capability-matched Fashion-MNIST comparison described above.
