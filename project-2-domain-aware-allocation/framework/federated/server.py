@@ -14,6 +14,7 @@ Aggregation pipeline:
 """
 
 import copy
+import math
 import torch
 from tqdm import tqdm
 
@@ -41,10 +42,13 @@ class HeteroFedAvgServer:
             alpha: shared client LoRA alpha (for source and destination scaling)
             device: compute device
         """
-        self.clients = clients
+        self.clients = list(clients)
         self.rank_assignments = rank_assignments
         self.alpha = alpha
         self.device = device
+        if not math.isfinite(float(alpha)) or float(alpha) <= 0:
+            raise ValueError("alpha must be finite and positive")
+        self._validate_shared_alpha()
         self.history = {
             'rounds': [],
             'avg_loss': [],
@@ -54,33 +58,84 @@ class HeteroFedAvgServer:
         }
 
     def aggregate_delta_w(self, client_delta_ws, client_weights):
+        """Weighted average in effective ``delta_W`` space.
+
+        Inputs are validated explicitly because malformed client payloads or
+        weights otherwise produce silent NaNs or biased updates.
         """
-        Weighted average in delta_W space.
+        if client_delta_ws is None or len(client_delta_ws) == 0:
+            raise ValueError("at least one client update is required")
+        if client_weights is None or len(client_weights) != len(client_delta_ws):
+            raise ValueError("client updates and weights must have matching lengths")
 
-        All effective delta_W have identical shape (out_features x in_features)
-        regardless of the rank used to produce them.
+        weights = []
+        for idx, weight in enumerate(client_weights):
+            try:
+                weight = float(weight)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"client weight at index {idx} is not numeric") from exc
+            if not math.isfinite(weight) or weight < 0:
+                raise ValueError(f"client weight at index {idx} must be finite and nonnegative")
+            weights.append(weight)
+        total_weight = sum(weights)
+        if not math.isfinite(total_weight) or total_weight <= 0:
+            raise ValueError("client weights must have a finite, positive total")
 
-        Args:
-            client_delta_ws: list of delta_W dicts
-            client_weights: list of weights (typically n_samples)
+        reference = client_delta_ws[0]
+        if not hasattr(reference, "keys"):
+            raise ValueError("client updates must be mappings of layer names to tensors")
+        layer_names = set(reference.keys())
+        for idx, delta_w in enumerate(client_delta_ws):
+            if not hasattr(delta_w, "keys") or set(delta_w.keys()) != layer_names:
+                raise ValueError(f"client update at index {idx} has incompatible layer keys")
+            for layer_name in layer_names:
+                tensor = delta_w[layer_name]
+                ref_tensor = reference[layer_name]
+                if not isinstance(tensor, torch.Tensor) or tensor.shape != ref_tensor.shape:
+                    raise ValueError(f"incompatible tensor shape for layer {layer_name!r}")
+                if not torch.isfinite(tensor).all():
+                    raise ValueError(f"non-finite update for layer {layer_name!r}")
 
-        Returns:
-            averaged delta_W dict
-        """
-        total_weight = sum(client_weights)
-        normalized_weights = [w / total_weight for w in client_weights]
-
-        agg_delta_w = {}
-        for layer_name in client_delta_ws[0]:
-            agg_delta_w[layer_name] = torch.zeros_like(
-                client_delta_ws[0][layer_name]
-            )
-
+        normalized_weights = [w / total_weight for w in weights]
+        agg_delta_w = {
+            layer_name: torch.zeros_like(reference[layer_name])
+            for layer_name in layer_names
+        }
         for delta_w, weight in zip(client_delta_ws, normalized_weights):
-            for layer_name in agg_delta_w:
+            for layer_name in layer_names:
                 agg_delta_w[layer_name] += weight * delta_w[layer_name]
-
         return agg_delta_w
+
+    @staticmethod
+    def _client_alphas(client):
+        """Discover alpha values exposed by a client or its LoRA modules."""
+        values = []
+        for obj in (client, getattr(client, "model", None)):
+            if obj is None:
+                continue
+            if hasattr(obj, "alpha"):
+                values.append(float(obj.alpha))
+            named_modules = getattr(obj, "named_modules", None)
+            if named_modules is not None:
+                for _, module in named_modules():
+                    if hasattr(module, "alpha"):
+                        values.append(float(module.alpha))
+        return values
+
+    def _validate_shared_alpha(self):
+        discovered = [self._client_alphas(client) for client in self.clients]
+        present = [value for values in discovered for value in values]
+        if not present:
+            return  # lightweight test doubles may not expose model metadata
+        if any(not math.isfinite(value) or value <= 0 for value in present):
+            raise ValueError("client alpha values must be finite and positive")
+        if any(not values for values in discovered):
+            raise ValueError("all clients must expose a shared alpha value")
+        for client, values in zip(self.clients, discovered):
+            if any(not math.isclose(value, self.alpha, rel_tol=1e-6, abs_tol=1e-8) for value in values):
+                raise ValueError(
+                    f"client {getattr(client, 'client_id', '?')} alpha does not match server alpha {self.alpha}"
+                )
 
     def run(self, n_rounds=50, verbose=True):
         """
@@ -89,6 +144,7 @@ class HeteroFedAvgServer:
         Returns:
             history dict with per-round metrics
         """
+        self._validate_shared_alpha()
         iterator = tqdm(range(n_rounds), desc="HeteroFedAvg") if verbose else range(n_rounds)
 
         for round_idx in iterator:

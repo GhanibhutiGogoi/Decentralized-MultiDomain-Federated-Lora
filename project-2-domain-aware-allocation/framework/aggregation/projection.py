@@ -4,6 +4,8 @@ These helpers use the unscaled ``B @ A`` convention of the Project 1 models.
 The alpha/r-scaled ResNet helpers live in ``framework.models.lora_resnet``.
 """
 
+import numbers
+
 import torch
 
 
@@ -32,6 +34,13 @@ def project_tensor_to_rank(t, target_rank, rank_dim=0):
     discarded. When both factors are available, prefer ``load_global_state``:
     independently projecting A and B does not approximate their product.
     """
+    if not isinstance(target_rank, numbers.Integral) or isinstance(target_rank, bool) or target_rank <= 0:
+        raise ValueError("target_rank must be a positive integer")
+    target_rank = int(target_rank)
+    if t.dim() != 2:
+        raise ValueError("LoRA tensors must be 2-D")
+    if rank_dim not in (0, 1):
+        raise ValueError("rank_dim must be 0 or 1")
     cur_rank = t.shape[rank_dim]
     if cur_rank == target_rank:
         return t.clone()
