@@ -595,14 +595,14 @@
       "number": 42,
       "status": "open",
       "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/42",
-      "commit": "dce4248973157f0217f6cc19a6f1ed0399254b8e",
+      "commit": "1939c9c69ed8bb34f2db77264c7b933c316d57e0",
       "scope": "Project 2 projection and real-data regeneration runtime fixes"
     },
     {
       "number": 43,
       "status": "open",
       "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/43",
-      "commit": "d7b0db3",
+      "commit": "ca2424bc5ad95238a49e09894a98dcd0fdc11703",
       "scope": "P3 completion benchmark, signatures, aggregate report, and evidence handoff"
     }
   ],
@@ -624,6 +624,7 @@
     "p3_discovery_targeted_remote": "30 passed",
     "p1_rank_selector_remote": "20 passed",
     "p1_full_battery": "complete_gate_failed",
-    "p1_summary": "93.75% FLOP savings, rank 2 throughout, accuracy gate failed on CIFAR/Fashion/Tabular"
+    "p1_summary": "93.75% FLOP savings, rank 2 throughout, accuracy gate failed on CIFAR/Fashion/Tabular",
+    "p2_review_fixes": "PR #42 final head 1939c9c: 127 passed, 46 subtests passed on gpu003"
   }
 }
