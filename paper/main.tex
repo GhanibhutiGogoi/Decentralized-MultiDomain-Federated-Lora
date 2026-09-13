@@ -18,12 +18,12 @@
 \begin{document}\maketitle
 \sloppy
 \begin{abstract}
-Federated fine-tuning with Low-Rank Adaptation (LoRA) must handle statistical heterogeneity, unequal device budgets, and unreliable central coordination at the same time. We present AH-LoRA, a framework whose implemented core aggregates LoRA adapters in effective-update space rather than factor space. A client sends $\dW_i=(\alpha_i/r_i)B_iA_i$; neighbors mix these matrices and each receiver refactorizes the result to its own rank by truncated SVD. This operation is invariant to the LoRA factor gauge and supports heterogeneous ranks in a serverless graph. We implement Metropolis--Hastings gossip, an oracle two-tier hierarchy, heterogeneous-rank and error-feedback protocols, direction-aware signatures, online domain discovery, and an adaptive-rank controller. On a real CIFAR-100 benchmark with 15 clients, five known domains, frozen ImageNet ResNet-18 features, 50 rounds, and three seeds, the oracle hierarchy reaches $68.98\pm0.95\%$ personalized accuracy at uniform rank 16, compared with $42.30\pm1.39\%$ for flat gossip and $23.20\pm0.29\%$ for centralized FedAvg under the same personalized evaluation. The online discovery mixer infers five groups with stage-10 scoring ARI $1.00$ for all three seeds (stage-20 ARI $1.00/0.918/1.00$ under coordinator-visible full-state observation). The single-seed Project 1 rank controller saves $93.75\%$ of measured FLOPs but selects rank 2 throughout and loses accuracy on three of five tasks, so it is an implementation baseline rather than a calibrated allocator. We also regenerate the Project 2 aggregation-weight calibration on five real datasets; its predictive fit is weak and should be treated as exploratory. The resulting artifact is a reproducible benchmark and implementation record with explicit limits on generalization.
+Federated fine-tuning with Low-Rank Adaptation (LoRA) must handle statistical heterogeneity, unequal device budgets, and unreliable central coordination at the same time. We present AH-LoRA, a framework whose implemented core aggregates LoRA adapters in effective-update space rather than factor space. A client sends $\dW_i=(\alpha/r_i)B_iA_i$ with a shared scaling constant $\alpha$; neighbors mix these matrices and each receiver refactorizes the result to its own rank by truncated SVD. This operation is invariant to the LoRA factor gauge and supports heterogeneous ranks in a serverless graph. We implement Metropolis--Hastings gossip, an oracle two-tier hierarchy, heterogeneous-rank and error-feedback protocols, direction-aware signatures, online domain discovery, and an adaptive-rank controller. On a real CIFAR-100 benchmark with 15 clients, five known domains, frozen ImageNet ResNet-18 features, 50 rounds, and three seeds, the oracle hierarchy reaches $68.98\pm0.95\%$ personalized accuracy at uniform rank 16, compared with $42.30\pm1.39\%$ for flat gossip and $23.20\pm0.29\%$ for centralized FedAvg under the same personalized evaluation. The online discovery mixer infers five groups with stage-10 scoring ARI $1.00$ for all three seeds (stage-20 ARI $1.00/0.918/1.00$ under coordinator-visible full-state observation). The single-seed Project 1 rank controller saves $93.75\%$ of measured FLOPs but selects rank 2 throughout and loses accuracy on three of five tasks, so it is an implementation baseline rather than a calibrated allocator. We also regenerate the Project 2 aggregation-weight calibration on five real datasets; its predictive fit is weak and should be treated as exploratory. The resulting artifact is a reproducible benchmark and implementation record with explicit limits on generalization.
 \end{abstract}
 \section{Introduction}
 Large pretrained models are commonly specialized with LoRA~\citep{hu2022lora}, which trains small factors $B\in\R^{d_o\times r}$ and $A\in\R^{r\times d_i}$ while freezing the backbone. Existing federated LoRA methods address parameter efficiency and, in some cases, rank heterogeneity~\citep{zhang2023fedit,babakniya2023slora,cho2024hetlora,bai2024flexlora}; decentralized optimization provides serverless gossip protocols~\citep{boyd2006gossip,lian2017dpsgd}. These lines of work leave a practical intersection under-specified: clients may have different ranks, different domains, and no trusted aggregation server.
 
-LoRA factors are not identifiable: $(BQ,Q^{-1}A)$ represents the same update as $(B,A)$ for every invertible $Q$. Factor averaging therefore depends on arbitrary coordinates and is undefined for unequal ranks. AH-LoRA defines the communicated object in the common matrix space $\dW_i=(\alpha_i/r_i)B_iA_i$ and refactorizes every mixed update with an SVD. This primitive is local, rank-agnostic, and compatible with symmetric doubly-stochastic mixing.
+LoRA factors are not identifiable: $(BQ,Q^{-1}A)$ represents the same update as $(B,A)$ for every invertible $Q$. Factor averaging therefore depends on arbitrary coordinates and is undefined for unequal ranks. AH-LoRA defines the communicated object in the common matrix space $\dW_i=(\alpha/r_i)B_iA_i$ with shared $\alpha$ and refactorizes every mixed update with an SVD. This primitive is local, rank-agnostic, and compatible with symmetric doubly-stochastic mixing.
 
 Our contribution is deliberately scoped: a tested effective-update merge and Metropolis--Hastings gossip implementation; a reproducible CIFAR-100 benchmark; heterogeneous-rank, factor zero-padding, and error-feedback ablations; offline and online direction-aware discovery; an auditable adaptive-rank controller; and a real-data regeneration of the Project 2 calibration pipeline. Neighborhood-local discovery, calibrated rank adaptation, privacy guarantees, and broad multimodal generalization remain open.
 \section{Problem Formulation}
@@ -33,96 +33,98 @@ The idealized objective is
  \min_{\{\dW_i\}} F=\frac1N\sum_{i=1}^N f_i(W_0+\dW_i)\quad\text{s.t.}\quad \operatorname{rank}(\dW_i)\le r_i,\; (i,j)\in E\text{ for every transmitted pair}.
 \end{equation}
 The reported personalized score is $A_{\rm pers}=N^{-1}\sum_i\operatorname{Acc}_i(\mathcal T_i)$; the consensus adapter is $\dW_{\rm con}=\mathcal C_R(N^{-1}\sum_i\dW_i)$ and the fairness gap is $\max_d A_d-\min_d A_d$.
-\section{Mathematical specification}
-This section collects the equations used by the three project lines and by the online extensions. For client $i$, let $n_i$ be its local sample count, $\ell_i$ its measured local loss, $q_i=(1+\ell_i)^{-1}$ its quality score, and $\lambda_i$ its domain-aware multiplier. Project 2 forms the normalized aggregation coefficient
+\section{Method}
+AH-LoRA combines three components that can be evaluated independently and then composed: domain-aware weighting (Project 2), gauge-invariant decentralized aggregation (Project 3), and stateful rank selection (Project 1). The following subsections define the operators used in the experiments and make explicit which quantities are observed, communicated, and optimized.
+
+\subsection{Domain-aware aggregation weights}
+For client $i$, let $n_i$ denote the local sample count, $\ell_i$ its measured local loss, $q_i=(1+\ell_i)^{-1}$ its quality score, and $\lambda_i$ its domain-aware multiplier. Project 2 normalizes the contribution used by the weighted aggregator as
 \begin{equation}
  a_i=\frac{n_i q_i\lambda_i}{\sum_j n_j q_j\lambda_j},\qquad \sum_i a_i=1.
 \end{equation}
-Its fitted score is linear in standardized measurements, $s_i=\theta_0+\theta^\top x_i$, and the multiplier is computed within each task/round group $g$ as
+The fitted quality score is linear in standardized measurements, $s_i=\theta_0+\theta^\top x_i$. Within each task/round group $g$, the multiplier is centered before exponentiation and then clipped and renormalized:
 \begin{equation}
- \lambda_i=\operatorname{renorm}_{[0.5,1.5],\,\mathrm{mean}=1}\!\left(\exp\!\left[\gamma\left(s_i-\overline{s}_{g}\right)\right]\right),
+ \lambda_i=\operatorname{renorm}_{[0.5,1.5],\,\mathrm{mean}=1}\!\left(\exp\left[\gamma\left(s_i-\overline{s}_{g}\right)\right]\right),
  \qquad \overline{s}_{g}=|g|^{-1}\sum_{j\in g}s_j.
 \end{equation}
-The two calibrated Project 2 forms differ only in the components of $x_i$. For the standardized form, the fitted coefficients solve the ridge objective
+The standardized calibration estimates its coefficients by ridge regression,
 \begin{equation}
  \widehat\theta_{\alpha}=\arg\min_{\theta}\left\{\lVert X\theta-y\rVert_2^2+\alpha\lVert\theta\rVert_2^2\right\},\qquad
  \widehat\theta_{\alpha}=(X^\top X+\alpha I)^{-1}X^\top y,
 \end{equation}
-and the implementation selects $\alpha$ by leave-one-task-out RMSE.
+with $\alpha$ selected by leave-one-task-out RMSE. The two calibration forms differ only in the components of $x_i$; both are treated as exploratory when predictive fit is weak.
 
-The measured domain signals use class proportions $p_{ic}=n_{ic}/\sum_c n_{ic}$. Their entropy, normalized entropy, and imbalance are
+The measured domain signals begin with class proportions $p_{ic}=n_{ic}/\sum_c n_{ic}$. We record entropy, normalized entropy, and an imbalance statistic,
 \begin{equation}
  H_i=-\sum_{c:p_{ic}>0}p_{ic}\log p_{ic},\quad H_i^{\rm norm}=H_i/\log C,\quad B_i=\frac{\max_c n_{ic}}{\min_{c:n_{ic}>0}n_{ic}}\left(1+\frac{z_i}{C}\right),
 \end{equation}
-where $z_i$ counts absent classes; KL/JS divergence to the global class distribution and update-distance features are also recorded. The weighted-assignment variant uses
-\begin{equation}
- u_i=\lambda_c C_i+\lambda_e E_i+\lambda_b B_i,\qquad \widetilde r_i=r_{\min}+\frac{u_i}{\sum_j u_j}\left(B_{\rm tot}-Nr_{\min}\right),
-\end{equation}
-then snaps to the allowed menu and greedily corrects to the total rank budget; if $\sum_j u_j=0$, the implementation uses uniform weights.
-For completeness, with global proportions $q_c$ and $m_c=(p_{ic}+q_c)/2$, the recorded divergences are
+where $z_i$ counts absent classes. With global proportions $q_c$ and $m_c=(p_{ic}+q_c)/2$, the recorded divergences are
 \begin{equation}
  \operatorname{KL}(p_i\|q)=\sum_c p_{ic}\log\frac{p_{ic}+\varepsilon}{q_c+\varepsilon},\qquad
  \operatorname{JS}(p_i,q)=\tfrac12\operatorname{KL}(p_i\|m)+\tfrac12\operatorname{KL}(q\|m),
 \end{equation}
-and update distances are $d_{\cos}(u,\bar u)=1-u^\top\bar u/(\|u\|_2\|\bar u\|_2)$ and $d_2(u,\bar u)=\|u-\bar u\|_2$.
+and update-distance features are $d_{\cos}(u,\bar u)=1-u^\top\bar u/(\|u\|_2\|\bar u\|_2)$ and $d_2(u,\bar u)=\|u-\bar u\|_2$. The weighted rank-assignment variant combines normalized signals as
+\begin{equation}
+ u_i=\lambda_c C_i+\lambda_e E_i+\lambda_b B_i,\qquad
+ \widetilde r_i=r_{\min}+\frac{u_i}{\sum_j u_j}\left(B_{\rm tot}-Nr_{\min}\right),
+\end{equation}
+then snaps to the allowed menu and greedily corrects to the total rank budget; if $\sum_j u_j=0$, uniform weights are used.
 
-For a LoRA adapter with factors $B_i\in\mathbb R^{d_o\times r_i}$ and $A_i\in\mathbb R^{r_i\times d_i}$, the communicated effective update is
+\subsection{Gauge-invariant effective-update aggregation}
+A LoRA adapter with factors $B_i\in\mathbb R^{d_o\times r_i}$ and $A_i\in\mathbb R^{r_i\times d_i}$ communicates the scaled effective update using a shared scaling constant $\alpha$
 \begin{equation}
  \dW_i=\frac{\alpha}{r_i}B_iA_i.
 \end{equation}
-The P3 runner and all heterogeneous-rank comparisons use this scaled effective update; the legacy Project 1 FedAvg path keeps its historical unscaled $B_iA_i$ aggregation and is reported separately.
-For a symmetric doubly-stochastic mixing matrix $W$, client $i$ receives
+The P3 runner and all heterogeneous-rank comparisons use this scaled update; the legacy Project 1 FedAvg path retains its historical unscaled $B_iA_i$ aggregation and is reported separately. For neighbors $\mathcal N(i)$, client $i$ forms a convex update-space merge,
 \begin{equation}
- Y_i^t=\sum_{j=1}^N W_{ij}^t\dW_j^t+m_i^t,
- \qquad \overline{\dW}_i^t=\mathcal C_{r_i}(Y_i^t),
+ \overline{\dW}_i=\sum_{j\in\mathcal N(i)\cup\{i\}}w_{ij}\dW_j,\qquad \sum_jw_{ij}=1,\;w_{ij}\ge0.
 \end{equation}
-where $m_i^t=0$ without error feedback. If $Y_i^t=U_i\Sigma_iV_i^\top$, the rank projection and stored factors are
+If $\overline{\dW}_i=U\Sigma V^\top$, its rank-$r_i$ representation is obtained from the truncated SVD:
 \begin{align}
- \mathcal C_{r_i}(Y_i^t)&=U_{i,(:,1:r_i)}\Sigma_{i,1:r_i}V_{i,(:,1:r_i)}^\top,\\
- B_i&=\frac{U_{i,(:,1:r_i)}\Sigma_{i,1:r_i}^{1/2}}{\sqrt{\alpha/r_i}},\qquad
- A_i=\frac{\Sigma_{i,1:r_i}^{1/2}V_{i,(:,1:r_i)}^\top}{\sqrt{\alpha/r_i}},\\
- m_i^{t+1}&=Y_i^t-\mathcal C_{r_i}(Y_i^t).
+ \mathcal C_{r_i}(\overline{\dW}_i)&=U_{(:,1:r_i)}\Sigma_{1:r_i}V_{(:,1:r_i)}^\top,\nonumber\\
+ B_i&=\frac{U_{(:,1:r_i)}\Sigma_{1:r_i}^{1/2}}{\sqrt{\alpha/r_i}},\qquad
+ A_i=\frac{\Sigma_{1:r_i}^{1/2}V_{(:,1:r_i)}^\top}{\sqrt{\alpha/r_i}}.
 \end{align}
-This is the Eckart--Young minimum-Frobenius-error rank-$r_i$ approximation and is invariant to factor gauge transformations.
+The projection is the Eckart--Young minimum-Frobenius-error rank-$r_i$ approximation. It is invariant to the LoRA factor gauge: replacing $(B,A)$ by $(BQ,Q^{-1}A)$ leaves $BA$ unchanged, while entry-wise factor averaging changes in general and introduces cross terms.
 
-For an undirected graph with degree $d_i$, flat Metropolis--Hastings gossip uses
+\subsection{Decentralized mixing, hierarchy, and feedback}
+With a symmetric doubly-stochastic mixing matrix $W^t$, client $i$ receives
 \begin{equation}
- W_{ij}=\frac{1}{1+\max(d_i,d_j)}\ \text{for }(i,j)\in E,\qquad W_{ii}=1-\sum_{j\ne i}W_{ij},
+ Y_i^t=\sum_{j=1}^N W_{ij}^t\dW_j^t+m_i^t,\qquad \overline{\dW}_i^t=\mathcal C_{r_i}(Y_i^t),
 \end{equation}
-with all other entries zero. The oracle two-tier schedule is the product $W^t=W_{\mathrm{intra}}^tW_{\mathrm{bridge}}^tW_{\mathrm{intra}}^t$ on bridge rounds and $W^t=W_{\mathrm{intra}}^t$ otherwise.
+where $m_i^t=0$ without error feedback. The discarded residual is retained as
+\begin{equation}
+ m_i^{t+1}=Y_i^t-\mathcal C_{r_i}(Y_i^t).
+\end{equation}
+Flat gossip uses ring Metropolis--Hastings weights, $W_{ij}=1/(1+\max(d_i,d_j))$ on edges and $W_{ii}=1-\sum_{j\ne i}W_{ij}$. The oracle two-tier schedule is $W^t=W_{\mathrm{intra}}^tW_{\mathrm{bridge}}^tW_{\mathrm{intra}}^t$ on bridge rounds and $W^t=W_{\mathrm{intra}}^t$ otherwise. It uses known domains only as an oracle diagnostic.
 
-If source $j$ has rank $r_j$ and layer dimensions $(d_o,d_i)$, its transmitted factor payload is $S_j=\sum_\ell r_j(d_{o,\ell}+d_{i,\ell})$ floats. For mixer support $E_t=\{(i,j):i\ne j,\,W^t_{ij}>0\}$, the runner reports the effective communication count
+Communication is reported in factor floats rather than matrix entries. If source $j$ has rank $r_j$ and layer dimensions $(d_{o,\ell},d_{i,\ell})$, its payload is $S_j=\sum_\ell r_j(d_{o,\ell}+d_{i,\ell})$ floats. For mixer support $E_t=\{(i,j):i\ne j,W^t_{ij}>0\}$, the effective count is
 \begin{equation}
  F_t=\sum_{(i,j)\in E_t}S_j.
 \end{equation}
 
-Online discovery builds a compact direction signature from a fixed seeded projection $P\in\mathbb R^{64\times D}$:
+\subsection{Automatic discovery and adaptive mixing}
+Online discovery compresses the flattened effective updates using a fixed seeded projection $P\in\mathbb R^{64\times D}$. The normalized signature and its exponential moving average are
 \begin{equation}
- z_i^t=\frac{P\,\operatorname{vec}(\dW_i^t)}{\left\lVert P\,\operatorname{vec}(\dW_i^t)\right\rVert_2},\qquad h_i^t=\frac{\beta h_i^{t-1}+(1-\beta)z_i^t}{\left\lVert\beta h_i^{t-1}+(1-\beta)z_i^t\right\rVert_2}.
+ z_i^t=\frac{P\operatorname{vec}(\dW_i^t)}{\left\lVert P\operatorname{vec}(\dW_i^t)\right\rVert_2},\qquad h_i^t=\frac{\beta h_i^{t-1}+(1-\beta)z_i^t}{\left\lVert\beta h_i^{t-1}+(1-\beta)z_i^t\right\rVert_2}.
 \end{equation}
-The affinity is cosine similarity $A_{ij}=h_i^\top h_j$. On the selected topology, the nonnegative kernel and mixer are
+The affinity is $A_{ij}=h_i^\top h_j$. On the selected topology, we construct a nonnegative kernel and project it to a symmetric mixer,
 \begin{equation}
- K_{ij}=\mathbf 1\{j\in\mathcal N(i)\cup\{i\}\}\exp\!\left(\frac{A_{ij}-A_{\max}}{\tau}\right),\quad W_0=\operatorname{Sinkhorn}(K),\quad W=w_{\min}I+(1-w_{\min})W_0.
+ K_{ij}=\mathbf 1\{j\in\mathcal N(i)\cup\{i\}\}\exp\left(\frac{A_{ij}-A_{\max}}{\tau}\right),\quad W_0=\operatorname{Sinkhorn}(K),\quad W=w_{\min}I+(1-w_{\min})W_0.
 \end{equation}
-The unknown cluster count is chosen without labels as $\hat K=\arg\max_{k\in\{2,\ldots,\min(8,N-1)\}}\operatorname{Silhouette}(1-A,k)$; if all scores are non-positive, $\hat K=1$ and the soft mixer is retained. Labels and ARI/NMI appear only in evaluation.
+The unknown cluster count is selected without labels by $\widehat K=\arg\max_{k\in\{2,\ldots,\min(8,N-1)\}}\operatorname{Silhouette}(1-A,k)$. If all scores are non-positive, $\widehat K=1$ and the soft mixer is retained; labels and ARI/NMI are used only for evaluation.
 
-Finally, Project 1 estimates the stable rank of a probe gradient $G_i$ by
+\subsection{Adaptive rank selection}
+Project 1 estimates the stable rank of a probe gradient $G_i$ and applies a capability floor:
 \begin{equation}
- s_i=\frac{\lVert G_i\rVert_F^2}{\lVert G_i\rVert_2^2},\qquad c_i=\frac{\operatorname{index}(b_i)}{M-1},\qquad r_i^{\star}=q_{\mathcal R_i}\!\left(\max\left\{r_{\min},\gamma c_iR_i^{\max},\min(s_i,R_i^{\max})\right\}\right),
+ s_i=\frac{\lVert G_i\rVert_F^2}{\lVert G_i\rVert_2^2},\qquad c_i=\frac{\operatorname{index}(b_i)}{M-1},\qquad r_i^{\star}=q_{\mathcal R_i}\left(\max\left\{r_{\min},\gamma c_iR_i^{\max},\min(s_i,R_i^{\max})\right\}\right),
 \end{equation}
-where $q_{\mathcal R_i}$ snaps to the allowed candidate menu. The stateful controller uses the demand $d_i^t=\operatorname{clip}(s_i^t[1+\omega\,\operatorname{clip}(\rho_i^t,0,1)],0,R_i^{\max})$ (with optional residual ratio $\rho_i^t$), smooths it as $\tilde d_i^t=\beta_r\tilde d_i^{t-1}+(1-\beta_r)d_i^t$, and changes rank only after the configured hysteresis margin and patience conditions are met.
-\section{Method}
-\subsection{Gauge-invariant aggregation}
-For neighbors $\mathcal N(i)$, client $i$ forms
-\begin{equation}\overline{\dW}_i=\sum_{j\in\mathcal N(i)\cup\{i\}}w_{ij}\dW_j,\qquad \sum_jw_{ij}=1,\;w_{ij}\ge0.\end{equation}
-If $\overline{\dW}_i=U\Sigma V^\top$, its rank-$r_i$ representation is $B_i=U_{:,1:r_i}\Sigma_{1:r_i}^{1/2}$ and $A_i=\Sigma_{1:r_i}^{1/2}V_{:,1:r_i}^{\top}$. By Eckart--Young this is the minimum-Frobenius-error rank-$r_i$ approximation.
-\begin{proposition}[Factor averaging is gauge dependent]
-Replacing one factor pair by $(BQ,Q^{-1}A)$ leaves $BA$ unchanged but changes entry-wise factor averages in general; expansion also introduces cross terms. Thus factor averaging is not a function of represented updates, whereas the $\dW$ average is.
-\end{proposition}
-\subsection{Mixing, hierarchy, and feedback}
-Flat gossip uses ring Metropolis--Hastings weights. The oracle hierarchy partitions clients using the known five domain groups, applies intra-domain mixing each round, and performs a representative bridge every five rounds. This is an oracle diagnostic, not a discovery result. Optional error feedback stores each client's discarded SVD residual and adds it to the next update before mixing.
-\subsection{Signatures and rank schedules}
-The signature experiment compares singular-value spectra, row-norm signatures, and inverse-$\dW$-L2 signatures at stages 2, 5, 10, and 20. Signatures are scored against known labels offline. The benchmark uses uniform rank 16 or a repeating heterogeneous schedule $(4,12,32)$ with the same total rank budget (240 across 15 clients). The online discovery extension uses an EMA-smoothed, deterministic 64-dimensional projection of flattened scaled $\dW$, infers $K$ by silhouette score, and emits a symmetric doubly-stochastic affinity mixer. Adaptive rank selection is evaluated separately on the five-task Project 1 battery.
+where $q_{\mathcal R_i}$ snaps to the allowed candidate menu. At round $t$, optional residual demand $\rho_i^t$ modifies the signal as
+\begin{equation}
+ d_i^t=\operatorname{clip}\left(s_i^t\left[1+\omega\operatorname{clip}(\rho_i^t,0,1)\right],0,R_i^{\max}\right),\qquad \widetilde d_i^t=\beta_r\widetilde d_i^{t-1}+(1-\beta_r)d_i^t.
+\end{equation}
+The stateful controller changes rank only after the configured hysteresis margin and patience conditions are satisfied. This makes rank decisions auditable while allowing capability ceilings to be enforced at every client.
+
+The signature experiment compares singular-value spectra, row-norm signatures, and inverse-$\dW$-L2 signatures at stages 2, 5, 10, and 20, scored against known labels offline. The benchmark uses uniform rank 16 or the repeating heterogeneous schedule $(4,12,32)$ with total rank budget 240 across 15 clients. Online discovery and adaptive-rank results are evaluated as separate extensions.
 \section{Analysis}
 For symmetric doubly-stochastic $W$, with $J=\mathbf1\mathbf1^\top/N$, consensus error contracts as $\norm{(W-J)X}_F\le|\lambda_2(W)|\norm{(I-J)X}_F$. For rank-$R$ matrices, the SVD projection obeys $\norm{C_r(X)-X}_F^2=\sum_{k>r}\sigma_k(X)^2\le(1-r/R)\norm{X}_F^2$. With error feedback, the mean update follows the averaged update up to stochastic-gradient terms; without feedback, biased compression leaves an approximation floor. These statements require fixed mixing and bounded residual assumptions; the repository analysis does not claim convergence for the state-dependent discovery mixer or adaptive-rank controller.
 \section{Experimental Setup}

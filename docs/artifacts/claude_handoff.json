@@ -616,9 +616,9 @@
     "source": "paper/main.tex",
     "rendered_pdf": "paper/main.pdf",
     "compile": "pdflatex + bibtex + pdflatex + pdflatex",
-    "pages": 10,
-    "scope": "Evidence-scoped technical paper; online coordinator-visible discovery is measured, adaptive rank is measured and reported as uncalibrated.",
-    "last_rendered": "2026-09-13T05:20:00Z"
+    "pages": 12,
+    "scope": "Evidence-scoped technical paper; equations are integrated into the methodology subsections. Online coordinator-visible discovery is measured; adaptive rank is measured and reported as uncalibrated.",
+    "last_rendered": "2026-09-13T06:00:00Z"
   },
   "validation": {
     "p3_discovery_targeted_remote": "30 passed",
