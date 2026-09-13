@@ -32,5 +32,5 @@ def test_scoring_labels_do_not_change_predicted_clusters():
 def test_signature_schedule_controls_training_and_defaults_to_nonoracle_modes():
     config = experiment.parse_args(["--output", "unused", "--stages", "2", "5", "10"])
     assert config.rounds == 10
-    assert config.methods == ["local", "mh"]
+    assert config.methods == ["local", "mh", "adaptive"]
     assert config.stages == [2, 5, 10]
