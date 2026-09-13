@@ -45,9 +45,9 @@ python experiments/03_clustering_validation.py
 - [x] Metropolis-Hastings, affinity and two-tier mixing.
 - [x] Decentralized runner with error feedback and compression diagnostics.
 - [x] Convergence analysis and numerical tests of its stated assumptions.
-- [ ] Reproducible real-data benchmark with personalized and consensus evaluation.
-- [ ] Three-seed baseline and heterogeneous-rank experiment battery.
-- [ ] Automatic domain discovery; the original singular-value signature did not recover the known domains.
+- [x] Reproducible real-data benchmark with personalized and consensus evaluation (Experiment 04, three seeds).
+- [x] Three-seed baseline and heterogeneous-rank experiment battery (Experiment 04).
+- [x] Automatic domain-discovery implementation and full-data online evaluation. The original singular-value diagnostic remains a failed baseline; the online coordinator-visible mixer is evaluated separately in Experiment 06.
 
 The immediate completion target is a measured CIFAR-100 system with explicit oracle-domain assumptions. NLP experiments, rank-policy calibration and a paper are extensions, not prerequisites.
 

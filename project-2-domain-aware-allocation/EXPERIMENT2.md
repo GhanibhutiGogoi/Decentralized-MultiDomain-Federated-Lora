@@ -37,9 +37,10 @@ Synthetic, mixed, missing, null, malformed, ambiguous, or manifest-disagreeing
 provenance fails closed before regression fitting, alpha search, lambda
 calibration, figures, reports, or Experiment 2 output writes. Existing
 historical artifacts must not be manually relabeled to satisfy this contract;
-future authorized Experiment 1 regeneration must write valid measurement-level
-provenance. Experiment 1/2 regeneration remains blocked until Project 1
-mathematics is finalized.
+the completed real-data regeneration under `docs/artifacts/p2-exp1-real-seed42`
+and `docs/artifacts/p2-exp2-real-seed42` supplies valid measurement-level
+provenance. The regenerated calibration is an exploratory result; its weak fit
+is recorded rather than treated as a deployment-ready allocator.
 
 Required numeric measurements in consumed Experiment 1 artifacts must also be
 present, genuinely numeric, and finite. Missing columns, nulls, NaN, infinities,
