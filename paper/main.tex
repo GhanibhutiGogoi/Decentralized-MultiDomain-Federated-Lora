@@ -84,6 +84,13 @@ The adaptive-rank controller is stable and respects every capability ceiling, bu
 
 \begin{figure}[t]
 \centering
+\includegraphics[width=0.82\linewidth]{figures/p1_adaptive_pareto.png}
+\caption{Project 1 accuracy--FLOP trade-off. The adaptive points achieve large compute reductions relative to the fixed rank-32 reference, at the cost of lower accuracy on several tasks.}
+\label{fig:p1-adaptive-pareto}
+\end{figure}
+
+\begin{figure}[t]
+\centering
 \includegraphics[width=\linewidth]{figures/p3_uniform_curves.png}
 \caption{Uniform-rank CIFAR-100 benchmark. Curves show mean $\pm$ sample standard deviation over seeds 42--44. Personalized and consensus accuracy are separate evaluation protocols; payload panels show simulated direct and staged float counts.}
 \label{fig:uniform-curves}
