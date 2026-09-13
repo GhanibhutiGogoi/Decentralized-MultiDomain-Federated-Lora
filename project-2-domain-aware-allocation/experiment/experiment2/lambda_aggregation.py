@@ -8,6 +8,10 @@ its existing samples * q_i formula becomes samples * q_i * lambda_i.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+
+from framework.aggregation.domain_weighting import conservative_domain_factors
+
 
 def effective_quality_scores(quality_scores, lambda_weights=None):
     """Return q or q * lambda while preserving q exactly when disabled."""
@@ -28,6 +32,39 @@ def normalized_aggregation_weights(samples, quality_scores, lambda_weights=None)
     total = sum(raw)
     if total <= 0:
         return [1.0 / len(raw)] * len(raw)
+    return [value / total for value in raw]
+
+
+def normalized_conservative_domain_weights(
+    samples: Sequence[float],
+    quality_scores: Sequence[float],
+    domain_features: Mapping[str, Sequence[float]] | None = None,
+    *,
+    blend_strength: float = 0.10,
+    max_deviation: float = 0.15,
+    temperature: float = 1.0,
+):
+    """Quality weights with a bounded, conservative domain redistribution.
+
+    The return value is directly usable by the aggregation routines.  Domain
+    features are optional; omitting them gives the original ``samples*q``
+    weights exactly.
+    """
+    factors = conservative_domain_factors(
+        samples,
+        quality_scores,
+        domain_features,
+        blend_strength=blend_strength,
+        max_deviation=max_deviation,
+        temperature=temperature,
+    )
+    raw = [
+        float(sample) * float(quality) * float(factor)
+        for sample, quality, factor in zip(samples, quality_scores, factors)
+    ]
+    total = sum(raw)
+    if total <= 0:
+        raise ValueError("samples*quality*domain factors must have positive total")
     return [value / total for value in raw]
 
 
@@ -54,4 +91,3 @@ def fedavg_quality_lambda_weighted(
         ref_sd,
         device,
     )
-

@@ -6,6 +6,8 @@ into the reusable framework namespace without changing its behavior.
 
 import torch
 
+from framework.aggregation.domain_weighting import conservative_domain_factors
+
 from framework.aggregation.projection import (
     LORA_A_SUFFIXES,
     LORA_B_SUFFIXES,
@@ -60,12 +62,44 @@ def _factorize_delta(delta, target_rank, dtype):
     return a.to(dtype), b.to(dtype)
 
 
-def fedavg_quality_weighted(weights, samples, quality_scores, target_rank, ref_sd, device):
+def fedavg_quality_weighted(
+    weights,
+    samples,
+    quality_scores,
+    target_rank,
+    ref_sd,
+    device,
+    *,
+    lambda_weights=None,
+    domain_features=None,
+    domain_blend_strength=0.10,
+    domain_max_deviation=0.15,
+):
     """
     FedAvg weighted by samples times quality, with heterogeneous LoRA handled
     in update space.
     """
-    norm_w = _normalised_client_weights(samples, quality_scores)
+    effective_quality = list(quality_scores)
+    if lambda_weights is not None:
+        if len(lambda_weights) != len(effective_quality):
+            raise ValueError("lambda_weights must match quality_scores length")
+        effective_quality = [
+            float(q) * float(lam)
+            for q, lam in zip(effective_quality, lambda_weights)
+        ]
+    if domain_features is not None:
+        factors = conservative_domain_factors(
+            samples,
+            effective_quality,
+            domain_features,
+            blend_strength=domain_blend_strength,
+            max_deviation=domain_max_deviation,
+        )
+        effective_quality = [
+            float(q) * float(factor)
+            for q, factor in zip(effective_quality, factors)
+        ]
+    norm_w = _normalised_client_weights(samples, effective_quality)
     agg = {}
     handled = set()
 
@@ -104,4 +138,3 @@ def fedavg_quality_weighted(weights, samples, quality_scores, target_rank, ref_s
         agg[key] = sum(t * w for t, w in contribs) if contribs else ref_sd[key]
 
     return agg
-
