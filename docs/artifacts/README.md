@@ -69,6 +69,8 @@ The historical P3 signature report is [`p3-signatures/gate_g1.json`](p3-signatur
 
 The regenerated P2 artifacts are [`p2-exp1-real-seed42`](p2-exp1-real-seed42) and [`p2-exp2-real-seed42`](p2-exp2-real-seed42). All five datasets are marked real in `dataset_manifest.json`. Form A uses gamma 2.44458 and has global Spearman 0.368, pairwise ranking accuracy 0.641 and permutation p 0.162. Form B uses gamma 5 and has global Spearman 0.369, pairwise ranking accuracy 0.630 and permutation p 0.207. Form B's selected ridge alpha is 1000. These seed-42, five-round results show weak and task-dependent ranking behavior; they do not establish a universal preferred form or cross-task generalization.
 
+The follow-up conservative domain-weighting sweep is [`p2-domain-weighting`](p2-domain-weighting). At blend strength 0.10 it improves mean model-free contribution ranking over quality-only weights (Spearman 0.152 to 0.196; pairwise accuracy 0.520 to 0.547), while preserving bounded redistribution. It has not yet demonstrated an end-to-end accuracy gain or a privacy guarantee.
+
 ## Pending completion extensions
 
 The automatic-discovery and adaptive-rank drivers are implemented and their measured outputs are tracked separately from the completed P3 battery:

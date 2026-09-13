@@ -588,7 +588,8 @@
     "metric_definitions": "docs/artifacts/README.md#metric-dictionary",
     "convergence_analysis": "docs/research/2026-09-03-project3-convergence-analysis.md",
     "research_context": "docs/research/2026-07-20-project3-research-framing.md",
-    "historical_code_inventory": "docs/research/mathematical-inventory-code-only.md"
+    "historical_code_inventory": "docs/research/mathematical-inventory-code-only.md",
+    "p2_domain_weighting": "docs/artifacts/p2-domain-weighting/"
   },
   "pull_requests": [
     {
@@ -617,14 +618,16 @@
     "rendered_pdf": "paper/main.pdf",
     "compile": "pdflatex + bibtex + pdflatex + pdflatex",
     "pages": 12,
-    "scope": "Evidence-scoped technical paper; equations are integrated into the methodology subsections. Online coordinator-visible discovery is measured; adaptive rank is measured and reported as uncalibrated.",
-    "last_rendered": "2026-09-13T06:00:00Z"
+    "scope": "Equations integrated into methodology; capability-matched adaptive-rank parity shown on Fashion-MNIST; domain weighting remains a modest ranking improvement; privacy requires separate DP/attack evaluation.",
+    "last_rendered": "2026-09-13T06:30:00Z"
   },
   "validation": {
     "p3_discovery_targeted_remote": "30 passed",
     "p1_rank_selector_remote": "20 passed",
     "p1_full_battery": "complete_gate_failed",
     "p1_summary": "93.75% FLOP savings, rank 2 throughout, accuracy gate failed on CIFAR/Fashion/Tabular",
-    "p2_review_fixes": "PR #42 final head 1939c9c: 127 passed, 46 subtests passed on gpu003"
+    "p2_review_fixes": "PR #42 final head 1939c9c: 127 passed, 46 subtests passed on gpu003",
+    "p1_fashion_capability_matched": "gpu003: fixed [4,8,16] 82.85%; revised adaptive 82.85%; 10.0% FLOP savings; transient round-4 dip",
+    "p2_conservative_domain_weighting": "gpu003 sweep: Spearman 0.152->0.196; pairwise 0.520->0.547; weighted contribution 0.575943->0.577445"
   }
 }
