@@ -28,6 +28,79 @@ LoRA factors are not identifiable: $(BQ,Q^{-1}A)$ represents the same update as 
 Our contribution is deliberately scoped: a tested effective-update merge and Metropolis--Hastings gossip implementation; a reproducible CIFAR-100 benchmark; heterogeneous-rank, factor zero-padding, and error-feedback ablations; offline and online direction-aware discovery; an auditable adaptive-rank controller; and a real-data regeneration of the Project 2 calibration pipeline. Neighborhood-local discovery, calibrated rank adaptation, privacy guarantees, and broad multimodal generalization remain open.
 \section{Problem Formulation}
 Let clients $i\in\{1,\ldots,N\}$ communicate over an undirected graph $G$. Client $i$ owns private data from domain $d(i)$ and maintains a LoRA update $\dW_i$. Ranks $r_i$ may differ but must satisfy local resource ceilings. A symmetric doubly-stochastic mixing matrix $W$ preserves the network mean. We report personalized accuracy (each client on its held-out shard) and consensus accuracy (a reference-rank update on the union of test shards), plus worst-domain accuracy, the best-minus-worst domain gap, consensus distance, residual energy, and effective versus operational communication counts.
+The idealized objective is
+\begin{equation}
+ \min_{\{\dW_i\}} F=\frac1N\sum_{i=1}^N f_i(W_0+\dW_i)\quad\text{s.t.}\quad \operatorname{rank}(\dW_i)\le r_i,\; (i,j)\in E\text{ for every transmitted pair}.
+\end{equation}
+The reported personalized score is $A_{\rm pers}=N^{-1}\sum_i\operatorname{Acc}_i(\mathcal T_i)$; the consensus adapter is $\dW_{\rm con}=\mathcal C_R(N^{-1}\sum_i\dW_i)$ and the fairness gap is $\max_d A_d-\min_d A_d$.
+\section{Mathematical specification}
+This section collects the equations used by the three project lines and by the online extensions. For client $i$, let $n_i$ be its local sample count, $\ell_i$ its measured local loss, $q_i=(1+\ell_i)^{-1}$ its quality score, and $\lambda_i$ its domain-aware multiplier. Project 2 forms the normalized aggregation coefficient
+\begin{equation}
+ a_i=\frac{n_i q_i\lambda_i}{\sum_j n_j q_j\lambda_j},\qquad \sum_i a_i=1.
+\end{equation}
+Its fitted score is linear in standardized measurements, $s_i=\theta_0+\theta^\top x_i$, and the multiplier is computed within each task/round group $g$ as
+\begin{equation}
+ \lambda_i=\operatorname{renorm}_{[0.5,1.5],\,\mathrm{mean}=1}\!\left(\exp\!\left[\gamma\left(s_i-\overline{s}_{g}\right)\right]\right),
+ \qquad \overline{s}_{g}=|g|^{-1}\sum_{j\in g}s_j.
+\end{equation}
+The two calibrated Project 2 forms differ only in the components of $x_i$; the implementation uses ridge regression to fit $\theta$ and selects the ridge penalty by leave-one-task-out RMSE.
+
+The measured domain signals use class proportions $p_{ic}=n_{ic}/\sum_c n_{ic}$. Their entropy, normalized entropy, and imbalance are
+\begin{equation}
+ H_i=-\sum_{c:p_{ic}>0}p_{ic}\log p_{ic},\quad H_i^{\rm norm}=H_i/\log C,\quad B_i=\frac{\max_c n_{ic}}{\min_{c:n_{ic}>0}n_{ic}}\left(1+\frac{z_i}{C}\right),
+\end{equation}
+where $z_i$ counts absent classes; KL/JS divergence to the global class distribution and update-distance features are also recorded. The weighted-assignment variant uses
+\begin{equation}
+ u_i=\lambda_c C_i+\lambda_e E_i+\lambda_b B_i,\qquad \widetilde r_i=r_{\min}+\frac{u_i}{\sum_j u_j}\left(B_{\rm tot}-Nr_{\min}\right),
+\end{equation}
+then snaps to the allowed menu and greedily corrects to the total rank budget; if $\sum_j u_j=0$, the implementation uses uniform weights.
+For completeness, with global proportions $q_c$ and $m_c=(p_{ic}+q_c)/2$, the recorded divergences are
+\begin{equation}
+ \operatorname{KL}(p_i\|q)=\sum_c p_{ic}\log\frac{p_{ic}+\varepsilon}{q_c+\varepsilon},\qquad
+ \operatorname{JS}(p_i,q)=\tfrac12\operatorname{KL}(p_i\|m)+\tfrac12\operatorname{KL}(q\|m),
+\end{equation}
+and update distances are $d_{\cos}(u,\bar u)=1-u^\top\bar u/(\|u\|_2\|\bar u\|_2)$ and $d_2(u,\bar u)=\|u-\bar u\|_2$.
+
+For a LoRA adapter with factors $B_i\in\mathbb R^{d_o\times r_i}$ and $A_i\in\mathbb R^{r_i\times d_i}$, the communicated effective update is
+\begin{equation}
+ \dW_i=\frac{\alpha}{r_i}B_iA_i.
+\end{equation}
+The P3 runner and all heterogeneous-rank comparisons use this scaled effective update; the legacy Project 1 FedAvg path keeps its historical unscaled $B_iA_i$ aggregation and is reported separately.
+For a symmetric doubly-stochastic mixing matrix $W$, client $i$ receives
+\begin{equation}
+ Y_i^t=\sum_{j=1}^N W_{ij}^t\dW_j^t+m_i^t,
+ \qquad \overline{\dW}_i^t=\mathcal C_{r_i}(Y_i^t),
+\end{equation}
+where $m_i^t=0$ without error feedback. If $Y_i^t=U_i\Sigma_iV_i^\top$, the rank projection and stored factors are
+\begin{align}
+ \mathcal C_{r_i}(Y_i^t)&=U_{i,(:,1:r_i)}\Sigma_{i,1:r_i}V_{i,(:,1:r_i)}^\top,\\
+ B_i&=\frac{U_{i,(:,1:r_i)}\Sigma_{i,1:r_i}^{1/2}}{\sqrt{\alpha/r_i}},\qquad
+ A_i=\frac{\Sigma_{i,1:r_i}^{1/2}V_{i,(:,1:r_i)}^\top}{\sqrt{\alpha/r_i}},\\
+ m_i^{t+1}&=Y_i^t-\mathcal C_{r_i}(Y_i^t).
+\end{align}
+This is the Eckart--Young minimum-Frobenius-error rank-$r_i$ approximation and is invariant to factor gauge transformations.
+
+For an undirected graph with degree $d_i$, flat Metropolis--Hastings gossip uses
+\begin{equation}
+ W_{ij}=\frac{1}{1+\max(d_i,d_j)}\ \text{for }(i,j)\in E,\qquad W_{ii}=1-\sum_{j\ne i}W_{ij},
+\end{equation}
+with all other entries zero. The oracle two-tier schedule is the product $W^t=W_{\mathrm{intra}}^tW_{\mathrm{bridge}}^tW_{\mathrm{intra}}^t$ on bridge rounds and $W^t=W_{\mathrm{intra}}^t$ otherwise.
+
+Online discovery builds a compact direction signature from a fixed seeded projection $P\in\mathbb R^{64\times D}$:
+\begin{equation}
+ z_i^t=\frac{P\,\operatorname{vec}(\dW_i^t)}{\left\lVert P\,\operatorname{vec}(\dW_i^t)\right\rVert_2},\qquad h_i^t=\frac{\beta h_i^{t-1}+(1-\beta)z_i^t}{\left\lVert\beta h_i^{t-1}+(1-\beta)z_i^t\right\rVert_2}.
+\end{equation}
+The affinity is cosine similarity $A_{ij}=h_i^\top h_j$. On the selected topology, the nonnegative kernel and mixer are
+\begin{equation}
+ K_{ij}=\mathbf 1\{j\in\mathcal N(i)\cup\{i\}\}\exp\!\left(\frac{A_{ij}-A_{\max}}{\tau}\right),\quad W_0=\operatorname{Sinkhorn}(K),\quad W=w_{\min}I+(1-w_{\min})W_0.
+\end{equation}
+The unknown cluster count is chosen without labels as $\hat K=\arg\max_{k\in\{2,\ldots,\min(8,N-1)\}}\operatorname{Silhouette}(1-A,k)$; if all scores are non-positive, $\hat K=1$ and the soft mixer is retained. Labels and ARI/NMI appear only in evaluation.
+
+Finally, Project 1 estimates the stable rank of a probe gradient $G_i$ by
+\begin{equation}
+ s_i=\frac{\lVert G_i\rVert_F^2}{\lVert G_i\rVert_2^2},\qquad c_i=\frac{\operatorname{index}(b_i)}{M-1},\qquad r_i^{\star}=q_{\mathcal R_i}\!\left(\max\left\{r_{\min},\gamma c_iR_i^{\max},\min(s_i,R_i^{\max})\right\}\right),
+\end{equation}
+where $q_{\mathcal R_i}$ snaps to the allowed candidate menu. The stateful controller uses the demand $d_i^t=\operatorname{clip}(s_i^t[1+\omega\,\operatorname{clip}(\rho_i^t,0,1)],0,R_i^{\max})$ (with optional residual ratio $\rho_i^t$), smooths it as $\tilde d_i^t=\beta_r\tilde d_i^{t-1}+(1-\beta_r)d_i^t$, and changes rank only after the configured hysteresis margin and patience conditions are met.
 \section{Method}
 \subsection{Gauge-invariant aggregation}
 For neighbors $\mathcal N(i)$, client $i$ forms
