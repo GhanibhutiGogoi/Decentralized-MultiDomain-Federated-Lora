@@ -1,8 +1,10 @@
 # Project 2: Domain-Aware Allocation
 
 Project 2 extends the Project 1 federated LoRA runtime while keeping Project 2
-in its own redesigned repository structure. The current phase is infrastructure
-hardening before the final Experiment 1 and Experiment 2 rerun.
+in its own redesigned repository structure. The implementation and real-data
+regeneration are complete; artifacts include Experiment 1/2 outputs,
+checkpoint/resume support, strict provenance validation, and conservative
+domain weighting.
 
 Project 1 mathematical formulations, adaptive rank logic, lambda calibration,
 and aggregation code are not redefined here.
@@ -11,10 +13,10 @@ and aggregation code are not redefined here.
 
 - Experiment 1 runner exists at `experiment/experiment1/run.py`.
 - Experiment 2 runner exists at `experiment/experiment2/run.py`.
-- Existing outputs under `outputs/` are historical artifacts and should not be
-  regenerated until the Project 1 mathematical review is complete.
+- Real-data outputs and provenance manifests are recorded under
+  `docs/artifacts/p2-exp1-real-seed42/` and `docs/artifacts/p2-exp2-real-seed42/`.
 - Dataset loading is centralized in `framework/datasets/factory.py`.
-- Experiment 2 evaluation infrastructure is prepared in
+- Experiment 2 evaluation and reporting are implemented in
   `experiment/experiment2/evaluation.py`, `figures.py`, and `reporting.py`.
 
 ## Structure

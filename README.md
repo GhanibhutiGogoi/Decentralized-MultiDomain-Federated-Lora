@@ -6,13 +6,13 @@ The immediate benchmark uses real CIFAR-100, ImageNet-pretrained ResNet-18, and 
 
 ## Current status
 
-As of 12 September 2026, the new P3 benchmark, feature-cache checks and signature validation are implemented. The SSH GPU machine passed **379 P3 tests** and **100 P2 tests plus 46 subtests**. The full-data P3 battery (39 completed method/seed runs across uniform and heterogeneous contexts) and signature validation completed, as did the all-five-real-data P2 regeneration.
+As of 13 September 2026, the P3 benchmark, feature-cache checks, online discovery evaluation, P1 adaptive-rank controller, and P2 real-data regeneration are implemented. The merged main branch has reproducible artifacts for the full-data P3 battery, the revised P1 controller and conservative P2 weighting. Results that fail an accuracy or privacy objective are recorded as negative findings.
 
 | Folder | Purpose | Remaining scope |
 |---|---|---|
 | `project-1-adaptive-rank` | Select client adapter ranks | Rank-policy calibration remains unresolved |
 | `project-2-domain-aware-allocation` | Fit domain-aware aggregation weights | Real-data Experiment 1/2 complete; calibration remains exploratory |
-| `project-3-hierarchical-gossip` | Mix heterogeneous adapters without a central server | Benchmark and offline discovery artifacts complete; automatic discovery remains open |
+| `project-3-hierarchical-gossip` | Mix heterogeneous adapters without a central server | Benchmark, online coordinator-visible discovery, and evidence artifacts complete; neighborhood-local discovery is an unimplemented variant |
 
 The homogeneous schedule uses rank 16; the heterogeneous schedule repeats ranks 4, 12 and 32. Both have total rank 240 over 15 clients. Seeds are 42, 43 and 44, alpha is 32, and consensus evaluation uses reference rank 16. Fixed heterogeneous ranks do not establish that an adaptive rank policy works. Known-domain hierarchy does not establish automatic domain discovery.
 
@@ -24,7 +24,7 @@ The feature cache contains all 50,000 official CIFAR-100 training images and 10,
 
 Start with the [machine-readable Claude handoff](docs/artifacts/claude_handoff.json), [metric and artifact guide](docs/artifacts/README.md), and [append-only progress log](docs/artifacts/progress.jsonl). They distinguish completed evidence from smoke tests and historical results. [PR #42](https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/42) contains the P2 projection and real-data runtime fixes; the P3 completion PR contains the benchmark, signatures and evidence bundle.
 
-The old P3 experiments 01–03 preserve their historical two-round protocol and should not be mixed into new benchmark curves. Existing P2 lambda tables are stale until the real-data regeneration completes. The convergence analysis is in [the research note](docs/research/2026-09-03-project3-convergence-analysis.md), with its assumptions and separate error-feedback/default bounds stated explicitly.
+The old P3 experiments 01–03 preserve their historical two-round protocol and should not be mixed into new benchmark curves. The completed real-data P2 regeneration and conservative weighting artifacts are documented separately. The convergence analysis is in [the research note](docs/research/2026-09-03-project3-convergence-analysis.md), with its assumptions and separate error-feedback/default bounds stated explicitly.
 
 ## Results table
 
@@ -36,4 +36,4 @@ The aggregate report keeps uniform and heterogeneous protocols separate and repo
 | Heterogeneous ranks 4/12/32, ΔW | Local / FedAvg / MH / oracle | 42, 43, 44 | 53.60±0.62% / 5.74±0.71% / 28.45±2.42% / 44.07±0.70% | 14.50±0.80% / 5.73±0.59% / 6.83±0.45% / 11.47±1.13% | report in `docs/artifacts/p3-completion-report` | complete |
 | Heterogeneous ranks 4/12/32, factor zero-pad | FedAvg / MH / oracle | 42, 43, 44 | 4.71±0.22% / 20.63±4.40% / 31.24±1.27% | 5.35±0.37% / 7.75±1.64% / 8.13±1.10% | factor payload comparison in report | complete |
 | Heterogeneous ranks 4/12/32, ΔW + feedback | MH / oracle | 42, 43, 44 | 26.63±1.68% / 41.28±0.71% | 10.62±1.33% / 9.45±1.40% | feedback residuals in report | complete |
-| Signature validation stages 2/5/10/20 | Local, MH; spectral/row-norm/inverse-L2 | 42, 43, 44 | n/a | n/a | stage-10 mean ARI ≤0.274; see `docs/artifacts/p3-signatures` | complete; discovery gate remains open |
+| Signature validation stages 2/5/10/20 | Local, MH; spectral/row-norm/inverse-L2 | 42, 43, 44 | n/a | n/a | historical offline stage-10 mean ARI ≤0.274; see `docs/artifacts/p3-signatures` | offline diagnostic complete; online coordinator-visible discovery separately complete |

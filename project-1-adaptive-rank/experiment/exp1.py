@@ -529,6 +529,7 @@ def main():
         print(f"\n{'=' * 60}\n  EXPERIMENT: {name}\n{'=' * 60}")
         results[name] = {
             "fixed": run_fixed_rank(name, model_fn, trainset, testloader),
+            "matched": run_capability_matched_rank(name, model_fn, trainset, testloader),
             "adaptive": run_adaptive_rank(name, model_fn, trainset, testloader),
         }
 

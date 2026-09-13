@@ -1,5 +1,7 @@
 # Adaptive Heterogeneous LoRA for Cross-Domain Federated Learning: Complete Deep-Dive Guide
 
+> **Status note (September 2026):** This document is the original proposal and architecture plan. Its projected accuracy, communication, LLM, and privacy claims were not measured by the current repository. For implemented code, experiments, and evidence, use `docs/artifacts/claude_handoff.json`, `docs/artifacts/README.md`, and the merged `main` branch.
+
 **Author:** Manus AI  
 **Date:** December 27, 2025  
 **Target Timeline:** 12 months  

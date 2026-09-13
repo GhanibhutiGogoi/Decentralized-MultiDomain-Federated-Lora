@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-09-13T12:00:00Z",
+  "updated_at": "2026-09-13T16:30:00Z",
   "status": "complete_implementation_and_evidence_with_negative_research_outcomes",
   "project": {
     "name": "AH-LoRA",
@@ -9,7 +9,7 @@
     "source_baseline": {
       "commit": "8c22e76f5c2313abcfd6ddeb1313a04eb26834c4",
       "branch": "main",
-      "note": "Starting snapshot for the completion work. PRs #42 (bd9f321) and #43 (f0109b9) are merged; latest handoff update is 775e986. Use each experiment manifest for the exact code actually run."
+      "note": "Current merged main contains PRs #41, #42 and #43 plus the revised adaptive-rank and domain-weighting iterations."
     }
   },
   "scope": {
@@ -770,7 +770,8 @@
     "p1_fashion_capability_matched": "gpu003: fixed [4,8,16] 82.85%; revised adaptive 82.85%; 10.0% FLOP savings; transient round-4 dip",
     "p2_conservative_domain_weighting": "gpu003 sweep: Spearman 0.152->0.196; pairwise 0.520->0.547; weighted contribution 0.575943->0.577445",
     "p1_p2_regression_remote": "gpu003: adaptive-rank and domain-weighting regression tests, 27 passed",
-    "required_test_machine": "gpu003; local tests do not replace SSH validation"
+    "required_test_machine": "gpu003; local tests do not replace SSH validation",
+    "p3_final_main_audit": "gpu003: 382 passed in 12.10s"
   },
   "scientific_conclusion": {
     "as_of": "2026-09-13",
