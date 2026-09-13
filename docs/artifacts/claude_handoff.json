@@ -593,5 +593,10 @@
     "compile": "pdflatex + bibtex + pdflatex + pdflatex",
     "pages": 5,
     "scope": "Evidence-scoped technical paper; oracle hierarchy and unresolved discovery/adaptive-rank limitations are explicit."
+  },
+  "validation": {
+    "p3_discovery_targeted_remote": "30 passed",
+    "p1_rank_selector_remote": "20 passed",
+    "p1_full_battery": "running_on_gpu003"
   }
 }
