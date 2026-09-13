@@ -93,9 +93,6 @@ class AdaptiveRankController:
             self.rank = self.max_rank
         else:
             self.rank = int(initial_rank) if initial_rank in self.candidates else self.candidates[0]
-        if initial_rank == "max":
-            self.rank = self.max_rank
-        else:
             self.rank = max(self.rank, self.min_rank)
         self.ema_demand = None
         self._direction = 0
