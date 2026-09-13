@@ -43,7 +43,12 @@ Its fitted score is linear in standardized measurements, $s_i=\theta_0+\theta^\t
  \lambda_i=\operatorname{renorm}_{[0.5,1.5],\,\mathrm{mean}=1}\!\left(\exp\!\left[\gamma\left(s_i-\overline{s}_{g}\right)\right]\right),
  \qquad \overline{s}_{g}=|g|^{-1}\sum_{j\in g}s_j.
 \end{equation}
-The two calibrated Project 2 forms differ only in the components of $x_i$; the implementation uses ridge regression to fit $\theta$ and selects the ridge penalty by leave-one-task-out RMSE.
+The two calibrated Project 2 forms differ only in the components of $x_i$. For the standardized form, the fitted coefficients solve the ridge objective
+\begin{equation}
+ \widehat\theta_{\alpha}=\arg\min_{\theta}\left\{\lVert X\theta-y\rVert_2^2+\alpha\lVert\theta\rVert_2^2\right\},\qquad
+ \widehat\theta_{\alpha}=(X^\top X+\alpha I)^{-1}X^\top y,
+\end{equation}
+and the implementation selects $\alpha$ by leave-one-task-out RMSE.
 
 The measured domain signals use class proportions $p_{ic}=n_{ic}/\sum_c n_{ic}$. Their entropy, normalized entropy, and imbalance are
 \begin{equation}
@@ -85,6 +90,11 @@ For an undirected graph with degree $d_i$, flat Metropolis--Hastings gossip uses
  W_{ij}=\frac{1}{1+\max(d_i,d_j)}\ \text{for }(i,j)\in E,\qquad W_{ii}=1-\sum_{j\ne i}W_{ij},
 \end{equation}
 with all other entries zero. The oracle two-tier schedule is the product $W^t=W_{\mathrm{intra}}^tW_{\mathrm{bridge}}^tW_{\mathrm{intra}}^t$ on bridge rounds and $W^t=W_{\mathrm{intra}}^t$ otherwise.
+
+If source $j$ has rank $r_j$ and layer dimensions $(d_o,d_i)$, its transmitted factor payload is $S_j=\sum_\ell r_j(d_{o,\ell}+d_{i,\ell})$ floats. For mixer support $E_t=\{(i,j):i\ne j,\,W^t_{ij}>0\}$, the runner reports the effective communication count
+\begin{equation}
+ F_t=\sum_{(i,j)\in E_t}S_j.
+\end{equation}
 
 Online discovery builds a compact direction signature from a fixed seeded projection $P\in\mathbb R^{64\times D}$:
 \begin{equation}
