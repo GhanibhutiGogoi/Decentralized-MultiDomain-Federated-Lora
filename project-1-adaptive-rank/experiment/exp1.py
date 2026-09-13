@@ -119,6 +119,37 @@ def run_fixed_rank(name, model_fn, trainset, testloader, rank=FIXED_RANK):
     return acc_curve, acc_curve[-1], flops_hist
 
 
+def run_capability_matched_rank(name, model_fn, trainset, testloader):
+    """Run a fixed-rank reference at each client's feasible ceiling.
+
+    The original r=32 reference is useful as a compute upper bound but exceeds
+    the advertised client capabilities.  This reference isolates the effect
+    of adaptation from that hardware mismatch while retaining the same global
+    aggregation target and training schedule.
+    """
+    print(f"\n  [MATCHED] {name} ranks={[BATCH_TO_MAX_RANK[b] for b in CLIENT_BATCH_SIZES]}")
+    loss_fn = nn.CrossEntropyLoss()
+    loaders = make_loaders(trainset)
+    global_state = model_fn(FIXED_RANK).to(DEVICE).state_dict()
+    acc_curve, flops_hist = [], []
+    for rnd in range(NUM_ROUNDS):
+        weights, samples, quality_scores, round_flops = [], [], [], []
+        for i, loader in enumerate(loaders):
+            rank = BATCH_TO_MAX_RANK[CLIENT_BATCH_SIZES[i]]
+            local = model_fn(rank).to(DEVICE)
+            load_global_state(local, global_state)
+            round_flops.append(compute_round_flops(local, loader, rank, CLIENT_EPOCHS))
+            state, sample_count = train_client(local, loader, CLIENT_EPOCHS, DEVICE)
+            quality = compute_quality_score(local, loader, loss_fn, DEVICE)
+            weights.append(state); samples.append(sample_count); quality_scores.append(quality)
+        flops_hist.append(round_flops)
+        ref_sd = model_fn(FIXED_RANK).to(DEVICE).state_dict()
+        global_state = fedavg_quality_weighted(weights, samples, quality_scores, FIXED_RANK, ref_sd, DEVICE)
+        eval_model = model_fn(FIXED_RANK).to(DEVICE)
+        load_global_state(eval_model, global_state)
+        acc_curve.append(evaluate(eval_model, testloader, DEVICE))
+    return acc_curve, acc_curve[-1], flops_hist
+
 def run_adaptive_rank(name, model_fn, trainset, testloader):
     print(f"\n  [ADAPTIVE] {name}")
     loss_fn = nn.CrossEntropyLoss()
@@ -126,7 +157,18 @@ def run_adaptive_rank(name, model_fn, trainset, testloader):
     global_state = model_fn(FIXED_RANK).to(DEVICE).state_dict()
 
     acc_curve, flops_hist, rank_hist, diagnostics_hist = [], [], [], []
-    controllers = {i: AdaptiveRankController(CLIENT_BATCH_SIZES[i]) for i in range(NUM_CLIENTS)}
+    controllers = {
+        i: AdaptiveRankController(
+            CLIENT_BATCH_SIZES[i],
+            initial_rank="max",
+            warmup_rounds=2,
+            # Keep at least half of the feasible capability until the local
+            # quality signal confirms that a reduction is safe.
+            min_rank=max(2, int(np.ceil(0.5 * BATCH_TO_MAX_RANK[CLIENT_BATCH_SIZES[i]]))),
+            quality_drop_tolerance=0.05,
+        )
+        for i in range(NUM_CLIENTS)
+    }
 
     for rnd in range(NUM_ROUNDS):
         weights, samples, quality_scores = [], [], []
@@ -150,6 +192,7 @@ def run_adaptive_rank(name, model_fn, trainset, testloader):
 
             state, sample_count = train_client(local, loader, CLIENT_EPOCHS, DEVICE)
             quality = compute_quality_score(local, loader, loss_fn, DEVICE)
+            controllers[i].observe_quality(quality)
             weights.append(state)
             samples.append(sample_count)
             quality_scores.append(quality)

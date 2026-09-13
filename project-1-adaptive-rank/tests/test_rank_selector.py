@@ -1,6 +1,7 @@
 """Regression tests for the capability-aware rank equation (audit defect D1)."""
 
 import pytest
+import numpy as np
 
 from config import ALL_CANDIDATE_RANKS, BATCH_TO_MAX_RANK
 from rank_allocation.rank_selector import (
@@ -154,3 +155,25 @@ def test_shipped_gamma_allocation_is_still_capability_dominated():
     # their hardware ceilings of 4 and 8 -- so their headroom is small.
     assert rank_equation(1.1, 16) == 2 and rank_equation(4.2, 16) == 4
     assert rank_equation(1.1, 64) == 2 and rank_equation(4.2, 64) == 4
+
+
+def test_conservative_controller_warmup_starts_at_capability_ceiling():
+    c = AdaptiveRankController(256, initial_rank="max", warmup_rounds=2,
+                               ema_decay=0.0, patience=1)
+    assert c.update(1.0) == c.max_rank
+    assert c.update(1.0) == c.max_rank
+
+
+def test_quality_guard_restores_ceiling_after_drop():
+    c = AdaptiveRankController(256, initial_rank=8, warmup_rounds=0,
+                               ema_decay=0.0, patience=1, down_margin=0.0)
+    c.observe_quality(1.0)
+    c.update(1.0)
+    c.observe_quality(0.8)
+    assert c.update(1.0) == c.max_rank
+
+
+def test_default_min_rank_is_half_capability_floor():
+    for batch_size, max_rank in BATCH_TO_MAX_RANK.items():
+        c = AdaptiveRankController(batch_size, initial_rank="max")
+        assert c.min_rank >= max(ALL_CANDIDATE_RANKS[0], int(np.ceil(0.5 * max_rank)))

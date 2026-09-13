@@ -62,7 +62,8 @@ class AdaptiveRankController:
 
     def __init__(self, batch_size, initial_rank=None, candidates=None, gamma=GAMMA,
                  ema_decay=0.7, up_margin=0.10, down_margin=0.15, patience=2,
-                 residual_weight=0.5):
+                 residual_weight=0.5, warmup_rounds=0, min_rank=None,
+                 quality_drop_tolerance=0.05):
         self.batch_size = batch_size
         capability_max = BATCH_TO_MAX_RANK.get(batch_size, min(ALL_CANDIDATE_RANKS))
         # An explicit menu can narrow the choices but may not bypass the
@@ -77,7 +78,25 @@ class AdaptiveRankController:
         self.down_margin = float(down_margin)
         self.patience = max(1, int(patience))
         self.residual_weight = float(residual_weight)
-        self.rank = int(initial_rank) if initial_rank in self.candidates else self.candidates[0]
+        self.warmup_rounds = max(0, int(warmup_rounds))
+        self.rounds_seen = 0
+        if min_rank is None:
+            # Generic controller instances retain the historical menu floor;
+            # experiment drivers can opt into a conservative capability floor.
+            min_rank = (max(self.candidates[0], int(math.ceil(0.5 * capability_max)))
+                        if initial_rank == "max" else self.candidates[0])
+        self.min_rank = _ceil_candidate(float(min_rank), self.candidates)
+        self.quality_drop_tolerance = max(0.0, float(quality_drop_tolerance))
+        self.quality_ema = None
+        self._quality_alarm = False
+        if initial_rank == "max":
+            self.rank = self.max_rank
+        else:
+            self.rank = int(initial_rank) if initial_rank in self.candidates else self.candidates[0]
+        if initial_rank == "max":
+            self.rank = self.max_rank
+        else:
+            self.rank = max(self.rank, self.min_rank)
         self.ema_demand = None
         self._direction = 0
         self._streak = 0
@@ -91,6 +110,23 @@ class AdaptiveRankController:
         self.last_direction = 0
         self.last_changed = False
 
+    def observe_quality(self, quality):
+        """Record post-training quality for a conservative next-round guard.
+
+        A sudden quality drop after a rank decrease arms an increase to the
+        capability ceiling on the next update.  The guard is deliberately
+        relative, since absolute losses differ substantially by task.
+        """
+        try:
+            q = float(quality)
+        except (TypeError, ValueError):
+            return
+        if not math.isfinite(q) or q <= 0:
+            return
+        if self.quality_ema is not None and q < self.quality_ema * (1.0 - self.quality_drop_tolerance):
+            self._quality_alarm = True
+        self.quality_ema = q if self.quality_ema is None else 0.8 * self.quality_ema + 0.2 * q
+
     @property
     def max_rank(self):
         return self.candidates[-1]
@@ -103,6 +139,7 @@ class AdaptiveRankController:
             demand = 0.0
         if not math.isfinite(demand):
             demand = 0.0
+        self.rounds_seen += 1
         self.last_stable_rank = demand
         self.last_residual_ratio = None
         if residual_ratio is not None:
@@ -119,6 +156,17 @@ class AdaptiveRankController:
             self.ema_decay * self.ema_demand + (1.0 - self.ema_decay) * demand
         )
         target = rank_equation(self.ema_demand, self.batch_size, gamma=self.gamma)
+        force_restore = self.rounds_seen <= self.warmup_rounds or self._quality_alarm
+        if force_restore:
+            # Begin from the richest feasible adapter so the global model can
+            # establish a useful update.  If quality regresses after a
+            # reduction, restore the ceiling before considering reductions.
+            target = self.max_rank
+            self._quality_alarm = False
+            if self.rank < self.max_rank:
+                self.rank = self.max_rank
+                self._direction, self._streak = 0, 0
+                self.last_changed = True
         # Restrict to an explicitly supplied menu as well as the global menu.
         target = _nearest_candidate(target, self.candidates)
         self.last_target_rank = target
@@ -136,6 +184,8 @@ class AdaptiveRankController:
         if self._streak >= self.patience:
             idx = self.candidates.index(self.rank) + direction
             idx = min(max(idx, 0), len(self.candidates) - 1)
+            if self.candidates[idx] < self.min_rank:
+                idx = self.candidates.index(self.min_rank)
             old_rank = self.rank
             self.rank = self.candidates[idx]
             self.last_changed = self.rank != old_rank
@@ -160,11 +210,22 @@ class AdaptiveRankController:
             "changed": bool(self.last_changed),
             "max_rank": int(self.max_rank),
             "gamma": float(self.gamma),
+            "warmup_rounds": int(self.warmup_rounds),
+            "rounds_seen": int(self.rounds_seen),
+            "min_rank": int(self.min_rank),
+            "quality_ema": None if self.quality_ema is None else float(self.quality_ema),
+            "quality_alarm": bool(self._quality_alarm),
         }
 
 
 def _nearest_candidate(rank, candidates):
     return min(candidates, key=lambda r: (abs(r - rank), r))
+
+
+def _ceil_candidate(rank, candidates):
+    """Choose the smallest menu entry greater than or equal to ``rank``."""
+    above = [r for r in candidates if r >= rank]
+    return min(above) if above else max(candidates)
 
 
 def capability_fraction(batch_size):
