@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
 
 import numpy as np
 import pandas as pd
@@ -119,7 +120,12 @@ def run_statistical_analysis(measurements: pd.DataFrame, output_dir: Path):
 
     corr_df = pd.DataFrame(rows)
     reg_df = pd.DataFrame(reg_rows)
-    corr_df.to_csv(output_dir / "signal_contribution_correlations.csv", index=False)
-    reg_df.to_csv(output_dir / "controlled_regression.csv", index=False)
+    for frame, filename in (
+        (corr_df, "signal_contribution_correlations.csv"),
+        (reg_df, "controlled_regression.csv"),
+    ):
+        path = output_dir / filename
+        temporary = path.with_suffix(".csv.tmp")
+        frame.to_csv(temporary, index=False)
+        os.replace(temporary, path)
     return corr_df, reg_df
-

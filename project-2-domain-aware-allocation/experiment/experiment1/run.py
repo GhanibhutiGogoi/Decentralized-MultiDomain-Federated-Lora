@@ -8,8 +8,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
+import hashlib
+import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -93,6 +97,164 @@ TASK_ORDER = [
     "Tabular-MLP",
     "Audio-1DCNN",
 ]
+CHECKPOINT_SCHEMA_VERSION = 1
+MEASUREMENT_NUMERIC_FIELDS = {
+    "round", "client_id", "partition_alpha", "partition_seed", "hardware_batch_size",
+    "train_samples_seen", "partition_samples", "adaptive_rank", "local_loss", "quality_score",
+    "entropy", "normalized_entropy", "class_imbalance_ratio", "kl_to_global", "js_to_global",
+    "zero_class_count", "update_cosine_distance_to_mean", "update_l2_distance_to_mean",
+    "update_norm", "full_accuracy", "loo_accuracy", "delta_accuracy",
+}
+
+
+def _json_safe(value):
+    """Convert experiment values to strict JSON-compatible primitives."""
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, (np.integer,)):
+        return int(value)
+    if isinstance(value, (np.floating,)):
+        return float(value)
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, Path):
+        return str(value)
+    return value
+
+
+def _stable_dataset_provenance(manifest: dict) -> dict:
+    volatile = {"generated_at_utc", "cache_status", "download_status"}
+    datasets = manifest.get("datasets", {}) if isinstance(manifest, dict) else {}
+    return {
+        task: {key: value for key, value in record.items() if key not in volatile}
+        for task, record in datasets.items()
+    }
+
+
+def _atomic_json_write(path: Path, payload: dict) -> None:
+    """Atomically persist JSON so interruption cannot leave a partial file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        json.dump(_json_safe(payload), handle, indent=2, allow_nan=False)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, path)
+
+
+def _atomic_dataframe_to_csv(frame: pd.DataFrame, path: Path) -> None:
+    """Atomically replace a CSV artifact after successful serialization."""
+    temporary = path.with_name(path.name + ".tmp")
+    frame.to_csv(temporary, index=False)
+    os.replace(temporary, path)
+
+
+def _source_revision() -> dict:
+    """Capture source identity used to reject incompatible resumes."""
+    try:
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=PROJECT2_ROOT, text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        commit = "unknown"
+    hasher = hashlib.sha256()
+    repo_root = PROJECT2_ROOT.parent
+    source_roots = [PROJECT2_ROOT / "experiment", PROJECT2_ROOT / "framework", repo_root / "project-1-adaptive-rank"]
+    files = sorted(path for root in source_roots if root.exists() for path in root.rglob("*.py"))
+    for path in files:
+        hasher.update(str(path.relative_to(repo_root)).encode())
+        hasher.update(path.read_bytes())
+    return {"git_commit": commit, "runtime_sources_sha256": hasher.hexdigest()}
+
+
+def _load_checkpoint(path: Path) -> dict:
+    if not path.exists():
+        raise ValueError(f"Checkpoint not found: {path}")
+    try:
+        payload = json.loads(
+            path.read_text(encoding="utf-8"),
+            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"nonfinite JSON constant {value}")),
+        )
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Malformed checkpoint {path}: {exc}") from exc
+    if not isinstance(payload, dict) or payload.get("schema_version") != CHECKPOINT_SCHEMA_VERSION:
+        raise ValueError("Unsupported or malformed Experiment 1 checkpoint schema")
+    if payload.get("status") not in {"running", "completed"}:
+        raise ValueError("Checkpoint status must be running or completed")
+    if not isinstance(payload.get("completed_tasks"), list) or not isinstance(payload.get("task_results"), list):
+        raise ValueError("Checkpoint is missing completed_tasks/task_results")
+    return payload
+
+
+def _validate_checkpoint_identity(checkpoint: dict, *, task_names, args, partition_config):
+    expected = {
+        "tasks": list(task_names),
+        "num_rounds": int(args.num_rounds),
+        "seed": int(args.seed),
+        "partition": _json_safe(partition_config.__dict__),
+        "data_root": str(Path(args.data_root).resolve()),
+        "synthetic_datasets": sorted(args.synthetic_datasets),
+        "download_datasets": bool(args.download_datasets),
+        "task_seed_policy": "seed + task index",
+    }
+    for key, value in expected.items():
+        if checkpoint.get(key) != value:
+            raise ValueError(
+                f"Checkpoint incompatible for {key}: stored={checkpoint.get(key)!r}, expected={value!r}"
+            )
+    completed = checkpoint["completed_tasks"]
+    if completed != list(task_names)[:len(completed)]:
+        raise ValueError("Checkpoint completed tasks must be an ordered prefix of the requested tasks")
+    if len(checkpoint["task_results"]) != len(completed):
+        raise ValueError("Checkpoint task result count does not match completed tasks")
+    for task, result in zip(completed, checkpoint["task_results"]):
+        required_types = {
+            "task": str,
+            "is_synthetic": bool,
+            "label_records": list,
+            "label_payload": dict,
+            "round_rows": list,
+            "accuracy_curve": list,
+        }
+        if not isinstance(result, dict) or any(
+            not isinstance(result.get(key), value_type) for key, value_type in required_types.items()
+        ):
+            raise ValueError(f"Checkpoint has incomplete result data for {task}")
+        if result["task"] != task or len(result["accuracy_curve"]) != args.num_rounds:
+            raise ValueError(f"Checkpoint has incomplete rounds or incorrect task identity for {task}")
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+               for value in result["accuracy_curve"]):
+            raise ValueError(f"Checkpoint has invalid accuracy values for {task}")
+        rows = result["round_rows"]
+        expected_rows = args.num_rounds * NUM_CLIENTS
+        if len(rows) != expected_rows:
+            raise ValueError(f"Checkpoint has incomplete client-round rows for {task}")
+        seen = {(row.get("round"), row.get("client_id")) for row in rows if isinstance(row, dict)}
+        expected = {(round_id, client_id) for round_id in range(1, args.num_rounds + 1) for client_id in range(NUM_CLIENTS)}
+        if seen != expected:
+            raise ValueError(f"Checkpoint client-round rows are malformed for {task}")
+        for row in rows:
+            if row.get("task") != task or row.get("is_synthetic") is not result["is_synthetic"]:
+                raise ValueError(f"Checkpoint measurement identity differs for {task}")
+            if row.get("partition_strategy") != partition_config.strategy:
+                raise ValueError(f"Checkpoint measurement partition differs for {task}")
+            if any(isinstance(row.get(key), bool) or not isinstance(row.get(key), (int, float))
+                   or not math.isfinite(row[key]) for key in MEASUREMENT_NUMERIC_FIELDS):
+                raise ValueError(f"Checkpoint has incomplete or nonfinite measurements for {task}")
+        labels = result["label_records"]
+        if len(labels) != NUM_CLIENTS or any(not isinstance(row, dict) for row in labels):
+            raise ValueError(f"Checkpoint label records are incomplete for {task}")
+        if {row.get("client_id") for row in labels} != set(range(NUM_CLIENTS)) or any(row.get("task") != task for row in labels):
+            raise ValueError(f"Checkpoint label identities differ for {task}")
+        payload = result["label_payload"]
+        if payload.get("task") != task or any(not isinstance(payload.get(key), list) for key in
+                ("global_class_counts", "global_class_frequency", "client_class_counts", "client_class_frequency")):
+            raise ValueError(f"Checkpoint label payload is incomplete for {task}")
+    if checkpoint["status"] == "completed" and completed != list(task_names):
+        raise ValueError("Completed checkpoint does not contain every requested task")
 
 
 def _is_synthetic(dataset) -> bool:
@@ -399,7 +561,7 @@ def save_accuracy_curves(task_results, output_dir: Path):
                 }
             )
     df = pd.DataFrame(rows)
-    df.to_csv(output_dir / "accuracy_curves.csv", index=False)
+    _atomic_dataframe_to_csv(df, output_dir / "accuracy_curves.csv")
     return df
 
 
@@ -435,6 +597,17 @@ def parse_args():
         ),
     )
     parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from checkpoint.json in --output-dir.",
+    )
+    parser.add_argument(
+        "--resume-from",
+        type=Path,
+        default=None,
+        help="Resume from an explicit Experiment 1 output directory or checkpoint.json.",
+    )
+    parser.add_argument(
         "--data-root",
         type=Path,
         default=DEFAULT_DATA_ROOT,
@@ -461,6 +634,22 @@ def main():
     args = parse_args()
     os.chdir(PROJECT2_ROOT)
 
+    if (args.resume or args.resume_from is not None) and args.overwrite:
+        raise ValueError("Resume cannot be combined with --overwrite")
+    resume_path = args.resume_from
+    if args.resume and resume_path is None:
+        resume_path = args.output_dir
+    if resume_path is not None:
+        resume_path = Path(resume_path)
+        if resume_path.name == "checkpoint.json":
+            resume_checkpoint_path = resume_path
+            args.output_dir = resume_path.parent
+        else:
+            args.output_dir = resume_path
+            resume_checkpoint_path = resume_path / "checkpoint.json"
+    else:
+        resume_checkpoint_path = None
+
     ensure_disjoint_directory(
         args.output_dir,
         EXPERIMENT2_OUTPUT_DIR,
@@ -473,15 +662,20 @@ def main():
         output_label="Experiment 1 output directory",
         protected_label="shared Project 2 outputs directory",
     )
-    output_dir = prepare_output_directory(
-        args.output_dir,
-        overwrite=args.overwrite,
-        experiment_name="Experiment 1",
-        allowed_cleanup_root=OUTPUT_DIR,
-        repository_root=PROJECT2_ROOT.parent,
-        project_root=PROJECT2_ROOT,
-        shared_outputs_root=OUTPUT_ROOT,
-    )
+    if resume_checkpoint_path is None:
+        output_dir = prepare_output_directory(
+            args.output_dir,
+            overwrite=args.overwrite,
+            experiment_name="Experiment 1",
+            allowed_cleanup_root=OUTPUT_DIR,
+            repository_root=PROJECT2_ROOT.parent,
+            project_root=PROJECT2_ROOT,
+            shared_outputs_root=OUTPUT_ROOT,
+        )
+    else:
+        output_dir = args.output_dir
+        if not output_dir.is_dir():
+            raise ValueError(f"Resume output directory does not exist: {output_dir}")
     set_reproducibility_seed(args.seed)
 
     partition_config = PartitionConfig(
@@ -497,6 +691,17 @@ def main():
     print(f"Output directory: {output_dir}")
 
     task_names = args.tasks if args.tasks else TASK_ORDER
+    checkpoint = None
+    if resume_checkpoint_path is not None:
+        checkpoint = _load_checkpoint(resume_checkpoint_path)
+        _validate_checkpoint_identity(
+            checkpoint,
+            task_names=task_names,
+            args=args,
+            partition_config=partition_config,
+        )
+        if checkpoint.get("source_revision") != _source_revision():
+            raise ValueError("Checkpoint source revision differs from current code; refusing resume")
     _record_progress(
         output_dir,
         "run_started",
@@ -513,18 +718,58 @@ def main():
         pin_memory=args.pin_memory,
         synthetic_datasets=set(args.synthetic_datasets),
     )
-    dataset_manifest = write_dataset_manifest(
-        output_dir=output_dir,
-        experiment_name="Experiment 1",
-        bundles=dataset_bundles,
-    )
+    # Build the candidate manifest outside the output directory so a rejected
+    # resume cannot overwrite the provenance of the original run.
+    with tempfile.TemporaryDirectory(prefix="p2-exp1-manifest-") as staging_dir:
+        dataset_manifest = write_dataset_manifest(
+            output_dir=Path(staging_dir),
+            experiment_name="Experiment 1",
+            bundles=dataset_bundles,
+        )
 
-    task_results = []
+    identity = {
+        "schema_version": CHECKPOINT_SCHEMA_VERSION,
+        "status": "running",
+        "tasks": list(task_names),
+        "num_rounds": int(args.num_rounds),
+        "seed": int(args.seed),
+        "partition": _json_safe(partition_config.__dict__),
+        "data_root": str(Path(args.data_root).resolve()),
+        "synthetic_datasets": sorted(args.synthetic_datasets),
+        "download_datasets": bool(args.download_datasets),
+        "task_seed_policy": "seed + task index",
+        "dataset_manifest": _json_safe(dataset_manifest),
+        "dataset_provenance": _stable_dataset_provenance(dataset_manifest),
+        "source_revision": _source_revision(),
+        "completed_tasks": [],
+        "task_results": [],
+    }
+    if checkpoint is not None:
+        if checkpoint.get("dataset_provenance") != identity["dataset_provenance"]:
+            raise ValueError("Checkpoint dataset provenance differs from current datasets; refusing resume")
+        identity = checkpoint
+    else:
+        _atomic_json_write(output_dir / "checkpoint.json", identity)
+    _atomic_json_write(output_dir / "dataset_manifest.json", identity["dataset_manifest"])
+
+    task_results = list(identity.get("task_results", []))
     label_records_all = []
     label_payloads = {}
     measurement_rows = []
 
-    for task_name, model_fn, trainset, testloader in experiments:
+    for prior in task_results:
+        label_records_all.extend(prior.get("label_records", []))
+        label_payloads[prior["task"]] = prior.get("label_payload", {})
+        measurement_rows.extend(prior.get("round_rows", []))
+    completed_tasks = set(identity.get("completed_tasks", []))
+
+    for task_index, (task_name, model_fn, trainset, testloader) in enumerate(experiments):
+        if task_name in completed_tasks:
+            print(f"  Resuming: skipping completed task {task_name}")
+            continue
+        # Task-local seeding makes an interrupted task repeat independently of
+        # how many earlier tasks were skipped during a resume.
+        set_reproducibility_seed(args.seed + task_index)
         result = run_task(
             task_name=task_name,
             model_fn=model_fn,
@@ -538,11 +783,19 @@ def main():
         label_records_all.extend(result["label_records"])
         label_payloads[task_name] = result["label_payload"]
         measurement_rows.extend(result["round_rows"])
-        # These cumulative files contain completed tasks only. The final
-        # manifest and run_completed event distinguish a finished experiment.
+        identity.update(
+            {
+                "completed_tasks": [result_item["task"] for result_item in task_results],
+                "task_results": _json_safe(task_results),
+            }
+        )
+        _atomic_json_write(output_dir / "checkpoint.json", identity)
+        # Checkpoint first: derived output failures must not lose completed work.
         save_label_distribution_outputs(label_records_all, label_payloads, output_dir)
-        pd.DataFrame(measurement_rows).to_csv(
-            output_dir / "per_round_client_measurements.csv", index=False)
+        _atomic_dataframe_to_csv(
+            pd.DataFrame(measurement_rows),
+            output_dir / "per_round_client_measurements.csv",
+        )
         save_accuracy_curves(task_results, output_dir)
 
     label_df = save_label_distribution_outputs(
@@ -551,7 +804,7 @@ def main():
         output_dir,
     )
     measurements = pd.DataFrame(measurement_rows)
-    measurements.to_csv(output_dir / "per_round_client_measurements.csv", index=False)
+    _atomic_dataframe_to_csv(measurements, output_dir / "per_round_client_measurements.csv")
     save_accuracy_curves(task_results, output_dir)
     corr_df, reg_df = run_statistical_analysis(measurements, output_dir)
     plot_signal_vs_contribution(measurements, output_dir / "figures")
@@ -583,9 +836,12 @@ def main():
             "progress_jsonl": "progress.jsonl",
         },
     }
-    with (output_dir / "manifest.json").open("w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
+    _atomic_json_write(output_dir / "manifest.json", manifest)
     _record_progress(output_dir, "run_completed", measurement_rows=len(measurements))
+    identity["status"] = "completed"
+    identity["completed_tasks"] = [result_item["task"] for result_item in task_results]
+    identity["task_results"] = _json_safe(task_results)
+    _atomic_json_write(output_dir / "checkpoint.json", identity)
 
     print("\n=== Experiment 1 Complete ===")
     print(f"Label rows: {len(label_df)}")
