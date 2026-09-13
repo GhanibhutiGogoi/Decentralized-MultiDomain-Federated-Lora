@@ -413,7 +413,32 @@
         "rank_history.csv",
         "figures/"
       ],
-      "use": "Adaptive-rank implementation evidence; calibration gate failed."
+      "use": "Adaptive-rank implementation evidence; calibration gate failed.",
+      "seed": 42,
+      "tasks": [
+        "CIFAR-CNN",
+        "Fashion-MLP",
+        "AGNews-LSTM",
+        "Tabular-MLP",
+        "Audio-1DCNN"
+      ],
+      "rounds": 5,
+      "fixed_rank": 32,
+      "adaptive_rank_summary": "rank 2 throughout, zero changes, 93.75% FLOP savings, zero capability violations",
+      "accuracies_fixed": [
+        59.5,
+        86.55,
+        24.72,
+        90.0,
+        96.36
+      ],
+      "accuracies_adaptive": [
+        34.74,
+        68.5,
+        26.05,
+        83.33,
+        96.36
+      ]
     },
     {
       "id": "p3_adaptive_discovery_full_data",
@@ -591,8 +616,9 @@
     "source": "paper/main.tex",
     "rendered_pdf": "paper/main.pdf",
     "compile": "pdflatex + bibtex + pdflatex + pdflatex",
-    "pages": 5,
-    "scope": "Evidence-scoped technical paper; online coordinator-visible discovery is measured, adaptive rank is measured and reported as uncalibrated."
+    "pages": 10,
+    "scope": "Evidence-scoped technical paper; online coordinator-visible discovery is measured, adaptive rank is measured and reported as uncalibrated.",
+    "last_rendered": "2026-09-13T05:20:00Z"
   },
   "validation": {
     "p3_discovery_targeted_remote": "30 passed",

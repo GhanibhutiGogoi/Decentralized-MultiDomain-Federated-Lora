@@ -45,7 +45,7 @@ For symmetric doubly-stochastic $W$, with $J=\mathbf1\mathbf1^\top/N$, consensus
 \section{Experimental Setup}
 \paragraph{Vision.} We use all 50,000 CIFAR-100 training images and 10,000 test images. A frozen ImageNet-pretrained ResNet-18 produces 512-dimensional features after deterministic resize to $224\times224$ and ImageNet normalization. The trainable classification head is a $100\times512$ LoRA update. Five superclass groups form domains, with three clients per domain and Dirichlet($0.5$) within-domain partitions. Runs use $\alpha=32$, one local epoch, learning rate $10^{-3}$, batch size 128, 50 rounds, and seeds 42, 43, and 44.
 \paragraph{Comparators and evidence.} We compare local-only, centralized $\dW$ FedAvg, flat Metropolis--Hastings gossip, oracle two-tier gossip, factor zero-padding, and error feedback. Every run records manifests, split hashes, per-round metrics, per-domain metrics, and communication accounting. The separate Project 2 regeneration uses real CIFAR-10, FashionMNIST, AG News, UCI Heart Disease, and SpeechCommands data; Experiment 1 has 75 client-round rows at seed 42.
-\paragraph{Adaptive-rank battery.} Project 1 compares fixed rank 32 with the shipped controller ($\gamma=0.5$) on five real tasks for five rounds. Three clients use batch-size capabilities 16, 64, and 256, corresponding to maximum ranks 4, 8, and 16. The controller logs stable-rank demand, EMA state, hysteresis decisions, selected ranks, FLOPs, and capability violations.
+\paragraph{Adaptive-rank battery.} Project 1 compares fixed rank 32 with the shipped controller ($\gamma=0.5$) on five real tasks for five rounds at seed 42. Three clients use batch-size capabilities 16, 64, and 256, corresponding to maximum ranks 4, 8, and 16. The controller logs stable-rank demand, EMA state, hysteresis decisions, selected ranks, FLOPs, and capability violations.
 \section{Results}
 \begin{table}[t]\centering\caption{Final-round CIFAR-100 accuracy (mean $\pm$ sample standard deviation over seeds 42--44).}\small\begin{tabular}{llcc}\toprule Context & Method & Personalized & Consensus\\\midrule
 Uniform $r=16$ & Local & $57.93\pm0.55$ & $14.23\pm1.27$\\
@@ -59,14 +59,14 @@ Heterogeneous $4/12/32$, $\dW$ & Local & $53.60\pm0.62$ & $14.50\pm0.80$\\
 
 The oracle hierarchy provides the strongest personalized result in the uniform context, while centralized FedAvg is optimized for a single consensus adapter and is poorly matched to the personalized objective. The heterogeneous context is harder. This known-domain table establishes protocol behavior; the separate online-discovery experiment below evaluates whether domains can be recovered without labels.
 
-\begin{table}[t]\centering\caption{Project 1 fixed rank 32 versus the shipped adaptive controller after five rounds. FLOP savings are measured against the fixed-rank run.}\small\begin{tabular}{lrrrr}\toprule Task & Fixed acc. & Adaptive acc. & $\Delta$ acc. & FLOPs saved \\\midrule
+\begin{table}[t]\centering\caption{Project 1 fixed rank 32 versus the shipped adaptive controller after five rounds at seed 42. FLOP savings are measured against the fixed-rank run.}\small\begin{tabular}{lrrrr}\toprule Task & Fixed acc. & Adaptive acc. & $\Delta$ acc. & FLOPs saved \\\midrule
 CIFAR-CNN & 59.50 & 34.74 & $-24.76$ & 93.75\%\\
 Fashion-MLP & 86.55 & 68.50 & $-18.05$ & 93.75\%\\
 AGNews-LSTM & 24.72 & 26.05 & $+1.33$ & 93.75\%\\
 Tabular-MLP & 90.00 & 83.33 & $-6.67$ & 93.75\%\\
 Audio-1DCNN & 96.36 & 96.36 & $+0.00$ & 93.75\%\\\bottomrule\end{tabular}\end{table}
 
-The adaptive-rank controller is stable and respects every capability ceiling, but it does not meet the preregistered calibration gate. It selects rank 2 for every client and round (zero rank changes), yielding 93.75\% FLOP savings while falling more than one percentage point below the fixed reference on three tasks. The controller is therefore an auditable implementation baseline, not a validated accuracy-preserving allocator.
+The adaptive-rank controller is stable and respects every capability ceiling, but it does not meet the current accuracy-preservation gate when fixed rank 32 is used as the operational reference. It selects rank 2 for every client and round (zero rank changes), yielding 93.75\% FLOP savings while falling more than one percentage point below that reference on three tasks. The controller is therefore an auditable implementation baseline, not a validated accuracy-preserving allocator.
 
 \begin{figure}[t]
 \centering
@@ -121,7 +121,7 @@ The offline signature screen remains weak for the historical spectral and invers
 \label{fig:p2-lambda}
 \end{figure}
 \section{Limitations and Reproducibility}
-The oracle hierarchy receives true domain assignments, and offline signature scores use those labels only for evaluation. The online discovery result is coordinator-visible because the current runner callback supplies all adapter states; a neighborhood-local discovery protocol and its communication overhead remain future work. The benchmark is one frozen-feature CIFAR-100 task; it does not establish behavior for LLMs, asynchronous churn, or other modalities. Communication is simulated payload accounting rather than measured network throughput. Three seeds provide variability estimates, not statistical proof. P2 calibration is a single-seed, five-round diagnostic with weak predictive fit. Project 1 adaptive-rank calibration is implemented but fails the current accuracy-preservation gate: it selects rank 2 throughout, saves 93.75\% FLOPs, and loses accuracy on three tasks.
+The oracle hierarchy receives true domain assignments, and offline signature scores use those labels only for evaluation. The online discovery result is coordinator-visible because the current runner callback supplies all adapter states; a neighborhood-local discovery protocol and its communication overhead remain future work. The benchmark is one frozen-feature CIFAR-100 task; it does not establish behavior for LLMs, asynchronous churn, or other modalities. Communication is simulated payload accounting rather than measured network throughput. Three seeds provide variability estimates, not statistical proof. P2 calibration is a single-seed, five-round diagnostic with weak predictive fit. Project 1 adaptive-rank calibration is implemented but fails the current fixed-rank-reference accuracy gate: it selects rank 2 throughout, saves 93.75\% FLOPs, and loses accuracy on three tasks.
 
 All source code, manifests, compact CSV/JSON evidence, and logs are included. Start with \texttt{docs/artifacts/claude\_handoff.json}, then read \texttt{docs/artifacts/README.md} and the P3 aggregate report. Remote validation used Python 3.10, PyTorch 2.3 with CUDA 12.1, and Tesla V100 GPUs; no credentials are stored in the artifact bundle.
 \clearpage
