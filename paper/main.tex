@@ -86,6 +86,10 @@ If $\overline{\dW}_i=U\Sigma V^\top$, its rank-$r_i$ representation is obtained 
 \end{align}
 The projection is the Eckart--Young minimum-Frobenius-error rank-$r_i$ approximation. It is invariant to the LoRA factor gauge: replacing $(B,A)$ by $(BQ,Q^{-1}A)$ leaves $BA$ unchanged, while entry-wise factor averaging changes in general and introduces cross terms.
 
+\begin{proposition}[Factor averaging is gauge dependent]
+Replacing one factor pair by $(BQ,Q^{-1}A)$ leaves $BA$ unchanged but changes entry-wise factor averages in general; expansion also introduces cross terms. Thus factor averaging is not a function of represented updates, whereas the $\dW$ average is.
+\end{proposition}
+
 \subsection{Decentralized mixing, hierarchy, and feedback}
 With a symmetric doubly-stochastic mixing matrix $W^t$, client $i$ receives
 \begin{equation}
