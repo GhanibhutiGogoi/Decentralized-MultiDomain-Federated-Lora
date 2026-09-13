@@ -594,23 +594,25 @@
   "pull_requests": [
     {
       "number": 42,
-      "status": "open",
+      "status": "merged",
       "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/42",
-      "commit": "1939c9c69ed8bb34f2db77264c7b933c316d57e0",
-      "scope": "Project 2 projection and real-data regeneration runtime fixes"
+      "commit": "bd9f32155be1832807f88f0c334a4af852041323",
+      "scope": "Project 2 projection and real-data regeneration runtime fixes",
+      "merge_commit": "bd9f32155be1832807f88f0c334a4af852041323"
     },
     {
       "number": 43,
-      "status": "open",
+      "status": "merged",
       "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/43",
-      "commit": "ca2424bc5ad95238a49e09894a98dcd0fdc11703",
-      "scope": "P3 completion benchmark, signatures, aggregate report, and evidence handoff"
+      "commit": "f0109b90af954de643f1eed84ae767e41fe56ed5",
+      "scope": "P3 completion benchmark, signatures, aggregate report, and evidence handoff",
+      "merge_commit": "f0109b90af954de643f1eed84ae767e41fe56ed5"
     }
   ],
   "next_actions": [
-    "Review and merge PR #42 and PR #43",
     "Use the updated paper and handoff artifacts for the Claude explanation",
-    "Future work: calibrate rank demand and implement neighborhood-local discovery/hard hierarchy gating."
+    "Future work: calibrate rank demand and implement neighborhood-local discovery/hard hierarchy gating.",
+    "Use merged main branch and updated artifacts for the Claude explanation"
   ],
   "paper": {
     "status": "complete",
