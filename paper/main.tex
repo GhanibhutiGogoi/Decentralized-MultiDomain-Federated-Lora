@@ -66,7 +66,7 @@ AGNews-LSTM & 24.72 & 26.05 & $+1.33$ & 93.75\%\\
 Tabular-MLP & 90.00 & 83.33 & $-6.67$ & 93.75\%\\
 Audio-1DCNN & 96.36 & 96.36 & $+0.00$ & 93.75\%\\\bottomrule\end{tabular}\end{table}
 
-The adaptive-rank controller is stable and respects every capability ceiling, but it does not meet the current accuracy-preservation gate when fixed rank 32 is used as the operational reference. It selects rank 2 for every client and round (zero rank changes), yielding 93.75\% FLOP savings while falling more than one percentage point below that reference on three tasks. The controller is therefore an auditable implementation baseline, not a validated accuracy-preserving allocator.
+The adaptive-rank controller is stable and respects every capability ceiling, but it does not meet the current accuracy-preservation gate when fixed rank 32 is used as the operational compute reference. That reference exceeds the per-client capability maxima (4, 8, and 16), so the reported 93.75\% saving is a compute comparison rather than a feasible hardware-matched baseline. The controller selects rank 2 for every client and round (zero rank changes) and falls more than one percentage point below the reference on three tasks. It is therefore an auditable implementation baseline, not a validated accuracy-preserving allocator.
 
 \begin{figure}[t]
 \centering
