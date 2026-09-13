@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-09-12T14:50:00Z",
-  "status": "all_experiments_complete_artifacts_ready_for_review",
+  "updated_at": "2026-09-13T04:00:00Z",
+  "status": "discovery_validated_adaptive_rank_running",
   "project": {
     "name": "AH-LoRA",
     "description": "Adaptive heterogeneous LoRA for decentralized multi-domain federated learning",
@@ -64,12 +64,12 @@
     },
     {
       "component": "P3 direction-aware signature validation",
-      "status": "complete_remote_battery",
+      "status": "complete_remote_battery_and_online_discovery_validated",
       "sources": [
         "project-3-hierarchical-gossip/src/clustering/signatures.py",
         "project-3-hierarchical-gossip/experiments/05_signature_validation.py"
       ],
-      "detail": "Offline comparison of legacy spectral features, row-norm cosine and inverse delta-W L2 under local-only and flat MH training; oracle labels are scoring-only"
+      "detail": "Offline diagnostics plus full-data three-seed online soft discovery; inferred K and ARI logged under docs/artifacts/p3-adaptive-discovery."
     },
     {
       "component": "P2 lambda calibration",
@@ -85,8 +85,8 @@
     },
     {
       "component": "P1 adaptive rank selection",
-      "status": "implemented_calibration_unresolved",
-      "detail": "Implementation runs, but the measured stable-rank signal has not been shown to select useful ranks"
+      "status": "implemented_remote_battery_running",
+      "detail": "AdaptiveRankController integrated into Project 1 Experiment 1; full-data calibration and budget-gated evidence pending."
     }
   ],
   "experiment_plan": {
@@ -388,6 +388,71 @@
         "log_class_imbalance_ratio": 0.01754345937451533
       },
       "interpretation": "Form A and B have similar weak global rank association; per-task behavior is heterogeneous, so no universal preferred form is claimed."
+    },
+    {
+      "id": "p3_adaptive_discovery",
+      "status": "awaiting_full_data_validation",
+      "classification": "pending_extension",
+      "local_path": "docs/artifacts/p3-adaptive-discovery",
+      "required_files": [
+        "manifest.json",
+        "summary.csv",
+        "seed{seed}_adaptive.json",
+        "figures/"
+      ],
+      "use": "Online automatic discovery evidence; do not cite until non-smoke runs complete."
+    },
+    {
+      "id": "p1_adaptive_rank",
+      "status": "awaiting_full_data_validation",
+      "classification": "pending_extension",
+      "local_path": "docs/artifacts/p1-adaptive-rank",
+      "required_files": [
+        "manifest.json",
+        "summary.csv",
+        "rank_history.csv",
+        "figures/"
+      ],
+      "use": "Adaptive-rank calibration evidence; apply preregistered gate before changing paper claims."
+    },
+    {
+      "id": "p3_adaptive_discovery_full_data",
+      "status": "complete",
+      "remote_path": "~/ahlora-runs/p3-adaptive-discovery-v2",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "stages": [
+        2,
+        5,
+        10,
+        20
+      ],
+      "inferred_k_stage10": [
+        5,
+        5,
+        5
+      ],
+      "stage10_ari": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "stage20_ari": [
+        1.0,
+        0.9180327868852459,
+        1.0
+      ],
+      "confidence_stage10": [
+        0.738,
+        0.735,
+        0.724
+      ],
+      "signature_dimension": 64,
+      "signature_payload_bytes_fp32": 3840,
+      "caveat": "Coordinator-visible full-state observation; soft affinity mixer only."
     }
   ],
   "test_evidence": [
@@ -519,7 +584,7 @@
   "next_actions": [
     "Review and merge PR #42 and PR #43",
     "Use the paper and handoff artifacts for the Claude explanation",
-    "Keep automatic domain discovery and adaptive rank calibration as future extensions"
+    "Run full-data automatic discovery and adaptive-rank calibration; update extension result sets and paper only from measured manifests."
   ],
   "paper": {
     "status": "complete",

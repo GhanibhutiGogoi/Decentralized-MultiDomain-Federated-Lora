@@ -4,7 +4,8 @@ The adaptive rank is not brute force. Each client uses the closed-form rule
 
     s(G) = ||G||_F^2 / ||G||_2^2
     c_i  = capability_index(batch_i) / (num_capabilities - 1)
-    r_i  = nearest_allowed_rank(max(r_min, c_i R_i^max, min(s(G), R_i^max)))
+    r_i  = nearest_allowed_rank(max(r_min, gamma*c_i R_i^max,
+                                    min(s(G), R_i^max)))
 
 where s(G) is the median stable rank of LoRA adapter gradients.
 """
@@ -13,6 +14,7 @@ from __future__ import annotations
 
 import os
 import sys
+import json
 from pathlib import Path
 
 import matplotlib
@@ -46,7 +48,9 @@ from Federated.fedavg_aggregation import fedavg_quality_weighted  # noqa: E402
 from Federated.flops import compute_round_flops  # noqa: E402
 from Federated.utilities import evaluate, split_dataset  # noqa: E402
 from rank_allocation.LoRa_rank_projection import load_global_state  # noqa: E402
-from rank_allocation.rank_selector import GAMMA, estimate_optimal_rank  # noqa: E402
+from rank_allocation.rank_selector import (  # noqa: E402
+    GAMMA, AdaptiveRankController, estimate_gradient_stable_rank,
+)
 from Source.Models import AudioCNN, CNN, LSTMModel, MLP, TabularMLP  # noqa: E402
 from Source.datasets.audio import get_audio  # noqa: E402
 from Source.datasets.image import get_cifar10, get_fashion_mnist  # noqa: E402
@@ -121,7 +125,8 @@ def run_adaptive_rank(name, model_fn, trainset, testloader):
     loaders = make_loaders(trainset)
     global_state = model_fn(FIXED_RANK).to(DEVICE).state_dict()
 
-    acc_curve, flops_hist, rank_hist = [], [], []
+    acc_curve, flops_hist, rank_hist, diagnostics_hist = [], [], [], []
+    controllers = {i: AdaptiveRankController(CLIENT_BATCH_SIZES[i]) for i in range(NUM_CLIENTS)}
 
     for rnd in range(NUM_ROUNDS):
         weights, samples, quality_scores = [], [], []
@@ -133,7 +138,8 @@ def run_adaptive_rank(name, model_fn, trainset, testloader):
             probe = model_fn(probe_rank).to(DEVICE)
             load_global_state(probe, global_state)
 
-            chosen_rank = estimate_optimal_rank(probe, loader, loss_fn, batch_size)
+            stable_rank = estimate_gradient_stable_rank(probe, loader, loss_fn)
+            chosen_rank = controllers[i].update(stable_rank)
             ranks.append(chosen_rank)
 
             local = model_fn(chosen_rank).to(DEVICE)
@@ -150,6 +156,7 @@ def run_adaptive_rank(name, model_fn, trainset, testloader):
 
         flops_hist.append(round_flops)
         rank_hist.append(ranks)
+        diagnostics_hist.append({i: controllers[i].diagnostics() for i in range(NUM_CLIENTS)})
 
         ref_sd = model_fn(FIXED_RANK).to(DEVICE).state_dict()
         global_state = fedavg_quality_weighted(
@@ -170,7 +177,7 @@ def run_adaptive_rank(name, model_fn, trainset, testloader):
             f"total_flops={sum(round_flops):.2e} | {detail}"
         )
 
-    return acc_curve, acc_curve[-1], flops_hist, rank_hist
+    return acc_curve, acc_curve[-1], flops_hist, rank_hist, diagnostics_hist
 
 
 def load_experiments():
@@ -409,6 +416,7 @@ def plot_pareto(results, names):
 
 def write_summary(results, names):
     rows = []
+    rank_rows = []
     for name in names:
         fixed_acc = results[name]["fixed"][1]
         adaptive_acc = results[name]["adaptive"][1]
@@ -429,10 +437,36 @@ def write_summary(results, names):
                 "Adaptive Total FLOPs": int(adaptive_flops),
                 "FLOPs Saved (%)": round(100.0 * saved / fixed_flops, 2) if fixed_flops else 0.0,
                 "Average Adaptive Rank": round(float(np.mean(all_ranks)), 2),
+                "Capability Violations": int(sum(
+                    r > BATCH_TO_MAX_RANK[CLIENT_BATCH_SIZES[i]]
+                    for round_ranks in rank_hist for i, r in enumerate(round_ranks)
+                )),
+                "Global Rank Budget": None,
+                "Budget Residual": None,
+                "Budget Violations": None,
+                "Rank Changes": int(sum(
+                    1 for round_diag in results[name]["adaptive"][4]
+                    for diag in round_diag.values() if diag["changed"]
+                )),
             }
         )
+        for round_idx, round_diag in enumerate(results[name]["adaptive"][4], start=1):
+            for client_idx, diag in round_diag.items():
+                rank_rows.append({
+                    "Experiment": name,
+                    "Round": round_idx,
+                    "Client": int(client_idx),
+                    **diag,
+                })
     df = pd.DataFrame(rows)
     df.to_csv(RESULT_DIR / "federated_lora_summary.csv", index=False)
+    pd.DataFrame(rank_rows).to_csv(RESULT_DIR / "rank_history.csv", index=False)
+    diagnostics = {
+        name: results[name]["adaptive"][4] for name in names
+    }
+    (RESULT_DIR / "adaptive_rank_diagnostics.json").write_text(
+        json.dumps(diagnostics, indent=2), encoding="utf-8"
+    )
     (RESULT_DIR / "rank_equation.txt").write_text(RANK_EQUATION + "\n", encoding="utf-8")
     print("\n" + df.to_string(index=False))
 

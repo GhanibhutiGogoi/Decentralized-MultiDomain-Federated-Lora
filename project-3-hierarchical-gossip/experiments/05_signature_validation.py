@@ -7,9 +7,9 @@ Usage from project-3-hierarchical-gossip (run on the SSH GPU machine):
 
 Remaining options are shared with 04_protocol_benchmark.py. True domain labels
 are used to construct the benchmark data split and score clusters, never as
-signature inputs or flat-topology inputs. The cluster count is prespecified.
-This evaluates an offline discovery signal; it does not deploy a distributed
-clustering protocol or account for exchanging signatures.
+signature inputs or flat-topology inputs. Offline baselines use a prespecified cluster count;
+the optional ``adaptive`` method infers K online by silhouette score and deploys the label-free EMA/silhouette mixer
+online inside the same runner. ``local`` and ``mh`` remain offline diagnostics.
 """
 
 import argparse
@@ -39,6 +39,7 @@ from src.clustering.domain_clustering import extract_lora_features
 from src.clustering.signatures import (
     affinity_matrix, cluster_from_affinity, signature_delta_vec, signature_row_norms,
 )
+from src.clustering.discovery import AdaptiveAffinityMixer, OnlineDomainDiscovery
 from src.federated.runner import DecentralizedRunner
 
 
@@ -105,8 +106,16 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
     test = {key: value.to(device) for key, value in test_cpu.items()}
     clients = [FeatureClient(cid, domains[cid], initial, ranks[cid], config, train, test,
                              splits[cid], device) for cid in sorted(domains)]
-    # build_mixing's seeded ring order is independent of domain memberships.
-    mixing = build_mixing(method, domains, config.bridge_every, config.topology, seed=seed)
+    # ``adaptive`` discovers an affinity graph from the freshly trained
+    # effective updates each round; ``local`` and ``mh`` retain the historical
+    # fixed protocol baselines.
+    if method == "adaptive":
+        mixing = AdaptiveAffinityMixer(sorted(domains), config.alpha,
+                                       OnlineDomainDiscovery(beta=0.8, max_clusters=8),
+                                       topology="fully_connected")
+    else:
+        # build_mixing's seeded ring order is independent of domain memberships.
+        mixing = build_mixing(method, domains, config.bridge_every, config.topology, seed=seed)
     runner = DecentralizedRunner(clients, mixing, ranks, config.alpha, error_feedback=False)
     evaluation_indices = torch.tensor(sorted(index for split in splits.values()
                                              for index in split["test_indices"]), device=device)
@@ -116,7 +125,7 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
               "initial_state_sha256": initial_digest, "split_sha256": split_digest,
               "true_domains_for_scoring": domains, "n_clusters_prespecified": config.n_clusters,
               "feature_cache_sha256": {key: feature_metadata[key]["sha256"] for key in ("train", "test")},
-              "mixing_matrix": mixing(0).tolist(),
+              "mixing_matrix": None if method == "adaptive" else mixing(0).tolist(),
               "n_train_samples": sum(len(split["train_indices"]) for split in splits.values()),
               "n_test_samples": len(evaluation_indices), "stages": [], "training_rounds": []}
     path = output / f"seed{seed}_{method}.json"
@@ -124,7 +133,7 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
     for round_idx in range(max(config.stages)):
         training = [client.train() for client in clients]
         states = [client.get_lora_state() for client in clients]
-        if method == "mh":
+        if method in {"mh", "adaptive"}:
             new_states, diagnostics = runner.gossip_round(round_idx, states)
             for client, state in zip(clients, new_states):
                 client.set_lora_state(state)
@@ -140,10 +149,28 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
             metrics = evaluate_protocol(clients, runner, initial, test, evaluation_indices,
                                         consensus_rank, config.eval_batch_size)
             signatures = score_signatures(states, domains, config.alpha, config.n_clusters, seed, stage)
-            record["stages"].append({"stage": stage, "evaluation": metrics, "signatures": signatures,
+            stage_record = {"stage": stage, "evaluation": metrics, "signatures": signatures,
                                       "adapter_state_sha256": tensor_digest(*[
                                           value for cid in sorted(states) for layer in sorted(states[cid])
-                                          for value in states[cid][layer].values()])})
+                                          for value in states[cid][layer].values()])}
+            discovery = getattr(mixing, "discovery", None)
+            snapshot = getattr(discovery, "snapshot", None)
+            if method == "adaptive" and snapshot is not None:
+                from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
+                stage_record["discovery"] = {
+                    "n_clusters": int(snapshot.n_clusters),
+                    "confidence": float(snapshot.confidence),
+                    "adjusted_rand_index_for_scoring": float(
+                        adjusted_rand_score([domains[cid] for cid in sorted(domains)], snapshot.labels)),
+                    "normalized_mutual_info_for_scoring": float(
+                        normalized_mutual_info_score([domains[cid] for cid in sorted(domains)], snapshot.labels)),
+                    "signature_dimension": int(getattr(snapshot, "signature_dimension", 0)),
+                    "signature_floats": int(len(states) * getattr(snapshot, "signature_dimension", 0)),
+                    "signature_payload_bytes_fp32": int(len(states) * getattr(snapshot, "signature_dimension", 0) * 4),
+                    "labels": snapshot.labels.tolist(),
+                    "mixing_matrix": mixing(round_idx).tolist(),
+                }
+            record["stages"].append(stage_record)
             for signature in signatures:
                 print(f"seed={seed} method={method} stage={stage} signature={signature['signature']} "
                       f"ARI={signature['adjusted_rand_index']:.4f} "
@@ -163,15 +190,15 @@ def parse_args(argv=None):
     parser.add_argument("--n-clusters", type=int, default=5)
     own, remaining = parser.parse_known_args(argv)
     if "--methods" not in remaining:
-        remaining.extend(["--methods", "local", "mh"])
+        remaining.extend(["--methods", "local", "mh", "adaptive"])
     config = parse_benchmark_args(remaining)
     if (not own.stages or min(own.stages) < 1
             or own.stages != sorted(set(own.stages))):
         parser.error("stages must be unique, positive and increasing")
     if own.n_clusters < 2 or own.n_clusters > config.n_domains * config.clients_per_domain:
         parser.error("n-clusters must be between 2 and the client count")
-    if any(method not in {"local", "mh"} for method in config.methods):
-        parser.error("signature validation supports only --methods local mh")
+    if any(method not in {"local", "mh", "adaptive"} for method in config.methods):
+        parser.error("signature validation supports only --methods local mh adaptive")
     if config.merge != "delta" or config.error_feedback or config.prepare_only:
         parser.error("signature validation uses delta merging without error feedback; use 04 for preparation")
     if len(set(config.ranks)) != 1:
@@ -234,9 +261,9 @@ def main(argv=None):
                 "protocol": {
                     "representation": "cached frozen eval-mode ResNet-18; deterministic resize and ImageNet normalization; no augmentation",
                     "training": "paired seed/shared head and partitions; Adam reset each round; homogeneous rank",
-                    "signature_timing": "after local training and, in MH mode, after delta-W gossip",
+                    "signature_timing": "after local training; MH and adaptive signatures are measured after delta-W gossip",
                     "labels": "known domains construct benchmark shards and score clusters only; no labels in signatures or clustering",
-                    "cluster_count": "prespecified; not inferred from adapters",
+                    "cluster_count": "adaptive mode infers K by silhouette score; offline baselines use the prespecified n_clusters",
                     "topology": "flat topology client order is permuted by training seed, independently of domain labels",
                     "clustering_order": "seeded client permutation at each stage to remove domain-sorted tie-breaking",
                     "spectral_baseline": "original standardized singular values of A, B, BA plus factor norms; Ward linkage",

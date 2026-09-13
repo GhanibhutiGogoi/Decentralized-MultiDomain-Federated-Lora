@@ -141,6 +141,12 @@ class DecentralizedRunner:
         Returns (new_states, diagnostics). Separated from `run` so the mixing
         step can be tested without a training loop.
         """
+        # Stateful mixers (for example ``AdaptiveAffinityMixer``) can inspect
+        # the freshly trained adapters before choosing this round's matrix.
+        # Plain callables retain the original API and incur no overhead.
+        observe = getattr(self.mixing_fn, "update", None)
+        if observe is not None:
+            observe(states, alpha=self.alpha, client_ids=self.client_ids)
         w = self._mixing_matrix(round_idx)
         n = len(self.clients)
         deltas = [lora_to_delta(states[i], self.alpha) for i in range(n)]

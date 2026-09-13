@@ -27,9 +27,10 @@ from src.federated.hierarchical import two_tier_mixing, two_tier_message_cost, w
 from src.federated.merge import lora_to_delta
 from src.federated.mixing import build_topology, metropolis_hastings, spectral_gap
 from src.federated.runner import DecentralizedRunner
+from src.clustering.discovery import AdaptiveAffinityMixer, OnlineDomainDiscovery
 
 
-METHODS = ("local", "fedavg", "mh", "oracle")
+METHODS = ("local", "fedavg", "mh", "oracle", "adaptive")
 SUMMARY_FIELDS = ["seed", "method", "merge", "rank_schedule", "error_feedback", "rounds",
                   "personalized_accuracy", "personalized_sample_weighted_accuracy",
                   "consensus_accuracy", "accuracy_gap", "worst_domain_accuracy",
@@ -64,7 +65,7 @@ def topology_order(assignments, seed):
     return np.random.default_rng(seed + 7919).permutation(sorted(assignments)).tolist()
 
 
-def build_mixing(method, assignments, bridge_every, topology="ring", seed=42):
+def build_mixing(method, assignments, bridge_every, topology="ring", seed=42, alpha=32.0):
     ids = sorted(assignments)
     n = len(ids)
     if method == "local":
@@ -78,6 +79,15 @@ def build_mixing(method, assignments, bridge_every, topology="ring", seed=42):
     elif method == "oracle":
         return lambda round_idx: two_tier_mixing(assignments, round_idx,
             bridge_every=bridge_every, client_ids=ids)
+    elif method == "adaptive":
+        # Label-free stateful mixer. It observes only effective updates and
+        # infers the number of groups by silhouette score before emitting a
+        # soft Sinkhorn doubly-stochastic matrix on the configured topology.
+        return AdaptiveAffinityMixer(ids, alpha=float(alpha),
+            discovery=OnlineDomainDiscovery(beta=0.8, min_clusters=2, max_clusters=8,
+                                            temperature=0.5, self_weight=0.2),
+            topology=topology,
+            topology_client_ids=topology_order(assignments, seed))
     else:
         raise ValueError(f"unknown method {method!r}")
     return lambda round_idx: matrix
@@ -283,7 +293,7 @@ def operational_cost(method, assignments, round_idx, bridge_every, states, diagn
     n = len(states)
     if method == "local":
         return 0, 0, "none"
-    if method == "mh":
+    if method in {"mh", "adaptive"}:
         return diagnostics["messages"], diagnostics["floats"], "direct neighbor factor payloads"
     sizes = [DecentralizedRunner._factor_floats(state) for state in states]
     dense_size = sum(p["A"].shape[1] * p["B"].shape[0] for p in states[0].values())
@@ -317,7 +327,7 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
     test = {k: v.to(device) for k, v in test_cpu.items()}
     clients = [FeatureClient(cid, assignments[cid], initial, ranks[cid], config, train, test,
                              splits[cid], device) for cid in sorted(assignments)]
-    mixer = build_mixing(method, assignments, config.bridge_every, config.topology, seed)
+    mixer = build_mixing(method, assignments, config.bridge_every, config.topology, seed, alpha=config.alpha)
     runner_class = DecentralizedRunner if config.merge == "delta" else FactorRunner
     runner = runner_class(clients, mixer, ranks, config.alpha, config.error_feedback)
     eval_indices = torch.tensor(sorted(index for value in splits.values() for index in value["test_indices"]), device=device)
@@ -384,7 +394,8 @@ def parse_args(argv=None):
     parser.add_argument("--output", type=Path, required=True, help="New output directory; existing run files are refused")
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--feature-cache", type=Path, default=Path("data/features"))
-    parser.add_argument("--methods", nargs="+", choices=METHODS, default=list(METHODS))
+    parser.add_argument("--methods", nargs="+", choices=METHODS,
+                        default=["local", "fedavg", "mh", "oracle"])
     parser.add_argument("--seeds", nargs="+", type=int, default=[42, 43, 44])
     parser.add_argument("--rounds", type=int, default=30)
     parser.add_argument("--ranks", nargs="+", type=int, default=[8], help="Rank cycle across client ids")
@@ -430,6 +441,8 @@ def parse_args(argv=None):
         parser.error("seeds must be in [0, 2**32 - 1]")
     if args.error_feedback and args.merge != "delta":
         parser.error("error feedback requires --merge delta")
+    if "adaptive" in args.methods and args.merge != "delta":
+        parser.error("adaptive discovery requires --merge delta")
     return args
 
 

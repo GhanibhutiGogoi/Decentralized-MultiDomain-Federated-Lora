@@ -39,7 +39,7 @@ Replacing one factor pair by $(BQ,Q^{-1}A)$ leaves $BA$ unchanged but changes en
 \subsection{Mixing, hierarchy, and feedback}
 Flat gossip uses ring Metropolis--Hastings weights. The oracle hierarchy partitions clients using the known five domain groups, applies intra-domain mixing each round, and performs a representative bridge every five rounds. This is an oracle diagnostic, not a discovery result. Optional error feedback stores each client's discarded SVD residual and adds it to the next update before mixing.
 \subsection{Signatures and rank schedules}
-The signature experiment compares singular-value spectra, row-norm signatures, and inverse-$\dW$-L2 signatures at stages 2, 5, 10, and 20. Signatures are scored against known labels offline. The benchmark uses uniform rank 16 or a repeating heterogeneous schedule $(4,12,32)$ with the same total rank budget (240 across 15 clients). Adaptive rank selection is not evaluated in the final battery.
+The signature experiment compares singular-value spectra, row-norm signatures, and inverse-$\dW$-L2 signatures at stages 2, 5, 10, and 20. Signatures are scored against known labels offline. The benchmark uses uniform rank 16 or a repeating heterogeneous schedule $(4,12,32)$ with the same total rank budget (240 across 15 clients). The online discovery extension uses an EMA-smoothed, deterministic 64-dimensional projection of flattened scaled $\dW$, infers $K$ by silhouette score, and emits a symmetric doubly-stochastic affinity mixer. Adaptive rank selection is evaluated separately on the five-task Project 1 battery.
 \section{Analysis}
 For symmetric doubly-stochastic $W$, with $J=\mathbf1\mathbf1^\top/N$, consensus error contracts as $\norm{(W-J)X}_F\le|\lambda_2(W)|\norm{(I-J)X}_F$. For rank-$R$ matrices, the SVD projection obeys $\norm{C_r(X)-X}_F^2=\sum_{k>r}\sigma_k(X)^2\le(1-r/R)\norm{X}_F^2$. With error feedback, the mean update follows the averaged update up to stochastic-gradient terms; without feedback, biased compression leaves an approximation floor. These statements require fixed mixing and bounded residual assumptions; the repository analysis does not claim convergence of the unresolved adaptive system.
 \section{Experimental Setup}
@@ -74,7 +74,14 @@ Factor zero-padding under ranks $(4,12,32)$ gives personalized accuracy of $4.71
 \label{fig:heterogeneous-curves}
 \end{figure}
 
-The best descriptive stage-10 mean signature ARI is $0.274$ for local inverse-$\dW$-L2 signatures; all other local or MH variants are lower than $0.161$. This is below the preregistered soft-candidate threshold of $0.4$ and does not support automatic discovery in this setup. The regenerated Project 2 calibration selects ridge alpha 1000. Form A has global Spearman correlation 0.368 and pairwise ranking accuracy 0.641; Form B has Spearman 0.369 and pairwise accuracy 0.630. Global $R^2$ is low (0.079 and 0.025), and task-level correlations change sign across modalities.
+The offline signature screen remains weak for the historical spectral and inverse-distance diagnostics. The new online mixer, however, recovers the five known domain groups on the full CIFAR-100 benchmark: across seeds 42--44 it infers $K=5$ with confidence $0.72$--$0.75$ and scoring ARI $1.00$ at rounds 2, 5, and 10; at round 20 the ARI is $1.00$, $0.918$, and $1.00$. The discovery sketch is 64 floats per client (3,840 fp32 bytes for 15 clients). These labels are used only for scoring; the mixer itself receives adapter states. Because the current runner provides the full state list to the callback, this validates coordinator-visible automatic discovery rather than a neighborhood-only protocol. The regenerated Project 2 calibration selects ridge alpha 1000. Form A has global Spearman correlation 0.368 and pairwise ranking accuracy 0.641; Form B has Spearman 0.369 and pairwise accuracy 0.630. Global $R^2$ is low (0.079 and 0.025), and task-level correlations change sign across modalities.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/p3_adaptive_discovery.png}
+\caption{Full-data online domain discovery on CIFAR-100. The EMA/silhouette mixer infers five groups with high confidence and near-perfect scoring ARI through round 20; scoring uses known domains only after the unsupervised update.}
+\label{fig:adaptive-discovery}
+\end{figure}
 
 \begin{figure}[t]
 \centering
@@ -90,7 +97,7 @@ The best descriptive stage-10 mean signature ARI is $0.274$ for local inverse-$\
 \label{fig:p2-lambda}
 \end{figure}
 \section{Limitations and Reproducibility}
-The oracle hierarchy receives true domain assignments, and signatures are evaluated offline against those labels. The benchmark is one frozen-feature CIFAR-100 task; it does not establish behavior for LLMs, asynchronous churn, or other modalities. Communication is simulated payload accounting rather than measured network throughput. Three seeds provide variability estimates, not statistical proof. P2 calibration is a single-seed, five-round diagnostic with weak predictive fit. Project 1 adaptive-rank calibration and automatic domain discovery remain unresolved.
+The oracle hierarchy receives true domain assignments, and offline signature scores use those labels only for evaluation. The online discovery result is coordinator-visible because the current runner callback supplies all adapter states; a neighborhood-local discovery protocol and its communication overhead remain future work. The benchmark is one frozen-feature CIFAR-100 task; it does not establish behavior for LLMs, asynchronous churn, or other modalities. Communication is simulated payload accounting rather than measured network throughput. Three seeds provide variability estimates, not statistical proof. P2 calibration is a single-seed, five-round diagnostic with weak predictive fit. Project 1 adaptive-rank calibration remains unresolved until its full battery completes.
 
 All source code, manifests, compact CSV/JSON evidence, and logs are included. Start with \texttt{docs/artifacts/claude\_handoff.json}, then read \texttt{docs/artifacts/README.md} and the P3 aggregate report. Remote validation used Python 3.10, PyTorch 2.3 with CUDA 12.1, and Tesla V100 GPUs; no credentials are stored in the artifact bundle.
 \clearpage
@@ -110,5 +117,5 @@ The companion domain plots expose the fairness trade-off hidden by a single aggr
 \end{figure}
 \clearpage
 \section{Conclusion}
-AH-LoRA demonstrates a practical primitive for decentralized federated LoRA with heterogeneous ranks: mix scaled effective updates and refactorize locally. The completed benchmark shows that protocol choice and domain structure strongly affect personalized behavior, factor zero-padding can fail under rank heterogeneity, and error feedback changes the compression trade-off. Known-domain hierarchy is a useful oracle comparison, while automatic discovery and adaptive rank selection are not yet solved. The repository provides a complete, reproducible implementation milestone and a concrete base for future work.
+AH-LoRA demonstrates a practical primitive for decentralized federated LoRA with heterogeneous ranks: mix scaled effective updates and refactorize locally. The completed benchmark shows that protocol choice and domain structure strongly affect personalized behavior, factor zero-padding can fail under rank heterogeneity, and error feedback changes the compression trade-off. Known-domain hierarchy is a useful oracle comparison, and the online extension demonstrates automatic recovery of the five CIFAR-100 groups under coordinator-visible observations. Adaptive rank selection is implemented with auditable diagnostics but still requires full-battery calibration. The repository provides a complete, reproducible implementation milestone and a concrete base for future work.
 \bibliographystyle{plainnat}\bibliography{references}\end{document}

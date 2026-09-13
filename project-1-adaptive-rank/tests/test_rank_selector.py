@@ -4,10 +4,52 @@ import pytest
 
 from config import ALL_CANDIDATE_RANKS, BATCH_TO_MAX_RANK
 from rank_allocation.rank_selector import (
+    AdaptiveRankController,
     GAMMA,
     capability_fraction,
     rank_equation,
 )
+
+
+def test_controller_hysteresis_requires_patience_before_increase():
+    c = AdaptiveRankController(256, initial_rank=2, patience=2, ema_decay=0.0,
+                               up_margin=0.0)
+    assert c.update(20.0) == 2
+    assert c.update(20.0) > 2
+
+
+def test_controller_does_not_oscillate_on_small_signal_changes():
+    c = AdaptiveRankController(256, initial_rank=4, patience=2, ema_decay=0.0,
+                               up_margin=0.2, down_margin=0.2)
+    assert c.update(4.1) == 4
+    assert c.update(3.9) == 4
+    assert c.update(4.2) == 4
+
+
+def test_controller_residual_signal_can_raise_rank_but_stays_bounded():
+    c = AdaptiveRankController(256, initial_rank=4, patience=1, ema_decay=0.0,
+                               up_margin=0.0, residual_weight=1.0)
+    raised = c.update(4.0, residual_ratio=1.0)
+    assert raised >= 4
+    assert raised <= BATCH_TO_MAX_RANK[256]
+
+
+def test_controller_diagnostics_capture_latest_decision():
+    c = AdaptiveRankController(16, initial_rank=2, patience=1,
+                               ema_decay=0.0, up_margin=0.0)
+    c.update(4.0)
+    details = c.diagnostics()
+    assert details["demand"] == 4.0
+    assert details["ema_demand"] == 4.0
+    assert details["target_rank"] >= 2
+    assert details["rank"] in c.candidates
+    assert isinstance(details["changed"], bool)
+
+
+def test_explicit_candidate_menu_cannot_bypass_capability_ceiling():
+    c = AdaptiveRankController(16, candidates=[2, 4, 8, 32], initial_rank=4)
+    assert c.candidates == (2, 4)
+    assert c.max_rank == BATCH_TO_MAX_RANK[16]
 
 TOP_BATCH = max(BATCH_TO_MAX_RANK)
 STABLE_RANKS = (0.5, 1.0, 2.0, 3.0, 5.0, 8.0, 12.0, 20.0, 50.0)

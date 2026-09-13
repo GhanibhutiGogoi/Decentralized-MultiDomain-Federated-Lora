@@ -48,6 +48,121 @@ from Federated.client import set_lora_only_trainable
 GAMMA = 0.5
 
 
+class AdaptiveRankController:
+    """Stateful adaptive-rank policy with EMA, hysteresis and patience.
+
+    ``rank_equation`` is intentionally stateless and useful for one-off probes,
+    but a federated client should not oscillate between adjacent ranks because
+    of noisy mini-batches.  This controller smooths the demand signal and only
+    changes rank after ``patience`` consecutive requests in the same direction.
+    A residual ratio (if supplied) raises demand when the current rank is
+    losing update energy; it is clipped to keep a bad probe from exploding the
+    allocation.  All decisions remain bounded by the client's capability menu.
+    """
+
+    def __init__(self, batch_size, initial_rank=None, candidates=None, gamma=GAMMA,
+                 ema_decay=0.7, up_margin=0.10, down_margin=0.15, patience=2,
+                 residual_weight=0.5):
+        self.batch_size = batch_size
+        capability_max = BATCH_TO_MAX_RANK.get(batch_size, min(ALL_CANDIDATE_RANKS))
+        # An explicit menu can narrow the choices but may not bypass the
+        # hardware ceiling advertised by BATCH_TO_MAX_RANK.
+        menu = candidates if candidates is not None else ALL_CANDIDATE_RANKS
+        self.candidates = tuple(sorted({int(r) for r in menu if int(r) <= capability_max}))
+        if not self.candidates:
+            self.candidates = (min(ALL_CANDIDATE_RANKS),)
+        self.gamma = float(gamma)
+        self.ema_decay = float(ema_decay)
+        self.up_margin = float(up_margin)
+        self.down_margin = float(down_margin)
+        self.patience = max(1, int(patience))
+        self.residual_weight = float(residual_weight)
+        self.rank = int(initial_rank) if initial_rank in self.candidates else self.candidates[0]
+        self.ema_demand = None
+        self._direction = 0
+        self._streak = 0
+        # Last decision details are intentionally public read-only-by-convention
+        # attributes.  Experiment drivers can persist these alongside rank
+        # histories so an allocation curve remains auditable after the run.
+        self.last_demand = None
+        self.last_stable_rank = None
+        self.last_residual_ratio = None
+        self.last_target_rank = self.rank
+        self.last_direction = 0
+        self.last_changed = False
+
+    @property
+    def max_rank(self):
+        return self.candidates[-1]
+
+    def update(self, stable_rank, residual_ratio=None):
+        """Update state and return the rank to use on the next local step."""
+        try:
+            demand = float(stable_rank)
+        except (TypeError, ValueError):
+            demand = 0.0
+        if not math.isfinite(demand):
+            demand = 0.0
+        self.last_stable_rank = demand
+        self.last_residual_ratio = None
+        if residual_ratio is not None:
+            try:
+                rr = float(residual_ratio)
+            except (TypeError, ValueError):
+                rr = 0.0
+            if math.isfinite(rr):
+                self.last_residual_ratio = rr
+                demand *= 1.0 + self.residual_weight * min(max(rr, 0.0), 1.0)
+        demand = min(max(demand, 0.0), float(self.max_rank))
+        self.last_demand = demand
+        self.ema_demand = demand if self.ema_demand is None else (
+            self.ema_decay * self.ema_demand + (1.0 - self.ema_decay) * demand
+        )
+        target = rank_equation(self.ema_demand, self.batch_size, gamma=self.gamma)
+        # Restrict to an explicitly supplied menu as well as the global menu.
+        target = _nearest_candidate(target, self.candidates)
+        self.last_target_rank = target
+        direction = 1 if target > self.rank and self.ema_demand >= self.rank * (1.0 + self.up_margin) else \
+            -1 if target < self.rank and self.ema_demand <= self.rank * (1.0 - self.down_margin) else 0
+        self.last_direction = direction
+        self.last_changed = False
+        if direction == 0:
+            self._direction, self._streak = 0, 0
+            return self.rank
+        if direction == self._direction:
+            self._streak += 1
+        else:
+            self._direction, self._streak = direction, 1
+        if self._streak >= self.patience:
+            idx = self.candidates.index(self.rank) + direction
+            idx = min(max(idx, 0), len(self.candidates) - 1)
+            old_rank = self.rank
+            self.rank = self.candidates[idx]
+            self.last_changed = self.rank != old_rank
+            self._streak = 0
+        return self.rank
+
+    def diagnostics(self):
+        """Return a serialisable snapshot of the latest controller decision."""
+        return {
+            "rank": int(self.rank),
+            "demand": None if self.last_demand is None else float(self.last_demand),
+            "stable_rank": None if self.last_stable_rank is None else float(self.last_stable_rank),
+            "residual_ratio": self.last_residual_ratio,
+            # Tail mass is a ΔW compression diagnostic and is unavailable to
+            # the gradient-only controller; retain an explicit null field so
+            # downstream artifact schemas stay stable across policies.
+            "tail_mass": None,
+            "ema_demand": None if self.ema_demand is None else float(self.ema_demand),
+            "target_rank": int(self.last_target_rank),
+            "direction": int(self.last_direction),
+            "streak": int(self._streak),
+            "changed": bool(self.last_changed),
+            "max_rank": int(self.max_rank),
+            "gamma": float(self.gamma),
+        }
+
+
 def _nearest_candidate(rank, candidates):
     return min(candidates, key=lambda r: (abs(r - rank), r))
 

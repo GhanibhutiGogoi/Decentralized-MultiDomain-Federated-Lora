@@ -68,3 +68,12 @@ The heterogeneous rank/merge context is a separate comparison. Its notable final
 The P3 signature report is [`p3-signatures/gate_g1.json`](p3-signatures/gate_g1.json). Stage-10 mean ARI was 0.127 (local spectral), 0.067 (local row norms), 0.274 (local inverse ΔW L2), −0.060 (MH spectral), 0.161 (MH row norms), and 0.110 (MH inverse ΔW L2). All are below the 0.4 soft-candidate screen, so this run does not support automatic domain discovery for the fc-only adapters.
 
 The regenerated P2 artifacts are [`p2-exp1-real-seed42`](p2-exp1-real-seed42) and [`p2-exp2-real-seed42`](p2-exp2-real-seed42). All five datasets are marked real in `dataset_manifest.json`. Form A uses gamma 2.44458 and has global Spearman 0.368, pairwise ranking accuracy 0.641 and permutation p 0.162. Form B uses gamma 5 and has global Spearman 0.369, pairwise ranking accuracy 0.630 and permutation p 0.207. Form B's selected ridge alpha is 1000. These seed-42, five-round results show weak and task-dependent ranking behavior; they do not establish a universal preferred form or cross-task generalization.
+
+## Pending completion extensions
+
+The automatic-discovery and adaptive-rank drivers are implemented, but their full-data measurements are tracked separately from the completed P3 battery. Before citing either extension, require a non-smoke output directory with a manifest, per-seed records, and an aggregate summary:
+
+- [`p3-adaptive-discovery/`](p3-adaptive-discovery/) records online signature discovery, realised mixing matrices, and the ARI/NMI scoring view.
+- [`p1-adaptive-rank/`](p1-adaptive-rank/) records controller diagnostics, rank histories, budget checks, and fixed-rank/oracle comparisons.
+
+The README files in those directories are measurement templates. They intentionally do not alter the current paper or handoff claims; update those claims only after the corresponding manifests and aggregate tables exist.
