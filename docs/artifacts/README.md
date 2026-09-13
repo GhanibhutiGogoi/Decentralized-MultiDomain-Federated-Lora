@@ -2,7 +2,7 @@
 
 Start with [`claude_handoff.json`](claude_handoff.json). It records the intended completion scope, which evidence is current, where to find the measured data, and which claims the data can support. [`progress.jsonl`](progress.jsonl) is an append-only work log; each line is one JSON object. New experiments should be added to the handoff only after their files exist.
 
-The deliverable is a reproducible CIFAR-100 benchmark of decentralized LoRA with known domain groups. The benchmark is not evidence that clients can discover their domains, that adaptive ranks are calibrated, or that Project 2's old lambda estimates are valid. Those are separate extensions. A paper is optional.
+The deliverable is a reproducible CIFAR-100 benchmark of decentralized LoRA with known domain groups. The repository now also contains a measured coordinator-visible online-discovery extension and a measured adaptive-rank controller. Discovery is supported by full-data evidence; adaptive rank is implemented but fails its accuracy-preservation gate. Project 2's old lambda estimates remain separate and exploratory.
 
 ## Reading a benchmark run
 
@@ -65,15 +65,15 @@ The P3 aggregate report is [`p3-completion-report/aggregate.json`](p3-completion
 
 The heterogeneous rank/merge context is a separate comparison. Its notable final personalized/consensus means are: Local ΔW `0.5360 / 0.1450`; FedAvg ΔW `0.0574 / 0.0573`; flat MH ΔW `0.2845 / 0.0683`; oracle hierarchy ΔW `0.4407 / 0.1147`; flat MH factor zero-pad `0.2063 / 0.0775`; and flat MH ΔW with error feedback `0.2663 / 0.1062`. These values describe this fixed rank cycle and do not validate adaptive rank selection. Factor zero-padding is an intentionally naive baseline and its merge error is measured separately.
 
-The P3 signature report is [`p3-signatures/gate_g1.json`](p3-signatures/gate_g1.json). Stage-10 mean ARI was 0.127 (local spectral), 0.067 (local row norms), 0.274 (local inverse ΔW L2), −0.060 (MH spectral), 0.161 (MH row norms), and 0.110 (MH inverse ΔW L2). All are below the 0.4 soft-candidate screen, so this run does not support automatic domain discovery for the fc-only adapters.
+The historical P3 signature report is [`p3-signatures/gate_g1.json`](p3-signatures/gate_g1.json); its offline local/MH screen remains below the 0.4 soft-candidate threshold. The completed online discovery run is [`p3-adaptive-discovery/`](p3-adaptive-discovery/): the EMA/silhouette mixer inferred K=5 with scoring ARI 1.0 at stage 10 for all three seeds, with stage-20 ARI 1.0/0.918/1.0. This is coordinator-visible full-state observation, not a neighborhood-local protocol.
 
 The regenerated P2 artifacts are [`p2-exp1-real-seed42`](p2-exp1-real-seed42) and [`p2-exp2-real-seed42`](p2-exp2-real-seed42). All five datasets are marked real in `dataset_manifest.json`. Form A uses gamma 2.44458 and has global Spearman 0.368, pairwise ranking accuracy 0.641 and permutation p 0.162. Form B uses gamma 5 and has global Spearman 0.369, pairwise ranking accuracy 0.630 and permutation p 0.207. Form B's selected ridge alpha is 1000. These seed-42, five-round results show weak and task-dependent ranking behavior; they do not establish a universal preferred form or cross-task generalization.
 
 ## Pending completion extensions
 
-The automatic-discovery and adaptive-rank drivers are implemented, but their full-data measurements are tracked separately from the completed P3 battery. Before citing either extension, require a non-smoke output directory with a manifest, per-seed records, and an aggregate summary:
+The automatic-discovery and adaptive-rank drivers are implemented and their measured outputs are tracked separately from the completed P3 battery:
 
 - [`p3-adaptive-discovery/`](p3-adaptive-discovery/) records online signature discovery, realised mixing matrices, and the ARI/NMI scoring view.
 - [`p1-adaptive-rank/`](p1-adaptive-rank/) records controller diagnostics, rank histories, budget checks, and fixed-rank/oracle comparisons.
 
-The README files in those directories are measurement templates. They intentionally do not alter the current paper or handoff claims; update those claims only after the corresponding manifests and aggregate tables exist.
+The P3 discovery directory contains the completed manifest, per-seed records, aggregate table, and graph. The P1 directory contains the completed five-task summary, rank histories, diagnostics, manifest, and figures; its preregistered gate fails because every client stays at rank 2 and accuracy drops on three tasks.

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-09-13T04:00:00Z",
-  "status": "discovery_validated_adaptive_rank_running",
+  "status": "discovery_and_rank_measured_paper_updated",
   "project": {
     "name": "AH-LoRA",
     "description": "Adaptive heterogeneous LoRA for decentralized multi-domain federated learning",
@@ -85,8 +85,8 @@
     },
     {
       "component": "P1 adaptive rank selection",
-      "status": "implemented_remote_battery_running",
-      "detail": "AdaptiveRankController integrated into Project 1 Experiment 1; full-data calibration and budget-gated evidence pending."
+      "status": "implemented_remote_battery_complete_gate_failed",
+      "detail": "Five real tasks, five rounds on gpu003. Rank 2 throughout, 93.75% FLOP savings, zero capability violations, accuracy-preservation gate failed on three tasks."
     }
   ],
   "experiment_plan": {
@@ -391,8 +391,8 @@
     },
     {
       "id": "p3_adaptive_discovery",
-      "status": "awaiting_full_data_validation",
-      "classification": "pending_extension",
+      "status": "complete",
+      "classification": "extension_complete",
       "local_path": "docs/artifacts/p3-adaptive-discovery",
       "required_files": [
         "manifest.json",
@@ -400,12 +400,12 @@
         "seed{seed}_adaptive.json",
         "figures/"
       ],
-      "use": "Online automatic discovery evidence; do not cite until non-smoke runs complete."
+      "use": "Online automatic discovery evidence; coordinator-visible full-state observation."
     },
     {
       "id": "p1_adaptive_rank",
-      "status": "awaiting_full_data_validation",
-      "classification": "pending_extension",
+      "status": "complete_gate_failed",
+      "classification": "extension_complete",
       "local_path": "docs/artifacts/p1-adaptive-rank",
       "required_files": [
         "manifest.json",
@@ -413,7 +413,7 @@
         "rank_history.csv",
         "figures/"
       ],
-      "use": "Adaptive-rank calibration evidence; apply preregistered gate before changing paper claims."
+      "use": "Adaptive-rank implementation evidence; calibration gate failed."
     },
     {
       "id": "p3_adaptive_discovery_full_data",
@@ -583,8 +583,8 @@
   ],
   "next_actions": [
     "Review and merge PR #42 and PR #43",
-    "Use the paper and handoff artifacts for the Claude explanation",
-    "Run full-data automatic discovery and adaptive-rank calibration; update extension result sets and paper only from measured manifests."
+    "Use the updated paper and handoff artifacts for the Claude explanation",
+    "Future work: calibrate rank demand and implement neighborhood-local discovery/hard hierarchy gating."
   ],
   "paper": {
     "status": "complete",
@@ -592,11 +592,12 @@
     "rendered_pdf": "paper/main.pdf",
     "compile": "pdflatex + bibtex + pdflatex + pdflatex",
     "pages": 5,
-    "scope": "Evidence-scoped technical paper; oracle hierarchy and unresolved discovery/adaptive-rank limitations are explicit."
+    "scope": "Evidence-scoped technical paper; online coordinator-visible discovery is measured, adaptive rank is measured and reported as uncalibrated."
   },
   "validation": {
     "p3_discovery_targeted_remote": "30 passed",
     "p1_rank_selector_remote": "20 passed",
-    "p1_full_battery": "running_on_gpu003"
+    "p1_full_battery": "complete_gate_failed",
+    "p1_summary": "93.75% FLOP savings, rank 2 throughout, accuracy gate failed on CIFAR/Fashion/Tabular"
   }
 }
