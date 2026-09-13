@@ -154,6 +154,7 @@ class AdaptiveRankController:
         )
         target = rank_equation(self.ema_demand, self.batch_size, gamma=self.gamma)
         force_restore = self.rounds_seen <= self.warmup_rounds or self._quality_alarm
+        restored = False
         if force_restore:
             # Begin from the richest feasible adapter so the global model can
             # establish a useful update.  If quality regresses after a
@@ -163,14 +164,14 @@ class AdaptiveRankController:
             if self.rank < self.max_rank:
                 self.rank = self.max_rank
                 self._direction, self._streak = 0, 0
-                self.last_changed = True
+                restored = True
         # Restrict to an explicitly supplied menu as well as the global menu.
         target = _nearest_candidate(target, self.candidates)
         self.last_target_rank = target
         direction = 1 if target > self.rank and self.ema_demand >= self.rank * (1.0 + self.up_margin) else \
             -1 if target < self.rank and self.ema_demand <= self.rank * (1.0 - self.down_margin) else 0
         self.last_direction = direction
-        self.last_changed = False
+        self.last_changed = restored
         if direction == 0:
             self._direction, self._streak = 0, 0
             return self.rank
