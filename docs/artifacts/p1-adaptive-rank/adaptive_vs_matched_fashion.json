@@ -1,0 +1,25 @@
+{
+  "experiment": "project1_fashion_capability_matched_vs_conservative_adaptive",
+  "machine": "gpu003 (10.120.16.19)",
+  "seed": 42,
+  "rounds": 5,
+  "clients": {"0": {"batch_size": 16, "max_rank": 4}, "1": {"batch_size": 64, "max_rank": 8}, "2": {"batch_size": 256, "max_rank": 16}},
+  "matched": {
+    "ranks": [4, 8, 16],
+    "accuracy_curve_percent": [72.96, 80.6, 82.13, 83.08, 82.85],
+    "final_accuracy_percent": 82.85,
+    "total_flops": 26641440000
+  },
+  "adaptive": {
+    "policy": "two-round ceiling warmup, half-ceiling floor, five-percent relative quality-drop restore",
+    "rank_history": [[4, 8, 16], [4, 8, 16], [4, 8, 16], [2, 6, 12], [4, 6, 12]],
+    "accuracy_curve_percent": [70.92, 80.84, 82.23, 70.24, 82.85],
+    "final_accuracy_percent": 82.85,
+    "total_flops": 23977296000
+  },
+  "comparison": {
+    "final_accuracy_delta_percentage_points": 0.0,
+    "flops_saved_percent": 10.0,
+    "notes": "Adaptive briefly dipped at round 4 before recovering; parity is against a feasible capability-matched baseline, not fixed rank 32."
+  }
+}
