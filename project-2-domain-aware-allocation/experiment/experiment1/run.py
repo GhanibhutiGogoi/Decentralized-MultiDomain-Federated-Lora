@@ -98,6 +98,8 @@ TASK_ORDER = [
     "Audio-1DCNN",
 ]
 CHECKPOINT_SCHEMA_VERSION = 1
+CHECKPOINT_OUTPUT_SCHEMA_VERSION = "p2-exp1-output/v2"
+CHECKPOINT_RESUME_BOUNDARY = "task-boundary"
 MEASUREMENT_NUMERIC_FIELDS = {
     "round", "client_id", "partition_alpha", "partition_seed", "hardware_batch_size",
     "train_samples_seen", "partition_samples", "adaptive_rank", "local_loss", "quality_score",
@@ -105,6 +107,10 @@ MEASUREMENT_NUMERIC_FIELDS = {
     "zero_class_count", "update_cosine_distance_to_mean", "update_l2_distance_to_mean",
     "update_norm", "full_accuracy", "loo_accuracy", "delta_accuracy",
 }
+
+
+class Experiment1CheckpointError(ValueError):
+    """Raised when an Experiment 1 checkpoint is malformed or incompatible."""
 
 
 def _json_safe(value):
@@ -146,9 +152,35 @@ def _atomic_json_write(path: Path, payload: dict) -> None:
 
 def _atomic_dataframe_to_csv(frame: pd.DataFrame, path: Path) -> None:
     """Atomically replace a CSV artifact after successful serialization."""
-    temporary = path.with_name(path.name + ".tmp")
-    frame.to_csv(temporary, index=False)
-    os.replace(temporary, path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=str(path.parent),
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as handle:
+            frame.to_csv(handle, index=False)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except Exception:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def _stable_hash(payload: object) -> str:
+    encoded = json.dumps(
+        _json_safe(payload),
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def _source_revision() -> dict:
@@ -172,27 +204,82 @@ def _source_revision() -> dict:
 
 def _load_checkpoint(path: Path) -> dict:
     if not path.exists():
-        raise ValueError(f"Checkpoint not found: {path}")
+        raise Experiment1CheckpointError(f"Checkpoint not found: {path}")
+
+    def reject_duplicate_keys(pairs):
+        out = {}
+        for key, value in pairs:
+            if key in out:
+                raise Experiment1CheckpointError(f"duplicate JSON key {key!r}")
+            out[key] = value
+        return out
+
     try:
         payload = json.loads(
             path.read_text(encoding="utf-8"),
-            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"nonfinite JSON constant {value}")),
+            object_pairs_hook=reject_duplicate_keys,
+                parse_constant=lambda value: (_ for _ in ()).throw(Experiment1CheckpointError(f"nonfinite JSON constant {value}")),
         )
-    except (OSError, json.JSONDecodeError) as exc:
-        raise ValueError(f"Malformed checkpoint {path}: {exc}") from exc
+    except (OSError, json.JSONDecodeError, Experiment1CheckpointError) as exc:
+        raise Experiment1CheckpointError(f"Malformed checkpoint {path}: {exc}") from exc
     if not isinstance(payload, dict) or payload.get("schema_version") != CHECKPOINT_SCHEMA_VERSION:
-        raise ValueError("Unsupported or malformed Experiment 1 checkpoint schema")
+        raise Experiment1CheckpointError("Unsupported or malformed Experiment 1 checkpoint schema")
     if payload.get("status") not in {"running", "completed"}:
-        raise ValueError("Checkpoint status must be running or completed")
+        raise Experiment1CheckpointError("Checkpoint status must be running or completed")
     if not isinstance(payload.get("completed_tasks"), list) or not isinstance(payload.get("task_results"), list):
-        raise ValueError("Checkpoint is missing completed_tasks/task_results")
+        raise Experiment1CheckpointError("Checkpoint is missing completed_tasks/task_results")
+    if payload.get("output_schema_version") != CHECKPOINT_OUTPUT_SCHEMA_VERSION:
+        raise Experiment1CheckpointError("Checkpoint is missing the Experiment 1 output schema identity")
+    if payload.get("resume_boundary") != CHECKPOINT_RESUME_BOUNDARY:
+        raise Experiment1CheckpointError("Checkpoint resume boundary is unsupported")
+    run_identity = payload.get("run_identity")
+    if not isinstance(run_identity, dict) or not isinstance(payload.get("run_identity_hash"), str):
+        raise Experiment1CheckpointError("Checkpoint is missing run identity")
+    if payload["run_identity_hash"] != _stable_hash(run_identity):
+        raise Experiment1CheckpointError("Checkpoint run identity hash does not match its payload")
     return payload
 
 
-def _validate_checkpoint_identity(checkpoint: dict, *, task_names, args, partition_config):
-    expected = {
+def _run_identity(task_names, args, partition_config, dataset_manifest: dict) -> dict:
+    return {
+        "schema_version": CHECKPOINT_SCHEMA_VERSION,
+        "output_schema_version": CHECKPOINT_OUTPUT_SCHEMA_VERSION,
+        "resume_boundary": CHECKPOINT_RESUME_BOUNDARY,
         "tasks": list(task_names),
         "num_rounds": int(args.num_rounds),
+        "num_clients": int(NUM_CLIENTS),
+        "seed": int(args.seed),
+        "task_seed_policy": "seed + task index",
+        "task_seeds": {
+            task: int(args.seed) + idx for idx, task in enumerate(task_names)
+        },
+        "partition": _json_safe(partition_config.__dict__),
+        "data_root": str(Path(args.data_root).resolve()),
+        "synthetic_datasets": sorted(args.synthetic_datasets),
+        "download_datasets": bool(args.download_datasets),
+        "client_batch_sizes": list(CLIENT_BATCH_SIZES),
+        "client_epochs": int(CLIENT_EPOCHS),
+        "training": {
+            "optimizer": "Adam",
+            "learning_rate": 0.001,
+            "local_epochs": int(CLIENT_EPOCHS),
+        },
+        "lora": {
+            "fixed_rank": int(FIXED_RANK),
+            "batch_to_max_rank": {str(k): int(v) for k, v in BATCH_TO_MAX_RANK.items()},
+        },
+        "dataset_provenance": _stable_dataset_provenance(dataset_manifest),
+        "source_revision": _source_revision(),
+    }
+
+
+def _validate_checkpoint_identity(checkpoint: dict, *, task_names, args, partition_config, dataset_manifest: dict | None = None):
+    expected = {
+        "output_schema_version": CHECKPOINT_OUTPUT_SCHEMA_VERSION,
+        "resume_boundary": CHECKPOINT_RESUME_BOUNDARY,
+        "tasks": list(task_names),
+        "num_rounds": int(args.num_rounds),
+        "num_clients": int(NUM_CLIENTS),
         "seed": int(args.seed),
         "partition": _json_safe(partition_config.__dict__),
         "data_root": str(Path(args.data_root).resolve()),
@@ -205,6 +292,12 @@ def _validate_checkpoint_identity(checkpoint: dict, *, task_names, args, partiti
             raise ValueError(
                 f"Checkpoint incompatible for {key}: stored={checkpoint.get(key)!r}, expected={value!r}"
             )
+    if dataset_manifest is not None:
+        expected_identity = _run_identity(task_names, args, partition_config, dataset_manifest)
+        if checkpoint.get("run_identity") != expected_identity:
+            raise ValueError("Checkpoint run identity differs from the requested run")
+        if checkpoint.get("run_identity_hash") != _stable_hash(expected_identity):
+            raise ValueError("Checkpoint run identity hash differs from requested run")
     completed = checkpoint["completed_tasks"]
     if completed != list(task_names)[:len(completed)]:
         raise ValueError("Checkpoint completed tasks must be an ordered prefix of the requested tasks")
@@ -700,8 +793,6 @@ def main():
             args=args,
             partition_config=partition_config,
         )
-        if checkpoint.get("source_revision") != _source_revision():
-            raise ValueError("Checkpoint source revision differs from current code; refusing resume")
     _record_progress(
         output_dir,
         "run_started",
@@ -727,17 +818,23 @@ def main():
             bundles=dataset_bundles,
         )
 
+    run_identity = _run_identity(task_names, args, partition_config, dataset_manifest)
     identity = {
         "schema_version": CHECKPOINT_SCHEMA_VERSION,
+        "output_schema_version": CHECKPOINT_OUTPUT_SCHEMA_VERSION,
+        "resume_boundary": CHECKPOINT_RESUME_BOUNDARY,
         "status": "running",
         "tasks": list(task_names),
         "num_rounds": int(args.num_rounds),
+        "num_clients": int(NUM_CLIENTS),
         "seed": int(args.seed),
         "partition": _json_safe(partition_config.__dict__),
         "data_root": str(Path(args.data_root).resolve()),
         "synthetic_datasets": sorted(args.synthetic_datasets),
         "download_datasets": bool(args.download_datasets),
         "task_seed_policy": "seed + task index",
+        "run_identity": run_identity,
+        "run_identity_hash": _stable_hash(run_identity),
         "dataset_manifest": _json_safe(dataset_manifest),
         "dataset_provenance": _stable_dataset_provenance(dataset_manifest),
         "source_revision": _source_revision(),
@@ -745,6 +842,13 @@ def main():
         "task_results": [],
     }
     if checkpoint is not None:
+        _validate_checkpoint_identity(
+            checkpoint,
+            task_names=task_names,
+            args=args,
+            partition_config=partition_config,
+            dataset_manifest=dataset_manifest,
+        )
         if checkpoint.get("dataset_provenance") != identity["dataset_provenance"]:
             raise ValueError("Checkpoint dataset provenance differs from current datasets; refusing resume")
         identity = checkpoint
@@ -836,12 +940,12 @@ def main():
             "progress_jsonl": "progress.jsonl",
         },
     }
-    _atomic_json_write(output_dir / "manifest.json", manifest)
-    _record_progress(output_dir, "run_completed", measurement_rows=len(measurements))
     identity["status"] = "completed"
     identity["completed_tasks"] = [result_item["task"] for result_item in task_results]
     identity["task_results"] = _json_safe(task_results)
     _atomic_json_write(output_dir / "checkpoint.json", identity)
+    _atomic_json_write(output_dir / "manifest.json", manifest)
+    _record_progress(output_dir, "run_completed", measurement_rows=len(measurements))
 
     print("\n=== Experiment 1 Complete ===")
     print(f"Label rows: {len(label_df)}")

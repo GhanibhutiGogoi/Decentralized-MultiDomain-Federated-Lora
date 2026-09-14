@@ -29,6 +29,10 @@ permutation seeds. Fresh Dirichlet partitions are generated from labels via the
 shared Project 2 partitioning implementation, not from Experiment 1 or
 Experiment 2 calibration outputs. Partition hashes are recorded for run identity
 and statistical pairing.
+Before each paired arm trains for the same task and round, the runner resets
+Python, NumPy, PyTorch CPU/CUDA, and per-client DataLoader generator state from
+the same arm-independent seed. Baseline, Form A, and Form B receive independent
+copies of the same initial global model state; only lambda weighting differs.
 
 ## Metrics And Statistics
 
@@ -40,6 +44,17 @@ Statistical utilities pair arm-versus-baseline comparisons by task, seed, and
 partition identity. Paired permutation tests use exact sign-flip enumeration for
 small samples and deterministic Monte Carlo with the plus-one convention for
 larger samples. MDE comparison requires an explicit configured MDE.
+Production CLI runs require `--mde`; no default minimum detectable effect is
+invented by the runner.
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment3/run.py --calibration-bundle project-2-domain-aware-allocation/outputs/exp2/calibration_bundle.json --experiment1-run-id <exp1-run-id> --experiment2-run-id <exp2-run-id> --mde <minimum-detectable-effect>
+```
+
+Final artifacts include paired arm differences, paired permutation tests,
+paired confidence intervals, task-level paired summaries, and configured MDE
+comparisons in addition to per-round accuracy, per-domain accuracy, fairness,
+realized-weight, and lambda-rank-agreement outputs.
 
 ## Checkpoint And Output Ownership
 

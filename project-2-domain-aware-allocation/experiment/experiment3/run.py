@@ -16,6 +16,7 @@ path; there is no separate dry-run runner or output schema.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import sys
@@ -52,12 +53,21 @@ from experiment3.metrics import (  # noqa: E402
     worst_domain_accuracy,
 )
 from experiment3.seeds import Experiment3Seeds, derive_seeds  # noqa: E402
+from experiment3.statistics import (  # noqa: E402
+    compare_to_mde,
+    confidence_interval,
+    paired_arm_differences,
+    paired_permutation_test,
+    pooled_summary,
+    task_level_summary,
+)
 from framework.datasets import DEFAULT_DATA_ROOT  # noqa: E402
 from framework.utils import (  # noqa: E402
     ensure_cleanup_within_allowed_root,
     ensure_disjoint_directory,
     ensure_not_cleanup_parent,
     prepare_output_directory,
+    set_reproducibility_seed,
 )
 
 
@@ -149,6 +159,17 @@ class Experiment3RuntimeOps(Protocol):
         ...
 
     def initial_state(self, task: TaskRuntime, config: Experiment3Config) -> Any:
+        ...
+
+    def reset_stochastic_state(
+        self,
+        task: TaskRuntime,
+        prepared: PreparedTask,
+        *,
+        round_id: int,
+        seed: int,
+        config: Experiment3Config,
+    ) -> None:
         ...
 
     def train_client_updates(
@@ -261,6 +282,7 @@ def _config_payload(config: Experiment3Config, seeds: Experiment3Seeds) -> dict[
         "arms": list(ARMS),
         "target_accuracy": config.target_accuracy,
         "mde": config.mde,
+        "paired_stochastic_seed_policy": "arm-independent stable hash of run/task/round",
     }
 
 
@@ -278,6 +300,26 @@ def _state_path(output_dir: Path, task: str, arm: str, seed: int, round_id: int)
     return output_dir / "checkpoints" / (
         f"{_sanitize(task)}__{_sanitize(arm)}__seed{seed}__round{round_id}.state"
     )
+
+
+def _paired_stochastic_seed(
+    *,
+    config: Experiment3Config,
+    seeds: Experiment3Seeds,
+    task_name: str,
+    round_id: int,
+) -> int:
+    payload = {
+        "stream": "experiment3-paired-arm-stochastic-state",
+        "run_seed": int(config.run_seed),
+        "model_seed": int(seeds.model_seed),
+        "dataloader_seed": int(seeds.dataloader_seed),
+        "task": task_name,
+        "round": int(round_id),
+        "partition": config.partition,
+        "partition_alpha": float(config.partition_alpha),
+    }
+    return int(stable_hash(payload)[:8], 16)
 
 
 def _atomic_write_dataframe_csv(df: pd.DataFrame, path: Path) -> None:
@@ -358,7 +400,12 @@ def _round_rows(
     applied_lambda = (
         [1.0 for _ in updates] if lambda_weights is None else [float(v) for v in lambda_weights]
     )
-    realized = normalized_aggregation_weights(samples, qualities, lambda_weights)
+    realized = normalized_aggregation_weights(
+        samples,
+        qualities,
+        lambda_weights,
+        client_ids=[update.client_id for update in updates],
+    )
     divergence_rank = _divergence_orders(updates)
 
     observation_rows = []
@@ -444,6 +491,76 @@ def _convergence_speed(global_df: pd.DataFrame, target_accuracy: float) -> pd.Da
     return pd.DataFrame(rows)
 
 
+def _paired_stat_artifacts(final_global: pd.DataFrame, config: Experiment3Config) -> dict[str, pd.DataFrame]:
+    paired_frames = []
+    permutation_rows = []
+    ci_rows = []
+    task_summary_frames = []
+    mde_rows = []
+
+    for comparison_arm in ("form_a", "form_b"):
+        paired = paired_arm_differences(
+            final_global,
+            baseline_arm="baseline",
+            comparison_arm=comparison_arm,
+            value_col="global_accuracy",
+        )
+        paired = paired.copy()
+        paired.insert(0, "comparison_arm", comparison_arm)
+        paired_frames.append(paired)
+
+        differences = paired["difference"].to_numpy(dtype=float)
+        permutation = paired_permutation_test(
+            differences,
+            seed=int(config.run_seed),
+        )
+        permutation_rows.append(
+            {
+                "comparison_arm": comparison_arm,
+                "observed_mean_difference": permutation.observed_mean_difference,
+                "p_value": permutation.p_value,
+                "n_pairs": permutation.n_pairs,
+                "method": permutation.method,
+                "alternative": permutation.alternative,
+                "permutations": permutation.permutations,
+            }
+        )
+        ci_low, ci_high = confidence_interval(differences)
+        pooled = pooled_summary(paired)
+        ci_rows.append(
+            {
+                "comparison_arm": comparison_arm,
+                "n_pairs": pooled["n_pairs"],
+                "mean_difference": pooled["mean_difference"],
+                "ci_low": ci_low,
+                "ci_high": ci_high,
+            }
+        )
+        task_summary = task_level_summary(paired).copy()
+        task_summary.insert(0, "comparison_arm", comparison_arm)
+        task_summary_frames.append(task_summary)
+        if config.mde is not None:
+            mde = compare_to_mde(float(pooled["mean_difference"]), mde=config.mde)
+            mde_rows.append(
+                {
+                    "comparison_arm": comparison_arm,
+                    "effect": mde["effect"],
+                    "mde": mde["mde"],
+                    "meets_mde": mde["meets_mde"],
+                }
+            )
+
+    artifacts = {
+        "paired_arm_differences.csv": pd.concat(paired_frames, ignore_index=True),
+        "paired_permutation_tests.csv": pd.DataFrame(permutation_rows),
+        "paired_confidence_intervals.csv": pd.DataFrame(ci_rows),
+        "paired_task_summaries.csv": pd.concat(task_summary_frames, ignore_index=True),
+    }
+    if config.mde is not None:
+        artifacts["mde_comparison.csv"] = pd.DataFrame(mde_rows)
+    return artifacts
+
+
 def _write_final_artifacts(
     *,
     output_dir: Path,
@@ -457,16 +574,18 @@ def _write_final_artifacts(
     global_df = pd.DataFrame(global_rows)
     weights = pd.DataFrame(weight_rows)
     rank_df = pd.DataFrame(rank_rows)
+    final_global = _final_round_global_accuracy(global_df)
     artifacts = {
         "per_round_client_observations.csv": observations,
         "global_accuracy_per_round.csv": global_df,
-        "final_round_global_accuracy.csv": _final_round_global_accuracy(global_df),
+        "final_round_global_accuracy.csv": final_global,
         "per_domain_accuracy.csv": per_domain_accuracy(observations),
         "worst_domain_accuracy.csv": worst_domain_accuracy(observations),
         "fairness_spread_variance.csv": fairness_spread_variance(observations),
         "realized_aggregation_weights.csv": weights,
         "lambda_rank_agreement.csv": within_round_rank_agreement(rank_df),
     }
+    artifacts.update(_paired_stat_artifacts(final_global, config))
     if config.target_accuracy is not None:
         artifacts["convergence_speed.csv"] = _convergence_speed(
             global_df,
@@ -500,6 +619,8 @@ def run_experiment3(
     )
     if config.resume and config.overwrite:
         raise Experiment3RunnerError("--resume and --overwrite cannot be combined.")
+    if not allow_engineering_fixture and config.mde is None:
+        raise Experiment3RunnerError("Scientific Experiment 3 runs must configure --mde.")
     validate_output_scope(config.output_dir)
     seeds = derive_seeds(config.run_seed)
     bundle = load_calibration_bundle(
@@ -555,7 +676,20 @@ def run_experiment3(
             }
         )
 
-        states = {arm: ops.initial_state(task, config) for arm in ARMS}
+        ops.reset_stochastic_state(
+            task,
+            prepared,
+            round_id=0,
+            seed=_paired_stochastic_seed(
+                config=config,
+                seeds=seeds,
+                task_name=task.name,
+                round_id=0,
+            ),
+            config=config,
+        )
+        initial_state = ops.initial_state(task, config)
+        states = {arm: copy.deepcopy(initial_state) for arm in ARMS}
         for arm in ARMS:
             for round_id in range(1, int(config.rounds) + 1):
                 cp_path = _checkpoint_path(output_dir, task.name, arm, config.run_seed, round_id)
@@ -569,6 +703,18 @@ def run_experiment3(
                     global_rows.append(data["global_row"])
                     continue
 
+                ops.reset_stochastic_state(
+                    task,
+                    prepared,
+                    round_id=round_id,
+                    seed=_paired_stochastic_seed(
+                        config=config,
+                        seeds=seeds,
+                        task_name=task.name,
+                        round_id=round_id,
+                    ),
+                    config=config,
+                )
                 updates = ops.train_client_updates(
                     task,
                     prepared,
@@ -704,6 +850,7 @@ def prepare_validated_run(
     run_seed: int,
     rounds: int,
     clients: int,
+    mde: float | None = None,
     overwrite: bool = False,
 ) -> dict[str, object]:
     """Backward-compatible entry point now running the real orchestration."""
@@ -717,6 +864,7 @@ def prepare_validated_run(
             run_seed=run_seed,
             rounds=rounds,
             clients=clients,
+            mde=mde,
             overwrite=overwrite,
         )
     )
@@ -854,6 +1002,22 @@ class Project2RuntimeOps:
     def initial_state(self, task: TaskRuntime, config: Experiment3Config) -> Any:
         model = task.payload["model_fn"](self.fixed_rank).to(self.device)
         return model.state_dict()
+
+    def reset_stochastic_state(
+        self,
+        task: TaskRuntime,
+        prepared: PreparedTask,
+        *,
+        round_id: int,
+        seed: int,
+        config: Experiment3Config,
+    ) -> None:
+        del task, round_id, config
+        set_reproducibility_seed(int(seed))
+        for client_idx, loader in enumerate(prepared.payload.get("loaders", [])):
+            generator = getattr(loader, "generator", None)
+            if isinstance(generator, self.torch.Generator):
+                generator.manual_seed(int(seed) + client_idx)
 
     def train_client_updates(
         self,
@@ -998,6 +1162,8 @@ class Project2RuntimeOps:
         os.close(fd)
         try:
             self.torch.save(state, tmp_name)
+            with open(tmp_name, "rb") as handle:
+                os.fsync(handle.fileno())
             os.replace(tmp_name, path)
         except Exception:
             try:
@@ -1028,7 +1194,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--partition", default="dirichlet")
     parser.add_argument("--partition-alpha", type=float, default=0.5)
     parser.add_argument("--target-accuracy", type=float, default=None)
-    parser.add_argument("--mde", type=float, default=None)
+    parser.add_argument("--mde", type=float, required=True)
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)
     parser.add_argument("--download-datasets", action="store_true")
     parser.add_argument("--num-workers", type=int, default=0)

@@ -5,6 +5,7 @@ into the reusable framework namespace without changing its behavior.
 """
 
 import math
+import numbers
 
 import torch
 
@@ -69,21 +70,33 @@ def _lora_pairs(ref_sd):
 
 def _factorize_delta(delta, target_rank, dtype):
     """Return A, B such that B @ A approximates delta at target_rank."""
+    if not isinstance(target_rank, numbers.Integral) or isinstance(target_rank, bool) or target_rank <= 0:
+        raise ValueError("target_rank must be a positive integer")
+    target_rank = int(target_rank)
+    if delta.dim() != 2:
+        raise ValueError("delta must be a 2-D tensor")
+    if delta.numel() == 0:
+        raise ValueError("delta must be non-empty")
+    if not torch.is_floating_point(delta):
+        raise ValueError("delta must be a floating-point tensor")
+    if not torch.isfinite(delta).all():
+        raise ValueError("delta must contain only finite values")
     out_f, in_f = delta.shape
     rank = min(target_rank, out_f, in_f)
-    u, s, vh = torch.linalg.svd(delta.float(), full_matrices=False)
+    work = delta if delta.dtype == torch.float64 else delta.float()
+    u, s, vh = torch.linalg.svd(work, full_matrices=False)
 
     if rank > 0:
         root_s = torch.sqrt(torch.clamp(s[:rank], min=0.0))
         b = u[:, :rank] * root_s.unsqueeze(0)
         a = root_s.unsqueeze(1) * vh[:rank, :]
     else:
-        b = torch.zeros(out_f, 0, device=delta.device)
-        a = torch.zeros(0, in_f, device=delta.device)
+        b = torch.zeros(out_f, 0, dtype=work.dtype, device=delta.device)
+        a = torch.zeros(0, in_f, dtype=work.dtype, device=delta.device)
 
     if target_rank > rank:
-        b_pad = torch.zeros(out_f, target_rank - rank, device=delta.device)
-        a_pad = torch.zeros(target_rank - rank, in_f, device=delta.device)
+        b_pad = torch.zeros(out_f, target_rank - rank, dtype=work.dtype, device=delta.device)
+        a_pad = torch.zeros(target_rank - rank, in_f, dtype=work.dtype, device=delta.device)
         b = torch.cat([b, b_pad], dim=1)
         a = torch.cat([a, a_pad], dim=0)
 
@@ -146,7 +159,12 @@ def fedavg_quality_weighted(
             b = state[b_key].to(device)
             if a.dim() != 2 or b.dim() != 2 or b.shape[1] != a.shape[0]:
                 continue
-            deltas.append((b.float() @ a.float(), client_weight))
+            if not torch.is_floating_point(a) or not torch.is_floating_point(b):
+                raise ValueError("LoRA factors must be floating-point tensors")
+            if not torch.isfinite(a).all() or not torch.isfinite(b).all():
+                raise ValueError("LoRA factors must contain only finite values")
+            work_dtype = torch.float64 if torch.float64 in (a.dtype, b.dtype) else torch.float32
+            deltas.append((b.to(dtype=work_dtype) @ a.to(dtype=work_dtype), client_weight))
 
         if deltas:
             delta = sum(d * w for d, w in deltas)

@@ -121,9 +121,21 @@ def _validate_checkpoint_shape(payload: Mapping[str, object]) -> None:
 
 def read_checkpoint(path: Path, *, expected_identity: RunIdentity) -> dict[str, object]:
     """Read and validate a checkpoint for compatible explicit resume."""
+    def reject_duplicate_keys(pairs):
+        out = {}
+        for key, value in pairs:
+            if key in out:
+                raise ValueError(f"duplicate JSON key {key!r}")
+            out[key] = value
+        return out
+
     try:
-        payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = json.loads(
+            Path(path).read_text(encoding="utf-8"),
+            object_pairs_hook=reject_duplicate_keys,
+            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"nonfinite JSON constant {value}")),
+        )
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
         raise Experiment3CheckpointError("Checkpoint is missing or malformed.") from exc
     if not isinstance(payload, Mapping):
         raise Experiment3CheckpointError("Checkpoint root must be an object.")

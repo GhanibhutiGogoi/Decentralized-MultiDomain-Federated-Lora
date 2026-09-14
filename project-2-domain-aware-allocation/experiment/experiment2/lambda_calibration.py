@@ -255,20 +255,53 @@ def _clip_renormalize_to_mean_one(
 
 
 def _lambda_from_score(df: pd.DataFrame, score: np.ndarray, scale: float):
-    work = df[GROUP_COLS].reset_index(drop=True).copy()
-    work["score"] = score
-    centered = work["score"] - work.groupby(GROUP_COLS)["score"].transform("mean")
-    raw = np.exp(scale * centered.clip(lower=-20.0, upper=20.0))
+    return lambda_weights_from_scores(df[GROUP_COLS], score, scale)
+
+
+def lambda_weights_from_scores(
+    groups: pd.DataFrame,
+    score: Iterable[float],
+    scale: float,
+    *,
+    group_cols: list[str] | None = None,
+    lower: float = LAMBDA_MIN,
+    upper: float = LAMBDA_MAX,
+) -> np.ndarray:
+    """Convert calibrated scores to bounded mean-one lambda weights.
+
+    This is the single implementation used during Experiment 2 calibration and
+    Experiment 3 application.
+    """
+    group_cols = GROUP_COLS if group_cols is None else list(group_cols)
+    if not isinstance(groups, pd.DataFrame):
+        raise ValueError("groups must be a pandas DataFrame.")
+    missing = [column for column in group_cols if column not in groups.columns]
+    if missing:
+        raise ValueError(f"Lambda groups are missing columns: {missing}.")
+    if not np.isfinite(float(scale)):
+        raise ValueError("Lambda scale must be finite.")
+    work = groups[group_cols].reset_index(drop=True).copy()
+    score_array = np.asarray(list(score), dtype=float)
+    if len(work) != len(score_array):
+        raise ValueError("Lambda groups and scores must have equal length.")
+    if score_array.size == 0:
+        raise ValueError("Lambda scores must be non-empty.")
+    if not np.all(np.isfinite(score_array)):
+        raise ValueError("Lambda scores must be finite.")
+    work["score"] = score_array
+    centered = work["score"] - work.groupby(group_cols)["score"].transform("mean")
+    raw = np.exp(float(scale) * centered.clip(lower=-20.0, upper=20.0))
     work["lambda_raw"] = raw
     lam = np.empty(len(work), dtype=float)
     raw_values = work["lambda_raw"].to_numpy(dtype=float)
-    for _, indices in work.groupby(GROUP_COLS).groups.items():
+    for _, indices in work.groupby(group_cols).groups.items():
         group_positions = np.asarray(indices, dtype=int)
         lam[group_positions] = _clip_renormalize_to_mean_one(
-            raw_values[group_positions]
+            raw_values[group_positions],
+            lower=lower,
+            upper=upper,
         )
     return lam
-
 
 def _coefficient_of_variation(values: Iterable[float]) -> float:
     arr = np.asarray(list(values), dtype=float)

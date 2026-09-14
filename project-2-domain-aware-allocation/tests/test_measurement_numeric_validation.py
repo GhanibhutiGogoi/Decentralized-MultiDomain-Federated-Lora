@@ -351,7 +351,7 @@ class MeasurementNumericValidationTest(unittest.TestCase):
         alpha_line = _call_lines(main, "leave_one_task_out_evaluation")[0]
         fit_line = _call_lines(main, "fit_form_a")[0]
         gamma_line = _call_lines(main, "calibrate_lambda_scales")[0]
-        csv_line = _call_lines(main, "to_csv")[0]
+        csv_line = _call_lines(main, "_atomic_dataframe_to_csv")[0]
         figure_line = _call_lines(main, "save_figures")[0]
         report_line = _call_lines(main, "build_evaluation_report")[0]
 

@@ -24,6 +24,16 @@ def is_lora_B_key(k):
     return any(k.endswith(s) for s in LORA_B_SUFFIXES)
 
 
+def _validated_svd_input(t, *, label: str) -> torch.Tensor:
+    if not torch.is_floating_point(t):
+        raise ValueError(f"{label} must be a floating-point tensor")
+    if t.numel() == 0:
+        raise ValueError(f"{label} must be non-empty")
+    if not torch.isfinite(t).all():
+        raise ValueError(f"{label} must contain only finite values")
+    return t if t.dtype == torch.float64 else t.float()
+
+
 def project_tensor_to_rank(t, target_rank, rank_dim=0):
     """
     Project a 2-D LoRA matrix to target_rank along rank_dim.
@@ -42,11 +52,15 @@ def project_tensor_to_rank(t, target_rank, rank_dim=0):
     if rank_dim not in (0, 1):
         raise ValueError("rank_dim must be 0 or 1")
     cur_rank = t.shape[rank_dim]
+    if cur_rank <= 0:
+        raise ValueError("LoRA rank dimension must be non-empty")
+    _validated_svd_input(t, label="LoRA tensor")
     if cur_rank == target_rank:
         return t.clone()
 
     if cur_rank > target_rank:
-        mat = t.float() if rank_dim == 0 else t.float().t()
+        work = t if t.dtype == torch.float64 else t.float()
+        mat = work if rank_dim == 0 else work.t()
         _, singular_values, Vh = torch.linalg.svd(mat, full_matrices=False)
         principal = singular_values[:, None] * Vh
         actual_rows = principal.shape[0]
@@ -89,6 +103,8 @@ def load_global_state(model, global_state):
         g_a, g_b = global_state[a_key], global_state[b_key]
         if g_a.dim() != 2 or g_b.dim() != 2 or g_b.shape[1] != g_a.shape[0]:
             continue
+        _validated_svd_input(g_a, label=f"global LoRA tensor {a_key!r}")
+        _validated_svd_input(g_b, label=f"global LoRA tensor {b_key!r}")
 
         l_a, l_b = local[a_key], local[b_key]
         if l_b.shape[1] != l_a.shape[0]:
@@ -110,7 +126,8 @@ def load_global_state(model, global_state):
             )
 
         device = l_a.device
-        delta = g_b.to(device).float() @ g_a.to(device).float()
+        work_dtype = torch.float64 if torch.float64 in (g_a.dtype, g_b.dtype) else torch.float32
+        delta = g_b.to(device=device, dtype=work_dtype) @ g_a.to(device=device, dtype=work_dtype)
         new_a, new_b = _factorize_delta(delta, l_a.shape[0], l_a.dtype)
         local[a_key] = new_a.to(device=device, dtype=l_a.dtype)
         local[b_key] = new_b.to(device=device, dtype=l_b.dtype)

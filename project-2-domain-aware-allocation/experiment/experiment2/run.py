@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -33,6 +35,12 @@ from experiment2.lambda_calibration import (  # noqa: E402
     predict_standardized_score,
     ridge_alpha_grid,
     validation_tables,
+)
+from experiment2.calibration_bundle import (  # noqa: E402
+    atomic_write_json,
+    build_calibration_bundle,
+    stable_payload_hash,
+    write_calibration_bundle,
 )
 from experiment2.evaluation import (  # noqa: E402
     EvaluationConfig,
@@ -85,11 +93,30 @@ def _write_experiment2_dataset_manifest(
         "source_dataset_manifest_file": str(source_manifest_path),
         "source_dataset_manifest": source_dataset_manifest,
     }
-    (output_dir / "dataset_manifest.json").write_text(
-        json.dumps(manifest, indent=2),
-        encoding="utf-8",
-    )
+    atomic_write_json(output_dir / "dataset_manifest.json", manifest)
     return manifest
+
+
+def _atomic_dataframe_to_csv(frame: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=str(path.parent),
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as handle:
+            frame.to_csv(handle, index=False)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except Exception:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def _svg_scatter(path: Path, df: pd.DataFrame, x_col: str, y_col: str, title: str):
@@ -378,14 +405,14 @@ def main():
         ["form", "scope", "scope_value", "n", "spearman", "kendall_tau", "permutation_p_value"]
     ].copy()
 
-    lambda_values.to_csv(args.output_dir / "lambda_values.csv", index=False)
-    validation.to_csv(args.output_dir / "lambda_validation.csv", index=False)
-    orthogonality.to_csv(args.output_dir / "orthogonality_report.csv", index=False)
-    cv.to_csv(args.output_dir / "cross_validation.csv", index=False)
-    coefficients.to_csv(args.output_dir / "fitted_coefficients.csv", index=False)
-    evaluation_metrics.to_csv(args.output_dir / "evaluation_metrics.csv", index=False)
-    alpha_metrics.to_csv(args.output_dir / "alpha_evaluation.csv", index=False)
-    ranking_significance.to_csv(args.output_dir / "ranking_significance.csv", index=False)
+    _atomic_dataframe_to_csv(lambda_values, args.output_dir / "lambda_values.csv")
+    _atomic_dataframe_to_csv(validation, args.output_dir / "lambda_validation.csv")
+    _atomic_dataframe_to_csv(orthogonality, args.output_dir / "orthogonality_report.csv")
+    _atomic_dataframe_to_csv(cv, args.output_dir / "cross_validation.csv")
+    _atomic_dataframe_to_csv(coefficients, args.output_dir / "fitted_coefficients.csv")
+    _atomic_dataframe_to_csv(evaluation_metrics, args.output_dir / "evaluation_metrics.csv")
+    _atomic_dataframe_to_csv(alpha_metrics, args.output_dir / "alpha_evaluation.csv")
+    _atomic_dataframe_to_csv(ranking_significance, args.output_dir / "ranking_significance.csv")
 
     save_figures(lambda_values, figure_dir)
     figure_files = [
@@ -420,12 +447,42 @@ def main():
         figure_files=figure_files,
     )
 
+    experiment1_run_id = exp1_manifest.get("run_id") or stable_payload_hash(
+        {
+            "experiment1_manifest": exp1_manifest,
+            "experiment1_dataset_manifest": exp1_dataset_manifest,
+        }
+    )
+    experiment2_run_id = stable_payload_hash(
+        {
+            "source_experiment1_run_id": experiment1_run_id,
+            "task_set": list(df["task"].drop_duplicates()),
+            "ridge_alpha_grid": ridge_alphas,
+            "selected_ridge_alpha": selected_alpha,
+            "lambda_calibration": lambda_calibrations,
+        }
+    )
+    calibration_bundle = build_calibration_bundle(
+        measurements=df,
+        exp1_manifest=exp1_manifest,
+        exp1_dataset_manifest=exp1_dataset_manifest,
+        fits=[fit_a, fit_b],
+        lambda_calibrations=lambda_calibrations,
+        experiment1_run_id=experiment1_run_id,
+        experiment2_run_id=experiment2_run_id,
+    )
+    write_calibration_bundle(args.output_dir / "calibration_bundle.json", calibration_bundle)
+
     manifest = {
         "project": "Project 2",
         "experiment": "Experiment 2",
         "source_experiment": str(args.exp1_dir),
+        "source_experiment1_run_id": experiment1_run_id,
+        "experiment2_run_id": experiment2_run_id,
         "output_dir": str(args.output_dir),
         "dataset_manifest_file": "dataset_manifest.json",
+        "calibration_bundle_file": "calibration_bundle.json",
+        "calibration_bundle_schema_version": calibration_bundle["schema_version"],
         "dataset_manifest": dataset_manifest,
         "source_dataset_provenance": exp1_manifest.get("dataset_provenance", {}),
         "is_synthetic_present": bool(df["is_synthetic"].astype(bool).any()),
@@ -471,6 +528,7 @@ def main():
             "alpha_evaluation.csv",
             "ranking_significance.csv",
             "comparison_report.md",
+            "calibration_bundle.json",
             "figures/",
         ],
         "sanity_check_weights": normalized_aggregation_weights(
@@ -484,10 +542,7 @@ def main():
             lambda_weights=[1, 1, 1],
         ),
     }
-    (args.output_dir / "manifest.json").write_text(
-        json.dumps(manifest, indent=2),
-        encoding="utf-8",
-    )
+    atomic_write_json(args.output_dir / "manifest.json", manifest)
 
     print("=== Experiment 2 Complete ===")
     print(f"Rows used: {len(df)}")

@@ -6,6 +6,7 @@ import ast
 import json
 import math
 import os
+import random
 import sys
 import tempfile
 import unittest
@@ -13,6 +14,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 
 PROJECT2_ROOT = Path(__file__).resolve().parents[1]
 for path in (PROJECT2_ROOT, PROJECT2_ROOT / "experiment"):
@@ -111,6 +113,9 @@ def client_records():
 class InMemoryExperiment3Ops:
     def __init__(self):
         self.aggregate_calls = []
+        self.initial_state_calls = 0
+        self.reset_calls = []
+        self.rng_draws = []
 
     def load_tasks(self, config):
         return [TaskRuntime("TinyTask", {"labels": [0, 1]})]
@@ -123,9 +128,29 @@ class InMemoryExperiment3Ops:
         )
 
     def initial_state(self, task, config):
+        self.initial_state_calls += 1
         return {"value": 0.0}
 
+    def reset_stochastic_state(self, task, prepared, *, round_id, seed, config):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        prepared.payload.setdefault("loader_generators", [torch.Generator(), torch.Generator()])
+        for client_idx, generator in enumerate(prepared.payload["loader_generators"]):
+            generator.manual_seed(seed + client_idx)
+        self.reset_calls.append((task.name, round_id, seed))
+
     def train_client_updates(self, task, prepared, *, arm, round_id, global_state, config):
+        self.rng_draws.append(
+            (
+                arm,
+                round_id,
+                random.random(),
+                float(np.random.random()),
+                float(torch.rand(())),
+                float(torch.rand((), generator=prepared.payload["loader_generators"][0])),
+            )
+        )
         records = client_records()
         return [
             ClientUpdate(
@@ -152,6 +177,7 @@ class InMemoryExperiment3Ops:
         lambda_weights,
         config,
     ):
+        global_state["value"] += 0.0
         applied = [1.0 for _ in updates] if lambda_weights is None else list(lambda_weights)
         self.aggregate_calls.append((arm, tuple(round(float(v), 12) for v in applied)))
         increment = sum(
@@ -483,6 +509,7 @@ class OutputCheckpointSmokeTest(unittest.TestCase):
                         run_seed=1,
                         rounds=1,
                         clients=2,
+                        mde=0.1,
                         overwrite=True,
                     )
             finally:
@@ -522,6 +549,10 @@ class OutputCheckpointSmokeTest(unittest.TestCase):
             malformed.write_text("{", encoding="utf-8")
             with self.assertRaises(Experiment3CheckpointError):
                 read_checkpoint(malformed, expected_identity=identity)
+            duplicate = Path(tmp) / "duplicate.json"
+            duplicate.write_text('{"schema_version":"x","schema_version":"y"}', encoding="utf-8")
+            with self.assertRaises(Experiment3CheckpointError):
+                read_checkpoint(duplicate, expected_identity=identity)
 
     def test_tiny_three_arm_smoke_execution_in_tempdir_only(self):
         before_outputs = set((PROJECT2_ROOT / "outputs").rglob("*"))
@@ -561,6 +592,7 @@ class OutputCheckpointSmokeTest(unittest.TestCase):
                         clients=2,
                         overwrite=False,
                         target_accuracy=50.0,
+                        mde=0.1,
                         allowed_tasks=("TinyTask",),
                     ),
                     runtime_ops=ops,
@@ -588,9 +620,19 @@ class OutputCheckpointSmokeTest(unittest.TestCase):
                 "realized_aggregation_weights.csv",
                 "lambda_rank_agreement.csv",
                 "convergence_speed.csv",
+                "paired_arm_differences.csv",
+                "paired_permutation_tests.csv",
+                "paired_confidence_intervals.csv",
+                "paired_task_summaries.csv",
+                "mde_comparison.csv",
             }
             self.assertTrue(expected_files.issubset({path.name for path in exp3_dir.iterdir()}))
             self.assertEqual(len(list((exp3_dir / "checkpoints").glob("*.json"))), 3)
+            self.assertEqual(ops.initial_state_calls, 1)
+            self.assertEqual([call[1] for call in ops.reset_calls], [0, 1, 1, 1])
+            rng_payloads = [draw[2:] for draw in ops.rng_draws]
+            self.assertEqual(rng_payloads[0], rng_payloads[1])
+            self.assertEqual(rng_payloads[1], rng_payloads[2])
             baseline_call = [call for call in ops.aggregate_calls if call[0] == "baseline"][0]
             form_a_call = [call for call in ops.aggregate_calls if call[0] == "form_a"][0]
             form_b_call = [call for call in ops.aggregate_calls if call[0] == "form_b"][0]
@@ -600,6 +642,24 @@ class OutputCheckpointSmokeTest(unittest.TestCase):
 
         after_outputs = set((PROJECT2_ROOT / "outputs").rglob("*"))
         self.assertEqual(before_outputs, after_outputs)
+
+    def test_scientific_run_requires_mde(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(exp3_run.Experiment3RunnerError):
+                exp3_run.run_experiment3(
+                    Experiment3Config(
+                        calibration_bundle_path=FIXTURE,
+                        output_dir=Path(tmp) / "exp3",
+                        tasks=("TinyTask",),
+                        experiment1_run_id="exp1-engineering-fixture",
+                        experiment2_run_id="exp2-engineering-fixture",
+                        run_seed=3,
+                        rounds=1,
+                        clients=2,
+                        allowed_tasks=("TinyTask",),
+                    ),
+                    runtime_ops=InMemoryExperiment3Ops(),
+                )
 
     def test_runner_has_no_public_invalid_calibration_flag(self):
         tree = ast.parse((PROJECT2_ROOT / "experiment" / "experiment3" / "run.py").read_text(encoding="utf-8"))

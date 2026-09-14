@@ -18,6 +18,11 @@ and aggregation code are not redefined here.
 - Dataset loading is centralized in `framework/datasets/factory.py`.
 - Experiment 2 evaluation and reporting are implemented in
   `experiment/experiment2/evaluation.py`, `figures.py`, and `reporting.py`.
+- Experiment 2 now writes the strict `exp3-calibration-bundle/v1` calibration
+  bundle consumed by Experiment 3.
+- Experiment 3 infrastructure is implemented under `experiment/experiment3/`;
+  scientific runs require a validated calibration bundle, explicit source run
+  IDs, and a configured MDE.
 
 ## Structure
 
@@ -111,6 +116,11 @@ Experiment 2 automatically computes regression metrics, ranking metrics, and
 ranking permutation tests during future reruns. Pooled permutation tests are
 stratified by the configured aggregation context columns. The ranking metrics
 are reported only; Form A/Form B selection is not changed by them.
+After a successful real-data calibration, Experiment 2 writes
+`outputs/exp2/calibration_bundle.json` with schema
+`exp3-calibration-bundle/v1`; the bundle is written only after input
+provenance, numeric validation, calibration, report generation, and artifact
+writes succeed.
 
 Experiment 2 requires explicit `is_synthetic` provenance in Experiment 1
 measurement tables. It does not backfill missing provenance as real data.
@@ -137,3 +147,14 @@ python project-2-domain-aware-allocation/experiment/experiment2/run.py --ridge-a
 Do not rerun experiments during the current infrastructure hardening phase.
 See `EXPERIMENT1.md` for Experiment 1 details and `EXPERIMENT2.md` for
 Experiment 2 evaluation infrastructure.
+
+Experiment 3 production CLI:
+
+```powershell
+python project-2-domain-aware-allocation/experiment/experiment3/run.py --calibration-bundle project-2-domain-aware-allocation/outputs/exp2/calibration_bundle.json --experiment1-run-id <exp1-run-id> --experiment2-run-id <exp2-run-id> --mde <minimum-detectable-effect>
+```
+
+Experiment 3 writes paired arm differences, paired permutation tests,
+confidence intervals, task summaries, realized aggregation weights, and MDE
+comparisons. It refuses synthetic or engineering calibration bundles in normal
+production mode.

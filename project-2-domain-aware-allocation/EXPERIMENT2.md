@@ -144,10 +144,19 @@ produce:
 - `evaluation_metrics.csv`
 - `alpha_evaluation.csv`
 - `ranking_significance.csv`
+- `calibration_bundle.json`
 - `dataset_manifest.json`
 - `manifest.json`
 - `comparison_report.md`
 - summary SVG figures under `figures/`
+
+`calibration_bundle.json` uses schema `exp3-calibration-bundle/v1` and is
+written only after the real-data provenance checks, numeric validation,
+calibration, report generation, and other owned artifact writes succeed. It
+contains exact source Experiment 1 and Experiment 2 run identities,
+non-synthetic dataset provenance for every expected task, Form A/Form B feature
+order, coefficients, intercepts, gamma values, clipping bounds, and feature
+standardization statistics.
 
 Do not generate these outputs during Phase 2A.
 
@@ -159,6 +168,9 @@ domain factor toward one (`blend_strength=0.10` by default), limits each
 factor to `[0.85, 1.15]`, and renormalizes under the existing
 `samples * quality` weights.  This keeps the original quality-weighted rule as
 the safe reference while allowing a small, evidence-backed redistribution.
+The direct lambda aggregation helper has no uniform fallback: empty inputs,
+length mismatches, duplicate client IDs, non-finite values, negative values, or
+zero-total weights fail loudly.
 
 The offline contribution benchmark compares the ranking and weighted
 contribution of both policies:

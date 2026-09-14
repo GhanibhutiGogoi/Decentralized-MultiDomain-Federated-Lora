@@ -6,8 +6,9 @@ import math
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
-import numpy as np
+import pandas as pd
 
+from experiment2.lambda_calibration import lambda_weights_from_scores
 from experiment2.lambda_aggregation import normalized_aggregation_weights
 from experiment3.calibration_bundle import CalibrationBundle, FormCalibration
 
@@ -62,34 +63,6 @@ def _score(record: ClientRecord, calibration: FormCalibration) -> float:
     return float(total)
 
 
-def _clip_renormalize_mean_one(
-    values: Sequence[float],
-    bounds: tuple[float, float],
-    *,
-    tolerance: float = 1e-10,
-) -> list[float]:
-    lower, upper = bounds
-    lam = np.asarray(values, dtype=float)
-    if lam.size == 0:
-        raise Experiment3ArmError("Cannot normalize an empty lambda group.")
-    if not np.all(np.isfinite(lam)) or np.any(lam <= 0.0):
-        raise Experiment3ArmError("Lambda values must be finite and positive.")
-
-    lam = lam / max(float(lam.mean()), 1e-12)
-    for _ in range(1000):
-        previous = lam.copy()
-        lam = np.clip(lam, lower, upper)
-        lam = lam / max(float(lam.mean()), 1e-12)
-        if (
-            float(lam.min()) >= lower - tolerance
-            and float(lam.max()) <= upper + tolerance
-            and abs(float(lam.mean()) - 1.0) <= tolerance
-            and float(np.max(np.abs(lam - previous))) <= tolerance
-        ):
-            return [float(value) for value in lam]
-    raise Experiment3ArmError("Lambda clipping/renormalization did not converge.")
-
-
 def calculate_lambda_weights(
     records: Sequence[ClientRecord],
     bundle: CalibrationBundle,
@@ -119,16 +92,25 @@ def calculate_lambda_weights(
             raise Experiment3ArmError(f"Unknown task {record.task!r}.")
         groups.setdefault((record.task, int(record.round)), []).append(idx)
 
-    out = [0.0] * len(records)
-    for indices in groups.values():
-        group_scores = np.asarray([scores[idx] for idx in indices], dtype=float)
-        centered = group_scores - float(group_scores.mean())
-        raw = np.exp(np.clip(calibration.gamma * centered, -20.0, 20.0))
-        normalized = _clip_renormalize_mean_one(raw, calibration.clipping_bounds)
-        for idx, value in zip(indices, normalized):
-            out[idx] = value
+    del groups
+    group_df = pd.DataFrame(
+        {
+            "task": [record.task for record in records],
+            "round": [int(record.round) for record in records],
+        }
+    )
+    try:
+        out = lambda_weights_from_scores(
+            group_df,
+            scores,
+            calibration.gamma,
+            lower=calibration.clipping_bounds[0],
+            upper=calibration.clipping_bounds[1],
+        )
+    except Exception as exc:
+        raise Experiment3ArmError(str(exc)) from exc
     validate_lambda_weights(records, out)
-    return out
+    return [float(value) for value in out]
 
 
 def validate_lambda_weights(
@@ -163,9 +145,19 @@ def realized_aggregation_weights(
         _finite(sample, f"sample_count[{idx}]", positive=True)
         _finite(quality, f"quality_score[{idx}]", positive=True)
     if arm == "baseline":
-        return normalized_aggregation_weights(samples, qualities, lambda_weights=None)
+        return normalized_aggregation_weights(
+            samples,
+            qualities,
+            lambda_weights=None,
+            client_ids=[record.client_id for record in records],
+        )
     if bundle is None:
         raise Experiment3ArmError("Form arms require a calibration bundle.")
     lambda_weights = calculate_lambda_weights(records, bundle, arm)
-    return normalized_aggregation_weights(samples, qualities, lambda_weights)
+    return normalized_aggregation_weights(
+        samples,
+        qualities,
+        lambda_weights,
+        client_ids=[record.client_id for record in records],
+    )
 

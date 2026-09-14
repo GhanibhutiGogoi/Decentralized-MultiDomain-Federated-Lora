@@ -129,6 +129,15 @@ runner aborts before dataset loading or training unless `--overwrite` is passed.
 With `--overwrite`, only the contents of the selected Experiment 1 output
 directory are cleaned before the run starts.
 
+Experiment 1 resume is task-boundary only. The checkpoint stores a hashed run
+identity covering task order, rounds, client count, seed policy, partition
+configuration, data root, synthetic/download flags, Project 1 LoRA and client
+hyperparameters, dataset provenance, and source revision. Resume rejects
+malformed JSON, duplicate JSON keys, non-finite numeric records, tampered
+identity hashes, incomplete task rows, reordered completed tasks, and
+configuration or provenance drift. The final `completed` checkpoint is written
+before the informational `run_completed` progress event.
+
 ### `dataset_manifest.json`
 
 One manifest is written for each run and contains:

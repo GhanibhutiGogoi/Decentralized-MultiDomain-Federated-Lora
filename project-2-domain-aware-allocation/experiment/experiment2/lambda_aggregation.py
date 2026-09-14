@@ -8,30 +8,65 @@ its existing samples * q_i formula becomes samples * q_i * lambda_i.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 
 from framework.aggregation.domain_weighting import conservative_domain_factors
 
 
+def _validated_nonnegative_sequence(values, name: str) -> list[float]:
+    if values is None:
+        raise ValueError(f"{name} is required.")
+    if isinstance(values, (str, bytes)):
+        raise ValueError(f"{name} must be a numeric sequence.")
+    parsed = []
+    for idx, value in enumerate(values):
+        if isinstance(value, bool):
+            raise ValueError(f"{name}[{idx}] must be numeric.")
+        try:
+            number = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{name}[{idx}] must be numeric.") from exc
+        if not math.isfinite(number):
+            raise ValueError(f"{name}[{idx}] must be finite.")
+        if number < 0.0:
+            raise ValueError(f"{name}[{idx}] must be non-negative.")
+        parsed.append(number)
+    if not parsed:
+        raise ValueError(f"{name} must contain at least one value.")
+    return parsed
+
+
 def effective_quality_scores(quality_scores, lambda_weights=None):
     """Return q or q * lambda while preserving q exactly when disabled."""
+    qualities = _validated_nonnegative_sequence(quality_scores, "quality_scores")
     if lambda_weights is None:
-        return list(quality_scores)
-    if len(quality_scores) != len(lambda_weights):
+        return qualities
+    lambdas = _validated_nonnegative_sequence(lambda_weights, "lambda_weights")
+    if len(qualities) != len(lambdas):
         raise ValueError("quality_scores and lambda_weights must have equal length.")
     return [
-        float(quality) * float(lambda_weight)
-        for quality, lambda_weight in zip(quality_scores, lambda_weights)
+        quality * lambda_weight
+        for quality, lambda_weight in zip(qualities, lambdas)
     ]
 
 
-def normalized_aggregation_weights(samples, quality_scores, lambda_weights=None):
+def normalized_aggregation_weights(samples, quality_scores, lambda_weights=None, *, client_ids=None):
     """Compute normalized samples * q * lambda aggregation weights."""
+    sample_values = _validated_nonnegative_sequence(samples, "samples")
     qualities = effective_quality_scores(quality_scores, lambda_weights)
-    raw = [float(sample_count) * quality for sample_count, quality in zip(samples, qualities)]
+    if len(sample_values) != len(qualities):
+        raise ValueError("samples and quality_scores must have equal length.")
+    if client_ids is not None:
+        client_ids = [str(value) for value in client_ids]
+        if len(client_ids) != len(sample_values):
+            raise ValueError("client_ids must match samples length.")
+        if len(set(client_ids)) != len(client_ids):
+            raise ValueError("client_ids must be unique.")
+    raw = [sample_count * quality for sample_count, quality in zip(sample_values, qualities)]
     total = sum(raw)
-    if total <= 0:
-        return [1.0 / len(raw)] * len(raw)
+    if not math.isfinite(total) or total <= 0:
+        raise ValueError("samples*quality*lambda must have a finite, positive total.")
     return [value / total for value in raw]
 
 
