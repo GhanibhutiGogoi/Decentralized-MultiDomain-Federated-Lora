@@ -78,9 +78,13 @@ Experiment 2 reports both regression and ranking metrics:
 - Kendall tau
 - permutation p-value for positive Spearman association
 
-These metrics are evaluation outputs only. They do not select Form A or Form B
-and they do not change the existing Ridge-alpha selection rule, which remains
-minimum mean leave-one-task-out RMSE.
+These metrics are evaluation outputs only. Ranking metrics do not select Form A,
+Form B, or Form C. Support is decided independently for each original form by
+raw mean leave-one-task-out RMSE against a fold-safe intercept-only null
+comparator. Form C is a post-hoc exploratory candidate evaluated on
+within-task-round normalized predictors and a centered relative contribution
+target. A Ridge form must also select an interior alpha to be eligible for
+Experiment 3.
 
 The default Ridge alpha grid remains `[0.01, 0.1, 1.0, 10.0, 100.0]`. Larger
 prepared candidates `[300.0, 500.0, 1000.0]` can be enabled in a future rerun
@@ -92,8 +96,9 @@ through the Experiment 2 CLI without another code change.
   `max_count / min_positive_count * (1 + zero_class_count / num_classes)`.
 - Experiment 2 requires explicit `is_synthetic` provenance in measurements and
   refuses to assume missing provenance means real data.
-- Ridge alpha selection fails with `RidgeAlphaBoundaryError` when RMSE selects
-  the minimum or maximum tested alpha; the grid is not expanded automatically.
+- Ridge alpha selection on the minimum or maximum tested alpha is recorded as
+  an unsupported-form diagnostic; the grid is not expanded automatically and no
+  fallback lambda parameters are written.
 - Pooled Experiment 2 permutation p-values are stratified by the configured
   aggregation context columns, currently `task` and `round`.
 
@@ -102,4 +107,7 @@ through the Experiment 2 CLI without another code change.
 After Project 1 mathematics are finalized, rerun Experiment 1 exactly once with
 the approved configuration, then rerun Experiment 2 from the new Experiment 1
 outputs. Any downstream Experiment 3 work should consume those final outputs
-rather than historical artifacts.
+rather than historical artifacts. Experiment 3 should run baseline plus only
+the treatment arms listed as supported in the Experiment 2 v3 calibration
+bundle; if no treatment arm is supported, Experiment 3 is blocked pending a
+methodology decision.

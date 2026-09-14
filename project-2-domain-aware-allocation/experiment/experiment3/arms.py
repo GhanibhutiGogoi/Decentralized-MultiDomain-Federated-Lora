@@ -1,4 +1,4 @@
-"""Three-arm Experiment 3 aggregation support."""
+"""Experiment 3 aggregation support."""
 
 from __future__ import annotations
 
@@ -6,14 +6,16 @@ import math
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
+import numpy as np
 import pandas as pd
 
+from experiment2.form_c import transform_form_c_context
 from experiment2.lambda_calibration import lambda_weights_from_scores
 from experiment2.lambda_aggregation import normalized_aggregation_weights
 from experiment3.calibration_bundle import CalibrationBundle, FormCalibration
 
 
-ARMS = ("baseline", "form_a", "form_b")
+ARMS = ("baseline", "form_a", "form_b", "form_c")
 
 
 class Experiment3ArmError(ValueError):
@@ -68,19 +70,20 @@ def calculate_lambda_weights(
     bundle: CalibrationBundle,
     form: str,
 ) -> list[float]:
-    """Calculate Form A or Form B lambda weights preserving client order.
+    """Calculate supported lambda weights preserving client order.
 
     Scores are standardized in the exact bundle feature order, centered within
     each ``(task, round)`` group, exponentiated with the form-specific gamma,
     clipped to the bundle bounds, and renormalized so each group mean is one.
     """
-    if form not in {"form_a", "form_b"}:
+    if form not in {"form_a", "form_b", "form_c"}:
         raise Experiment3ArmError(f"Unsupported lambda form {form!r}.")
+    if form not in bundle.supported_treatment_arms:
+        raise Experiment3ArmError(f"Calibration bundle does not support {form!r}.")
     if not records:
         raise Experiment3ArmError("At least one client record is required.")
 
     calibration = bundle.forms[form]
-    scores = [_score(record, calibration) for record in records]
     groups: dict[tuple[str, int], list[int]] = {}
     seen_ids: set[tuple[str, int, str]] = set()
     for idx, record in enumerate(records):
@@ -92,7 +95,38 @@ def calculate_lambda_weights(
             raise Experiment3ArmError(f"Unknown task {record.task!r}.")
         groups.setdefault((record.task, int(record.round)), []).append(idx)
 
-    del groups
+    if form == "form_c":
+        feature_rows = []
+        for record in records:
+            row = {"task": record.task, "round": int(record.round)}
+            for feature in calibration.feature_order:
+                if feature not in record.features:
+                    raise Experiment3ArmError(
+                        f"Client {record.client_id!r} is missing feature {feature!r}."
+                    )
+                row[feature] = _finite(
+                    record.features[feature],
+                    f"{record.client_id}.{feature}",
+                )
+            feature_rows.append(row)
+        try:
+            transformed = transform_form_c_context(
+                pd.DataFrame(feature_rows),
+                features=calibration.feature_order,
+                include_target=False,
+            )
+            x = transformed.frame[list(transformed.feature_columns)].to_numpy(dtype=float)
+            scores = (
+                float(calibration.intercept)
+                + x @ np.asarray(calibration.coefficients, dtype=float)
+            )
+        except Exception as exc:
+            raise Experiment3ArmError(str(exc)) from exc
+        if not np.all(np.isfinite(scores)):
+            raise Experiment3ArmError("Form C scores must be finite.")
+    else:
+        scores = [_score(record, calibration) for record in records]
+
     group_df = pd.DataFrame(
         {
             "task": [record.task for record in records],
@@ -153,6 +187,8 @@ def realized_aggregation_weights(
         )
     if bundle is None:
         raise Experiment3ArmError("Form arms require a calibration bundle.")
+    if arm not in bundle.supported_treatment_arms:
+        raise Experiment3ArmError(f"Calibration bundle does not support {arm!r}.")
     lambda_weights = calculate_lambda_weights(records, bundle, arm)
     return normalized_aggregation_weights(
         samples,

@@ -36,6 +36,15 @@ from experiment2.lambda_calibration import (  # noqa: E402
     ridge_alpha_grid,
     validation_tables,
 )
+from experiment2.form_c import (  # noqa: E402
+    FORM_C_EXPLORATORY_STATUS,
+    FORM_C_FEATURES,
+    FORM_C_METHOD_LABEL,
+    FORM_C_TARGET_TRANSFORMATION,
+    fit_form_c,
+    form_c_zero_variance_summary,
+    predict_form_c_score,
+)
 from experiment2.calibration_bundle import (  # noqa: E402
     atomic_write_json,
     build_calibration_bundle,
@@ -46,7 +55,7 @@ from experiment2.evaluation import (  # noqa: E402
     EvaluationConfig,
     alpha_evaluation_table,
     evaluation_table,
-    leave_one_task_out_evaluation,
+    support_decision_evaluation,
 )
 from experiment2.figures import save_evaluation_figures  # noqa: E402
 from experiment2.lambda_aggregation import normalized_aggregation_weights  # noqa: E402
@@ -67,6 +76,79 @@ from framework.utils import (  # noqa: E402
 OUTPUT_ROOT = PROJECT2_ROOT / "outputs"
 EXP1_DIR = PROJECT2_ROOT / "outputs" / "exp1"
 OUTPUT_DIR = PROJECT2_ROOT / "outputs" / "exp2"
+LAMBDA_VALUE_COLUMNS = [
+    "task",
+    "round",
+    "client_id",
+    "is_synthetic",
+    "quality_score",
+    "delta_accuracy",
+    "js_to_global",
+    "update_l2_distance_to_mean",
+    "update_cosine_distance_to_mean",
+    "normalized_entropy",
+    "class_imbalance_ratio",
+    "form",
+    "methodology_label",
+    "exploratory_status",
+    "gamma",
+    "target_lambda_cv",
+    "achieved_lambda_cv",
+    "raw_lambda_score",
+    "predicted_delta_accuracy",
+    "relative_contribution_target",
+    "lambda_weight",
+    "effective_quality_score",
+]
+COEFFICIENT_COLUMNS = [
+    "form",
+    "term",
+    "coefficient",
+    "abs_coefficient",
+    "ridge_alpha",
+    "feature_mean",
+    "feature_std",
+    "methodology_label",
+    "feature_transformation",
+    "target_transformation",
+    "exploratory_status",
+]
+VALIDATION_COLUMNS = [
+    "form",
+    "task",
+    "n",
+    "lambda_mean",
+    "lambda_std",
+    "lambda_min",
+    "lambda_max",
+    "lambda_cv",
+    "lambda_delta_pearson",
+    "lambda_delta_spearman",
+]
+ORTHOGONALITY_COLUMNS = [
+    "form",
+    "task",
+    "n",
+    "lambda_quality_pearson",
+    "lambda_quality_spearman",
+    "quality_delta_pearson",
+    "quality_delta_spearman",
+    "mean_effective_quality",
+]
+EVALUATION_METRIC_COLUMNS = [
+    "form",
+    "scope",
+    "scope_value",
+    "n",
+    "rmse",
+    "mae",
+    "r_squared",
+    "pearson",
+    "spearman",
+    "pairwise_ranking_accuracy",
+    "kendall_tau",
+    "permutation_p_value",
+]
 
 
 def _read_required_csv(path: Path) -> pd.DataFrame:
@@ -376,6 +458,12 @@ def main():
     )
 
     df = prepare_measurements(measurements)
+    experiment1_run_id = exp1_manifest.get("run_id") or stable_payload_hash(
+        {
+            "experiment1_manifest": exp1_manifest,
+            "experiment1_dataset_manifest": exp1_dataset_manifest,
+        }
+    )
     ridge_alphas = ridge_alpha_grid(
         include_extended=args.include_extended_ridge_alphas,
         custom_alphas=args.ridge_alphas,
@@ -384,50 +472,89 @@ def main():
         permutation_seed=args.ranking_permutation_seed,
         permutations=args.ranking_permutations,
     )
-    cv, selected_alpha = leave_one_task_out_evaluation(
+    cv, form_support, support_decisions = support_decision_evaluation(
         df,
         ridge_alphas=ridge_alphas,
         config=evaluation_config,
+        source_run_identity=str(experiment1_run_id),
     )
-    fit_a = fit_form_a(df)
-    fit_b = fit_form_b(df, selected_alpha)
-    scores = {
-        "form_a": predict_standardized_score(df, fit_a),
-        "form_b": predict_standardized_score(df, fit_b),
-    }
-    lambda_calibrations = calibrate_lambda_scales(df, scores)
-    lambda_values = attach_lambda_values(df, [fit_a, fit_b], lambda_calibrations)
-    coefficients = coefficient_table([fit_a, fit_b])
-    validation, orthogonality = validation_tables(lambda_values)
-    evaluation_metrics = evaluation_table(lambda_values, config=evaluation_config)
+    selected_alpha = support_decisions["form_b"].selected_alpha
+    selected_form_c_alpha = support_decisions["form_c"].selected_alpha
+    supported_fits = []
+    if support_decisions["form_a"].supported:
+        supported_fits.append(fit_form_a(df))
+    if support_decisions["form_b"].supported:
+        supported_fits.append(fit_form_b(df, float(selected_alpha)))
+    if support_decisions["form_c"].supported:
+        supported_fits.append(fit_form_c(df, float(selected_form_c_alpha)))
+
+    scores = {}
+    for fit in supported_fits:
+        if fit.form == "form_c":
+            scores[fit.form] = predict_form_c_score(df, fit)
+        else:
+            scores[fit.form] = predict_standardized_score(df, fit)
+    lambda_calibrations = (
+        calibrate_lambda_scales(df, scores) if supported_fits else {}
+    )
+    lambda_values = (
+        attach_lambda_values(df, supported_fits, lambda_calibrations)
+        if supported_fits
+        else pd.DataFrame(columns=LAMBDA_VALUE_COLUMNS)
+    )
+    coefficients = (
+        coefficient_table(supported_fits)
+        if supported_fits
+        else pd.DataFrame(columns=COEFFICIENT_COLUMNS)
+    )
+    if lambda_values.empty:
+        validation = pd.DataFrame(columns=VALIDATION_COLUMNS)
+        orthogonality = pd.DataFrame(columns=ORTHOGONALITY_COLUMNS)
+        evaluation_metrics = pd.DataFrame(columns=EVALUATION_METRIC_COLUMNS)
+    else:
+        validation, orthogonality = validation_tables(lambda_values)
+        evaluation_metrics = evaluation_table(lambda_values, config=evaluation_config)
     alpha_metrics = alpha_evaluation_table(cv, config=evaluation_config)
-    ranking_significance = evaluation_metrics[
-        ["form", "scope", "scope_value", "n", "spearman", "kendall_tau", "permutation_p_value"]
-    ].copy()
+    ranking_columns = [
+        "form",
+        "scope",
+        "scope_value",
+        "n",
+        "spearman",
+        "kendall_tau",
+        "permutation_p_value",
+    ]
+    ranking_significance = evaluation_metrics[ranking_columns].copy()
 
     _atomic_dataframe_to_csv(lambda_values, args.output_dir / "lambda_values.csv")
     _atomic_dataframe_to_csv(validation, args.output_dir / "lambda_validation.csv")
     _atomic_dataframe_to_csv(orthogonality, args.output_dir / "orthogonality_report.csv")
     _atomic_dataframe_to_csv(cv, args.output_dir / "cross_validation.csv")
+    _atomic_dataframe_to_csv(form_support, args.output_dir / "form_support_status.csv")
     _atomic_dataframe_to_csv(coefficients, args.output_dir / "fitted_coefficients.csv")
     _atomic_dataframe_to_csv(evaluation_metrics, args.output_dir / "evaluation_metrics.csv")
     _atomic_dataframe_to_csv(alpha_metrics, args.output_dir / "alpha_evaluation.csv")
     _atomic_dataframe_to_csv(ranking_significance, args.output_dir / "ranking_significance.csv")
 
-    save_figures(lambda_values, figure_dir)
-    figure_files = [
-        "figures/lambda_distribution.svg",
-        "figures/lambda_vs_contribution.svg",
-        "figures/lambda_vs_quality.svg",
-        "figures/form_a_vs_form_b.svg",
-    ]
-    figure_files.extend(
-        save_evaluation_figures(
-            figure_dir,
-            evaluation_metrics=evaluation_metrics,
-            alpha_metrics=alpha_metrics,
+    figure_files = []
+    if not lambda_values.empty:
+        save_figures(lambda_values, figure_dir)
+        figure_files.extend(
+            [
+                "figures/lambda_distribution.svg",
+                "figures/lambda_vs_contribution.svg",
+                "figures/lambda_vs_quality.svg",
+            ]
         )
-    )
+        if {"form_a", "form_b"}.issubset(set(lambda_values["form"])):
+            figure_files.append("figures/form_a_vs_form_b.svg")
+        figure_files.extend(
+            save_evaluation_figures(
+                figure_dir,
+                evaluation_metrics=evaluation_metrics,
+                alpha_metrics=alpha_metrics,
+            )
+        )
     build_evaluation_report(
         output_dir=args.output_dir,
         correlations=correlations,
@@ -438,6 +565,7 @@ def main():
         cv=cv,
         evaluation_metrics=evaluation_metrics,
         alpha_metrics=alpha_metrics,
+        form_support=form_support,
         selected_alpha=selected_alpha,
         lambda_calibrations=lambda_calibrations,
         evaluation_config={
@@ -447,56 +575,99 @@ def main():
         figure_files=figure_files,
     )
 
-    experiment1_run_id = exp1_manifest.get("run_id") or stable_payload_hash(
-        {
-            "experiment1_manifest": exp1_manifest,
-            "experiment1_dataset_manifest": exp1_dataset_manifest,
-        }
-    )
     experiment2_run_id = stable_payload_hash(
         {
             "source_experiment1_run_id": experiment1_run_id,
             "task_set": list(df["task"].drop_duplicates()),
             "ridge_alpha_grid": ridge_alphas,
             "selected_ridge_alpha": selected_alpha,
+            "selected_form_c_ridge_alpha": selected_form_c_alpha,
+            "form_support": form_support.to_dict(orient="records"),
+            "supported_treatment_arms": [fit.form for fit in supported_fits],
             "lambda_calibration": lambda_calibrations,
         }
     )
-    calibration_bundle = build_calibration_bundle(
-        measurements=df,
-        exp1_manifest=exp1_manifest,
-        exp1_dataset_manifest=exp1_dataset_manifest,
-        fits=[fit_a, fit_b],
-        lambda_calibrations=lambda_calibrations,
-        experiment1_run_id=experiment1_run_id,
-        experiment2_run_id=experiment2_run_id,
-    )
-    write_calibration_bundle(args.output_dir / "calibration_bundle.json", calibration_bundle)
+    calibration_bundle = None
+    if supported_fits:
+        calibration_bundle = build_calibration_bundle(
+            measurements=df,
+            exp1_manifest=exp1_manifest,
+            exp1_dataset_manifest=exp1_dataset_manifest,
+            fits=supported_fits,
+            lambda_calibrations=lambda_calibrations,
+            experiment1_run_id=experiment1_run_id,
+            experiment2_run_id=experiment2_run_id,
+            form_support=form_support,
+        )
+        write_calibration_bundle(args.output_dir / "calibration_bundle.json", calibration_bundle)
+
+    supported_treatment_arms = [fit.form for fit in supported_fits]
+    outputs = [
+        "lambda_values.csv",
+        "lambda_validation.csv",
+        "orthogonality_report.csv",
+        "cross_validation.csv",
+        "form_support_status.csv",
+        "fitted_coefficients.csv",
+        "evaluation_metrics.csv",
+        "alpha_evaluation.csv",
+        "ranking_significance.csv",
+        "comparison_report.md",
+    ]
+    if calibration_bundle is not None:
+        outputs.append("calibration_bundle.json")
+    if figure_files:
+        outputs.append("figures/")
 
     manifest = {
         "project": "Project 2",
         "experiment": "Experiment 2",
+        "status": "complete" if supported_fits else "complete_negative_no_supported_forms",
         "source_experiment": str(args.exp1_dir),
         "source_experiment1_run_id": experiment1_run_id,
         "experiment2_run_id": experiment2_run_id,
         "output_dir": str(args.output_dir),
         "dataset_manifest_file": "dataset_manifest.json",
-        "calibration_bundle_file": "calibration_bundle.json",
-        "calibration_bundle_schema_version": calibration_bundle["schema_version"],
+        "calibration_bundle_file": "calibration_bundle.json" if calibration_bundle else None,
+        "calibration_bundle_schema_version": calibration_bundle["schema_version"] if calibration_bundle else None,
         "dataset_manifest": dataset_manifest,
         "source_dataset_provenance": exp1_manifest.get("dataset_provenance", {}),
         "is_synthetic_present": bool(df["is_synthetic"].astype(bool).any()),
         "environment": environment_manifest(),
         "form_a_features": FORM_A_FEATURES,
         "form_b_features": FORM_B_FEATURES,
+        "form_c_features": FORM_C_FEATURES,
+        "form_c_methodology": {
+            "label": FORM_C_METHOD_LABEL,
+            "exploratory_status": FORM_C_EXPLORATORY_STATUS,
+            "feature_transformation": "within task-round population z-score",
+            "target_transformation": FORM_C_TARGET_TRANSFORMATION,
+            "intercept_policy": "fit_intercept_false_because_features_and_target_are_group_centered",
+            "zero_variance_behavior": "map zero-variance predictor or target groups to zero without dropping rows",
+            "zero_variance_summary": form_c_zero_variance_summary(df),
+        },
         "ridge_alpha_grid": ridge_alphas,
         "extended_ridge_alpha_candidates": EXTENDED_RIDGE_ALPHAS,
         "selected_ridge_alpha": selected_alpha,
-        "selected_ridge_alpha_on_boundary": selected_alpha in {
-            min(ridge_alphas),
-            max(ridge_alphas),
+        "selected_form_c_ridge_alpha": selected_form_c_alpha,
+        "selected_ridge_alpha_on_boundary": support_decisions["form_b"].alpha_boundary_status in {"minimum", "maximum"},
+        "selected_form_c_ridge_alpha_on_boundary": support_decisions["form_c"].alpha_boundary_status in {"minimum", "maximum"},
+        "alpha_selection_rule": "minimum mean leave-one-task-out RMSE, accepted only when interior",
+        "primary_model_validity_gate": {
+            "null_model": "fold-safe train-fold intercept-only target mean",
+            "primary_metric": "raw mean leave-one-task-out RMSE",
+            "support_rule": "model RMSE must be strictly lower than null by more than numerical tolerance; Ridge alpha must be interior",
+            "null_improvement_tolerance": 1e-9,
         },
-        "alpha_selection_rule": "minimum mean leave-one-task-out RMSE",
+        "form_c_validity_gate": {
+            "null_model": "zero prediction for within-task-round centered target",
+            "primary_metric": "mean group-normalized leave-one-task-out RMSE with equal task weighting",
+            "support_rule": "Form C normalized RMSE must be strictly lower than zero-null by more than numerical tolerance; selected Ridge alpha must be interior; predictive orientation must not be reversed",
+            "ranking_metrics_secondary_only": True,
+        },
+        "form_support": form_support.to_dict(orient="records"),
+        "supported_treatment_arms": supported_treatment_arms,
+        "experiment3_eligible_arms": ["baseline", *supported_treatment_arms],
         "ranking_metrics_not_used_for_selection": True,
         "evaluation": {
             "regression_metrics": ["rmse", "mae", "r_squared", "pearson"],
@@ -518,19 +689,7 @@ def main():
         },
         "aggregation_rule": "Weight = w * q * lambda",
         "disabled_behavior": "lambda_weights=None preserves Weight = w * q",
-        "outputs": [
-            "lambda_values.csv",
-            "lambda_validation.csv",
-            "orthogonality_report.csv",
-            "cross_validation.csv",
-            "fitted_coefficients.csv",
-            "evaluation_metrics.csv",
-            "alpha_evaluation.csv",
-            "ranking_significance.csv",
-            "comparison_report.md",
-            "calibration_bundle.json",
-            "figures/",
-        ],
+        "outputs": outputs,
         "sanity_check_weights": normalized_aggregation_weights(
             samples=[1, 1, 1],
             quality_scores=[1, 2, 3],
@@ -547,6 +706,8 @@ def main():
     print("=== Experiment 2 Complete ===")
     print(f"Rows used: {len(df)}")
     print(f"Selected ridge alpha: {selected_alpha}")
+    print(f"Selected Form C ridge alpha: {selected_form_c_alpha}")
+    print(f"Supported treatment arms: {supported_treatment_arms}")
     print(f"Lambda calibration: {lambda_calibrations}")
     print(f"Saved outputs to: {args.output_dir}")
 

@@ -30,6 +30,7 @@ from experiment3.arms import (  # noqa: E402
 )
 from experiment3.calibration_bundle import (  # noqa: E402
     CalibrationBundleError,
+    SCHEMA_VERSION_V2,
     load_calibration_bundle,
 )
 from experiment3.checkpoint import (  # noqa: E402
@@ -187,7 +188,7 @@ class InMemoryExperiment3Ops:
         return {"value": global_state["value"] + increment}
 
     def evaluate(self, task, prepared, *, arm, round_id, global_state, config):
-        arm_offset = {"baseline": 0.0, "form_a": 1.0, "form_b": 2.0}[arm]
+        arm_offset = {"baseline": 0.0, "form_a": 1.0, "form_b": 2.0, "form_c": 3.0}[arm]
         global_accuracy = 50.0 + arm_offset + round_id
         return global_accuracy, {
             "client_0": global_accuracy - 1.0,
@@ -212,6 +213,24 @@ def write_bundle(tmp: Path, edits: dict | None = None) -> Path:
                 target = target[part]
             target[parts[-1]] = value
     path = tmp / "bundle.json"
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    return path
+
+
+def write_v2_single_form_bundle(tmp: Path) -> Path:
+    data = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    data["schema_version"] = SCHEMA_VERSION_V2
+    data["supported_treatment_arms"] = ["form_a"]
+    data["baseline_arm"] = "baseline"
+    data["unsupported_forms"] = [
+        {
+            "form": "form_b",
+            "status": "unsupported",
+            "rejection_reason": "ridge_alpha_boundary_maximum",
+        }
+    ]
+    data["forms"] = {"form_a": data["forms"]["form_a"]}
+    path = tmp / "bundle_v2_form_a_only.json"
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")
     return path
 
@@ -300,6 +319,21 @@ class CalibrationBundleTest(unittest.TestCase):
                     expected_experiment2_run_id="y",
                     allow_engineering_fixture=True,
                 )
+
+    def test_v2_supported_treatment_arms_are_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = write_v2_single_form_bundle(Path(tmp))
+            bundle = load_calibration_bundle(
+                path,
+                expected_tasks=["TinyTask"],
+                expected_experiment1_run_id="exp1-engineering-fixture",
+                expected_experiment2_run_id="exp2-engineering-fixture",
+                allow_engineering_fixture=True,
+            )
+            self.assertEqual(bundle.supported_treatment_arms, ("form_a",))
+            calculate_lambda_weights(client_records(), bundle, "form_a")
+            with self.assertRaises(Experiment3ArmError):
+                calculate_lambda_weights(client_records(), bundle, "form_b")
 
 
 class ArmMathTest(unittest.TestCase):
@@ -639,6 +673,70 @@ class OutputCheckpointSmokeTest(unittest.TestCase):
             self.assertEqual(baseline_call[1], (1.0, 1.0))
             self.assertNotEqual(form_a_call[1], baseline_call[1])
             self.assertNotEqual(form_b_call[1], form_a_call[1])
+
+        after_outputs = set((PROJECT2_ROOT / "outputs").rglob("*"))
+        self.assertEqual(before_outputs, after_outputs)
+
+    def test_v2_runner_uses_only_supported_treatment_arms(self):
+        before_outputs = set((PROJECT2_ROOT / "outputs").rglob("*"))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle_path = write_v2_single_form_bundle(root)
+            repo_root = root / "repo"
+            project_root = repo_root / "project-2-domain-aware-allocation"
+            outputs_root = project_root / "outputs"
+            exp1_dir = outputs_root / "exp1"
+            exp2_dir = outputs_root / "exp2"
+            exp3_dir = outputs_root / "exp3"
+            exp1_dir.mkdir(parents=True)
+            exp2_dir.mkdir()
+            old_values = (
+                exp3_run.PROJECT2_ROOT,
+                exp3_run.OUTPUT_ROOT,
+                exp3_run.EXP1_DIR,
+                exp3_run.EXP2_DIR,
+                exp3_run.OUTPUT_DIR,
+            )
+            ops = InMemoryExperiment3Ops()
+            try:
+                exp3_run.PROJECT2_ROOT = project_root
+                exp3_run.OUTPUT_ROOT = outputs_root
+                exp3_run.EXP1_DIR = exp1_dir
+                exp3_run.EXP2_DIR = exp2_dir
+                exp3_run.OUTPUT_DIR = exp3_dir
+                manifest = exp3_run.run_experiment3(
+                    Experiment3Config(
+                        calibration_bundle_path=bundle_path,
+                        output_dir=exp3_dir,
+                        tasks=("TinyTask",),
+                        experiment1_run_id="exp1-engineering-fixture",
+                        experiment2_run_id="exp2-engineering-fixture",
+                        run_seed=3,
+                        rounds=1,
+                        clients=2,
+                        overwrite=False,
+                        target_accuracy=50.0,
+                        mde=0.1,
+                        allowed_tasks=("TinyTask",),
+                    ),
+                    runtime_ops=ops,
+                    allow_engineering_fixture=True,
+                )
+            finally:
+                (
+                    exp3_run.PROJECT2_ROOT,
+                    exp3_run.OUTPUT_ROOT,
+                    exp3_run.EXP1_DIR,
+                    exp3_run.EXP2_DIR,
+                    exp3_run.OUTPUT_DIR,
+                ) = old_values
+
+            self.assertEqual(manifest["eligible_arms"], ["baseline", "form_a"])
+            self.assertEqual(manifest["supported_treatment_arms"], ["form_a"])
+            self.assertEqual(len(list((exp3_dir / "checkpoints").glob("*.json"))), 2)
+            self.assertFalse(any(call[0] == "form_b" for call in ops.aggregate_calls))
+            paired = pd.read_csv(exp3_dir / "paired_arm_differences.csv")
+            self.assertEqual(set(paired["comparison_arm"]), {"form_a"})
 
         after_outputs = set((PROJECT2_ROOT / "outputs").rglob("*"))
         self.assertEqual(before_outputs, after_outputs)

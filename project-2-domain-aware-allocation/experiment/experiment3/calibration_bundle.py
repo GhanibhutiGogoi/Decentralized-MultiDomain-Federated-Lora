@@ -15,11 +15,23 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 
-SCHEMA_VERSION = "exp3-calibration-bundle/v1"
-FORMS = ("form_a", "form_b")
+SCHEMA_VERSION_V1 = "exp3-calibration-bundle/v1"
+SCHEMA_VERSION_V2 = "exp3-calibration-bundle/v2"
+SCHEMA_VERSION_V3 = "exp3-calibration-bundle/v3"
+SCHEMA_VERSION = SCHEMA_VERSION_V1
+SUPPORTED_SCHEMA_VERSIONS = {SCHEMA_VERSION_V1, SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}
+LEGACY_FORMS = ("form_a", "form_b")
+FORMS = ("form_a", "form_b", "form_c")
 EXPECTED_FORM_FEATURES = {
     "form_a": ("log_update_l2", "js_to_global"),
     "form_b": (
+        "log_update_l2",
+        "js_to_global",
+        "update_cosine_distance_to_mean",
+        "normalized_entropy",
+        "log_class_imbalance_ratio",
+    ),
+    "form_c": (
         "log_update_l2",
         "js_to_global",
         "update_cosine_distance_to_mean",
@@ -45,6 +57,11 @@ class FormCalibration:
     clipping_bounds: tuple[float, float]
     standardization_means: Mapping[str, float]
     standardization_stds: Mapping[str, float]
+    methodology_label: str = ""
+    feature_transformation: str = "global_population_zscore"
+    target_transformation: str = "global_population_zscore_delta_accuracy"
+    exploratory_status: str = ""
+    ridge_alpha: float | None = None
 
 
 @dataclass(frozen=True)
@@ -64,6 +81,7 @@ class CalibrationBundle:
     source_commit_sha: str
     dataset_provenance: Mapping[str, object]
     forms: Mapping[str, FormCalibration]
+    supported_treatment_arms: tuple[str, ...]
 
 
 def _load_json_without_duplicate_keys(path: Path) -> dict:
@@ -216,8 +234,19 @@ def _parse_form(form: str, raw: object) -> FormCalibration:
             f"{form}.clipping_bounds must contain 1.0 and be ordered."
         )
 
-    means_raw = _required_mapping(raw, "standardization_means")
-    stds_raw = _required_mapping(raw, "standardization_stds")
+    means_raw = raw.get("standardization_means", {})
+    stds_raw = raw.get("standardization_stds", {})
+    if form != "form_c" or means_raw or stds_raw:
+        if not isinstance(means_raw, Mapping):
+            raise CalibrationBundleError(f"{form}.standardization_means must be an object.")
+        if not isinstance(stds_raw, Mapping):
+            raise CalibrationBundleError(f"{form}.standardization_stds must be an object.")
+    if form == "form_c" and not means_raw and not stds_raw:
+        means_raw = {feature: 0.0 for feature in expected_features}
+        stds_raw = {feature: 1.0 for feature in expected_features}
+    else:
+        means_raw = _required_mapping(raw, "standardization_means")
+        stds_raw = _required_mapping(raw, "standardization_stds")
     if set(means_raw) != set(expected_features) or set(stds_raw) != set(expected_features):
         raise CalibrationBundleError(
             f"{form} standardization keys must match feature_order exactly."
@@ -236,6 +265,28 @@ def _parse_form(form: str, raw: object) -> FormCalibration:
         for feature in expected_features
     }
 
+    methodology_label = str(raw.get("methodology_label", ""))
+    feature_transformation = str(raw.get("feature_transformation", "global_population_zscore"))
+    target_transformation = str(raw.get("target_transformation", "global_population_zscore_delta_accuracy"))
+    exploratory_status = str(raw.get("exploratory_status", ""))
+    ridge_alpha_raw = raw.get("ridge_alpha")
+    ridge_alpha = None if ridge_alpha_raw in (None, "") else _finite_float(
+        ridge_alpha_raw,
+        f"{form}.ridge_alpha",
+        positive=True,
+    )
+    if form == "form_c":
+        if methodology_label != "Form C - within-round relative-contribution calibration":
+            raise CalibrationBundleError("form_c methodology_label is invalid.")
+        if feature_transformation != "within_task_round_population_zscore":
+            raise CalibrationBundleError("form_c feature_transformation is invalid.")
+        if target_transformation != "within_task_round_zscore_delta_accuracy":
+            raise CalibrationBundleError("form_c target_transformation is invalid.")
+        if exploratory_status != "post_hoc_exploratory":
+            raise CalibrationBundleError("form_c exploratory_status is invalid.")
+        if ridge_alpha is None:
+            raise CalibrationBundleError("form_c ridge_alpha is required.")
+
     return FormCalibration(
         form=form,
         feature_order=expected_features,
@@ -245,7 +296,73 @@ def _parse_form(form: str, raw: object) -> FormCalibration:
         clipping_bounds=(lower, upper),
         standardization_means=means,
         standardization_stds=stds,
+        methodology_label=methodology_label,
+        feature_transformation=feature_transformation,
+        target_transformation=target_transformation,
+        exploratory_status=exploratory_status,
+        ridge_alpha=ridge_alpha,
     )
+
+
+def _supported_treatment_arms_versioned(
+    data: Mapping[str, object],
+    *,
+    schema_version: str,
+) -> tuple[str, ...]:
+    raw = data.get("supported_treatment_arms")
+    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)) or not raw:
+        raise CalibrationBundleError(
+            "supported_treatment_arms must be a non-empty list for schema v2/v3."
+        )
+    arms = []
+    seen = set()
+    for value in raw:
+        if value not in FORMS:
+            raise CalibrationBundleError(
+                f"Unsupported treatment arm in calibration bundle: {value!r}."
+            )
+        if schema_version == SCHEMA_VERSION_V2 and value == "form_c":
+            raise CalibrationBundleError("Schema v2 cannot contain form_c.")
+        if value in seen:
+            raise CalibrationBundleError(
+                f"Duplicate supported treatment arm {value!r}."
+            )
+        seen.add(value)
+        arms.append(str(value))
+    return tuple(arms)
+
+
+def _validate_versioned_unsupported_forms(
+    data: Mapping[str, object],
+    supported_treatment_arms: tuple[str, ...],
+) -> None:
+    raw = data.get("unsupported_forms", [])
+    if raw in (None, ""):
+        return
+    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
+        raise CalibrationBundleError("unsupported_forms must be a list when present.")
+    forbidden = {
+        "coefficients",
+        "intercept",
+        "gamma",
+        "feature_order",
+        "standardization_means",
+        "standardization_stds",
+        "clipping_bounds",
+        "ridge_alpha",
+    }
+    for item in raw:
+        if not isinstance(item, Mapping):
+            raise CalibrationBundleError("unsupported_forms entries must be objects.")
+        form = item.get("form")
+        if form in supported_treatment_arms:
+            raise CalibrationBundleError("A supported form cannot also be unsupported.")
+        if form not in FORMS:
+            raise CalibrationBundleError(f"Unknown unsupported form {form!r}.")
+        if forbidden.intersection(item):
+            raise CalibrationBundleError(
+                "Unsupported forms must not include runnable calibration parameters."
+            )
 
 
 def load_calibration_bundle(
@@ -269,7 +386,7 @@ def load_calibration_bundle(
     data = _load_json_without_duplicate_keys(path)
 
     schema_version = _required_string(data, "schema_version")
-    if schema_version != SCHEMA_VERSION:
+    if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise CalibrationBundleError(f"Unsupported schema_version {schema_version!r}.")
 
     purpose = _required_string(data, "purpose")
@@ -298,9 +415,24 @@ def load_calibration_bundle(
     _validate_dataset_provenance(dataset_provenance, bundle_tasks)
 
     forms_raw = _required_mapping(data, "forms")
-    if set(forms_raw) != set(FORMS):
-        raise CalibrationBundleError("Calibration bundle must contain Form A and Form B.")
-    forms = {form: _parse_form(form, forms_raw[form]) for form in FORMS}
+    if schema_version == SCHEMA_VERSION_V1:
+        if set(forms_raw) != set(LEGACY_FORMS):
+            raise CalibrationBundleError("Calibration bundle must contain Form A and Form B.")
+        supported_treatment_arms = tuple(LEGACY_FORMS)
+    else:
+        supported_treatment_arms = _supported_treatment_arms_versioned(
+            data,
+            schema_version=schema_version,
+        )
+        if set(forms_raw) != set(supported_treatment_arms):
+            raise CalibrationBundleError(
+                "Versioned schema forms must exactly match supported_treatment_arms."
+            )
+        _validate_versioned_unsupported_forms(data, supported_treatment_arms)
+    forms = {
+        form: _parse_form(form, forms_raw[form])
+        for form in supported_treatment_arms
+    }
 
     is_engineering_fixture = (
         purpose == "engineering_test_only"
@@ -337,5 +469,6 @@ def load_calibration_bundle(
         source_commit_sha=commit_sha,
         dataset_provenance=dataset_provenance,
         forms=forms,
+        supported_treatment_arms=supported_treatment_arms,
     )
 

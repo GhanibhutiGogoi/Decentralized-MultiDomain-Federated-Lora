@@ -18,8 +18,9 @@ and aggregation code are not redefined here.
 - Dataset loading is centralized in `framework/datasets/factory.py`.
 - Experiment 2 evaluation and reporting are implemented in
   `experiment/experiment2/evaluation.py`, `figures.py`, and `reporting.py`.
-- Experiment 2 now writes the strict `exp3-calibration-bundle/v1` calibration
-  bundle consumed by Experiment 3.
+- Experiment 2 writes a strict `exp3-calibration-bundle/v3` bundle for
+  Experiment 3 only when at least one treatment form is supported by the
+  null-model and Ridge-boundary gates.
 - Experiment 3 infrastructure is implemented under `experiment/experiment3/`;
   scientific runs require a validated calibration bundle, explicit source run
   IDs, and a configured MDE.
@@ -112,15 +113,18 @@ Experiment 2:
 python project-2-domain-aware-allocation/experiment/experiment2/run.py
 ```
 
-Experiment 2 automatically computes regression metrics, ranking metrics, and
-ranking permutation tests during future reruns. Pooled permutation tests are
-stratified by the configured aggregation context columns. The ranking metrics
-are reported only; Form A/Form B selection is not changed by them.
-After a successful real-data calibration, Experiment 2 writes
-`outputs/exp2/calibration_bundle.json` with schema
-`exp3-calibration-bundle/v1`; the bundle is written only after input
-provenance, numeric validation, calibration, report generation, and artifact
-writes succeed.
+Experiment 2 automatically computes regression metrics, ranking metrics,
+ranking permutation tests, and fold-safe null comparisons during future reruns.
+Pooled permutation tests are stratified by the configured aggregation context
+columns. Ranking metrics are reported only. Form A and Form B retain the
+original raw-RMSE support gate; Form C is a new post-hoc exploratory candidate
+that uses within-task-round normalized predictors and a within-task-round
+relative contribution target.
+After a successful real-data calibration with at least one supported treatment
+form, Experiment 2 writes `outputs/exp2/calibration_bundle.json` with schema
+`exp3-calibration-bundle/v3`; the bundle is written only after input
+provenance, numeric validation, support-decision evaluation, calibration,
+report generation, and artifact writes succeed.
 
 Experiment 2 requires explicit `is_synthetic` provenance in Experiment 1
 measurement tables. It does not backfill missing provenance as real data.
@@ -130,9 +134,10 @@ Class imbalance is computed with a finite missing-class penalty:
 
 Prepared optional Ridge-alpha controls for a future rerun:
 
-If Ridge alpha selection lands on the minimum or maximum tested value,
-Experiment 2 raises `RidgeAlphaBoundaryError`; the search grid is not expanded
-automatically.
+If Ridge alpha selection lands on the minimum or maximum tested value, that
+Ridge form is recorded as unsupported for Experiment 3 eligibility. The search
+grid is not expanded automatically, and no fallback alpha or lambda parameters
+are fabricated.
 
 ```powershell
 python project-2-domain-aware-allocation/experiment/experiment2/run.py --include-extended-ridge-alphas
@@ -156,5 +161,6 @@ python project-2-domain-aware-allocation/experiment/experiment3/run.py --calibra
 
 Experiment 3 writes paired arm differences, paired permutation tests,
 confidence intervals, task summaries, realized aggregation weights, and MDE
-comparisons. It refuses synthetic or engineering calibration bundles in normal
+comparisons for baseline plus the supported treatment arms listed in the v3
+bundle. It refuses synthetic or engineering calibration bundles in normal
 production mode.

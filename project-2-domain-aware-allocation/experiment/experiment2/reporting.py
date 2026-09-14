@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from experiment2.form_c import FORM_C_FEATURES, FORM_C_METHOD_LABEL
 from experiment2.lambda_calibration import FORM_A_FEATURES, FORM_B_FEATURES
 
 
@@ -43,6 +44,7 @@ def build_evaluation_report(
     cv: pd.DataFrame,
     evaluation_metrics: pd.DataFrame,
     alpha_metrics: pd.DataFrame,
+    form_support: pd.DataFrame,
     selected_alpha: float,
     lambda_calibrations: dict[str, dict[str, float]],
     evaluation_config: dict,
@@ -55,11 +57,25 @@ def build_evaluation_report(
             for form, values in sorted(lambda_calibrations.items())
         ]
     ))
-    global_metrics = evaluation_metrics[
-        (evaluation_metrics["scope"] == "all")
-        & (evaluation_metrics["scope_value"] == "ALL")
-    ]
-    task_metrics = evaluation_metrics[evaluation_metrics["scope"] == "task"]
+    if evaluation_metrics.empty:
+        global_metrics = evaluation_metrics
+        task_metrics = evaluation_metrics
+    else:
+        global_metrics = evaluation_metrics[
+            (evaluation_metrics["scope"] == "all")
+            & (evaluation_metrics["scope_value"] == "ALL")
+        ]
+        task_metrics = evaluation_metrics[evaluation_metrics["scope"] == "task"]
+    validation_all = (
+        validation[validation["task"] == "ALL"]
+        if "task" in validation.columns
+        else validation
+    )
+    orthogonality_all = (
+        orthogonality[orthogonality["task"] == "ALL"]
+        if "task" in orthogonality.columns
+        else orthogonality
+    )
     report = f"""# Experiment 2 Evaluation Report
 
 ## Scope
@@ -84,7 +100,24 @@ Form A features: `{", ".join(FORM_A_FEATURES)}`.
 
 Form B features: `{", ".join(FORM_B_FEATURES)}`.
 
+Form C label: `{FORM_C_METHOD_LABEL}`.
+
+Form C features: `{", ".join(FORM_C_FEATURES)}`.
+
+Form C was introduced after observing cross-task target-scale mismatch in the
+original A/B negative result. It is post-hoc and exploratory at calibration
+time; Experiment 3 is required for independent confirmation if it is supported.
+
 Selected Ridge alpha remains RMSE-based: `{selected_alpha}`.
+
+## Null-Model Validity Gate
+
+Experiment 2 reports a fold-safe intercept-only null comparator. A lambda form is
+supported only when its raw mean leave-one-task-out RMSE is strictly lower than
+the fold-safe null by more than the documented numerical tolerance; Ridge forms
+must also select an interior alpha.
+
+{markdown_table(form_support)}
 
 ## Gamma Calibration
 
@@ -110,11 +143,11 @@ Per-task metrics:
 
 ## Lambda Validation
 
-{markdown_table(validation[validation["task"] == "ALL"])}
+{markdown_table(validation_all)}
 
 ## Orthogonality Against q
 
-{markdown_table(orthogonality[orthogonality["task"] == "ALL"])}
+{markdown_table(orthogonality_all)}
 
 ## Leave-One-Task-Out Details
 
@@ -134,8 +167,10 @@ are available.
 
 ## Decision Status
 
-No scientific conclusion is made in this report. Form selection and lambda
-adequacy should be assessed only after Project 1 mathematical review is
-complete and Experiments 1 and 2 have been rerun.
+Forms A and B remain recorded under their original raw-RMSE/null evaluation.
+Unsupported forms do not receive coefficients, gamma, lambda values, or
+Experiment 3 treatment-arm eligibility. If the support table contains no
+supported treatment form, Experiment 3 is blocked because no scientifically
+runnable domain-aware calibration bundle is emitted.
 """
     (output_dir / "comparison_report.md").write_text(report, encoding="utf-8")

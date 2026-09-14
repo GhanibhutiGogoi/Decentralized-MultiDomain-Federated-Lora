@@ -15,7 +15,7 @@ import pandas as pd
 
 from experiment2.lambda_calibration import LAMBDA_MAX, LAMBDA_MIN, LinearFit
 from experiment2.provenance import parse_provenance_value
-from experiment3.calibration_bundle import EXPECTED_FORM_FEATURES, SCHEMA_VERSION
+from experiment3.calibration_bundle import EXPECTED_FORM_FEATURES, SCHEMA_VERSION_V3
 
 
 class CalibrationBundleWriteError(ValueError):
@@ -147,8 +147,17 @@ def _form_payload(
         "feature_order": list(fit.features),
         "coefficients": coefficients,
         "intercept": _finite_float(fit.intercept, f"{fit.form}.intercept"),
+        "ridge_alpha": None if fit.ridge_alpha is None else _finite_float(
+            fit.ridge_alpha,
+            f"{fit.form}.ridge_alpha",
+            positive=True,
+        ),
         "gamma": _finite_float(lambda_calibrations[fit.form].get("gamma"), f"{fit.form}.gamma"),
         "clipping_bounds": [float(LAMBDA_MIN), float(LAMBDA_MAX)],
+        "methodology_label": fit.methodology_label,
+        "feature_transformation": fit.feature_transformation,
+        "target_transformation": fit.target_transformation,
+        "exploratory_status": fit.exploratory_status,
         "standardization_means": {
             feature: _finite_float(fit.feature_means[feature], f"{fit.form}.mean.{feature}")
             for feature in fit.features
@@ -173,6 +182,7 @@ def build_calibration_bundle(
     lambda_calibrations: Mapping[str, Mapping[str, object]],
     experiment1_run_id: str,
     experiment2_run_id: str,
+    form_support: pd.DataFrame | None = None,
 ) -> dict[str, object]:
     """Build the completed production calibration contract for Experiment 3."""
     if "is_synthetic" not in measurements.columns:
@@ -185,17 +195,46 @@ def build_calibration_bundle(
         fit.form: _form_payload(fit, lambda_calibrations)
         for fit in fits
     }
-    if set(form_payloads) != set(EXPECTED_FORM_FEATURES):
-        raise CalibrationBundleWriteError("Calibration bundle requires exactly Form A and Form B.")
+    if not form_payloads:
+        raise CalibrationBundleWriteError("Calibration bundle requires at least one supported form.")
+    if not set(form_payloads).issubset(set(EXPECTED_FORM_FEATURES)):
+        raise CalibrationBundleWriteError("Calibration bundle contains an unsupported form.")
+    supported_treatment_arms = list(form_payloads)
     if not experiment1_run_id or not experiment2_run_id:
         raise CalibrationBundleWriteError("Experiment run identities are required.")
+    unsupported_forms = []
+    if form_support is not None and not form_support.empty:
+        for _, row in form_support.iterrows():
+            form = str(row.get("form", ""))
+            if form in form_payloads:
+                continue
+            if form in EXPECTED_FORM_FEATURES:
+                unsupported_forms.append(
+                    {
+                        "form": form,
+                        "status": str(row.get("status", "unsupported")),
+                        "rejection_reason": str(row.get("rejection_reason", "")),
+                        "model_mean_rmse": _finite_float(
+                            row.get("model_mean_rmse"),
+                            f"{form}.model_mean_rmse",
+                        ),
+                        "null_mean_rmse": _finite_float(
+                            row.get("null_mean_rmse"),
+                            f"{form}.null_mean_rmse",
+                        ),
+                        "selected_alpha": row.get("selected_alpha", ""),
+                        "alpha_boundary_status": str(row.get("alpha_boundary_status", "")),
+                    }
+                )
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": SCHEMA_VERSION_V3,
         "purpose": "scientific_calibration",
         "scientifically_valid": True,
         "is_synthetic": False,
         "completion_status": "complete",
         "expected_task_set": tasks,
+        "baseline_arm": "baseline",
+        "supported_treatment_arms": supported_treatment_arms,
         "source": {
             "experiment1_run_id": str(experiment1_run_id),
             "experiment2_run_id": str(experiment2_run_id),
@@ -205,12 +244,14 @@ def build_calibration_bundle(
                     "experiment1_run_id": str(experiment1_run_id),
                     "experiment2_run_id": str(experiment2_run_id),
                     "tasks": tasks,
+                    "supported_treatment_arms": supported_treatment_arms,
                     "forms": form_payloads,
                 }
             ),
         },
         "dataset_provenance": _dataset_provenance(tasks, exp1_dataset_manifest),
         "forms": form_payloads,
+        "unsupported_forms": unsupported_forms,
     }
 
 

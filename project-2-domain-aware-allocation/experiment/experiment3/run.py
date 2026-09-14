@@ -269,7 +269,22 @@ def validate_configuration(
     return task_tuple
 
 
-def _config_payload(config: Experiment3Config, seeds: Experiment3Seeds) -> dict[str, object]:
+def _eligible_arms(supported_treatment_arms: Sequence[str]) -> tuple[str, ...]:
+    arms = ("baseline", *tuple(supported_treatment_arms))
+    if len(arms) == 1:
+        raise Experiment3RunnerError("Experiment 3 requires at least one supported treatment arm.")
+    unknown = set(arms) - set(ARMS)
+    if unknown:
+        raise Experiment3RunnerError(f"Unknown Experiment 3 arm(s): {sorted(unknown)}.")
+    return arms
+
+
+def _config_payload(
+    config: Experiment3Config,
+    seeds: Experiment3Seeds,
+    supported_treatment_arms: Sequence[str],
+) -> dict[str, object]:
+    eligible_arms = _eligible_arms(supported_treatment_arms)
     return {
         "tasks": list(config.tasks),
         "experiment1_run_id": config.experiment1_run_id,
@@ -279,7 +294,8 @@ def _config_payload(config: Experiment3Config, seeds: Experiment3Seeds) -> dict[
         "clients": int(config.clients),
         "partition": config.partition,
         "partition_alpha": float(config.partition_alpha),
-        "arms": list(ARMS),
+        "arms": list(eligible_arms),
+        "supported_treatment_arms": list(supported_treatment_arms),
         "target_accuracy": config.target_accuracy,
         "mde": config.mde,
         "paired_stochastic_seed_policy": "arm-independent stable hash of run/task/round",
@@ -498,7 +514,12 @@ def _paired_stat_artifacts(final_global: pd.DataFrame, config: Experiment3Config
     task_summary_frames = []
     mde_rows = []
 
-    for comparison_arm in ("form_a", "form_b"):
+    comparison_arms = [
+        str(arm)
+        for arm in final_global["arm"].drop_duplicates().tolist()
+        if arm != "baseline"
+    ]
+    for comparison_arm in comparison_arms:
         paired = paired_arm_differences(
             final_global,
             baseline_arm="baseline",
@@ -630,7 +651,8 @@ def run_experiment3(
         expected_experiment2_run_id=config.experiment2_run_id,
         allow_engineering_fixture=allow_engineering_fixture,
     )
-    config_payload = _config_payload(config, seeds)
+    eligible_arms = _eligible_arms(bundle.supported_treatment_arms)
+    config_payload = _config_payload(config, seeds, bundle.supported_treatment_arms)
     identity = RunIdentity(
         config_hash=stable_hash(config_payload),
         calibration_bundle_hash=bundle.content_hash,
@@ -689,8 +711,8 @@ def run_experiment3(
             config=config,
         )
         initial_state = ops.initial_state(task, config)
-        states = {arm: copy.deepcopy(initial_state) for arm in ARMS}
-        for arm in ARMS:
+        states = {arm: copy.deepcopy(initial_state) for arm in eligible_arms}
+        for arm in eligible_arms:
             for round_id in range(1, int(config.rounds) + 1):
                 cp_path = _checkpoint_path(output_dir, task.name, arm, config.run_seed, round_id)
                 if config.resume and cp_path.exists():
@@ -813,6 +835,8 @@ def run_experiment3(
         "calibration_bundle_file": str(config.calibration_bundle_path),
         "calibration_bundle_hash": bundle.content_hash,
         "calibration_schema_version": bundle.schema_version,
+        "supported_treatment_arms": list(bundle.supported_treatment_arms),
+        "eligible_arms": list(eligible_arms),
         "source_experiment1_run_id": bundle.source_experiment1_run_id,
         "source_experiment2_run_id": bundle.source_experiment2_run_id,
         "source_commit_sha": bundle.source_commit_sha,

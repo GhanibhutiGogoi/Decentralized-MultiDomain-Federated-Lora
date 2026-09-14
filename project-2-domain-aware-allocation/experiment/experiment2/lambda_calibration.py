@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -50,6 +51,10 @@ class LinearFit:
     target_mean: float
     target_std: float
     ridge_alpha: float | None = None
+    methodology_label: str = ""
+    feature_transformation: str = "global_population_zscore"
+    target_transformation: str = "global_population_zscore_delta_accuracy"
+    exploratory_status: str = ""
 
 
 def prepare_measurements(df: pd.DataFrame) -> pd.DataFrame:
@@ -176,7 +181,17 @@ def ridge_alpha_grid(
 ) -> list[float]:
     """Return the Ridge alpha grid without changing the default search."""
     if custom_alphas is not None:
-        alphas = [float(alpha) for alpha in custom_alphas]
+        alphas = []
+        for idx, alpha in enumerate(custom_alphas):
+            if isinstance(alpha, bool):
+                raise ValueError(f"Ridge alpha at index {idx} must be numeric.")
+            try:
+                parsed = float(alpha)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Ridge alpha at index {idx} must be numeric.") from exc
+            if not math.isfinite(parsed):
+                raise ValueError(f"Ridge alpha at index {idx} must be finite.")
+            alphas.append(parsed)
         if include_extended:
             alphas.extend(EXTENDED_RIDGE_ALPHAS)
     else:
@@ -378,17 +393,31 @@ def attach_lambda_values(
         "class_imbalance_ratio",
     ]
     for fit in fits:
-        score = predict_standardized_score(df, fit)
+        if fit.form == "form_c":
+            from experiment2.form_c import predict_form_c_score, transform_form_c_context
+
+            transformed = transform_form_c_context(df, include_target=True)
+            score = predict_form_c_score(df, fit)
+            pred = score
+            relative_target = transformed.frame[transformed.target_column].to_numpy(
+                dtype=float
+            )
+        else:
+            score = predict_standardized_score(df, fit)
+            pred = predict_delta_accuracy(df, fit)
+            relative_target = np.full(len(df), np.nan)
         gamma = lambda_calibrations[fit.form]["gamma"]
         lam = _lambda_from_score(df, score, gamma)
-        pred = predict_delta_accuracy(df, fit)
         part = df[base_cols].copy()
         part["form"] = fit.form
+        part["methodology_label"] = fit.methodology_label
+        part["exploratory_status"] = fit.exploratory_status
         part["gamma"] = gamma
         part["target_lambda_cv"] = lambda_calibrations[fit.form]["target_cv"]
         part["achieved_lambda_cv"] = lambda_calibrations[fit.form]["achieved_cv"]
         part["raw_lambda_score"] = score
         part["predicted_delta_accuracy"] = pred
+        part["relative_contribution_target"] = relative_target
         part["lambda_weight"] = lam
         part["effective_quality_score"] = part["quality_score"] * part["lambda_weight"]
         rows.append(part)
@@ -407,6 +436,10 @@ def coefficient_table(fits: list[LinearFit]) -> pd.DataFrame:
                 "ridge_alpha": fit.ridge_alpha,
                 "feature_mean": "",
                 "feature_std": "",
+                "methodology_label": fit.methodology_label,
+                "feature_transformation": fit.feature_transformation,
+                "target_transformation": fit.target_transformation,
+                "exploratory_status": fit.exploratory_status,
             }
         )
         for feature, coef in zip(fit.features, fit.coefficients):
@@ -419,6 +452,10 @@ def coefficient_table(fits: list[LinearFit]) -> pd.DataFrame:
                     "ridge_alpha": fit.ridge_alpha,
                     "feature_mean": fit.feature_means[feature],
                     "feature_std": fit.feature_stds[feature],
+                    "methodology_label": fit.methodology_label,
+                    "feature_transformation": fit.feature_transformation,
+                    "target_transformation": fit.target_transformation,
+                    "exploratory_status": fit.exploratory_status,
                 }
             )
     return pd.DataFrame(rows)
