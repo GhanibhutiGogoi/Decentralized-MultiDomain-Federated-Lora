@@ -1,0 +1,61 @@
+{
+  "scope": "descriptive energy and personalization diagnostics; not causal attribution",
+  "methods": {
+    "fedavg16": {
+      "mean_round_relative_tail_energy": 1.3897595810196557e-06,
+      "max_round_relative_tail_energy": 8.180177010695621e-06,
+      "final_personalized_accuracy_mean": 20.056778417598007,
+      "final_personalized_accuracy_sample_sd": 0.44411415152408146,
+      "mean_final_assembly_relative_tail_energy": 0,
+      "max_final_assembly_relative_tail_energy": 0
+    },
+    "mh16": {
+      "mean_round_relative_tail_energy": 0.00024980247884113366,
+      "max_round_relative_tail_energy": 0.0005870205052460551,
+      "final_personalized_accuracy_mean": 42.099410755082914,
+      "final_personalized_accuracy_sample_sd": 1.4224325334478125,
+      "mean_final_assembly_relative_tail_energy": 0.0021785682709456475,
+      "max_final_assembly_relative_tail_energy": 0.0031882270005806684
+    },
+    "mh_sample": {
+      "mean_round_relative_tail_energy": 0.000990270432608225,
+      "max_round_relative_tail_energy": 0.0020930282999219586,
+      "final_personalized_accuracy_mean": 29.21233077155116,
+      "final_personalized_accuracy_sample_sd": 2.2902953410291165,
+      "mean_final_assembly_relative_tail_energy": 0.0004797448575329244,
+      "max_final_assembly_relative_tail_energy": 0.0011159113315360304
+    },
+    "fixed_quality": {
+      "mean_round_relative_tail_energy": 0.0012860036732187305,
+      "max_round_relative_tail_energy": 0.00258786851325647,
+      "final_personalized_accuracy_mean": 30.216298257277767,
+      "final_personalized_accuracy_sample_sd": 2.2236509594602833,
+      "mean_final_assembly_relative_tail_energy": 0.0007239954782738093,
+      "max_final_assembly_relative_tail_energy": 0.0014936332273230136
+    },
+    "fixed_domain": {
+      "mean_round_relative_tail_energy": 0.0012825305202891495,
+      "max_round_relative_tail_energy": 0.0025867875082514866,
+      "final_personalized_accuracy_mean": 29.859249554401977,
+      "final_personalized_accuracy_sample_sd": 2.425220840826985,
+      "mean_final_assembly_relative_tail_energy": 0.000759348728593857,
+      "max_final_assembly_relative_tail_energy": 0.0015916227661960556
+    },
+    "adaptive_quality": {
+      "mean_round_relative_tail_energy": 0.0017205604018019653,
+      "max_round_relative_tail_energy": 0.004813483734182047,
+      "final_personalized_accuracy_mean": 21.05427766597182,
+      "final_personalized_accuracy_sample_sd": 1.630122655996836,
+      "mean_final_assembly_relative_tail_energy": 7.757380537652892e-05,
+      "max_final_assembly_relative_tail_energy": 0.00013566012870715907
+    },
+    "adaptive_domain": {
+      "mean_round_relative_tail_energy": 0.0017270974808985722,
+      "max_round_relative_tail_energy": 0.004796921741212301,
+      "final_personalized_accuracy_mean": 21.164252708480596,
+      "final_personalized_accuracy_sample_sd": 1.8861718379380692,
+      "mean_final_assembly_relative_tail_energy": 7.628339701191358e-05,
+      "max_final_assembly_relative_tail_energy": 0.00011312002984467056
+    }
+  }
+}

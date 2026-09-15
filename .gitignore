@@ -57,6 +57,7 @@ Adaptive_Lora/result/exp1/data/
 # Env / secrets
 .env
 .env.local
+PROJECT_STATUS.md
 
 # OS
 Thumbs.db

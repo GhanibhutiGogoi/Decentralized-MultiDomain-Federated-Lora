@@ -30,8 +30,8 @@ from src.federated.runner import DecentralizedRunner
 from src.clustering.discovery import AdaptiveAffinityMixer, OnlineDomainDiscovery
 
 
-METHODS = ("local", "fedavg", "mh", "oracle", "adaptive", "weighted", "adaptive_weighted",
-           "adaptive_rank", "adaptive_weighted_rank")
+METHODS = ("local", "fedavg", "mh", "oracle", "adaptive")
+SUPERSEDED_METHODS = ("weighted", "adaptive_weighted", "adaptive_rank", "adaptive_weighted_rank")
 SUMMARY_FIELDS = ["seed", "method", "merge", "rank_schedule", "error_feedback", "rounds",
                   "personalized_accuracy", "personalized_sample_weighted_accuracy",
                   "consensus_accuracy", "accuracy_gap", "worst_domain_accuracy",
@@ -40,42 +40,14 @@ SUMMARY_FIELDS = ["seed", "method", "merge", "rank_schedule", "error_feedback", 
                   "wall_seconds", "initial_state_sha256", "split_sha256"]
 
 
-def conservative_factors(values, blend=0.10, bound=0.15):
-    """Bounded, mean-one factors from a per-client signal."""
-    x = np.asarray(values, dtype=float)
-    if x.size == 0 or not np.isfinite(x).all() or x.std() < 1e-12:
-        return np.ones(len(x), dtype=float)
-    z = np.clip((x - x.mean()) / x.std(), -3.0, 3.0)
-    raw = np.exp(np.clip(z, -4.0, 4.0)); raw /= raw.mean()
-    f = 1.0 + blend * (raw - 1.0)
-    # Scale after clipping so the factors preserve the base update scale.
-    lo, hi = 0.0, 2.0
-    for _ in range(60):
-        mid = (lo + hi) / 2
-        if np.clip(f * mid, 1-bound, 1+bound).mean() < 1.0: lo = mid
-        else: hi = mid
-    return np.clip(f * ((lo + hi) / 2), 1-bound, 1+bound)
-
-
 class DomainWeightedMixer:
-    """Stateful symmetric DS mixer using update-norm domain evidence."""
+    """Historical invalid weighting wrapper, retained only for forensic reading.
+
+    Sinkhorn cancels diagonal reweighting of an already balanced matrix.
+    New experiments must use integrated_benchmark's weighted-MH protocol.
+    """
     def __init__(self, base_mixer, n_clients, blend=0.10, bound=0.15, signal_values=None):
-        self.base_mixer, self.n_clients = base_mixer, int(n_clients)
-        self.blend, self.bound, self._factors = float(blend), float(bound), np.ones(n_clients)
-        self.signal_values = None if signal_values is None else np.asarray(signal_values, dtype=float)
-
-    def update(self, states, alpha, client_ids=None):
-        if self.signal_values is None:
-            self.signal_values = np.asarray(
-                [sum(float(torch.linalg.vector_norm(d)) for d in lora_to_delta(s, alpha).values()) for s in states], dtype=float)
-        self._factors = conservative_factors(self.signal_values, self.blend, self.bound)
-        observe = getattr(self.base_mixer, "update", None)
-        if observe is not None: observe(states, alpha=alpha, client_ids=client_ids)
-
-    def __call__(self, round_idx):
-        base = np.asarray(self.base_mixer(round_idx), dtype=float)
-        scale = np.sqrt(np.outer(self._factors, self._factors))
-        return sinkhorn(base * scale)
+        raise ValueError('Historical Sinkhorn domain weighting is invalid; use experiments.integrated_benchmark')
 
 
 def source_provenance():
@@ -105,6 +77,8 @@ def topology_order(assignments, seed):
 
 
 def build_mixing(method, assignments, bridge_every, topology="ring", seed=42, alpha=32.0):
+    if method in SUPERSEDED_METHODS:
+        raise ValueError('Superseded composition arm; use experiments.integrated_benchmark')
     ids = sorted(assignments)
     n = len(ids)
     if method == "local":
@@ -216,6 +190,16 @@ class FeatureClient:
             self.model.lora_A.copy_(initial["A"][:rank])
             self.model.lora_B.zero_()
         self.rng = torch.Generator().manual_seed(config.current_seed + 1009 * (cid + 1))
+        # Controller probes have their own fixed training sample and random
+        # directions. They must not consume the paired SGD minibatch stream or
+        # inspect held-out labels when selecting capacity.
+        self.rank_rng = torch.Generator().manual_seed(config.current_seed + 104729 * (cid + 1))
+        self.probe_factor_seed = config.current_seed + 130363 * (cid + 1)
+        probe_rng = torch.Generator().manual_seed(config.current_seed + 15485863 * (cid + 1))
+        probe_order = torch.randperm(len(self.train_indices), generator=probe_rng)
+        self.probe_indices = self.train_indices[probe_order[:config.batch_size].to(device)]
+        if not len(self.probe_indices):
+            raise ValueError("adaptive-rank probes require a nonempty training split")
 
     def train(self):
         self.model.train()
@@ -258,27 +242,93 @@ class FeatureClient:
             self.model.lora_A.copy_(state["fc"]["A"])
             self.model.lora_B.copy_(state["fc"]["B"])
 
-    def resize_rank(self, rank):
-        """Change adapter capacity while preserving the represented update."""
+    def _model_at_rank(self, rank, generator):
+        """Clone at another rank without consuming global or minibatch RNG.
+
+        Expansion rescales and pads the existing factors exactly. The new A
+        rows are random and the corresponding B columns are zero, so the
+        effective update is unchanged while those new directions can learn.
+        Shrinking uses the best truncated-SVD effective-update approximation.
+        """
+        import copy
+
         rank = int(rank)
-        if rank < 1 or rank == self.rank:
-            if rank < 1:
-                raise ValueError("rank must be positive")
-            return
+        if rank < 1:
+            raise ValueError("rank must be positive")
         old_state = self.get_lora_state()
-        delta = lora_to_delta(old_state, self.alpha)["fc"]
-        factors = factorize_delta(delta, rank, self.alpha, dtype=self.model.lora_A.dtype)
-        base = nn.Linear(self.model.linear.in_features, self.model.linear.out_features).to(self.device)
-        with torch.no_grad():
-            base.weight.copy_(self.model.linear.weight)
-            base.bias.copy_(self.model.linear.bias)
-        from src.models.lora_resnet import LoRALinear
-        replacement = LoRALinear(base, rank, self.alpha).to(self.device)
-        with torch.no_grad():
-            replacement.lora_A.copy_(factors["A"].to(self.device))
-            replacement.lora_B.copy_(factors["B"].to(self.device))
-        self.model = replacement
+        if rank >= self.rank:
+            old_a, old_b = old_state["fc"]["A"], old_state["fc"]["B"]
+            scale = math.sqrt(rank / self.rank)
+            a = old_a.new_zeros((rank, old_a.shape[1]))
+            b = old_b.new_zeros((old_b.shape[0], rank))
+            a[:self.rank] = old_a * scale
+            b[:, :self.rank] = old_b * scale
+            factors = {"A": a, "B": b}
+        else:
+            delta = lora_to_delta(old_state, self.alpha)["fc"]
+            factors = factorize_delta(delta, rank, self.alpha, dtype=self.model.lora_A.dtype)
+        dead = ((factors["A"].abs().sum(1) == 0)
+                & (factors["B"].abs().sum(0) == 0))
+        if dead.any():
+            fresh = torch.empty((int(dead.sum()), factors["A"].shape[1]),
+                                dtype=factors["A"].dtype)
+            fresh.uniform_(-1 / math.sqrt(fresh.shape[1]),
+                           1 / math.sqrt(fresh.shape[1]), generator=generator)
+            factors["A"][dead] = fresh
+        replacement = copy.deepcopy(self.model)
+        replacement.rank = rank
+        replacement.scaling = self.alpha / rank
+        replacement.lora_A = nn.Parameter(factors["A"].to(self.device))
+        replacement.lora_B = nn.Parameter(factors["B"].to(self.device))
+        return replacement
+
+    def resize_rank(self, rank):
+        """Apply a capability change, with trainable expansion directions."""
+        rank = int(rank)
+        if rank < 1:
+            raise ValueError("rank must be positive")
+        if rank == self.rank:
+            return
+        self.model = self._model_at_rank(rank, self.rank_rng)
         self.rank = rank
+
+    def probe_gradient_stable_rank(self, capability_max):
+        """P1 gradient geometry on one fixed training batch at the ceiling.
+
+        Uses the P1 statistic (median ||G||_F^2 / ||G||_2^2 over nonzero
+        trainable 2-D factor gradients). P3 names factors ``lora_A/lora_B``,
+        so it cannot call P1's model-name-specific trainability helper.
+        """
+        if int(capability_max) < self.rank:
+            raise ValueError("probe ceiling must accommodate the current rank")
+        generator = torch.Generator().manual_seed(self.probe_factor_seed)
+        probe = self._model_at_rank(capability_max, generator)
+        probe.train()
+        index = self.probe_indices
+        loss = nn.functional.cross_entropy(probe(self.train_data["features"][index]),
+                                           self.train_data["labels"][index])
+        if not torch.isfinite(loss):
+            raise ValueError(f"non-finite gradient probe on client {self.client_id}")
+        probe.zero_grad(set_to_none=True)
+        loss.backward()
+        stable_ranks = []
+        for parameter in (probe.lora_A, probe.lora_B):
+            grad = parameter.grad.float()
+            frob_sq = torch.sum(grad * grad).item()
+            spectral_sq = torch.linalg.matrix_norm(grad, ord=2).item() ** 2
+            if spectral_sq > 1e-12:
+                stable_ranks.append(frob_sq / spectral_sq)
+        return float(np.median(stable_ranks)) if stable_ranks else 1.0
+
+    @torch.no_grad()
+    def probe_quality(self):
+        """P1's quality score on the fixed local training probe, never test."""
+        index = self.probe_indices
+        loss = nn.functional.cross_entropy(self.model(self.train_data["features"][index]),
+                                           self.train_data["labels"][index])
+        if not torch.isfinite(loss):
+            raise ValueError(f"non-finite quality probe on client {self.client_id}")
+        return 1.0 / (1.0 + float(loss))
 
 
 def make_splits(train_labels, test_labels, config, seed):
@@ -397,6 +447,8 @@ def operational_cost(method, assignments, round_idx, bridge_every, states, diagn
 
 
 def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output):
+    if method in SUPERSEDED_METHODS:
+        raise ValueError('Superseded composition arm; use experiments.integrated_benchmark')
     started = time.perf_counter()
     config.current_seed = seed
     splits, assignments = make_splits(train_cpu["labels"].numpy(), test_cpu["labels"].numpy(), config, seed)

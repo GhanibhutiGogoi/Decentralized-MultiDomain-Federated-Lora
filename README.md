@@ -1,20 +1,22 @@
 # AH-LoRA
 
-A working testbed for heterogeneous LoRA adapters in multi-domain federated learning. Clients share a frozen backbone, train low-rank classification-head updates, and aggregate those updates centrally or through peer-to-peer gossip. The completion target is a reproducible measured system; a paper is optional.
+A working testbed for heterogeneous LoRA adapters in multi-domain federated learning. Clients share a frozen backbone, train low-rank classification-head updates, and aggregate those updates centrally or through peer-to-peer gossip. The repository includes the completed experiments, evidence bundle, and paper.
 
 The immediate benchmark uses real CIFAR-100, ImageNet-pretrained ResNet-18, and 15 clients across five known domains. It compares local-only training, client-uniform centralized FedAvg, flat Metropolis-Hastings gossip, and a hierarchy supplied with the true domain groups. Merging expands each scaled update `(alpha / rank) B A`, averages in a common matrix space, then refactorizes by SVD at each client's rank.
 
 ## Current status
 
-As of 13 September 2026, the P3 benchmark, feature-cache checks, online discovery evaluation, P1 adaptive-rank controller, and P2 real-data regeneration are implemented. The merged main branch has reproducible artifacts for the full-data P3 battery, the revised P1 controller and conservative P2 weighting. Results that fail an accuracy or privacy objective are recorded as negative findings.
+The corrected end-to-end comparison is complete: nine arms, three seeds, 30 rounds, all 50,000 training and 10,000 test examples on gpu003. The actual P1 rank policy and P2 conservative weights run through weighted peer gossip and neighbor-tree final assembly. Conventional pooled LoRA reaches **57.23 ± 0.59%** full-test accuracy; the adaptive-domain pipeline reaches **6.90 ± 2.03%**. **The accuracy-preservation objective is not met under this protocol.** These are frozen-feature, head-only experiments in a single-process peer simulation; no privacy guarantee or multi-host deployment is established.
+
+Read the [corrected results](docs/artifacts/integrated-corrected/RESULTS.md), [experiment and provenance guide](docs/artifacts/integrated-corrected/README.md), and [paper](paper/main.pdf). The earlier composed pilot is superseded because normalization canceled its weights and its pooled comparison used different scaling. The corrected run uses alpha 32 throughout and repeating resource ceilings 4/8/16. Validation includes 463 remote tests and 3,460 recorded protocol checks.
 
 | Folder | Purpose | Remaining scope |
 |---|---|---|
-| `project-1-adaptive-rank` | Select client adapter ranks | Rank-policy calibration remains unresolved |
-| `project-2-domain-aware-allocation` | Fit domain-aware aggregation weights | Real-data Experiment 1/2 complete; calibration remains exploratory |
+| `project-1-adaptive-rank` | Select client adapter ranks | Implemented and integrated; tested policy loses accuracy in the corrected comparison |
+| `project-2-domain-aware-allocation` | Fit domain-aware aggregation weights | Negative fitted calibration recorded; conservative policy integrated and measured |
 | `project-3-hierarchical-gossip` | Mix heterogeneous adapters without a central server | Benchmark, online coordinator-visible discovery, and evidence artifacts complete; neighborhood-local discovery is an unimplemented variant |
 
-The homogeneous schedule uses rank 16; the heterogeneous schedule repeats ranks 4, 12 and 32. Both have total rank 240 over 15 clients. Seeds are 42, 43 and 44, alpha is 32, and consensus evaluation uses reference rank 16. Fixed heterogeneous ranks do not establish that an adaptive rank policy works. Known-domain hierarchy does not establish automatic domain discovery.
+The earlier 50-round protocol battery below uses rank 16 or ranks 4/12/32, both with total rank 240. It is supporting evidence with a different objective and rank schedule. Known-domain hierarchy does not establish automatic domain discovery.
 
 ## Reproduce and inspect
 

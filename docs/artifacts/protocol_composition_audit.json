@@ -1,1 +1,280 @@
-{"schema_version": 1, "title": "Protocol composition audit", "conclusion": "The original gap was caused first by non-composed experiments. After adding a matched composed P3 ablation, the tested loss-adaptive rank policy still underperformed fixed MH while saving communication, and bounded domain reweighting had no measurable effect. No arithmetic defect was found in the P3 \u0394W runner.", "findings": [{"id": "rank-controller-not-composed", "claim": "P1 adaptive rank is not invoked by P3", "evidence": ["P1 controller appears in project-1-adaptive-rank/experiment/exp1.py", "P3 protocol_benchmark.py constructs ranks from config.ranks and passes fixed target_ranks to DecentralizedRunner"]}, {"id": "domain-weight-not-composed", "claim": "P2 conservative domain factors are optional API inputs and are not passed by P2 Experiment 1 or P3", "evidence": ["fedavg_quality_weighted accepts domain_features=None", "P2 Experiment 1 calls aggregate_fn without domain_features/lambda_weights", "P3 uses DecentralizedRunner gossip, not P2 fedavg_quality_weighted"]}, {"id": "objective-mismatch", "claim": "P1 accuracy, P2 leave-one-out contribution ranking, and P3 personalized/consensus accuracy are different targets", "evidence": ["P1 reports task accuracy", "P2 target is delta_accuracy", "P3 reports personalized_accuracy and consensus_accuracy"]}, {"id": "heterogeneous-rank-cost", "claim": "P3 heterogeneous 4/12/32 schedule introduces receiver-side SVD truncation each round; rank-4 clients can discard mixed update energy", "evidence": ["runner computes factorize_delta(y,target_rank) per receiver", "existing P3 artifacts show heterogeneous \u0394W FedAvg 5.74% personalized vs uniform-rank \u0394W FedAvg 23.20%"]}], "required_matched_ablation": {"fixed_factors": ["same split", "same seed", "same rounds", "same initialization", "same graph", "same alpha/lr", "same rank budget", "same evaluation target"], "arms": ["fixed feasible ranks vs adaptive controller in P3 runner", "quality-only aggregation vs conservative domain factors in same decentralized graph", "uniform rank 16 vs heterogeneous 4/12/32"], "interpretation": "Only this matrix can attribute an end-to-end gain or failure to rank adaptation or domain weighting."}, "source_evidence": {"p1_driver": {"path": "project-1-adaptive-rank/experiment/exp1.py", "sha256": "787696c1e3c7c3ab8245137f7abad09063e01af63b1a453bab219cae7ff3a865", "lines": 547, "matches": {"AdaptiveRankController": [52, 161], "estimate_optimal_rank": [], "domain_features": [], "lambda_weights": [], "DecentralizedRunner": [], "AdaptiveAffinityMixer": [], "target_ranks": [], "ranks =": [469], "fedavg_quality_weighted(": [105, 147, 205]}}, "p1_controller": {"path": "project-1-adaptive-rank/rank_allocation/rank_selector.py", "sha256": "aaca6293881ef93d73638ea7188e00181b8dbb246884542a38536f5e8a38a6d0", "lines": 314, "matches": {"AdaptiveRankController": [51], "estimate_optimal_rank": [311], "domain_features": [], "lambda_weights": [], "DecentralizedRunner": [], "AdaptiveAffinityMixer": [], "target_ranks": [], "ranks =": [290], "fedavg_quality_weighted(": []}}, "p2_driver": {"path": "project-2-domain-aware-allocation/experiment/experiment1/run.py", "sha256": "9fa6e669c9021758c7ca9ebb856f10a6220603fa790f448465b3011da396b98b", "lines": 855, "matches": {"AdaptiveRankController": [], "estimate_optimal_rank": [52, 418], "domain_features": [], "lambda_weights": [], "DecentralizedRunner": [], "AdaptiveAffinityMixer": [], "target_ranks": [], "ranks =": [407], "fedavg_quality_weighted(": []}}, "p2_agg": {"path": "project-2-domain-aware-allocation/framework/aggregation/fedavg.py", "sha256": "7a9e940373c6c703be9a3fdb8143f17bfcb62ed2d04abe809fcfe2fbe5f49a83", "lines": 174, "matches": {"AdaptiveRankController": [], "estimate_optimal_rank": [], "domain_features": [102, 124, 128], "lambda_weights": [101, 117, 118, 119, 122], "DecentralizedRunner": [], "AdaptiveAffinityMixer": [], "target_ranks": [], "ranks =": [], "fedavg_quality_weighted(": [93]}}, "p3_driver": {"path": "project-3-hierarchical-gossip/experiments/protocol_benchmark.py", "sha256": "3a7faf2cf4147908f65212182878793abc42a94ba656390122c3f17c688c2632", "lines": 522, "matches": {"AdaptiveRankController": [], "estimate_optimal_rank": [], "domain_features": [], "lambda_weights": [], "DecentralizedRunner": [29, 121, 298, 331], "AdaptiveAffinityMixer": [30, 86], "target_ranks": [96, 104, 106, 127], "ranks =": [322], "fedavg_quality_weighted(": []}}, "p3_runner": {"path": "project-3-hierarchical-gossip/src/federated/runner.py", "sha256": "fe42a37a53155fc281e4657bd1afee1b02e0529bcb1e4ef8c575a09cdb760a6b", "lines": 281, "matches": {"AdaptiveRankController": [], "estimate_optimal_rank": [], "domain_features": [], "lambda_weights": [], "DecentralizedRunner": [48, 64], "AdaptiveAffinityMixer": [144], "target_ranks": [57, 62, 70, 72, 74, 77, 188], "ranks =": [77], "fedavg_quality_weighted(": []}}}, "matched_ablation_result": {"artifact": "docs/artifacts/p3-e2e-ablation/", "fixed_mh_personalized_mean_sd": "24.16 \u00b1 1.04%", "adaptive_rank_personalized_mean_sd": "20.30 \u00b1 2.51%", "weighted_mh_personalized_mean_sd": "24.16 \u00b1 1.04%", "adaptive_weighted_rank_personalized_mean_sd": "20.30 \u00b1 2.51%", "interpretation": "negative for this tested policy; not a universal impossibility result"}}
+{
+  "schema_version": 2,
+  "title": "Protocol composition audit",
+  "conclusion": "The historical composed comparison was invalid: Sinkhorn canceled domain factors, a median-loss rule replaced P1, pooled scaling differed, and final assembly was centralized. The corrected experiment executes P1/P2, weighted MH and neighbor-tree assembly; accuracy preservation is not achieved under the tested 30-round frozen-feature protocol.",
+  "findings": [
+    {
+      "id": "rank-controller-not-composed",
+      "claim": "P1 adaptive rank is not invoked by P3",
+      "evidence": [
+        "P1 controller appears in project-1-adaptive-rank/experiment/exp1.py",
+        "P3 protocol_benchmark.py constructs ranks from config.ranks and passes fixed target_ranks to DecentralizedRunner"
+      ]
+    },
+    {
+      "id": "domain-weight-not-composed",
+      "claim": "P2 conservative domain factors are optional API inputs and are not passed by P2 Experiment 1 or P3",
+      "evidence": [
+        "fedavg_quality_weighted accepts domain_features=None",
+        "P2 Experiment 1 calls aggregate_fn without domain_features/lambda_weights",
+        "P3 uses DecentralizedRunner gossip, not P2 fedavg_quality_weighted"
+      ]
+    },
+    {
+      "id": "objective-mismatch",
+      "claim": "P1 accuracy, P2 leave-one-out contribution ranking, and P3 personalized/consensus accuracy are different targets",
+      "evidence": [
+        "P1 reports task accuracy",
+        "P2 target is delta_accuracy",
+        "P3 reports personalized_accuracy and consensus_accuracy"
+      ]
+    },
+    {
+      "id": "heterogeneous-rank-cost",
+      "claim": "P3 heterogeneous 4/12/32 schedule introduces receiver-side SVD truncation each round; rank-4 clients can discard mixed update energy",
+      "evidence": [
+        "runner computes factorize_delta(y,target_rank) per receiver",
+        "existing P3 artifacts show heterogeneous \u0394W FedAvg 5.74% personalized vs uniform-rank \u0394W FedAvg 23.20%"
+      ]
+    }
+  ],
+  "required_matched_ablation": {
+    "fixed_factors": [
+      "same split",
+      "same seed",
+      "same rounds",
+      "same initialization",
+      "same graph",
+      "same alpha/lr",
+      "same rank budget",
+      "same evaluation target"
+    ],
+    "arms": [
+      "fixed feasible ranks vs adaptive controller in P3 runner",
+      "quality-only aggregation vs conservative domain factors in same decentralized graph",
+      "uniform rank 16 vs heterogeneous 4/12/32"
+    ],
+    "interpretation": "Only this matrix can attribute an end-to-end gain or failure to rank adaptation or domain weighting."
+  },
+  "source_evidence": {
+    "p1_driver": {
+      "path": "project-1-adaptive-rank/experiment/exp1.py",
+      "sha256": "787696c1e3c7c3ab8245137f7abad09063e01af63b1a453bab219cae7ff3a865",
+      "lines": 547,
+      "matches": {
+        "AdaptiveRankController": [
+          52,
+          161
+        ],
+        "estimate_optimal_rank": [],
+        "domain_features": [],
+        "lambda_weights": [],
+        "DecentralizedRunner": [],
+        "AdaptiveAffinityMixer": [],
+        "target_ranks": [],
+        "ranks =": [
+          469
+        ],
+        "fedavg_quality_weighted(": [
+          105,
+          147,
+          205
+        ]
+      }
+    },
+    "p1_controller": {
+      "path": "project-1-adaptive-rank/rank_allocation/rank_selector.py",
+      "sha256": "aaca6293881ef93d73638ea7188e00181b8dbb246884542a38536f5e8a38a6d0",
+      "lines": 314,
+      "matches": {
+        "AdaptiveRankController": [
+          51
+        ],
+        "estimate_optimal_rank": [
+          311
+        ],
+        "domain_features": [],
+        "lambda_weights": [],
+        "DecentralizedRunner": [],
+        "AdaptiveAffinityMixer": [],
+        "target_ranks": [],
+        "ranks =": [
+          290
+        ],
+        "fedavg_quality_weighted(": []
+      }
+    },
+    "p2_driver": {
+      "path": "project-2-domain-aware-allocation/experiment/experiment1/run.py",
+      "sha256": "9fa6e669c9021758c7ca9ebb856f10a6220603fa790f448465b3011da396b98b",
+      "lines": 855,
+      "matches": {
+        "AdaptiveRankController": [],
+        "estimate_optimal_rank": [
+          52,
+          418
+        ],
+        "domain_features": [],
+        "lambda_weights": [],
+        "DecentralizedRunner": [],
+        "AdaptiveAffinityMixer": [],
+        "target_ranks": [],
+        "ranks =": [
+          407
+        ],
+        "fedavg_quality_weighted(": []
+      }
+    },
+    "p2_agg": {
+      "path": "project-2-domain-aware-allocation/framework/aggregation/fedavg.py",
+      "sha256": "7a9e940373c6c703be9a3fdb8143f17bfcb62ed2d04abe809fcfe2fbe5f49a83",
+      "lines": 174,
+      "matches": {
+        "AdaptiveRankController": [],
+        "estimate_optimal_rank": [],
+        "domain_features": [
+          102,
+          124,
+          128
+        ],
+        "lambda_weights": [
+          101,
+          117,
+          118,
+          119,
+          122
+        ],
+        "DecentralizedRunner": [],
+        "AdaptiveAffinityMixer": [],
+        "target_ranks": [],
+        "ranks =": [],
+        "fedavg_quality_weighted(": [
+          93
+        ]
+      }
+    },
+    "p3_driver": {
+      "path": "project-3-hierarchical-gossip/experiments/protocol_benchmark.py",
+      "sha256": "3a7faf2cf4147908f65212182878793abc42a94ba656390122c3f17c688c2632",
+      "lines": 522,
+      "matches": {
+        "AdaptiveRankController": [],
+        "estimate_optimal_rank": [],
+        "domain_features": [],
+        "lambda_weights": [],
+        "DecentralizedRunner": [
+          29,
+          121,
+          298,
+          331
+        ],
+        "AdaptiveAffinityMixer": [
+          30,
+          86
+        ],
+        "target_ranks": [
+          96,
+          104,
+          106,
+          127
+        ],
+        "ranks =": [
+          322
+        ],
+        "fedavg_quality_weighted(": []
+      }
+    },
+    "p3_runner": {
+      "path": "project-3-hierarchical-gossip/src/federated/runner.py",
+      "sha256": "fe42a37a53155fc281e4657bd1afee1b02e0529bcb1e4ef8c575a09cdb760a6b",
+      "lines": 281,
+      "matches": {
+        "AdaptiveRankController": [],
+        "estimate_optimal_rank": [],
+        "domain_features": [],
+        "lambda_weights": [],
+        "DecentralizedRunner": [
+          48,
+          64
+        ],
+        "AdaptiveAffinityMixer": [
+          144
+        ],
+        "target_ranks": [
+          57,
+          62,
+          70,
+          72,
+          74,
+          77,
+          188
+        ],
+        "ranks =": [
+          77
+        ],
+        "fedavg_quality_weighted(": []
+      }
+    }
+  },
+  "superseded_conclusion": "The original gap was caused first by non-composed experiments. After adding a matched composed P3 ablation, the tested loss-adaptive rank policy still underperformed fixed MH while saving communication, and bounded domain reweighting had no measurable effect. No arithmetic defect was found in the P3 \u0394W runner.",
+  "historical_matched_ablation_result": {
+    "artifact": "docs/artifacts/p3-e2e-ablation/",
+    "fixed_mh_personalized_mean_sd": "24.16 \u00b1 1.04%",
+    "adaptive_rank_personalized_mean_sd": "20.30 \u00b1 2.51%",
+    "weighted_mh_personalized_mean_sd": "24.16 \u00b1 1.04%",
+    "adaptive_weighted_rank_personalized_mean_sd": "20.30 \u00b1 2.51%",
+    "interpretation": "negative for this tested policy; not a universal impossibility result"
+  },
+  "corrected_experiment": {
+    "artifact": "docs/artifacts/integrated-corrected/",
+    "status": "complete",
+    "runs": 27,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "rounds": 30,
+    "alpha": 32,
+    "n_train": 50000,
+    "n_test": 10000,
+    "main_results": {
+      "pooled": "57.23 \u00b1 0.59",
+      "pooled_reset": "57.25 \u00b1 0.66",
+      "fedavg16": "20.06 \u00b1 0.44",
+      "mh16": "12.69 \u00b1 3.55",
+      "mh_sample": "7.71 \u00b1 0.81",
+      "fixed_quality": "10.69 \u00b1 0.73",
+      "fixed_domain": "10.78 \u00b1 2.01",
+      "adaptive_quality": "6.48 \u00b1 1.67",
+      "adaptive_domain": "6.90 \u00b1 2.03"
+    },
+    "primary_gap_pp": "-50.33 \u00b1 2.46",
+    "record_validation": "3460 checks passed",
+    "remote_regression": "463 passed in 17.90s",
+    "source_snapshot": "docs/artifacts/integrated-corrected/source_snapshot.tar.gz"
+  },
+  "current_findings": [
+    {
+      "id": "domain-normalization-cancellation",
+      "resolution": "Positive domain factors now modify the reversible weighted MH target; noncancellation verified in all seeds."
+    },
+    {
+      "id": "p1-policy-substitution",
+      "resolution": "Canonical source-pinned P1 controller with explicitly adapted fixed training probes."
+    },
+    {
+      "id": "unmatched-scaling-objective",
+      "resolution": "Common alpha32 and sample-weighted controls; quality/domain objectives explicitly labeled."
+    },
+    {
+      "id": "centralized-final-assembly",
+      "resolution": "Graph-restricted tree reduction with dense payload and storage ledger."
+    },
+    {
+      "id": "privacy",
+      "resolution": "No privacy mechanism or guarantee established; dense changes and histograms visible to peers."
+    }
+  ],
+  "updated_at": "2026-09-15T07:21:21.159724+00:00"
+}

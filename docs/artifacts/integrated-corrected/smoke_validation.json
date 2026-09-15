@@ -1,0 +1,1710 @@
+{
+  "status": "passed",
+  "n_runs": 9,
+  "n_checks": 254,
+  "failed_checks": [],
+  "observations": [
+    {
+      "seed": 42,
+      "first_round_domain_factor_max_deviation": 0.08067579370193156,
+      "first_round_domain_weight_max_change": 0.005177236847345612,
+      "first_round_domain_mixer_max_change": 0.028286089638345557
+    }
+  ],
+  "checks": [
+    {
+      "check": "nonempty_run_set",
+      "passed": true
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain"
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 1
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 2
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 3
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 4
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_domain",
+      "round": 5
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality"
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 1
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 2
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 3
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 4
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "adaptive_half_capability_floor",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "adaptive_gradient_probe_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "controller_observed_current_round",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "adaptive_quality",
+      "round": 5
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16"
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 1
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 1
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 2
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 2
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 3
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 3
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 4
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 4
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 5
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fedavg16",
+      "round": 5
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain"
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 1
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 1
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 1
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 1
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 1
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 2
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 2
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 2
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 2
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 2
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 3
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 3
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 3
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 3
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 3
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 4
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 4
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 4
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 4
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 4
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 5
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 5
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 5
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 5
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_domain",
+      "round": 5
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality"
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 1
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 1
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 1
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 1
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 1
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 2
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 2
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 2
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 2
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 2
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 3
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 3
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 3
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 3
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 3
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 4
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 4
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 4
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 4
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 4
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 5
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 5
+    },
+    {
+      "check": "weight_control_traffic_accounted",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 5
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 5
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "fixed_quality",
+      "round": 5
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16"
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 1
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 1
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 1
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 1
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 2
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 2
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 2
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 2
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 3
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 3
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 3
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 3
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 4
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 4
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 4
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 4
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 5
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 5
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 5
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh16",
+      "round": 5
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample"
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 1
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 1
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 1
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 1
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 2
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 2
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 2
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 2
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 3
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 3
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 3
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 3
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 4
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 4
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 4
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 4
+    },
+    {
+      "check": "stochastic_weighted_mixer",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 5
+    },
+    {
+      "check": "client_ranks_within_capability",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 5
+    },
+    {
+      "check": "training_uses_neighbor_edges",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 5
+    },
+    {
+      "check": "final_assembly_uses_neighbor_tree",
+      "passed": true,
+      "seed": 42,
+      "method": "mh_sample",
+      "round": 5
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled"
+    },
+    {
+      "check": "pooled_has_no_communication",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled"
+    },
+    {
+      "check": "unique_seed_method",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled_reset"
+    },
+    {
+      "check": "completed_run",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled_reset"
+    },
+    {
+      "check": "each_round_covers_training_split",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled_reset"
+    },
+    {
+      "check": "reported_total_exposure",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled_reset"
+    },
+    {
+      "check": "consistent_test_accuracy_denominator",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled_reset"
+    },
+    {
+      "check": "final_endpoint_matches_last_round",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled_reset"
+    },
+    {
+      "check": "pooled_has_no_communication",
+      "passed": true,
+      "seed": 42,
+      "method": "pooled_reset"
+    },
+    {
+      "check": "paired_alpha",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_reference_rank",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_initial_state_sha256",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_split_sha256",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_feature_cache_identity_sha256",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_n_train",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_n_test",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_training_sample_exposures",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_optimizer_lr",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_optimizer_weight_decay",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_optimizer_batch_size",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "paired_optimizer_local_epochs",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "check": "warmup_identical_fixed_and_adaptive",
+      "passed": true,
+      "seed": 42,
+      "suffix": "quality",
+      "round": 1
+    },
+    {
+      "check": "warmup_identical_fixed_and_adaptive",
+      "passed": true,
+      "seed": 42,
+      "suffix": "quality",
+      "round": 2
+    },
+    {
+      "check": "warmup_identical_fixed_and_adaptive",
+      "passed": true,
+      "seed": 42,
+      "suffix": "domain",
+      "round": 1
+    },
+    {
+      "check": "warmup_identical_fixed_and_adaptive",
+      "passed": true,
+      "seed": 42,
+      "suffix": "domain",
+      "round": 2
+    },
+    {
+      "check": "nonconstant_domain_factors_are_not_cancelled",
+      "passed": true,
+      "seed": 42
+    }
+  ],
+  "scope": "Recorded protocol invariants; scientific accuracy parity is evaluated separately."
+}
