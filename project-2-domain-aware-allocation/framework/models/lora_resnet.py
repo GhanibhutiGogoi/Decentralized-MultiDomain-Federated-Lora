@@ -158,6 +158,10 @@ def merge_lora_to_delta_w(lora_state, alpha=32):
         B = params['B']  # (out_features, rank)
         if A.ndim != 2 or B.ndim != 2 or A.shape[0] <= 0 or B.shape[1] != A.shape[0]:
             raise ValueError(f"inconsistent LoRA factors for {layer_name!r}")
+        if not torch.is_floating_point(A) or not torch.is_floating_point(B):
+            raise ValueError(f"LoRA factors for {layer_name!r} must be floating-point tensors")
+        if not torch.isfinite(A).all() or not torch.isfinite(B).all():
+            raise ValueError(f"LoRA factors for {layer_name!r} must contain only finite values")
         delta_w[layer_name] = (alpha / A.shape[0]) * (B @ A)
     return delta_w
 
@@ -185,6 +189,14 @@ def decompose_delta_w(delta_w_dict, target_rank, alpha=32):
         raise ValueError("alpha must be finite and positive")
     lora_state = {}
     for layer_name, delta_w in delta_w_dict.items():
+        if delta_w.ndim != 2:
+            raise ValueError(f"delta_W for {layer_name!r} must be 2-D")
+        if delta_w.numel() == 0:
+            raise ValueError(f"delta_W for {layer_name!r} must be non-empty")
+        if not torch.is_floating_point(delta_w):
+            raise ValueError(f"delta_W for {layer_name!r} must be a floating-point tensor")
+        if not torch.isfinite(delta_w).all():
+            raise ValueError(f"delta_W for {layer_name!r} must contain only finite values")
         # CPU SVD does not implement half/bfloat16, but preserve double input
         # precision and restore the original dtype before returning.
         work = delta_w if delta_w.dtype == torch.float64 else delta_w.float()

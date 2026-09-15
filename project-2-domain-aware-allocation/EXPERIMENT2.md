@@ -84,7 +84,27 @@ The pipeline computes:
 - Kendall tau
 - one-sided permutation p-value for positive Spearman association
 
-Ranking metrics are reported only. They do not select Form A or Form B.
+Ranking metrics are reported only. They do not select Form A, Form B, or Form C.
+
+Form support is decided independently for Form A and Form B using raw mean
+leave-one-task-out RMSE as the primary metric. Each form is compared with a
+fold-safe intercept-only null model that predicts the training-fold mean target
+for the held-out task. A form is supported only when its mean RMSE is strictly
+lower than the null by more than the documented numerical tolerance. Equality,
+equivalence, or worse-than-null performance is recorded as an unsupported
+negative result.
+
+Form C is a new post-hoc exploratory candidate introduced after observing that
+raw leave-one-task-out RMSE is dominated by large-target-scale tasks while
+lambda operates within a single task and federated round. It reuses the Form B
+predictor order and transforms each predictor within `(task, round)` using
+population z-scores. The relative target is the within-`(task, round)`
+population z-score of `delta_accuracy`. Zero-variance predictors or targets are
+mapped to zero without dropping rows, and the zero-variance occurrences are
+reported diagnostically. Form C uses a zero-null prediction for the centered
+target, equal task weighting across held-out folds, the same predeclared Ridge
+alpha grid, an intercept-free fit because both inputs and target are group
+centered, and the same interior-alpha gate before Experiment 3 eligibility.
 
 ## Ridge Alpha Search
 
@@ -112,11 +132,10 @@ Or provide a custom grid:
 python project-2-domain-aware-allocation/experiment/experiment2/run.py --ridge-alphas 0.01 0.1 1 10 100 300 500 1000
 ```
 
-The alpha selection rule remains minimum mean leave-one-task-out RMSE.
-
-If the selected alpha equals the minimum or maximum tested value, Experiment 2
-raises a `RidgeAlphaBoundaryError` before accepting the fit. The error states
-that the optimum may lie outside the tested range. The code does not
+The alpha selection rule remains minimum mean leave-one-task-out RMSE. If a
+Ridge form selects the minimum or maximum tested value, that form is recorded as
+unsupported for Experiment 3 eligibility. The run records the boundary
+diagnostic; it does not force an alpha, substitute coefficients, or
 automatically expand the search.
 
 ## Class Imbalance Input
@@ -140,14 +159,31 @@ produce:
 - `lambda_validation.csv`
 - `orthogonality_report.csv`
 - `cross_validation.csv`
+- `form_support_status.csv`
 - `fitted_coefficients.csv`
 - `evaluation_metrics.csv`
 - `alpha_evaluation.csv`
 - `ranking_significance.csv`
+- `calibration_bundle.json` if at least one treatment form is supported
 - `dataset_manifest.json`
 - `manifest.json`
 - `comparison_report.md`
 - summary SVG figures under `figures/`
+
+`calibration_bundle.json` uses schema `exp3-calibration-bundle/v3` and is
+written only after the real-data provenance checks, numeric validation,
+support-decision evaluation, calibration, report generation, and other owned
+artifact writes succeed. It contains exact source Experiment 1 and Experiment 2
+run identities, non-synthetic dataset provenance for every expected task, and
+only the supported treatment forms' feature order, coefficients, intercepts,
+gamma values, clipping bounds, transformation metadata, and feature
+standardization statistics. Form C is included only if its normalized-RMSE gate
+passes, its selected alpha is interior, its orientation is not reversed, and all
+calibration values are finite.
+Unsupported forms may appear only as diagnostics without runnable calibration
+parameters. If no treatment form is supported, Experiment 2 still completes as
+a negative diagnostic run but does not emit a runnable Experiment 3 calibration
+bundle.
 
 Do not generate these outputs during Phase 2A.
 
@@ -159,6 +195,9 @@ domain factor toward one (`blend_strength=0.10` by default), limits each
 factor to `[0.85, 1.15]`, and renormalizes under the existing
 `samples * quality` weights.  This keeps the original quality-weighted rule as
 the safe reference while allowing a small, evidence-backed redistribution.
+The direct lambda aggregation helper has no uniform fallback: empty inputs,
+length mismatches, duplicate client IDs, non-finite values, negative values, or
+zero-total weights fail loudly.
 
 The offline contribution benchmark compares the ranking and weighted
 contribution of both policies:

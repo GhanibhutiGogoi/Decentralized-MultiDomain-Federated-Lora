@@ -101,8 +101,13 @@ The unified evaluation pipeline computes:
 - statistical test: one-sided permutation p-value for positive Spearman
   association
 
-Ranking metrics are not used to choose Form A or Form B during Phase 2A. Ridge
-alpha selection remains based on minimum mean leave-one-task-out RMSE.
+Ranking metrics are not used to choose Form A, Form B, or Form C during Phase
+2A. Support is decided independently for the original forms by raw mean
+leave-one-task-out RMSE against a fold-safe intercept-only null comparator.
+Form C is a post-hoc exploratory candidate evaluated on within-task-round
+normalized predictors and a centered relative contribution target. Ridge alpha
+selection remains based on minimum mean leave-one-task-out RMSE, but a Ridge
+form is Experiment 3 eligible only if the selected alpha is interior.
 
 The default alpha grid remains `[0.01, 0.1, 1.0, 10.0, 100.0]`. Future reruns
 can opt into prepared larger candidates with:
@@ -120,8 +125,9 @@ Experiment 1 computes class imbalance as:
 max_count / min_positive_count * (1 + zero_class_count / num_classes)
 ```
 
-If Ridge alpha selection lands on a tested boundary, Experiment 2 raises a
-`RidgeAlphaBoundaryError` instead of expanding the search automatically.
+If Ridge alpha selection lands on a tested boundary, Experiment 2 records that
+Ridge form as unsupported instead of expanding the search automatically or
+fabricating fallback lambda parameters.
 
 ## Legacy CIFAR-100 Scaffold
 

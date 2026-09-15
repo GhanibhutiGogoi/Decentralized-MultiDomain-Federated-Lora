@@ -103,3 +103,21 @@ def test_inconsistent_local_pair_is_rejected():
     a, b = _factors(6)
     with pytest.raises(ValueError, match="local LoRA pair"):
         load_global_state(model, {"layer.A": a, "layer.B": b})
+
+
+def test_projection_rejects_nonfinite_lora_tensor():
+    matrix = torch.eye(4)
+    matrix[0, 0] = torch.nan
+    with pytest.raises(ValueError, match="finite"):
+        project_tensor_to_rank(matrix, 2)
+
+
+def test_projection_preserves_float64_compression_path():
+    matrix = torch.diag(torch.tensor([9.0, 4.0, 1.0], dtype=torch.float64))
+    projected = project_tensor_to_rank(matrix, 2)
+    assert projected.dtype == torch.float64
+    assert projected.shape == (2, 3)
+    torch.testing.assert_close(
+        projected.square().sum(),
+        torch.tensor(9.0**2 + 4.0**2, dtype=torch.float64),
+    )

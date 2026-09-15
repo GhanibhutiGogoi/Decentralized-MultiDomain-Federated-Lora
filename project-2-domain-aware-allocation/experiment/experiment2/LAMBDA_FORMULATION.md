@@ -22,16 +22,23 @@ $$
 \text{Weight}_i = w_i \times q_i \times \lambda_i
 $$
 
-The values in the regenerated run are recorded under
-`docs/artifacts/p2-exp2-real-seed42/` and summarized in the current report
-below. Earlier tables in this design note are retained as historical context;
-the regenerated coefficients and validation metrics supersede them.
+Historical regenerated-run values are recorded under
+`docs/artifacts/p2-exp2-real-seed42/`. Earlier tables in this design note are
+retained as historical context. The current conservative methodology supersedes
+any unconditional form-selection language below: each candidate form must pass a
+fold-safe intercept-only null gate using raw mean leave-one-task-out RMSE, and a
+Ridge form must select an interior alpha. Unsupported forms are recorded as
+diagnostics only and do not receive coefficients, gamma, lambda values, or
+Experiment 3 treatment-arm eligibility.
 
 ## Regenerated real-data run (2026-09-12)
 
 Experiment 1 used five real datasets, one seed (42), five rounds and 75
-client-round observations. Experiment 2 selected ridge alpha `1000.0` from the
-expanded grid. Form A used gamma `2.444578`; Form B used gamma `5.0`. Global
+client-round observations. A prior Experiment 2 attempt selected ridge alpha
+`1000.0` from the expanded grid. Under the current conservative methodology,
+boundary-selected Ridge fits are not accepted as supported treatment arms. In
+that historical attempt, Form A used gamma `2.444578`; Form B used gamma `5.0`.
+Global
 Spearman association with leave-one-client-out contribution was `0.3676` for
 Form A and `0.3693` for Form B, with global R² `0.0788` and `0.0254`
 respectively. Per-task behavior is heterogeneous, so this run does not claim
@@ -83,7 +90,7 @@ the signals that were empirically supported by Experiment 1.
 
 ## 3. Feature Definitions
 
-The final selected formulation is Form B. For each client-round observation
+The historical Ridge candidate is Form B. For each client-round observation
 \(i\), Form B uses the following five features:
 
 ### Update L2 Feature
@@ -212,8 +219,9 @@ units of measurement rather than calibrated relative influence.
 
 ## 5. Final Mathematical Formulation
 
-The final selected formulation is Form B, an interpretable ridge-calibrated
-linear score. The ridge parameter selected by leave-one-task-out validation is:
+The historical Form B candidate is an interpretable ridge-calibrated linear
+score. In the prior regenerated attempt, the ridge parameter selected by
+leave-one-task-out validation was:
 
 $$
 \alpha_{\mathrm{ridge}} = 1000.0
@@ -439,7 +447,7 @@ $$
 
 so the same Project 1 behavior is recovered.
 
-## 11. Why Form B Was Selected
+## 11. Form Selection Gate
 
 Experiment 2 constructed and compared two candidate lambda formulations.
 
@@ -455,11 +463,13 @@ Form A directly tests the minimal hypothesis suggested by Experiment 1: reward
 larger update L2 distance and penalize JS divergence from the global label
 distribution.
 
-Form B was selected as the primary formulation because it is the most stable
-and conservative calibrated formulation among the evaluated candidates. It
-preserves the interpretable structure suggested by Experiment 1 while using
-ridge regularization to shrink weak or uncertain signals. Its coefficients
-remain scientifically interpretable:
+Historically, Form B was treated as the primary formulation because it was the
+most regularized candidate among the evaluated forms. Under the current
+conservative methodology, that historical preference is not sufficient for
+Experiment 3 eligibility. Form A and Form B are evaluated independently against
+the fold-safe null comparator, and Form B must also select an interior Ridge
+alpha. Its coefficients remain scientifically interpretable when the form is
+supported:
 
 - update L2 contributes positively;
 - JS divergence contributes positively in this regenerated fit;
@@ -479,8 +489,78 @@ lambda distribution. These properties reduce the risk that \(\lambda\) overfits
 the small Experiment 1 calibration set or dominates the existing Project 1
 quality score \(q\).
 
-Therefore, Form B is the primary \(\lambda\) formulation carried forward into
-Experiment 3. Form A is retained as an interpretable ablation baseline.
+Therefore, neither Form A nor Form B is carried forward automatically. Only a
+form that passes the null-model gate and, for Ridge, the interior-alpha gate may
+appear as a supported treatment arm in the Experiment 3 calibration bundle.
+
+## 11A. Form C Relative-Contribution Candidate
+
+Form C is a new post-hoc exploratory candidate, not a replacement for the
+recorded Form A/Form B negative evidence. It was introduced after observing that
+raw target scales differ strongly by task while lambda is applied within the
+current task-round aggregation context.
+
+Form C reuses the deployable Form B feature order:
+
+$$
+[\log ||\Delta_i||_2,\ JS(p_i || p_{\mathrm{global}}),\ d_{\cos}(\Delta_i,
+\bar{\Delta}_g),\ H(p_i),\ \log(1+\mathrm{imbalance}_i)].
+$$
+
+For each task-round group \(g\), every predictor is population-standardized
+within the group:
+
+$$
+\tilde{x}_{igk} =
+\begin{cases}
+0, & \sigma_{gk}=0 \\
+\frac{x_{igk}-\mu_{gk}}{\sigma_{gk}}, & \sigma_{gk}>0
+\end{cases}
+$$
+
+The calibration target is the within-group relative contribution:
+
+$$
+\tilde{y}_{ig} =
+\begin{cases}
+0, & \sigma_{yg}=0 \\
+\frac{y_{ig}-\mu_{yg}}{\sigma_{yg}}, & \sigma_{yg}>0.
+\end{cases}
+$$
+
+No rows are dropped for zero-variance predictors or targets. Form C fits Ridge
+without an intercept because both predictors and target are group centered:
+
+$$
+s_i = \sum_k \beta_k \tilde{x}_{igk}.
+$$
+
+The fold-safe null prediction for Form C is zero. Support requires mean
+group-normalized leave-one-task-out RMSE to beat that null by more than the
+fixed tolerance, an interior selected Ridge alpha, finite calibration values,
+and non-reversed predictive orientation. Ranking metrics and stratified
+permutation tests remain secondary diagnostics.
+
+If supported, Form C maps scores to lambda within the current aggregation
+context:
+
+$$
+\lambda^{raw}_{ig} =
+\mathrm{clip}\left(\exp(\gamma (s_{ig} - \bar{s}_g)),
+\lambda_{\min}, \lambda_{\max}\right),
+\qquad
+\lambda_{ig} = \frac{\lambda^{raw}_{ig}}{\frac{1}{|g|}\sum_j \lambda^{raw}_{jg}}.
+$$
+
+Experiment 3 then applies the unchanged aggregation rule:
+
+$$
+p_i = \frac{w_i q_i \lambda_i}{\sum_j w_j q_j \lambda_j}.
+$$
+
+The true leave-one-out contribution is a training target only. Experiment 3
+Form C inference uses only current task-round client features available before
+aggregation.
 
 ## 12. Orthogonality Validation
 
@@ -561,11 +641,10 @@ behavior varies substantially. Form B is retained as a documented candidate
 because it uses all measured signals and explicit ridge regularization; this is
 an exploratory calibration choice, not evidence of a validated allocator.
 
-Thus, the Form B selection is a scientific trade-off. Form B is the conservative
-primary candidate, while Form A remains the interpretable ablation baseline.
-Experiment 3 is required to determine whether either calibrated \(\lambda\)
-formulation is beneficial when incorporated into the federated aggregation
-process.
+Thus, historical Form B selection is a documented diagnostic rather than an
+automatic approval. Experiment 3 is required to determine whether any supported
+calibrated \(\lambda\) formulation is beneficial when incorporated into the
+federated aggregation process.
 
 ## 14. Interpretation of Predictive Performance
 
@@ -684,11 +763,12 @@ limitations should be carried into Experiment 3:
 
 ## 18. Summary
 
-Experiment 2 defines a positive, calibrated, multi-factor Domain-Aware
-Aggregation Weight \(\lambda\). The final selected formulation is a
-ridge-regularized linear score over standardized Experiment 1 signals, followed
-by exponential positive mapping and iterative bounded mean-one normalization
-within each `(task, round)` aggregation context.
+Experiment 2 defines candidate positive, calibrated, multi-factor Domain-Aware
+Aggregation Weights \(\lambda\). A final supported formulation exists only if
+the candidate passes the null-model gate and, for Ridge, the interior-alpha
+gate. Supported forms use standardized Experiment 1 signals, exponential
+positive mapping, and iterative bounded mean-one normalization within each
+`(task, round)` aggregation context.
 
 The mathematical contribution of Experiment 2 is the construction and
 validation of:
@@ -703,10 +783,10 @@ $$
 \text{Weight}_i = w_i \times q_i.
 $$
 
-Experiment 2 calibrates \(\lambda\), validates its mathematical properties,
-validates boundedness and stability, validates global orthogonality against
-\(q\), documents limitations, and prepares a finalized \(\lambda\) candidate
-for Experiment 3.
+Experiment 2 calibrates eligible \(\lambda\) candidates, validates their
+mathematical properties, validates boundedness and stability, validates global
+orthogonality against \(q\), documents limitations, and prepares an Experiment 3
+calibration bundle only when at least one treatment form is supported.
 
 Experiment 2 does not prove that \(\lambda\) improves federated learning.
 Experiment 3 is the first experiment capable of answering whether

@@ -1,0 +1,64 @@
+{
+  "schema_version": "exp3-calibration-bundle/v1",
+  "purpose": "engineering_test_only",
+  "scientifically_valid": false,
+  "is_synthetic": true,
+  "completion_status": "engineering_fixture",
+  "expected_task_set": ["TinyTask"],
+  "source": {
+    "experiment1_run_id": "exp1-engineering-fixture",
+    "experiment2_run_id": "exp2-engineering-fixture",
+    "commit_sha": "0000000000000000000000000000000000000000",
+    "code_revision": "engineering-fixture"
+  },
+  "dataset_provenance": {
+    "TinyTask": {
+      "dataset_id": "in-memory-synthetic",
+      "is_synthetic": false
+    }
+  },
+  "forms": {
+    "form_a": {
+      "feature_order": ["log_update_l2", "js_to_global"],
+      "coefficients": [0.5, -0.25],
+      "intercept": 0.1,
+      "gamma": 0.4,
+      "clipping_bounds": [0.5, 1.5],
+      "standardization_means": {
+        "log_update_l2": 1.0,
+        "js_to_global": 0.2
+      },
+      "standardization_stds": {
+        "log_update_l2": 2.0,
+        "js_to_global": 0.1
+      }
+    },
+    "form_b": {
+      "feature_order": [
+        "log_update_l2",
+        "js_to_global",
+        "update_cosine_distance_to_mean",
+        "normalized_entropy",
+        "log_class_imbalance_ratio"
+      ],
+      "coefficients": [0.2, 0.1, -0.3, 0.4, 0.5],
+      "intercept": -0.2,
+      "gamma": 0.3,
+      "clipping_bounds": [0.5, 1.5],
+      "standardization_means": {
+        "log_update_l2": 1.0,
+        "js_to_global": 0.2,
+        "update_cosine_distance_to_mean": 0.3,
+        "normalized_entropy": 0.4,
+        "log_class_imbalance_ratio": 0.5
+      },
+      "standardization_stds": {
+        "log_update_l2": 2.0,
+        "js_to_global": 0.1,
+        "update_cosine_distance_to_mean": 0.2,
+        "normalized_entropy": 0.2,
+        "log_class_imbalance_ratio": 0.5
+      }
+    }
+  }
+}
