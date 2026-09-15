@@ -1,0 +1,410 @@
+{
+  "schema_version": 2,
+  "status": "complete",
+  "config": {
+    "data_dir": "/home/gogoi/ahlora-data",
+    "feature_cache": "/home/gogoi/ahlora-data/features-v2",
+    "output": "/home/gogoi/ahlora-runs/integrated-corrected-full-20260915",
+    "methods": [
+      "pooled",
+      "pooled_reset",
+      "fedavg16",
+      "mh16",
+      "mh_sample",
+      "fixed_quality",
+      "fixed_domain",
+      "adaptive_quality",
+      "adaptive_domain"
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "rounds": 30,
+    "alpha": 32.0,
+    "reference_rank": 16,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 128,
+    "eval_batch_size": 2048,
+    "local_epochs": 1,
+    "topology": "ring",
+    "clients_per_domain": 3,
+    "max_train_per_client": 0,
+    "max_test_per_domain": 0,
+    "device": "cuda:0",
+    "n_domains": 5,
+    "dirichlet_alpha": 0.5
+  },
+  "source": {
+    "files_sha256": {
+      "experiments/01_fedavg_baseline.py": "b81e20a61be01f7b4187b287443935d7cb5309c1d7c9a9ec18b35a215084262e",
+      "experiments/02_gossip_baseline.py": "586de0b4df94c562c278ccf47606846e55c6da3020a1a2505018215e8bd5ea39",
+      "experiments/03_clustering_validation.py": "8ac711d5fd26f38398c86f6297fa606afb7759ff454494766e78999be9839349",
+      "experiments/04_protocol_benchmark.py": "06e600e298306f165d55208abeb53acc1f9e50d4e136bff182b46bdf91f2b4e3",
+      "experiments/05_signature_validation.py": "cecce000bc419b90ae834cce0daa93b46a88c679f55d99b5899a167fce018de2",
+      "experiments/06_centralized_full_lora.py": "f3ed0cce3f8071e4470b3d76ac5ef5f615d0cb2f362dec59fb336a87fc82d866",
+      "experiments/06_online_discovery.py": "d7ec2ed5613bbdb4b9eefee0bd84bcc0dc74614d06c2a40af371b12708732f96",
+      "experiments/feature_cache.py": "90a849a31cea7e0c9620bf09a631ad5d0ad10dbba5a41398af3756310dd8637b",
+      "experiments/integrated_benchmark.py": "ea6d0e26bd9680818a09c59b9756ba27b9d8912912cde3ecff70e91ca737f3d1",
+      "experiments/protocol_benchmark.py": "0dd4ab6c286022856f7d0806ca264529793cadc274897d1da45f32ba472bd4c9",
+      "experiments/run_completion.py": "ef17da13a0b79f96558323287185568a6377a6ed1c830b82837e6b0347e69208",
+      "experiments/summarize_completion.py": "06045a56ebbf0b76a53ec5f23465728b28cfd0eab5cfa41260311a7fa07f0c0d",
+      "src/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/clustering/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/clustering/discovery.py": "bb3b75aa67cb1355fc6f422ef8918417b086cc51fb4cb0149c7e75d0607f30d3",
+      "src/clustering/domain_clustering.py": "b86f813be93304765b657a208291dfd1c3fcd378dcd9bd806ef540b10e450fbd",
+      "src/clustering/signatures.py": "c609bedd956baf16f5ed9866950d497022b24bd0288382f6c3bf45545f21805f",
+      "src/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/data/cifar100_domains.py": "b2b7bff51c68f287b8e37b2253e015644b9d01acac1c0384913259af57d44658",
+      "src/federated/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/federated/adaptive_rank.py": "8e9447ed74abc1e4f8a54865c9e40d01ce65336b1683a922ace06bc511b3973e",
+      "src/federated/client.py": "90b13aacb65b70f1d9d1b33e0f759ff0dcdb265d996ac6fe45efa990c411d67d",
+      "src/federated/domain_weights.py": "442b5c7f96e94209bfbd0d6aa2c373f7333c1ee26dfbfdce5c4f13da8036fe11",
+      "src/federated/fedavg.py": "8c93ba865f825b3161ec1046ee66617c77006a9890d3de7240dd3bd78a25f10d",
+      "src/federated/gossip.py": "eea7c000f40c719ef2dcc1da2c427b4300bdfe658bf4edf089c6fd6756cb8e78",
+      "src/federated/hierarchical.py": "627dc4a61056fa5b963370a2115b67a5fa14b8908703bf93c2f6c5a24e593faa",
+      "src/federated/merge.py": "8f0f05aea939d83e27df8f1711c9e603f8244accd04bfa5daee5d8fbaa9d01e3",
+      "src/federated/mixing.py": "642913f9ba59bd7113eafe112d41bcb20fbce8b97c89b500f4b95bfd6b2efb4e",
+      "src/federated/peer_assembly.py": "be63a098d7900e93f5ae3a3a65b66f34b46b59c87fe78009d159fff4a6916298",
+      "src/federated/runner.py": "ea698b9148d851c03f943c680e9592e2103fb4d364a19a3e963ddaa9d9af573d",
+      "src/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/models/lora_resnet.py": "a2c51890283268ede0bb0f87b04d953cafa48f683bfec4d6e42771749f676c20",
+      "src/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/utils/metrics.py": "a878b22457aa6dcdf0eb1feb58ffbd700029748040fbfb5fa50844f6cdb3bc96",
+      "src/utils/visualization.py": "dc956b9c8341eaf0088a96b943fd402b865e3ef14ceb0cc7d5db9dfdfc6a170f"
+    },
+    "combined_sha256": "cd8969b176db72a33e673405fffcc9c72e2ffbe6132adfd0710abf8a023edaef"
+  },
+  "p1_policy": {
+    "implementation": "verbatim P1 AdaptiveRankController and rank_equation",
+    "source": "project-1-adaptive-rank/rank_allocation/rank_selector.py",
+    "source_sha256": "aaca6293881ef93d73638ea7188e00181b8dbb246884542a38536f5e8a38a6d0",
+    "config_source": "project-1-adaptive-rank/config.py",
+    "config_source_sha256": "4e5d0f2e8c559bcb751203a15287f225a227301760238d2aa00ca1c2dcc78dce",
+    "initial_rank": "max",
+    "warmup_rounds": 2,
+    "minimum_rank_fraction": 0.5,
+    "quality_drop_tolerance": 0.05,
+    "gradient_probe": "median stable rank of LoRA A/B gradients on one fixed seeded training batch at capability ceiling",
+    "quality_probe": "1 / (1 + cross entropy) on the same fixed seeded training batch after local training",
+    "minibatch_note": "P1 batch sizes identify capability tiers; P3 training minibatch size is configured separately"
+  },
+  "p2_policy": {
+    "implementation": "direct import of canonical P2 conservative_domain_factors",
+    "source": "project-2-domain-aware-allocation/framework/aggregation/domain_weighting.py",
+    "source_sha256": "e9d4272a0ab588d06b34718aa26e473d5473f0da6603dea6581270edebc06a68",
+    "feature_source": "project-2-domain-aware-allocation/experiment/experiment1/signals.py",
+    "feature_source_sha256": "5572d453b57d373835b971d3ba181b263567cced1940edcebb9b63ca1b683b24",
+    "blend_strength": 0.1,
+    "max_deviation": 0.15,
+    "temperature": 1.0,
+    "feature_names": [
+      "js_to_global",
+      "update_l2_distance_to_mean",
+      "update_cosine_distance_to_mean",
+      "normalized_entropy",
+      "class_imbalance_ratio"
+    ],
+    "update_space": "effective LoRA delta-W, including alpha/r; local change from pretraining state when supplied",
+    "feature_mean": "unweighted arithmetic mean of local updates, as in P2",
+    "label_reference": "pooled training histogram, formed by summing client counts",
+    "privacy_note": "training histograms and update signals are exchanged metadata; no leakage protection is claimed"
+  },
+  "packages": {
+    "torch": "2.3.0",
+    "torchvision": "0.18.0",
+    "numpy": "1.26.4",
+    "scikit-learn": "1.7.2"
+  },
+  "primary_endpoint": "final assembled rank16 full-test accuracy minus pooled persistent-Adam accuracy",
+  "noninferiority_margin": "none prespecified; no formal equivalence claim",
+  "results": [
+    {
+      "seed": 42,
+      "method": "pooled",
+      "final_full_test_accuracy": 0.578,
+      "wall_seconds": 30.164280001074076,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 0,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 42,
+      "method": "pooled_reset",
+      "final_full_test_accuracy": 0.5791,
+      "wall_seconds": 29.163422250188887,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 0,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 42,
+      "method": "fedavg16",
+      "final_full_test_accuracy": 0.2056,
+      "wall_seconds": 35.535469631664455,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 8812800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 42,
+      "method": "mh16",
+      "final_full_test_accuracy": 0.1001,
+      "wall_seconds": 37.49273869860917,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 8812800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 42,
+      "method": "mh_sample",
+      "final_full_test_accuracy": 0.0705,
+      "wall_seconds": 36.892386618070304,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 42,
+      "method": "fixed_quality",
+      "final_full_test_accuracy": 0.1152,
+      "wall_seconds": 35.593655904754996,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 191520
+    },
+    {
+      "seed": 42,
+      "method": "fixed_domain",
+      "final_full_test_accuracy": 0.1204,
+      "wall_seconds": 49.42916112951934,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 3275183520
+    },
+    {
+      "seed": 42,
+      "method": "adaptive_quality",
+      "final_full_test_accuracy": 0.0631,
+      "wall_seconds": 39.25690827611834,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 2905776,
+      "total_control_bytes": 191520
+    },
+    {
+      "seed": 42,
+      "method": "adaptive_domain",
+      "final_full_test_accuracy": 0.0653,
+      "wall_seconds": 51.06350904982537,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 2900880,
+      "total_control_bytes": 3275183520
+    },
+    {
+      "seed": 43,
+      "method": "pooled",
+      "final_full_test_accuracy": 0.5663,
+      "wall_seconds": 29.972738716751337,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 0,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 43,
+      "method": "pooled_reset",
+      "final_full_test_accuracy": 0.566,
+      "wall_seconds": 29.177420028485358,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 0,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 43,
+      "method": "fedavg16",
+      "final_full_test_accuracy": 0.1989,
+      "wall_seconds": 35.6343410750851,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 8812800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 43,
+      "method": "mh16",
+      "final_full_test_accuracy": 0.1672,
+      "wall_seconds": 35.92663521040231,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 8812800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 43,
+      "method": "mh_sample",
+      "final_full_test_accuracy": 0.0861,
+      "wall_seconds": 36.37523416057229,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 43,
+      "method": "fixed_quality",
+      "final_full_test_accuracy": 0.1037,
+      "wall_seconds": 37.30636584945023,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 191520
+    },
+    {
+      "seed": 43,
+      "method": "fixed_domain",
+      "final_full_test_accuracy": 0.1184,
+      "wall_seconds": 49.838085115887225,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 3275183520
+    },
+    {
+      "seed": 43,
+      "method": "adaptive_quality",
+      "final_full_test_accuracy": 0.0823,
+      "wall_seconds": 39.7706597391516,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 3008592,
+      "total_control_bytes": 191520
+    },
+    {
+      "seed": 43,
+      "method": "adaptive_domain",
+      "final_full_test_accuracy": 0.0909,
+      "wall_seconds": 53.71300482656807,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 3003696,
+      "total_control_bytes": 3275183520
+    },
+    {
+      "seed": 44,
+      "method": "pooled",
+      "final_full_test_accuracy": 0.5725,
+      "wall_seconds": 29.697175269015133,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 0,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 44,
+      "method": "pooled_reset",
+      "final_full_test_accuracy": 0.5725,
+      "wall_seconds": 29.342923609539866,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 0,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 44,
+      "method": "fedavg16",
+      "final_full_test_accuracy": 0.1972,
+      "wall_seconds": 34.70468109007925,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 8812800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 44,
+      "method": "mh16",
+      "final_full_test_accuracy": 0.1133,
+      "wall_seconds": 35.419865493662655,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 8812800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 44,
+      "method": "mh_sample",
+      "final_full_test_accuracy": 0.0748,
+      "wall_seconds": 37.311700224876404,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 0
+    },
+    {
+      "seed": 44,
+      "method": "fixed_quality",
+      "final_full_test_accuracy": 0.1017,
+      "wall_seconds": 37.48696656059474,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 191520
+    },
+    {
+      "seed": 44,
+      "method": "fixed_domain",
+      "final_full_test_accuracy": 0.0847,
+      "wall_seconds": 49.451097978278995,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 5140800,
+      "total_control_bytes": 3275183520
+    },
+    {
+      "seed": 44,
+      "method": "adaptive_quality",
+      "final_full_test_accuracy": 0.049,
+      "wall_seconds": 39.7122529707849,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 3052656,
+      "total_control_bytes": 191520
+    },
+    {
+      "seed": 44,
+      "method": "adaptive_domain",
+      "final_full_test_accuracy": 0.0507,
+      "wall_seconds": 52.04817443527281,
+      "training_sample_exposures": 1500000,
+      "total_training_factor_floats": 3057552,
+      "total_control_bytes": 3275183520
+    }
+  ],
+  "feature_cache": {
+    "schema_version": 1,
+    "dataset": "CIFAR-100 official train/test split",
+    "representation": "frozen ResNet-18, fc replaced by Identity, eval mode",
+    "weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "weights_url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+    "transform": {
+      "resize": [
+        224,
+        224
+      ],
+      "interpolation": "bilinear",
+      "antialias": true,
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ],
+      "augmentation": "none"
+    },
+    "torch_version": "2.3.0+cu121",
+    "torchvision_version": "0.18.0+cu121",
+    "cache_path": "/home/gogoi/ahlora-data/features-v2/cifar100-resnet18-imagenet1k-v1-resize224-v1",
+    "train": {
+      "n_samples": 50000,
+      "feature_dim": 512,
+      "sha256": "37c88fdb981dccbc117e2c3a0dc0065ab12bc667a18d991c66d312324fff3eb7"
+    },
+    "test": {
+      "n_samples": 10000,
+      "feature_dim": 512,
+      "sha256": "960c63636ce8b68bdc6ef7df9762c61ce9c9b47ba47c3482aba53504242c73f2"
+    },
+    "weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+    "cache_identity_sha256": "eff1ad00e14d86f46fc9d261fdbee194d05ed44678c2262bc975d11bdbe102df",
+    "extraction_wall_seconds": 39.99093856476247
+  }
+}

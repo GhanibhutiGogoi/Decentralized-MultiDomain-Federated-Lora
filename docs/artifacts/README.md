@@ -2,11 +2,13 @@
 
 Start with [`claude_handoff.json`](claude_handoff.json). It records the intended completion scope, which evidence is current, where to find the measured data, and which claims the data can support. [`progress.jsonl`](progress.jsonl) is an append-only work log; each line is one JSON object. New experiments should be added to the handoff only after their files exist.
 
+**Current authoritative comparison:** [`integrated-corrected/RESULTS.md`](integrated-corrected/RESULTS.md), with 27 complete runs and 3,460 passed protocol checks. Ordinary pooled LoRA reaches 57.23 ± 0.59% full-test accuracy; the P1/P2 weighted peer pipeline reaches 6.90 ± 2.03%. The tested accuracy-preservation goal is not achieved. Use [`CLAUDE_UPDATE_PROMPT.md`](CLAUDE_UPDATE_PROMPT.md) to update the external explainer.
+
 The deliverable is a reproducible CIFAR-100 benchmark of decentralized LoRA with known domain groups. The repository now also contains a measured coordinator-visible online-discovery extension, a measured adaptive-rank controller, and a conservative domain-weighting iteration. Discovery is supported by full-data evidence. The original adaptive-rank controller failed its accuracy-preservation gate against a fixed rank-32 reference (historical, preserved below); the revised controller reaches final-accuracy parity with a feasible capability-matched baseline on one Fashion-MNIST run while saving 10.0% FLOPs, and broader five-task parity is unproven. Project 2's regenerated lambda estimates remain exploratory, and the conservative domain-weighting sweep improves contribution ranking modestly without an end-to-end no-regression result. See [Scientific conclusion](#scientific-conclusion) for what the evidence does and does not support.
 
 ## Reading a benchmark run
 
-The new entry point is `project-3-hierarchical-gossip/experiments/04_protocol_benchmark.py`. Each output directory contains:
+The corrected entry point is `project-3-hierarchical-gossip/experiments/integrated_benchmark.py`, documented in [`integrated-corrected/README.md`](integrated-corrected/README.md). The following older output contract belongs to `04_protocol_benchmark.py` and the supporting protocol battery:
 
 | File | Use |
 |---|---|
@@ -92,9 +94,9 @@ The adaptive run dipped at round 4 (70.24% against 83.08%) and recovered by roun
 
 Stated once, so that no summary drifts past the evidence:
 
-- The project's original end-to-end goal (broadly accuracy-preserving adaptive heterogeneous LoRA with a validated decentralized and privacy benefit) is **not yet achieved**.
+- The corrected combined pipeline is implemented and tested, but its **accuracy-preservation goal is not achieved** in the 30-round frozen-feature benchmark: 6.90 ± 2.03% versus pooled 57.23 ± 0.59%. This is a scoped negative result, not an impossibility theorem.
 - Adaptive rank now reaches parity with a feasible capability-matched baseline on **one** Fashion-MNIST experiment (seed 42, five rounds, 10.0% FLOP saving). Broader five-task parity is **unproven**; the historical five-task battery against the infeasible fixed rank-32 reference failed its gate and is preserved as such.
-- Conservative domain weighting improves model-free contribution ranking **modestly** (Spearman 0.152 to 0.196, pairwise accuracy 0.520 to 0.547). An end-to-end no-regression result is **unproven**.
+- Conservative domain weighting improves model-free contribution ranking **modestly** (Spearman 0.152 to 0.196, pairwise accuracy 0.520 to 0.547). In the corrected training ablation, its paired change is +0.10 ± 1.63 percentage points at fixed ranks and +0.42 ± 0.38 with adaptive ranks; it does not close the pooled-model gap.
 - **No privacy guarantee has been demonstrated.** Low-rank adapters and decentralized exchange alone do not establish privacy. Any privacy claim requires separate differential-privacy, membership-inference, reconstruction, or secure-aggregation experiments, none of which has been run.
 - The decentralized benchmark results (oracle hierarchy 68.98 ± 0.95% personalized at uniform rank 16 versus 42.30 ± 1.39% flat gossip and 23.20 ± 0.29% centralized FedAvg) are three-seed finite-run measurements under one frozen-feature protocol, with the hierarchy receiving true domain labels. The online-discovery result is coordinator-visible, not neighborhood-local.
 
@@ -104,19 +106,19 @@ The component studies and the P3 decentralized benchmark are different experimen
 
 `ΔW_{i,t+1} = C_{r_{i,t}}(Σ_j W_{ij,t} ΔW^{local}_{j,t})`,
 
-where `W_t` is the gossip matrix and `C_r` is local rank truncation. The current P3 runner uses fixed rank 16 (or the fixed `4/12/32` cycle); it does not invoke the Project 1 adaptive controller. The one-task Fashion-MNIST parity result therefore cannot be read as an adaptive-rank P3 result.
+where `W_t` is the gossip matrix and `C_r` is local rank truncation. The historical protocol battery used fixed rank 16 or the fixed `4/12/32` cycle. The corrected driver now invokes the P1 controller at resource ceilings `4/8/16`; its outcome is separately measured rather than inferred from Fashion-MNIST parity.
 
 The model conventions differ as well: Project 1/P2 Experiment 1 use the unscaled LoRA update `B_i A_i`, while P3 uses `(α/r_i) B_i A_i` and undoes that scaling during SVD refactorization. Both aggregation paths match their own forward pass; this audit found no missing-scale error in either path. The parameterization and resulting local optimization still differ across studies.
 
-Project 2 evaluates a leave-one-client-out target, `y_i = Δaccuracy_{-i}`, using normalized contribution weights `n_i q_i λ_i`. Its modest Spearman and pairwise improvements are model-free ranking metrics over 75 rows. The current P2 Experiment 1/P3 training path does not pass the conservative `λ_i` factors into the decentralized aggregation loop, so those factors cannot change P3 accuracy. Even after integration, a better scalar contribution ranking is not equivalent to improving the vector of personalized client objectives or the separate consensus objective.
+Project 2 evaluates a leave-one-client-out target, `y_i = Δaccuracy_{-i}`, using normalized contribution weights `n_i q_i λ_i`. Its modest Spearman and pairwise improvements are model-free ranking metrics over 75 rows. The historical training paths did not pass the conservative factors into decentralized aggregation; the corrected driver now does and records their actual mixer effects. A better contribution ranking still does not imply pooled-model accuracy preservation.
 
-For an end-to-end claim, all factors must be matched: data split, seed, rounds, rank budget, initialization, graph, aggregation operator, and evaluation target. A controlled P3 ablation is now complete. On heterogeneous `(4,12,32)` ranks over 30 rounds and three seeds, the tested loss-adaptive rank policy reached 20.30 ± 2.51% personalized accuracy versus 24.16 ± 1.04% for fixed MH; bounded domain reweighting produced no measurable change. This negative result is specific to the tested policy and protocol.
+The earlier `(4,12,32)` end-to-end attempt is superseded: its Sinkhorn normalization canceled the domain factors, its rank heuristic was not P1, its separately pooled baseline used a different alpha, and its final assembly was a centralized diagnostic. Its identical weighted/unweighted values are invalid evidence about domain weighting. The corrected experiment uses a common alpha 32, canonical P1/P2 policies, reversible weighted MH, explicit neighbor-tree communication, and direct pooled training on the same dataset. See [`integrated-corrected/`](integrated-corrected/) for the paired experiment and its validation.
 
 The [`protocol_composition_audit.json`](protocol_composition_audit.json) artifact records the source hashes and code-location evidence. The composed run is in [`p3-e2e-ablation/`](p3-e2e-ablation/).
 
 ## Validation and the required test machine
 
-The adaptive-rank and domain-weighting regression tests pass on gpu003: **27 passed**. Earlier remote counts on the same host: Project 3 full suite 378 passed, Project 2 127 passed with 46 subtests (PR #42), adaptive-rank controller suite 20 passed, discovery/runner/protocol suite 30 passed.
+The corrected P3 suite passes on gpu003: **463 passed in 17.90 seconds**, plus 3,460 recorded invariants over the 27 full runs. Earlier counts below are historical checks, not the current suite total.
 
 gpu003 (the documented SSH GPU machine, Tesla V100S, Python 3.10.12, torch 2.3.0+cu121) remains the **required** test and experiment machine. Local runs on a development laptop do not replace SSH validation and must not be reported as if they did. Access details are not part of this bundle.
 

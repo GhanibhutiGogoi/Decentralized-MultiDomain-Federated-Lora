@@ -1,4 +1,15 @@
-# Composed end-to-end ablation
+# Historical end-to-end attempts: superseded evidence
+
+**Correction, September 15:** This bundle does not establish the outcome of the proposed P1/P2/P3 methodology. Use `../integrated-corrected/` for the corrected paired experiment. The historical interpretation below is withdrawn for these reasons:
+
+- `Sinkhorn(D W D)` canceled the domain multipliers on the already doubly stochastic proposal. Identical weighted/unweighted results diagnose an implementation no-op.
+- The rank arm used a median-loss heuristic, not the canonical Project 1 controller.
+- Decentralized runs used alpha 16, while the separately pooled baseline used alpha 32; that comparison was not matched.
+- The old consensus endpoint used a centralized diagnostic average, not neighbor-only assembly.
+
+The numeric files are retained for auditability. They describe those implementations only and must not support current project success/failure claims.
+
+## Original report (superseded)
 
 This is the first P3 run that composes dynamic rank resizing and bounded domain weighting inside the same decentralized ΔW protocol. It uses real cached CIFAR-100 features on gpu003, heterogeneous ranks `(4,12,32)`, 30 rounds, and seeds 42/43/44 with identical splits, initialization, topology, and optimizer settings.
 

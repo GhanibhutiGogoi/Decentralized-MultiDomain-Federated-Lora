@@ -1,11 +1,11 @@
 # AH-LoRA paper
 
-`main.tex` is a completed, evidence-scoped technical paper for the current
-repository milestone. It reports the remote V100 benchmark, the heterogeneous
-rank and error-feedback comparisons, offline signature validation, and the
-real-data Project 2 calibration. It explicitly labels oracle-domain inputs,
-simulated communication counts, weak signature discovery, and unresolved
-adaptive-rank calibration.
+`main.tex` reports the corrected nine-arm, three-seed pooled-versus-peer experiment,
+with the mathematical definitions integrated into the methodology. It states
+the negative accuracy-preservation result and separates supporting historical
+experiments from the invalid, superseded pilot. Source data, peer-transport
+ledgers, resource costs, validation, and the exact launch source archive are in
+`../docs/artifacts/integrated-corrected/`. No privacy guarantee is claimed.
 
 Compile with:
 

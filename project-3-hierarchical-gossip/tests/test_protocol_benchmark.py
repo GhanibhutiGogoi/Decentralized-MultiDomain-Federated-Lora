@@ -16,6 +16,12 @@ def _state(a, b):
                    "B": torch.tensor(b, dtype=torch.float32)}}
 
 
+@pytest.mark.parametrize('method', benchmark.SUPERSEDED_METHODS)
+def test_invalid_historical_composition_cannot_be_rerun_as_evidence(method):
+    with pytest.raises(ValueError, match='integrated_benchmark'):
+        benchmark.build_mixing(method, {0: 0, 1: 1}, 5)
+
+
 def test_flat_ring_is_seeded_independently_of_domain_order():
     assignments = {i: i // 3 for i in range(15)}
     first = benchmark.build_mixing("mh", assignments, 5, seed=42)(0)

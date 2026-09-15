@@ -12,257 +12,356 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\dW}{\Delta W}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-\title{AH-LoRA: Heterogeneous Low-Rank Adapters for Decentralized Multi-Domain Federated Learning}
+\newcommand{\clip}{\operatorname{clip}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\Acc}{\operatorname{Acc}}
+\title{AH-LoRA: Evaluating Resource-Adaptive Decentralized LoRA Against Pooled Training}
 \author{AH-LoRA Project Team}
 \date{September 2026}
-\begin{document}\maketitle
-\sloppy
+\begin{document}
+\maketitle
 \begin{abstract}
-Federated fine-tuning with Low-Rank Adaptation (LoRA) must handle statistical heterogeneity, unequal device budgets, and unreliable central coordination at the same time. We present AH-LoRA, a framework whose implemented core aggregates LoRA adapters in effective-update space rather than factor space. A client sends $\dW_i=(\alpha/r_i)B_iA_i$ with a shared scaling constant $\alpha$; neighbors mix these matrices and each receiver refactorizes the result to its own rank by truncated SVD. This operation is invariant to the LoRA factor gauge and supports heterogeneous ranks in a serverless graph. We implement Metropolis--Hastings gossip, an oracle two-tier hierarchy, heterogeneous-rank and error-feedback protocols, direction-aware signatures, online domain discovery, and an adaptive-rank controller. On a real CIFAR-100 benchmark with 15 clients, five known domains, frozen ImageNet ResNet-18 features, 50 rounds, and three seeds, the oracle hierarchy reaches $68.98\pm0.95\%$ personalized accuracy at uniform rank 16, compared with $42.30\pm1.39\%$ for flat gossip and $23.20\pm0.29\%$ for centralized FedAvg under the same personalized evaluation. The online discovery mixer infers five groups with stage-10 scoring ARI $1.00$ for all three seeds (stage-20 ARI $1.00/0.918/1.00$ under coordinator-visible full-state observation). A matched 30-round heterogeneous-rank ablation shows the integrated loss-adaptive rank policy at $20.30\pm2.51\%$ versus $24.16\pm1.04\%$ for fixed-rank MH; bounded domain reweighting produces no measurable change in this run. A direct pooled-data rank-16 LoRA reaches $57.25\pm0.66\%$ on the full test set, versus $5.11\pm1.29\%$ fixed-MH consensus. A revised controller reaches parity with a feasible Fashion-MNIST baseline while saving 10.0\% FLOPs, and no privacy guarantee is measured. Thus the project does not yet satisfy its original end-to-end objective; the integrated ablation is negative for the tested rank policy and does not validate a privacy benefit.
+Can clients with unequal computing budgets collaboratively train low-rank adapters while retaining the accuracy of ordinary LoRA trained on pooled data? We evaluate AH-LoRA, which combines capability-constrained rank selection, domain-dependent contribution weights, and neighbor-to-neighbor aggregation of scaled LoRA updates. A final peer reduction constructs a rank-16 deployment model. Nine protocols are compared on all 50,000 CIFAR-100 training examples and 10,000 test examples, using frozen ResNet-18 features, 15 clients, and three seeds. Pooled LoRA reaches $57.23\pm0.59\%$ full-test accuracy, whereas the combined adaptive-rank, domain-weighted method reaches $6.90\pm2.03\%$. A substantial gap already exists without rank adaptation: centralized federated aggregation reaches $20.06\pm0.44\%$ and uniform-rank peer training reaches $12.69\pm3.55\%$. Within the domain-weighted comparison, adaptation loses $3.89\pm1.44$ percentage points against fixed feasible ranks. It reduces training-factor payload by 41.9\%, but total deployment payload falls only 0.26\% once the implemented dense control exchange and final assembly are included. These results do not meet the accuracy-preservation objective under the tested 30-round protocol; they do not establish an impossibility result for decentralized LoRA. Raw examples are absent from simulated peer messages, but shared updates and training statistics have no demonstrated privacy protection.
 \end{abstract}
+
 \section{Introduction}
-Large pretrained models are commonly specialized with LoRA~\citep{hu2022lora}, which trains small factors $B\in\R^{d_o\times r}$ and $A\in\R^{r\times d_i}$ while freezing the backbone. Existing federated LoRA methods address parameter efficiency and, in some cases, rank heterogeneity~\citep{zhang2023fedit,babakniya2023slora,cho2024hetlora,bai2024flexlora}; decentralized optimization provides serverless gossip protocols~\citep{boyd2006gossip,lian2017dpsgd}. These lines of work leave a practical intersection under-specified: clients may have different ranks, different domains, and no trusted aggregation server.
+LoRA adapts a pretrained model by training low-rank matrices while keeping the original weights fixed~\citep{hu2022lora}. Federated learning permits participants to retain their examples locally~\citep{mcmahan2017fedavg}; decentralized optimization replaces a dedicated aggregation server with communication between participating peers~\citep{boyd2006gossip,lian2017dpsgd}. Together these ideas suggest a practical objective: match ordinary pooled-data LoRA accuracy while allowing participants with smaller computing budgets to train smaller adapters.
 
-LoRA factors are not identifiable: $(BQ,Q^{-1}A)$ represents the same update as $(B,A)$ for every invertible $Q$. Factor averaging therefore depends on arbitrary coordinates and is undefined for unequal ranks. AH-LoRA defines the communicated object in the common matrix space $\dW_i=(\alpha/r_i)B_iA_i$ with shared $\alpha$ and refactorizes every mixed update with an SVD. This primitive is local, rank-agnostic, and compatible with symmetric doubly-stochastic mixing.
+Accuracy preservation is the criterion in this study. An improvement over pooled training is not required. Conversely, matching another weak federated baseline is insufficient if both methods trail a model trained directly on the pooled data. The proposed benefit also has two distinct parts: keeping raw examples local is a property of the training workflow, whereas protecting information in exchanged updates requires a separate privacy mechanism and threat model. A possible hospital collaboration motivates the problem but is not an evaluated application.
 
-Our contribution is deliberately scoped: a tested effective-update merge and Metropolis--Hastings gossip implementation; a reproducible CIFAR-100 benchmark; heterogeneous-rank, factor zero-padding, and error-feedback ablations; offline and online direction-aware discovery; an auditable adaptive-rank controller; and a real-data regeneration of the Project 2 calibration pipeline. Neighborhood-local discovery, calibrated rank adaptation, privacy guarantees, and broad multimodal generalization remain open.
-\section{Problem Formulation}
-Let clients $i\in\{1,\ldots,N\}$ communicate over an undirected graph $G$. Client $i$ owns private data from domain $d(i)$ and maintains a LoRA update $\dW_i$. Ranks $r_i$ may differ but must satisfy local resource ceilings. A symmetric doubly-stochastic mixing matrix $W$ preserves the network mean. We report personalized accuracy (each client on its held-out shard) and consensus accuracy (a reference-rank update on the union of test shards), plus worst-domain accuracy, the best-minus-worst domain gap, consensus distance, residual energy, and effective versus operational communication counts.
-The idealized objective is
+Combining the components introduces difficulties that isolated experiments do not resolve. LoRA factors are not identifiable, heterogeneous ranks induce different scaling and compression, and nonuniform contribution weights must survive the gossip normalization. The final model also matters: an adapter assembled centrally by an evaluator is not necessarily a model produced by the stated peer protocol.
+
+We therefore evaluate a concrete composition. AH-LoRA uses scaled effective-update aggregation, a source-pinned adaptive-rank controller, the canonical conservative domain-weighting function, a weighted Metropolis kernel, and an explicit final peer reduction. We compare its output with a conventional pooled LoRA model under common data, initialization, and evaluation. Supporting experiments on oracle hierarchy, automatic discovery, and isolated rank and weighting policies are reported separately. This is an empirical study of the implemented method, not a claim of a new convergence theorem or a validated private-learning system.
+
+\section{Learning Objective and Evaluation}
+Let $\mathcal D_i$ contain $n_i$ training examples at client $i$, let $n=\sum_i n_i$, and let $\phi(x)\in\R^{512}$ be the shared frozen feature extractor. A client's logits are
 \begin{equation}
- \min_{\{\dW_i\}} F=\frac1N\sum_{i=1}^N f_i(W_0+\dW_i)\quad\text{s.t.}\quad \operatorname{rank}(\dW_i)\le r_i,\; (i,j)\in E\text{ for every transmitted pair}.
+ z_i(x)=(W_0+\dW_i)\phi(x)+b_0,
+ \qquad \dW_i=\frac{\alpha}{r_i}B_iA_i,
+ \qquad 1\le r_i\le R_i^{\max}.
 \end{equation}
-The reported personalized score is $A_{\rm pers}=N^{-1}\sum_i\operatorname{Acc}_i(\mathcal T_i)$; the consensus adapter is $\dW_{\rm con}=\mathcal C_R(N^{-1}\sum_i\dW_i)$ and the fairness gap is $\max_d A_d-\min_d A_d$.
+The frozen head $(W_0,b_0)$, frozen features, and LoRA initialization are shared within each seed. Local loss is the empirical cross entropy
+\begin{equation}
+ f_i(\dW)=\frac1{n_i}\sum_{(x,y)\in\mathcal D_i}
+ \ell\big((W_0+\dW)\phi(x)+b_0,y\big).
+\end{equation}
+Ordinary pooled LoRA trains one rank-$R$ adapter directly on all examples:
+\begin{equation}
+ \min_{A,B}\;F_{\rm pool}(A,B)=\sum_i\frac{n_i}{n}
+ f_i\left(\frac{\alpha}{R}BA\right),\qquad R=16.
+ \label{eq:pooled-objective}
+\end{equation}
+Sample-weighted federated comparators target the same empirical weighting. Quality and domain arms instead use round-dependent weights $\pi_i^t\propto n_iq_i^t\lambda_i^t$. These weights change the training emphasis; all methods are still evaluated on the same unweighted full test set.
+
+The primary endpoint is the final assembled rank-16 model's accuracy on all 10,000 test examples. For seed $s$ and method $m$, we report the paired difference in percentage points,
+\begin{equation}
+ \Delta_{m,s}=100\left(\Acc(\widehat{\dW}_{m,s};\mathcal T)
+ -\Acc(\dW_{{\rm pool},s};\mathcal T)\right).
+ \label{eq:primary-endpoint}
+\end{equation}
+A prespecified noninferiority margin was not available; we report observed differences and sample standard deviations without equating a nonsignificant difference with equivalence. Personalized accuracy, $N^{-1}\sum_i\Acc(\dW_i;\mathcal T_i)$, is a secondary diagnostic. It evaluates different models on different local test shards and cannot replace the pooled-model comparison.
+
 \section{Method}
-AH-LoRA combines three components that can be evaluated independently and then composed: domain-aware weighting (Project 2), gauge-invariant decentralized aggregation (Project 3), and stateful rank selection (Project 1). The following subsections define the operators used in the experiments and make explicit which quantities are observed, communicated, and optimized.
+\subsection{Capability-constrained adaptive rank}
+The integrated experiment uses the Project 1 controller's decision rule rather than a replacement loss-threshold heuristic. Capability ceilings are $R_i^{\max}\in\{4,8,16\}$ and the feasible menu is
+\begin{equation}
+ \mathcal R_i=\{r\in\{2,4,6,8,12,16,24,32\}:r\le R_i^{\max}\}.
+\end{equation}
+A temporary probe at the client's ceiling measures gradient stable rank before local training. For each nonzero two-dimensional LoRA factor gradient $G$, define $s(G)=\norm{G}_F^2/\norm{G}_2^2$; the client signal $s_i^t$ is the median over these gradients. The probe uses one fixed, seeded local training minibatch, independently of the training shuffle. No test labels enter the controller.
 
-\subsection{Domain-aware aggregation weights}
-For client $i$, let $n_i$ denote the local sample count, $\ell_i$ its measured local loss, $q_i=(1+\ell_i)^{-1}$ its quality score, and $\lambda_i$ its domain-aware multiplier. Project 2 normalizes the contribution used by the weighted aggregator as
-\begin{equation}
- a_i=\frac{n_i q_i\lambda_i}{\sum_j n_j q_j\lambda_j},\qquad \sum_i a_i=1.
-\end{equation}
-The fitted quality score is linear in standardized measurements, $s_i=\theta_0+\theta^\top x_i$. Within each task/round group $g$, the multiplier is centered before exponentiation and then clipped and renormalized:
-\begin{equation}
- \lambda_i=\operatorname{renorm}_{[0.5,1.5],\,\mathrm{mean}=1}\!\left(\exp\left[\gamma\left(s_i-\overline{s}_{g}\right)\right]\right),
- \qquad \overline{s}_{g}=|g|^{-1}\sum_{j\in g}s_j.
-\end{equation}
-The standardized calibration estimates its coefficients by ridge regression,
-\begin{equation}
- \widehat\theta_{\alpha}=\arg\min_{\theta}\left\{\lVert X\theta-y\rVert_2^2+\alpha\lVert\theta\rVert_2^2\right\},\qquad
- \widehat\theta_{\alpha}=(X^\top X+\alpha I)^{-1}X^\top y,
-\end{equation}
-with $\alpha$ selected by leave-one-task-out RMSE. The two calibration forms differ only in the components of $x_i$; both are treated as exploratory when predictive fit is weak.
-
-The conservative follow-up uses no fitted coefficients. Let $p_i=n_iq_i/\sum_j n_jq_j$, let $z_{ik}$ be feature $k$ standardized across clients and clipped to $[-3,3]$, and set $s_i=K^{-1}\sum_k z_{ik}$. With temperature $T=1$, blend $\eta=0.10$, and bound $\delta=0.15$, it computes
+The smoothed demand and candidate target are
 \begin{align}
- e_i&=\frac{\exp(\operatorname{clip}(s_i/T,-4,4))}{\sum_jp_j\exp(\operatorname{clip}(s_j/T,-4,4))},\\
- h_i&=1+\eta(e_i-1),\qquad \lambda_i=\operatorname{clip}(c h_i,1-\delta,1+\delta),\quad \sum_ip_i\lambda_i=1.
+ d_i^t&=\clip(s_i^t,0,R_i^{\max}),\qquad
+ \bar d_i^t=0.7\bar d_i^{t-1}+0.3d_i^t,\\
+ r_i^\star&=\operatorname{nearest}_{\mathcal R_i}
+ \left(\max\left\{2,\;0.5c_iR_i^{\max},\;\min(\bar d_i^t,R_i^{\max})\right\}\right),
+ \label{eq:rank-target}
 \end{align}
-The positive scalar $c$ is found by bisection. Constant features or zero blend return $\lambda_i=1$. This preserves the total base weight while bounding its redistribution; the reported follow-up evaluates contribution ranking, not retraining accuracy.
+where $c_i\in\{0,1/2,1\}$ identifies the capability tier; the first demand observation initializes the moving average. Ties in the candidate quantizer choose the smaller rank, subject to its capability floor. The deployed policy starts at the ceiling, holds it for two warm-up rounds, and imposes a minimum feasible rank of at least $R_i^{\max}/2$. An upward request requires $r_i^\star>r_i$ and $\bar d_i^t\ge1.10r_i$; a downward request requires $r_i^\star<r_i$ and $\bar d_i^t\le0.85r_i$. Two consecutive requests in the same direction move one menu step. A post-training quality score, defined below, falling more than 5\% below its preceding moving average forces restoration to the ceiling at the next decision. Quality is smoothed with weights $0.8/0.2$. Optional residual-demand modulation in the generic controller is disabled here.
 
-The measured domain signals begin with class proportions $p_{ic}=n_{ic}/\sum_c n_{ic}$. We record entropy, normalized entropy, and an imbalance statistic,
-\begin{equation}
- H_i=-\sum_{c:p_{ic}>0}p_{ic}\log p_{ic},\quad H_i^{\rm norm}=H_i/\log C,\quad B_i=\frac{\max_c n_{ic}}{\min_{c:n_{ic}>0}n_{ic}}\left(1+\frac{z_i}{C}\right),
-\end{equation}
-where $z_i$ counts absent classes. With global proportions $q_c$ and $m_c=(p_{ic}+q_c)/2$, the recorded divergences are
-\begin{equation}
- \operatorname{KL}(p_i\|q)=\sum_c p_{ic}\log\frac{p_{ic}+\varepsilon}{q_c+\varepsilon},\qquad
- \operatorname{JS}(p_i,q)=\tfrac12\operatorname{KL}(p_i\|m)+\tfrac12\operatorname{KL}(q\|m),
-\end{equation}
-and update-distance features are $d_{\cos}(u,\bar u)=1-u^\top\bar u/(\|u\|_2\|\bar u\|_2)$ and $d_2(u,\bar u)=\|u-\bar u\|_2$. The weighted rank-assignment variant combines normalized signals as
-\begin{equation}
- u_i=\lambda_c C_i+\lambda_e E_i+\lambda_b B_i,\qquad
- \widetilde r_i=r_{\min}+\frac{u_i}{\sum_j u_j}\left(B_{\rm tot}-Nr_{\min}\right),
-\end{equation}
-then snaps to the allowed menu and greedily corrects to the total rank budget; if $\sum_j u_j=0$, uniform weights are used.
+A rank increase from $r$ to $r'$ preserves the current update by scaling each existing factor by $\sqrt{r'/r}$. New $A$ rows are randomly initialized and their corresponding $B$ columns are zero, preserving the output while allowing the added directions to learn. A decrease uses the truncated effective-update SVD. Gradient probes and quality evaluations are logged separately from training; a smaller training rank does not by itself establish a reduction in total computation. The controller is source-pinned to Project 1; its one-minibatch probe is an explicit adaptation of Project 1's multi-minibatch measurement procedure to this benchmark.
 
-\subsection{Gauge-invariant effective-update aggregation}
-A LoRA adapter with factors $B_i\in\mathbb R^{d_o\times r_i}$ and $A_i\in\mathbb R^{r_i\times d_i}$ communicates the scaled effective update using a shared scaling constant $\alpha$
+\subsection{Quality and domain contribution weights}
+After local optimization, client $i$ evaluates cross entropy $\ell_i^t$ on its fixed training probe and sets
 \begin{equation}
- \dW_i=\frac{\alpha}{r_i}B_iA_i.
+ q_i^t=(1+\ell_i^t)^{-1},\qquad
+ p_i^t=\frac{n_iq_i^t}{\sum_jn_jq_j^t}.
 \end{equation}
-The P3 runner and all heterogeneous-rank comparisons use this scaled update; the legacy Project 1 FedAvg path retains its historical unscaled $B_iA_i$ aggregation and is reported separately. For neighbors $\mathcal N(i)$, client $i$ forms a convex update-space merge,
+Both sides of the fixed/adaptive comparison use this same quality definition. Domain weighting uses five Project 2 signals. Let $n_{ic}$ be training class counts, $v_{ic}=n_{ic}/n_i$, $g_c=\sum_i n_{ic}/n$, and let
 \begin{equation}
- \overline{\dW}_i=\sum_{j\in\mathcal N(i)\cup\{i\}}w_{ij}\dW_j,\qquad \sum_jw_{ij}=1,\;w_{ij}\ge0.
+ u_i^t=\operatorname{vec}(\dW_i^{t,\mathrm{local}}-\dW_i^{t,\mathrm{pre}}),\qquad
+ \bar u^t=N^{-1}\sum_i u_i^t.
 \end{equation}
-If $\overline{\dW}_i=U\Sigma V^\top$, its rank-$r_i$ representation is obtained from the truncated SVD:
+The feature vector comprises Jensen--Shannon divergence to the pooled training histogram, Euclidean and cosine distance to the mean update, normalized class entropy, and class imbalance:
 \begin{align}
- \mathcal C_{r_i}(\overline{\dW}_i)&=U_{(:,1:r_i)}\Sigma_{1:r_i}V_{(:,1:r_i)}^\top,\nonumber\\
- B_i&=\frac{U_{(:,1:r_i)}\Sigma_{1:r_i}^{1/2}}{\sqrt{\alpha/r_i}},\qquad
- A_i=\frac{\Sigma_{1:r_i}^{1/2}V_{(:,1:r_i)}^\top}{\sqrt{\alpha/r_i}}.
+ x_{i1}&=\operatorname{JS}(v_i,g),&
+ x_{i2}&=\norm{u_i-\bar u}_2,&
+ x_{i3}&=1-\frac{u_i^\top\bar u}{\norm{u_i}_2\norm{\bar u}_2},\nonumber\\
+ x_{i4}&=-\frac{\sum_{c:v_{ic}>0}v_{ic}\log v_{ic}}{\log C},&
+ x_{i5}&=\frac{\max_c n_{ic}}{\min_{c:n_{ic}>0}n_{ic}}
+ \left(1+\frac{\#\{c:n_{ic}=0\}}{C}\right).
+ \label{eq:domain-features}
 \end{align}
-The projection is the Eckart--Young minimum-Frobenius-error rank-$r_i$ approximation. It is invariant to the LoRA factor gauge: replacing $(B,A)$ by $(BQ,Q^{-1}A)$ leaves $BA$ unchanged, while entry-wise factor averaging changes in general and introduces cross terms.
+Cosine distance is zero when its denominator is at most $10^{-12}$. For distributions $a,b$ and $m=(a+b)/2$, $\operatorname{JS}(a,b)=\tfrac12\operatorname{KL}(a\Vert m)+\tfrac12\operatorname{KL}(b\Vert m)$ and $\operatorname{KL}(a\Vert b)=\sum_c a_c\log(a_c/b_c)$. The implementation adds $10^{-12}$ and renormalizes at each divergence call.
 
-\begin{proposition}[Factor averaging is gauge dependent]
-Replacing one factor pair by $(BQ,Q^{-1}A)$ leaves $BA$ unchanged but changes entry-wise factor averages in general; expansion also introduces cross terms. Thus factor averaging is not a function of represented updates, whereas the $\dW$ average is.
-\end{proposition}
-
-\subsection{Decentralized mixing, hierarchy, and feedback}
-With a symmetric doubly-stochastic mixing matrix $W^t$, client $i$ receives
+The conservative allocator directly imports the canonical Project 2 function. Each feature is standardized across clients and clipped to $[-3,3]$, with a constant feature contributing zero. With $K=5$, its score and bounded multiplier are
+\begin{align}
+ z_{ik}&=\clip\left(\frac{x_{ik}-\bar x_k}{\sigma_k},-3,3\right),
+ &a_i&=K^{-1}\sum_kz_{ik},\nonumber\\
+ e_i&=\frac{\exp(\clip(a_i,-4,4))}{\sum_jp_j\exp(\clip(a_j,-4,4))},
+ &h_i&=1+0.10(e_i-1),\\
+ \lambda_i&=\clip(ch_i,0.85,1.15),
+ &\sum_ip_i\lambda_i&=1.
+ \label{eq:domain-factors}
+\end{align}
+Bisection determines the positive scalar $c$. The resulting gossip target is
 \begin{equation}
- Y_i^t=\sum_{j=1}^N W_{ij}^t\dW_j^t+m_i^t,\qquad \overline{\dW}_i^t=\mathcal C_{r_i}(Y_i^t),
+ \pi_i=\frac{n_iq_i\lambda_i}{\sum_jn_jq_j\lambda_j}.
+ \label{eq:stationary-weights}
 \end{equation}
-where $m_i^t=0$ without error feedback. The discarded residual is retained as
+Quality-only arms set $\lambda_i=1$; sample-only arms set both $q_i=\lambda_i=1$. Domain weighting is tested for its effect on the parity objective, without requiring it to improve accuracy over quality-only training.
+
+\subsection{Effective-update aggregation and weighted gossip}
+LoRA factors can be gauge transformed as $(B,A)\mapsto(BQ,Q^{-1}A)$ for any invertible $Q$. This leaves $BA$ unchanged but generally changes factor averages. AH-LoRA therefore sends the factors and reconstructs $(\alpha/r)BA$ at the receiver. The shared $\alpha$ and source rank are used in every forward pass and merge.
+
+For the undirected training graph, form the symmetric Metropolis proposal
 \begin{equation}
- m_i^{t+1}=Y_i^t-\mathcal C_{r_i}(Y_i^t).
+ Q_{ij}=\frac1{1+\max(\deg(i),\deg(j))}\quad\text{on edges},\qquad
+ Q_{ii}=1-\sum_{j\ne i}Q_{ij}.
 \end{equation}
-Flat gossip uses ring Metropolis--Hastings weights, $W_{ij}=1/(1+\max(d_i,d_j))$ on edges and $W_{ii}=1-\sum_{j\ne i}W_{ij}$. The oracle two-tier schedule is $W^t=W_{\mathrm{intra}}^tW_{\mathrm{bridge}}^tW_{\mathrm{intra}}^t$ on bridge rounds and $W^t=W_{\mathrm{intra}}^t$ otherwise. It uses known domains only as an oracle diagnostic.
-
-Communication is reported in factor floats rather than matrix entries. If source $j$ has rank $r_j$ and layer dimensions $(d_{o,\ell},d_{i,\ell})$, its payload is $S_j=\sum_\ell r_j(d_{o,\ell}+d_{i,\ell})$ floats. For mixer support $E_t=\{(i,j):i\ne j,W^t_{ij}>0\}$, the effective count is
+To retain nonuniform contribution weights, the actual kernel is
 \begin{equation}
- F_t=\sum_{(i,j)\in E_t}S_j.
+ P_{ij}^t=Q_{ij}\min\left(1,\frac{\pi_j^t}{\pi_i^t}\right)\;(i\ne j),
+ \qquad P_{ii}^t=1-\sum_{j\ne i}P_{ij}^t.
+ \label{eq:weighted-mh}
 \end{equation}
-
-\subsection{Automatic discovery and adaptive mixing}
-Online discovery compresses the flattened effective updates using a fixed seeded projection $P\in\mathbb R^{64\times D}$. The normalized signature and its exponential moving average are
+It is row stochastic, preserves graph support, and satisfies detailed balance:
 \begin{equation}
- z_i^t=\frac{P\operatorname{vec}(\dW_i^t)}{\left\lVert P\operatorname{vec}(\dW_i^t)\right\rVert_2},\qquad h_i^t=\frac{\beta h_i^{t-1}+(1-\beta)z_i^t}{\left\lVert\beta h_i^{t-1}+(1-\beta)z_i^t\right\rVert_2}.
+ \pi_iP_{ij}=Q_{ij}\min(\pi_i,\pi_j)=\pi_jP_{ji},\qquad \pi^\top P=\pi^\top.
 \end{equation}
-The affinity is $A_{ij}=h_i^\top h_j$. On the selected topology, we construct a nonnegative kernel and project it to a symmetric mixer,
+It is generally neither symmetric nor doubly stochastic. A separate validator checks these weighted identities; the uniform-mean convergence claims of the earlier symmetric runner are not applied to this kernel.
+
+After local training, each client forms and compresses
 \begin{equation}
- K_{ij}=\mathbf 1\{j\in\mathcal N(i)\cup\{i\}\}\exp\left(\frac{A_{ij}-A_{\max}}{\tau}\right),\quad W_0=\operatorname{Sinkhorn}(K),\quad W=w_{\min}I+(1-w_{\min})W_0.
+ Y_i^t=\sum_jP_{ij}^t\dW_j^{t,\mathrm{local}},\qquad
+ \dW_i^{t+1}=\mathcal C_{r_i^t}(Y_i^t).
+ \label{eq:local-merge}
 \end{equation}
-The unknown cluster count is selected without labels by $\widehat K=\arg\max_{k\in\{2,\ldots,\min(8,N-1)\}}\operatorname{Silhouette}(1-A,k)$. If all scores are non-positive, $\widehat K=1$ and the soft mixer is retained; labels and ARI/NMI are used only for evaluation.
-
-\subsection{Adaptive rank selection}
-Project 1 estimates the stable rank of a probe gradient $G_i$ and applies a capability floor:
+If $Y=U\Sigma V^\top$, the stored factors are
 \begin{equation}
- s_i=\frac{\lVert G_i\rVert_F^2}{\lVert G_i\rVert_2^2},\qquad c_i=\frac{\operatorname{index}(b_i)}{M-1},\qquad r_i^{\star}=q_{\mathcal R_i}\left(\max\left\{r_{\min},\gamma c_iR_i^{\max},\min(s_i,R_i^{\max})\right\}\right),
+ B=\frac{U_{:r}\Sigma_{:r}^{1/2}}{\sqrt{\alpha/r}},\qquad
+ A=\frac{\Sigma_{:r}^{1/2}V_{:r}^\top}{\sqrt{\alpha/r}},\qquad
+ \mathcal C_r(Y)=U_{:r}\Sigma_{:r}V_{:r}^\top.
 \end{equation}
-where $q_{\mathcal R_i}$ snaps to the allowed candidate menu. At round $t$, optional residual demand $\rho_i^t$ modifies the signal as
+This is the minimum-Frobenius-error rank-$r$ approximation, with discarded energy $\norm{Y-\mathcal C_r(Y)}_F^2=\sum_{k>r}\sigma_k(Y)^2$. Before compression, the weighted mean is preserved for the current $\pi$. After compression its deviation is exactly $\sum_i\pi_i[\mathcal C_{r_i}(Y_i)-Y_i]$. Since local optimization, ranks, and weights change over time, these algebraic identities do not imply convergence or accuracy parity. The optional error-feedback extension stores $m_i^{t+1}=Y_i^t+m_i^t-\mathcal C_{r_i}(Y_i^t+m_i^t)$; it is evaluated only in the separate historical ablation.
+
+\subsection{Peer exchange of weighting information}
+The domain policy requires global training statistics. These inputs are explicitly delivered over the graph rather than supplied through an uncharged evaluator callback. Each client provides $(n_i,q_i)$; domain arms additionally provide its 100-bin training histogram and 51,200-element effective-update change. A breadth-first spanning tree gathers these records to a participating root peer and broadcasts the gathered records over the same tree. Each peer independently computes Equations~\eqref{eq:domain-features}--\eqref{eq:stationary-weights} from its received view, and equality of the resulting weights is checked.
+
+This straightforward allgather is intentionally fully accounted for. If record $i$ has $L_i$ numeric fields and the gather subtree at peer $v$ is $S_v$, its gather cost is $8\sum_{i\in S_v}(L_i+1)$ bytes, including one source identifier per record. Each broadcast edge carries $8\sum_i(L_i+1)$ bytes. Thus
 \begin{equation}
- d_i^t=\operatorname{clip}\left(s_i^t\left[1+\omega\operatorname{clip}(\rho_i^t,0,1)\right],0,R_i^{\max}\right),\qquad \widetilde d_i^t=\beta_r\widetilde d_i^{t-1}+(1-\beta_r)d_i^t.
+ B_{\rm control}^t=8\sum_{v\ne\mathrm{root}}\sum_{i\in S_v}(L_i+1)
+ +8(N-1)\sum_i(L_i+1).
+ \label{eq:allgather-cost}
 \end{equation}
-The stateful controller changes rank only after the configured hysteresis margin and patience conditions are satisfied. This makes rank decisions auditable while allowing capability ceilings to be enforced at every client.
+The numerical transport model uses eight-byte scalars and identifiers. The simulator shares read-only array references internally but charges full logical transmissions. This exchange reveals all contributed records to every peer; it is not secure aggregation.
 
-The signature experiment compares singular-value spectra, row-norm signatures, and inverse-$\dW$-L2 signatures at stages 2, 5, 10, and 20, scored against known labels offline. The benchmark uses uniform rank 16 or the repeating heterogeneous schedule $(4,12,32)$ with total rank budget 240 across 15 clients. Online discovery and adaptive-rank results are evaluated as separate extensions.
-\section{Analysis}
-For symmetric doubly-stochastic $W$, with $J=\mathbf1\mathbf1^\top/N$, consensus error contracts as $\norm{(W-J)X}_F\le|\lambda_2(W)|\norm{(I-J)X}_F$. For rank-$R$ matrices, the SVD projection obeys $\norm{C_r(X)-X}_F^2=\sum_{k>r}\sigma_k(X)^2\le(1-r/R)\norm{X}_F^2$. With error feedback, the mean update follows the averaged update up to stochastic-gradient terms; without feedback, biased compression leaves an approximation floor. These statements require fixed mixing and bounded residual assumptions; the repository analysis does not claim convergence for the state-dependent discovery mixer or adaptive-rank controller.
+\subsection{Final assembly and resource accounting}
+A final model is produced by the peer protocol itself. Before testing, we choose the first client with the largest capability as deployment root and use a spanning tree of the training graph. Let $\mathrm{ch}(i)$ denote tree children. Each peer accumulates a dense weighted numerator and scalar mass,
+\begin{equation}
+ H_i=\pi_i\dW_i+\sum_{j\in\mathrm{ch}(i)}H_j,
+ \qquad M_i=\pi_i+\sum_{j\in\mathrm{ch}(i)}M_j.
+\end{equation}
+Every non-root sends $(H_i,M_i)$ to its parent. Only the root refactorizes:
+\begin{equation}
+ \widehat{\dW}=\mathcal C_{16}(H_{\mathrm{root}}/M_{\mathrm{root}}).
+ \label{eq:peer-assembly}
+\end{equation}
+There is no intermediate truncation in this reduction. It constructs the weighted mean before the final rank projection using $N-1$ existing graph edges. It requires dense temporary storage and a root capable of the final SVD. The root is a participating peer, not an external training server; failure tolerance and root rotation are not evaluated.
 
-\subsection{Why component gains do not automatically transfer}
-The adaptive-rank and domain-weighting studies answer narrower questions than the decentralized benchmark. For client $i$ at round $t$, the end-to-end update is
-\[
-\dW_{i,t+1}=C_{r_{i,t}}\!\left(\sum_j W_{ij,t}\,\dW_{j,t}^{\mathrm{local}}\right),
-\qquad \dW_{j,t}^{\mathrm{local}}=\frac{\alpha}{r_{j,t}}B_{j,t}A_{j,t},
-\]
-where both the mixing matrix $W_t$ and the projection rank $r_{i,t}$ affect the next local objective. The isolated Project~1 experiment changes $r_{i,t}$ on a single task and compares final task accuracy at matched client capability ceilings. The P3 battery instead fixes rank 16, or the repeating $(4,12,32)$ schedule, and evaluates personalized and consensus predictions after 50 gossip rounds. Since the controller is not called by the P3 runner, its parity result cannot be interpreted as an end-to-end P3 result.
+For a source adapter with rank $r_j$, the training payload is $S_j=r_j(512+100)$ fp32 scalars. Let $E_t=\{(i,j):i\ne j,P_{ij}^t>0\}$. The deployment payload accounting is
+\begin{equation}
+ B_{\rm total}=4\sum_{t=1}^{T}\sum_{(i,j)\in E_t}S_j^t
+ +\sum_{t=1}^{T}B_{\rm control}^t+(N-1)(4\cdot51200+8).
+ \label{eq:total-cost}
+\end{equation}
+The last term is one final peer assembly. Earlier assemblies used to draw evaluation curves are recorded separately and do not alter training. FedAvg already returns its centrally aggregated model and does not require the peer reduction; pooled training has no inter-client payload. Static sample-count exchange, graph setup, packet framing, and subsequent model dissemination are excluded. We report training rank--sample products, $\sum_{t,i}r_i^tn_i$, and probe work separately; this proxy excludes SVD, feature extraction, optimizer, and communication costs and is not a measured total-FLOP or hardware-speedup claim.
 
-The representation also differs: the Project~1/P2 Experiment~1 models apply the unscaled update $B_iA_i$, whereas P3's ResNet head applies $(\alpha/r_i)B_iA_i$ and compensates for this scale during refactorization. Each merge matches its own forward convention; no missing-scale error was found. These parameterizations nevertheless induce different local optimization dynamics.
+\section{Experimental Design}
+\subsection{Matched pooled and integrated comparison}
+The primary benchmark uses all 50,000 CIFAR-100 training images and 10,000 test images. Frozen ImageNet-pretrained ResNet-18 features have dimension 512 after deterministic resizing to $224\times224$ and ImageNet normalization. Only LoRA factors on the random frozen 100-class head are trained. This is head-only LoRA on cached features, not end-to-end backbone or language-model fine-tuning.
 
-Project~2 measures a different quantity. Its target is a leave-one-client-out contribution, $y_i=\mathrm{Acc}(\mathrm{all})-\mathrm{Acc}(\mathrm{all}\setminus i)$, and it evaluates whether a multiplier improves the ranking of $y_i$:
-\[
-\widetilde w_i=\frac{n_iq_i\lambda_i}{\sum_k n_kq_k\lambda_k}.
-\]
-The reported Spearman and pairwise gains therefore measure rank association with $y_i$ over 75 recorded rows. In the current training path these factors are not passed into the P3 aggregation loop, so they cannot change P3 personalized accuracy. Even when wired in, improving a contribution ranking need not improve each client's local loss: the P3 objective is a vector of personalized losses (and, separately, a consensus loss), whereas Project~2 optimizes a scalar leave-one-out proxy.
+Five groups of CIFAR-100 superclasses define the domain partition. Each domain has three clients, split by Dirichlet($0.5$). The training sets and test shards are disjoint, and their unions are checked against the entire dataset. Heterogeneous arms assign repeating ceilings $(4,8,16)$; uniform controls use rank 16 everywhere. A seeded permutation independent of domain ordering defines the ring, and the same graph is used by paired arms. Known domains determine the benchmark partition but do not select a privileged training hierarchy in this experiment.
 
-Thus the apparent discrepancy does not demonstrate an arithmetic error. A valid end-to-end attribution requires the same dataset split, seeds, rounds, rank budget, initialization, evaluation target, and communication graph, with one component toggled at a time. P3 controls these variables within its comparator set, but the current evidence does not isolate the joint composition of all three components; claims of adaptive-rank or domain-weighted gains in the full decentralized pipeline would therefore be unsupported.
-\section{Experimental Setup}
-\paragraph{Vision.} We use all 50,000 CIFAR-100 training images and 10,000 test images. A frozen ImageNet-pretrained ResNet-18 produces 512-dimensional features after deterministic resize to $224\times224$ and ImageNet normalization. The trainable classification head is a $100\times512$ LoRA update. Five superclass groups form domains, with three clients per domain and Dirichlet($0.5$) within-domain partitions. Runs use $\alpha=32$, one local epoch, learning rate $10^{-3}$, batch size 128, 50 rounds, and seeds 42, 43, and 44.
-\paragraph{Comparators and evidence.} We compare local-only, centralized $\dW$ FedAvg, flat Metropolis--Hastings gossip, oracle two-tier gossip, factor zero-padding, and error feedback. Every run records manifests, split hashes, per-round metrics, per-domain metrics, and communication accounting. The separate Project 2 regeneration uses real CIFAR-10, FashionMNIST, AG News, UCI Heart Disease, and SpeechCommands data; Experiment 1 has 75 client-round rows at seed 42.
-\paragraph{Adaptive-rank battery.} Project 1 compares fixed rank 32 with the shipped controller ($\gamma=0.5$) on five real tasks for five rounds at seed 42. Three clients use batch-size capabilities 16, 64, and 256, corresponding to maximum ranks 4, 8, and 16. The controller logs stable-rank demand, EMA state, hysteresis decisions, selected ranks, FLOPs, and capability violations.
+All nine arms use $\alpha=32$, learning rate $10^{-3}$, weight decay $10^{-4}$, minibatch size 128, one local epoch per round, 30 rounds, and seeds 42, 43, and 44. Table~\ref{tab:design} specifies the comparators. Ordinary pooled training preserves Adam moments across epochs. Pooled-reset is an additional control that resets Adam each epoch; federated clients reset it each communication round. This separates the conventional baseline from the optimizer-reset convention used by the federation.
+
+\begin{table}[t]
+\centering
+\caption{Corrected comparison. All final deployment models have rank 16. Quality and domain arms form a $2\times2$ ablation of rank policy and domain factors.}
+\label{tab:design}
+\small
+\begin{tabular}{llll}
+\toprule
+Arm & Training rank & Contribution weights & Training coordination\\
+\midrule
+Pooled & 16 & individual samples & direct pooled Adam\\
+Pooled-reset & 16 & individual samples & pooled Adam, reset\\
+FedAvg-16 & 16 per client & $n_i$ & central FedAvg\\
+MH-16 & 16 per client & $n_i$ & weighted peer MH\\
+MH-sample & fixed $4/8/16$ & $n_i$ & weighted peer MH\\
+Fixed-quality & fixed $4/8/16$ & $n_iq_i$ & weighted peer MH\\
+Fixed-domain & fixed $4/8/16$ & $n_iq_i\lambda_i$ & weighted peer MH\\
+Adaptive-quality & P1 policy & $n_iq_i$ & weighted peer MH\\
+Adaptive-domain & P1 policy & $n_iq_i\lambda_i$ & weighted peer MH\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each arm processes 1.5 million training-example exposures, excluding separately logged probes. Equal exposure does not mean equal optimizer steps: pooled training performs $\lceil50000/128\rceil$ steps per epoch, whereas the federation performs $\sum_i\lceil n_i/128\rceil$. Counts are recorded rather than assumed equal. The pooled rank-16 model is the conventional reference, while the fixed heterogeneous arms isolate adaptation under the same client capability ceilings. They are different controls and answer different questions.
+
+Hyperparameters, method list, seeds, and the final round are fixed before the full comparison. Test evaluation produces curves but is not used for rank decisions, weighting, early stopping, or model selection. Reported uncertainties are sample standard deviations across three seeds, not confidence intervals. Rank-policy effects are paired as adaptive minus fixed within each weighting condition; domain effects are paired as domain minus quality within each rank policy. Source hashes, feature-cache identity, initialization hashes, split manifests, phase timings, ranks, weights, matrices, transport ledgers, and final adapters are retained.
+
+\subsection{Implementation validation and excluded pilots}
+Validation checks scaled heterogeneous merging, weighted stationarity and detailed balance, graph-restricted traffic, trainable rank expansion, deterministic training probes, and final peer assembly against a direct weighted-SVD test oracle. Paired smoke runs check that adaptive probes leave fixed/adaptive warm-up trajectories unchanged and that pooled and pooled-reset have identical first-epoch behavior. The direct weighted average is used to validate the reduction, not to replace it at evaluation.
+
+An audit of earlier pilot results found issues that affect their interpretation. First, the old weighting wrapper computed $\operatorname{Sinkhorn}(DWD)$ for an already doubly-stochastic $W$ and positive diagonal $D$. Since diagonal rescaling is precisely what Sinkhorn balancing removes,
+\begin{equation}
+ \operatorname{Sinkhorn}(DWD)=W
+\end{equation}
+under the usual uniqueness conditions, up to numerical tolerance. Consequently, identical weighted and unweighted pilot outcomes do not establish that domain weighting is ineffective or preserves accuracy: the intended intervention was canceled.
+
+Second, the pilot's so-called adaptive-rank arm used a median-loss threshold and half-ceiling rule, not the Project 1 gradient-based controller. Its measured performance describes that heuristic only. Third, the separate pooled pilot hardcoded $\alpha=32$ while the compared decentralized run used $\alpha=16$; it also contrasted a sample-based pooled objective with client-uniform gossip and an evaluator-assembled consensus adapter. These are not matched tests of Equation~\eqref{eq:primary-endpoint}. We retain their raw artifacts for provenance but exclude their success/failure and weighting-neutrality conclusions. The corrected experiment uses one common scaling constant, the intended policies, explicit objective controls, and actual peer assembly.
+
+\subsection{Supporting component studies}
+The earlier Project 3 protocol battery used 50 rounds, the same three seeds, and uniform rank 16 or heterogeneous ranks $(4,12,32)$. It compared client-uniform local, FedAvg, flat gossip, and an oracle hierarchy. This objective, rank schedule, and round budget differ from the corrected comparison. Historical consensus scores use a centrally computed uniform mean followed by a reference-rank SVD; they are diagnostic scores, not outputs of the new final tree reduction.
+
+The oracle uses known domains and the matrix $W^t=W_{\rm intra}W_{\rm bridge}W_{\rm intra}$ on bridge rounds, with intra-domain mixing otherwise. Its separate online-discovery extension projects effective updates into 64 dimensions, normalizes them, and smooths them:
+\begin{equation}
+ z_i^t=\frac{P\operatorname{vec}(\dW_i^t)}{\norm{P\operatorname{vec}(\dW_i^t)}_2},\qquad
+ h_i^t=\frac{0.8h_i^{t-1}+0.2z_i^t}{\norm{0.8h_i^{t-1}+0.2z_i^t}_2}.
+\end{equation}
+With affinity $a_{ij}=h_i^\top h_j$, a graph-supported kernel $K_{ij}=\mathbf1_{(i,j)\in E\cup I}\exp[(a_{ij}-a_{\max})/\tau]$ is Sinkhorn-balanced and blended with a self-weight floor. This pairwise-affinity kernel differs from the canceled clientwise diagonal weighting above. Cluster count is chosen by maximum silhouette over $k\in\{2,\ldots,\min(8,N-1)\}$; nonpositive scores select one group. Labels are used only to score discovery. The historical callback observes all adapters centrally, so this discovery result is not a neighborhood-local protocol and is not included in the corrected fixed-ring ablation.
+
+Project 1's original five-task battery compared a controller against fixed rank 32, above its capability ceilings. A later Fashion-MNIST rerun used a feasible fixed $(4,8,16)$ reference and the revised controller. Project 2 separately evaluated recorded leave-one-client-out contributions, $y_i=\Acc(\mathrm{all})-\Acc(\mathrm{all}\setminus i)$, on 75 real-data observations. Its exploratory fitted score used ridge regression, $\widehat\theta_\kappa=(X^\top X+\kappa I)^{-1}X^\top y$, with leave-one-task-out selection of $\kappa$. The corrected training experiment uses the conservative unfitted allocator in Equation~\eqref{eq:domain-factors}, not a fit to held-out test accuracy.
+
 \section{Results}
-\begin{table}[t]\centering\caption{Final-round CIFAR-100 accuracy (mean $\pm$ sample standard deviation over seeds 42--44).}\small\begin{tabular}{llcc}\toprule Context & Method & Personalized & Consensus\\\midrule
-Uniform $r=16$ & Local & $57.93\pm0.55$ & $14.23\pm1.27$\\
+\subsection{Corrected pooled comparison}
+\input{integrated_results.tex}
+
+The corrected experiment does not meet the pooled-accuracy criterion (Table~\ref{tab:integrated-corrected}). Ordinary pooled LoRA reaches $57.23\pm0.59\%$, compared with $6.90\pm2.03\%$ for the complete adaptive-domain arm: a seed-paired difference of $-50.33\pm2.46$ percentage points. Every federated arm trails the pooled reference in every seed. This is a measured negative result for the specified implementation and training budget, not an inference from the previously mismatched pilots.
+
+The shortfall is not confined to adaptive rank. Uniform-rank FedAvg reaches $20.06\pm0.44\%$, uniform-rank peer MH reaches $12.69\pm3.55\%$, and heterogeneous sample-weighted MH reaches $7.71\pm0.81\%$. Pooled-reset remains close to ordinary pooled training at $57.25\pm0.66\%$, with a paired difference of $+0.03\pm0.07$ points. Thus resetting Adam in pooled training does not reproduce the much larger federated shortfall, although this control does not isolate optimizer behavior under local domain shifts and repeated factor refactorization.
+
+The factorial comparison isolates the selected policies more directly (Table~\ref{tab:integrated-factorial}). Adaptive-quality reaches $6.48\pm1.67\%$ versus $10.69\pm0.73\%$ for fixed-quality, a paired change of $-4.21\pm1.79$ points. With domain weights, the corresponding change is $-3.89\pm1.44$ points against fixed-domain's $10.78\pm2.01\%$. Domain factors change accuracy by $+0.10\pm1.63$ points at fixed ranks and $+0.42\pm0.38$ points under adaptive ranks. Unlike the canceled pilot operation, this weighting intervention changes the actual mixing matrices and trajectories. Its small observed effects do not restore pooled accuracy; a claim of broad no-regression is also unwarranted from three seeds, particularly given the variability at fixed ranks. No improvement over conventional training was required for success.
+
+Rank adaptation reduces mean training-factor payload from 20.56 MB to 11.96 MB in quality-only training, and to 11.95 MB with domain weighting, approximately 41.9\% in either condition. Including the required control traffic and final assembly, quality-only deployment payload falls from 23.62 MB to 15.01 MB, a 36.4\% reduction accompanied by the measured accuracy loss. Domain-control exchange alone costs 3.275 GB per run; its total deployment payload is 3.299 GB at fixed ranks and 3.290 GB with adaptation, only a 0.26\% reduction. MB and GB here denote $10^6$ and $10^9$ bytes. Each adaptive run additionally processes 57,600 gradient-probe examples and 57,600 quality-probe examples. These costs preclude interpreting the factor reduction as a total-compute saving.
+
+All 27 runs process the same 1.5 million training-example exposures. They record 11,730 pooled Adam steps and 12,000 aggregate client Adam steps, with the latter determined by client minibatch boundaries. Independent evaluation of every saved checkpoint reproduces all 27 recorded fp32 correct counts on all 10,000 examples, and verifies rank-16 final updates and prediction hashes. A separate fp64 factorized forward pass disagrees on four near-tied predictions across 270,000 evaluations. Only one changes a correct count: seed-43 adaptive-quality increases by one of 10,000 examples, or 0.01 percentage points, with a top-two fp64 logit margin of $5.96\times10^{-8}$. The original fp32 results and the initial strict cross-precision check are retained. This precision sensitivity does not change the reported conclusion.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/integrated_final_comparison.pdf}
+\caption{Corrected final rank-16 full-test comparison. All methods use the same test set; error bars show sample standard deviation across seeds 42--44. Ordinary pooled LoRA is the primary reference.}
+\label{fig:integrated-final}\end{figure}
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/integrated_accuracy_curves.pdf}
+\caption{Full-test accuracy over the fixed 30-round budget. Each curve evaluates the actual deployment model at that round. Intermediate peer assembly supports evaluation only and does not feed a global model back into decentralized training.}
+\label{fig:integrated-curves}\end{figure}
+\begin{figure}[t]\centering
+\includegraphics[width=0.9\linewidth]{figures/integrated_factorial.pdf}
+\caption{Paired component effects within the corrected experiment. Rank adaptation is compared at the same weighting condition; domain factors are compared at the same rank policy. These comparisons complement the primary comparison against pooled training.}
+\label{fig:integrated-factorial}\end{figure}
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/integrated_communication.pdf}
+\caption{Simulated deployment payload: factor exchange during training, all weighting-control traffic, and one final peer assembly. Dense control information is included. These counts are not measured bandwidth or network latency.}
+\label{fig:integrated-communication}\end{figure}
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/integrated_rank_trajectories.pdf}
+\caption{Adaptive ranks under the published capability ceilings. Rank choices and gradient probes are recorded for each client; rank reductions alone do not account for probe, SVD, or metadata costs.}
+\label{fig:integrated-ranks}\end{figure}
+
+\subsection{What the component evidence establishes}
+Table~\ref{tab:historical-protocols} retains the earlier 50-round protocol results. With uniform rank 16, the oracle hierarchy reaches $68.98\pm0.95\%$ personalized accuracy, while its diagnostic consensus accuracy is $10.25\pm0.62\%$. This contrast illustrates why a domain-specific personalized score cannot establish parity of one globally deployed model. The oracle result remains useful evidence that known domain structure changes the behavior of local models.
+
+\begin{table}[t]
+\centering
+\caption{Supporting historical Project 3 results after 50 rounds, in percent (mean $\pm$ sample standard deviation, seeds 42--44). The objective is client-uniform; historical consensus is an evaluator-assembled uniform average. These values are not the corrected pooled comparison.}
+\label{tab:historical-protocols}
+\small
+\begin{tabular}{llcc}
+\toprule
+Rank context & Method & Personalized & Diagnostic consensus\\
+\midrule
+Uniform 16 & Local & $57.93\pm0.55$ & $14.23\pm1.27$\\
 & FedAvg & $23.20\pm0.29$ & $23.20\pm0.29$\\
 & MH & $42.30\pm1.39$ & $15.14\pm5.10$\\
-& Oracle hierarchy & $68.98\pm0.95$ & $10.25\pm0.62$\\\midrule
-Heterogeneous $4/12/32$, $\dW$ & Local & $53.60\pm0.62$ & $14.50\pm0.80$\\
+& Oracle hierarchy & $68.98\pm0.95$ & $10.25\pm0.62$\\
+\midrule
+Heterogeneous $4/12/32$ & Local & $53.60\pm0.62$ & $14.50\pm0.80$\\
 & FedAvg & $5.74\pm0.71$ & $5.73\pm0.59$\\
 & MH & $28.45\pm2.42$ & $6.83\pm0.45$\\
-& Oracle hierarchy & $44.07\pm0.70$ & $11.47\pm1.13$\\\bottomrule\end{tabular}\end{table}
+& Oracle hierarchy & $44.07\pm0.70$ & $11.47\pm1.13$\\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The oracle hierarchy provides the strongest personalized result in the uniform context, while centralized FedAvg is optimized for a single consensus adapter and is poorly matched to the personalized objective. The heterogeneous context is harder. This known-domain table establishes protocol behavior; the separate online-discovery experiment below evaluates whether domains can be recovered without labels.
+Under the historical heterogeneous schedule, factor zero-padding gives personalized accuracy of $4.71\pm0.22\%$ for FedAvg, $20.63\pm4.40\%$ for MH, and $31.24\pm1.27\%$ for the oracle hierarchy, compared with $44.07\pm0.70\%$ for effective-update oracle mixing. Error feedback gives $26.63\pm1.68\%$ for MH and $41.28\pm0.71\%$ for the oracle. These are finite-run ablations of representation and compression, not universal performance orderings.
 
-The new matched integration run uses the heterogeneous $(4,12,32)$ schedule, 30 rounds, the same three seeds, splits, initialization, graph, and $\dW$ merge for every arm. Fixed MH reaches $24.16\pm1.04\%$ personalized accuracy. The loss-adaptive rank policy reaches $20.30\pm2.51\%$ while reducing effective transmitted floats by 20.5\%; adding the bounded domain signal leaves the final accuracy unchanged in the paired run. This is a valid negative result for this controller and signal under this protocol, not evidence that every possible rank or weighting policy must fail. A separate rank-16 LoRA trained directly on all 50,000 training examples for 30 full passes reaches $57.25\pm0.66\%$ on the complete 10,000-image test set. The corresponding fixed-MH consensus is only $5.11\pm1.29\%$, and adaptive-rank consensus is $5.35\pm0.20\%$. Thus the original full-data conventional-LoRA parity criterion is not met under the heterogeneous decentralized protocol.
+The separate online-discovery experiment selects five groups with adjusted Rand index $1.00$ at stage 10 for each seed. At stage 20 its scores are $1.00$, $0.918$, and $1.00$, with the middle seed selecting six groups. This demonstrates recovery under coordinator-visible observations; it neither establishes a privacy property nor substitutes for the fixed-ring pooled comparison.
 
-\begin{table}[t]\centering\caption{Project 1 fixed rank 32 versus the shipped adaptive controller after five rounds at seed 42. FLOP savings are measured against the fixed-rank run.}\small\begin{tabular}{lrrrr}\toprule Task & Fixed acc. & Adaptive acc. & $\Delta$ acc. & FLOPs saved \\\midrule
-CIFAR-CNN & 59.50 & 34.74 & $-24.76$ & 93.75\%\\
-Fashion-MLP & 86.55 & 68.50 & $-18.05$ & 93.75\%\\
-AGNews-LSTM & 24.72 & 26.05 & $+1.33$ & 93.75\%\\
-Tabular-MLP & 90.00 & 83.33 & $-6.67$ & 93.75\%\\
-Audio-1DCNN & 96.36 & 96.36 & $+0.00$ & 93.75\%\\\bottomrule\end{tabular}\end{table}
+The original Project 1 controller stayed at rank 2 throughout its five-round battery and reduced the reported training-FLOP estimate by 93.75\% against fixed rank 32, while losing accuracy on three of five tasks. Since rank 32 violates every tested client ceiling, that comparison does not measure a feasible hardware-matched accuracy trade-off. The revised Fashion-MNIST rerun finishes at 82.85\% for both the adaptive controller and feasible fixed ranks $(4,8,16)$, with a reported 10.0\% reduction in the training-FLOP estimate. This is one task, one seed, and five rounds; its unscaled adapter convention also differs from the corrected scaled-head benchmark.
 
-The original adaptive-rank controller is stable and respects every capability ceiling, but it does not meet the accuracy-preservation gate when fixed rank 32 is used as the operational compute reference. That reference exceeds the per-client capability maxima (4, 8, and 16), so the reported 93.75\% saving is a compute comparison rather than a feasible hardware-matched baseline. The revised controller adds a two-round ceiling warm-up, a half-ceiling floor, and a relative quality-drop safeguard. In a capability-matched Fashion-MNIST rerun, fixed ranks $(4,8,16)$ and the revised controller both finish at 82.85\%, while the adaptive run saves 10.0\% FLOPs; it briefly dips at round 4 before recovering. This is encouraging evidence on one task, not yet a five-task calibration result.
+Project 2's conservative follow-up changes Spearman association with recorded contributions from 0.152 to 0.196 and pairwise ordering accuracy from 0.520 to 0.547. These are model-free ranking results, not retrained-model accuracy results. Its earlier ridge forms have weak global fit ($R^2=0.079$ and $0.025$) and task-dependent correlations. Neither the isolated Fashion-MNIST parity nor the contribution-ranking change predicts the composed method's full-test accuracy without the corrected experiment.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/p1_adaptive_accuracy_curves.png}
-\caption{Project 1 fixed-rank versus adaptive-rank accuracy over five rounds on five real tasks.}
-\label{fig:p1-adaptive-accuracy}
-\end{figure}
+\section{Discussion and Limitations}
+The parity question has several distinct comparisons. Pooled versus FedAvg tests the effect of local optimization and aggregation with uniform rank. MH-16 adds neighbor communication. MH-sample imposes heterogeneous capacity. The four quality/domain arms then isolate the selected adaptive policy and the domain multipliers. A shortfall at one step cannot automatically be attributed to a different component, and matching a resource-constrained federated control does not establish matching pooled training.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.9\linewidth]{figures/p1_adaptive_rank_trajectories.png}
-\caption{Historical five-task battery: the original shipped controller remained at rank 2 for all clients across five rounds against the fixed rank-32 reference; capability ceilings are shown as dotted lines. The revised controller (warm-up, half-capability floor, quality-drop restore) is evaluated separately against the feasible $(4,8,16)$ baseline.}
-\label{fig:p1-adaptive-ranks}
-\end{figure}
+The diagnostics support a cautious interpretation of the large gap. FedAvg's mean per-round relative discarded energy is only $1.39\times10^{-6}$ across the three runs. The final adaptive-domain assembly discards a mean relative energy of $7.63\times10^{-5}$. A large final Frobenius-energy loss therefore is not an adequate explanation by itself. The uniform-rank peer arm also reaches $42.10\pm1.42\%$ personalized accuracy while its full-test assembled model reaches $12.69\pm3.55\%$, illustrating the distinction between local specialization and a globally useful deployment model. Local domain heterogeneity and the optimization trajectory are plausible contributors, but their causal contributions are not separately identified by these measurements.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.82\linewidth]{figures/p1_adaptive_pareto.png}
-\caption{Project 1 accuracy--FLOP trade-off. The adaptive points achieve large compute reductions relative to the fixed rank-32 reference, at the cost of lower accuracy on several tasks.}
-\label{fig:p1-adaptive-pareto}
-\end{figure}
+Equal global sample exposures, even with all optimizer steps counted, do not make local-then-average training equivalent to pooled sequential optimization. Local objectives differ, Adam's gradient transformation depends nonlinearly on its moments, and SVD refactorization changes factor coordinates before the next optimizer reset. In general, if $\mathcal U_i$ is a local optimization map and $\mathcal U_{\rm pool}$ its pooled counterpart,
+\begin{equation}
+ \mathcal C_R\left(\sum_i\pi_i\mathcal U_i(\dW)\right)
+ \ne \mathcal U_{\rm pool}(\dW).
+\end{equation}
+This explains why the desired equality is an empirical hypothesis rather than an algebraic property of weighted assembly. Small Frobenius truncation energy does not rule out losing predictive directions or changing later optimization. The ablation measures the specified 30-round protocol; it does not causally isolate every difference between local and pooled optimization, prove an impossibility result for federated LoRA, or justify extending training until a preferred test result appears.
 
-\begin{figure}[t]
+The benchmark deliberately exposes costs that a factor-only account omits. Domain weighting currently exchanges dense update changes and class histograms with every peer, and final exact assembly also uses dense matrices. This simple protocol makes data dependencies auditable but can dominate the savings from smaller factor payloads. A compressed sufficient-statistic protocol would be a different implementation requiring its own correctness and accuracy evaluation. Rank--sample products likewise omit gradient probes, factorization, optimizer work, and dense processing.
+
+The execution is a deterministic single-process simulation of peer message flow on the designated remote GPU machine. It verifies graph-constrained operations and payloads; it does not establish multi-host reliability, measured communication speed, asynchronous behavior, or tolerance of dropped clients. The cached-feature, head-only CIFAR-100 task does not validate end-to-end visual fine-tuning, language models, medical data, or arbitrary AI training. Three seeds describe variation in this testbed and do not establish broad equivalence. The historical oracle and automatic-discovery results have different observation assumptions and are not silently included in the corrected pipeline.
+
+Raw examples are absent from the simulated peer messages, and each client's optimizer reads its assigned examples. The simulator process nevertheless has access to the entire dataset, so this experiment does not verify enforced isolation between machines. Updates and training statistics are exposed; in particular, the domain-control allgather reveals all supplied records to all peers. No differential privacy, secure aggregation, membership-inference evaluation, reconstruction evaluation, or medical threat model is implemented in this study. Consequently, accuracy parity, if observed, would still not justify a claim that hospitals can collaborate without privacy loss.
+
+\section{Conclusion}
+The completed experiment does not achieve the original accuracy-preservation objective. Under the corrected 30-round protocol, pooled rank-16 LoRA reaches $57.23\pm0.59\%$ full-test accuracy and the combined adaptive-domain method reaches $6.90\pm2.03\%$. The gap already appears in fixed-rank federated controls, and the tested adaptive policy introduces a further loss against capability-matched fixed ranks. Domain weighting has small observed effects and does not recover pooled performance. Smaller adapters reduce factor traffic, but dense domain-control exchange largely eliminates the reduction in total payload. These findings describe the tested framework and budget, not an impossibility result for decentralized federated LoRA. The implementation and its independent verification establish an executable, auditable experiment; they establish neither accuracy parity nor a privacy guarantee for the proposed hospital use case.
+
+\appendix
+\section{Reproducibility and Supporting Figures}
+The repository contains executable protocols, canonical policy provenance, feature and split hashes, per-round JSON records, phase timings, final adapters, and scripts that generate the reported tables and plots. The corrected driver is \path{project-3-hierarchical-gossip/experiments/integrated_benchmark.py}. Its evaluation does not tune on test data. Remote tests cover the numerical operators and paired execution invariants; artifacts distinguish full experiments from smoke tests and excluded pilots. Local credentials are not part of the artifact bundle. Historical figures below retain their original protocols and should be read with the associated qualifications.
+
+\begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth]{figures/p3_uniform_curves.png}
-\caption{Uniform-rank CIFAR-100 benchmark. Curves show mean $\pm$ sample standard deviation over seeds 42--44. Personalized and consensus accuracy are separate evaluation protocols; payload panels show simulated direct and staged float counts.}
-\label{fig:uniform-curves}
+\caption{Supporting historical uniform-rank protocol curves, 50 rounds. Personalized and evaluator-assembled consensus accuracy are different endpoints.}
+\label{fig:historical-uniform}
 \end{figure}
-
-Factor zero-padding under ranks $(4,12,32)$ gives personalized accuracy of $4.71\pm0.22\%$ for FedAvg, $20.63\pm4.40\%$ for MH, and $31.24\pm1.27\%$ for oracle hierarchy. The corresponding $\dW$ oracle result is $44.07\pm0.70\%$. Error feedback reaches $26.63\pm1.68\%$ for MH and $41.28\pm0.71\%$ for oracle hierarchy. These are finite-run comparisons, not universal rankings.
-
-\begin{figure}[t]
+\begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth]{figures/p3_heterogeneous_curves.png}
-\caption{Heterogeneous-rank $(4,12,32)$ benchmark. The $\dW$ and factor-zero-padding arms use the same rank budget but different merge operators; error-feedback results are reported separately in the text and aggregate CSV.}
-\label{fig:heterogeneous-curves}
+\caption{Supporting historical heterogeneous $(4,12,32)$ protocol curves. The rank budget and objective differ from the corrected $(4,8,16)$ pooled comparison.}
+\label{fig:historical-heterogeneous}
 \end{figure}
-
-The offline signature screen remains weak for the historical spectral and inverse-distance diagnostics. The new online mixer recovers the five known domain groups on the full CIFAR-100 benchmark: across seeds 42--44 it infers $K=5$ with confidence $0.72$--$0.75$ and scoring ARI $1.00$ at rounds 2, 5, and 10; at round 20 the ARI is $1.00$, $0.918$, and $1.00$, with one seed selecting $K=6$ and lower confidence. The discovery sketch is 64 floats per client (3,840 fp32 bytes for 15 clients). These labels are used only for scoring; the mixer itself receives adapter states. Because the current runner provides the full state list to the callback, this validates coordinator-visible automatic discovery rather than a neighborhood-only protocol. The regenerated Project 2 calibration selects ridge alpha 1000. Form A has global Spearman correlation 0.368 and pairwise ranking accuracy 0.641; Form B has Spearman 0.369 and pairwise accuracy 0.630. Global $R^2$ is low (0.079 and 0.025), and task-level correlations change sign across modalities.
-
-\begin{figure}[t]
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{figures/p1_adaptive_accuracy_curves.png}
+\caption{Historical five-task Project 1 battery. Fixed rank 32 exceeds the tested capability ceilings and is not a feasible hardware-matched reference. The revised Fashion-MNIST comparison is reported separately.}
+\label{fig:historical-p1}
+\end{figure}
+\begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth]{figures/p3_adaptive_discovery.png}
-\caption{Full-data online domain discovery on CIFAR-100. The EMA/silhouette mixer infers five groups with high confidence through round 10 and near-perfect scoring ARI through round 20; confidence decreases at round 20 and one seed selects $K=6$.}
-\label{fig:adaptive-discovery}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.9\linewidth]{figures/p3_signature_ari.png}
-\caption{Historical local/MH offline signature validation. The stage-10 screen labels those methods weak-signal; adaptive-run descriptive scores are reported separately with the online discovery result.}
-\label{fig:signature-ari}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.82\linewidth]{figures/p2_lambda_validation.png}
-\caption{Regenerated Project 2 lambda calibration on 75 real-data observations. Form A and Form B have similar weak global rank association; this calibration is exploratory rather than a validated allocator.}
-\label{fig:p2-lambda}
-\end{figure}
-\section{Limitations and Reproducibility}
-The oracle hierarchy receives true domain assignments, and offline signature scores use those labels only for evaluation. The online discovery result is coordinator-visible because the current runner callback supplies all adapter states; a neighborhood-local discovery protocol and its communication overhead remain future work. The benchmark is one frozen-feature CIFAR-100 task; it does not establish behavior for LLMs, asynchronous churn, or other modalities. Communication is simulated payload accounting rather than measured network throughput. Three seeds provide variability estimates, not statistical proof. P2 calibration is a single-seed, five-round diagnostic with weak predictive fit. The original Project 1 controller failed the fixed rank-32 accuracy gate (rank 2 throughout, 93.75\% FLOP savings, accuracy loss on three tasks); that reference exceeds every client's capability maximum. The revised controller reaches final-accuracy parity with the feasible $(4,8,16)$ baseline on one Fashion-MNIST run at seed 42 with 10.0\% FLOP savings, and this has not been shown on the other four tasks. Conservative domain weighting improves model-free contribution ranking modestly (Spearman 0.152 to 0.196) without an end-to-end no-regression result. No privacy guarantee is demonstrated: low-rank adapters and decentralized exchange do not by themselves establish privacy, and differential-privacy, membership-inference, reconstruction, or secure-aggregation experiments remain to be run.
-
-All source code, manifests, compact CSV/JSON evidence, and logs are included. Start with \texttt{docs/artifacts/claude\_handoff.json}, then read \texttt{docs/artifacts/README.md} and the P3 aggregate report. Remote validation used Python 3.10, PyTorch 2.3 with CUDA 12.1, and Tesla V100 GPUs; no credentials are stored in the artifact bundle.
-\clearpage
-\subsection*{Per-domain diagnostics}
-The companion domain plots expose the fairness trade-off hidden by a single aggregate accuracy number. They are generated by the same aggregate report and retain the uniform versus heterogeneous protocol split.
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.9\linewidth]{figures/p3_uniform_domains.png}
-\caption{Uniform-rank per-domain personalized accuracy at the final round.}
-\label{fig:uniform-domains}
-\end{figure}
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.9\linewidth]{figures/p3_heterogeneous_domains.png}
-\caption{Heterogeneous-rank per-domain personalized accuracy at the final round.}
-\label{fig:heterogeneous-domains}
+\caption{Supporting online-discovery results under coordinator-visible adapter observations. This experiment evaluates group recovery and is separate from the corrected fixed-ring pipeline.}
+\label{fig:historical-discovery}
 \end{figure}
 \clearpage
-\section{Conclusion}
-AH-LoRA demonstrates a practical primitive for decentralized federated LoRA with heterogeneous ranks: mix scaled effective updates and refactorize locally. The completed benchmark shows that protocol choice and domain structure strongly affect personalized behavior, factor zero-padding can fail under rank heterogeneity, and error feedback changes the compression trade-off. Known-domain hierarchy is a useful oracle comparison, and the online extension demonstrates automatic recovery of the five CIFAR-100 groups under coordinator-visible observations. The matched integration ablation is negative for the tested loss-adaptive rank policy: it trails fixed MH by 3.85 percentage points, while bounded domain reweighting has no measurable effect. The revised adaptive-rank controller reaches final-accuracy parity with a feasible $(4,8,16)$ Fashion-MNIST baseline while saving 10.0\% FLOPs, but broad accuracy-preserving adaptive LoRA is still unestablished. Neither result provides a privacy guarantee. Consequently, the project is not successful against its original end-to-end criterion yet, although the failure is now measured under a composed protocol rather than inferred from mismatched component studies.
-\bibliographystyle{plainnat}\bibliography{references}\end{document}
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

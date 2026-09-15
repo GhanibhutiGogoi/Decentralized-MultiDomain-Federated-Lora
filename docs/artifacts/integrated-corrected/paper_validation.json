@@ -1,0 +1,19 @@
+{
+  "status": "complete",
+  "timestamp_utc": "2026-09-15T07:36:46.908554+00:00",
+  "paper": "paper/main.pdf",
+  "paper_sha256": "8dcf6781d2c61336b8cd2b20a65dfacc69acf141060d80a1cc4209874c46c8d9",
+  "pages": 17,
+  "build": "pdflatex + bibtex + pdflatex; final build has no LaTeX warnings or overfull boxes",
+  "build_location": "local document compilation; all scientific and software tests executed on gpu003",
+  "visual_render": "pdftoppm at110dpi on gpu003",
+  "visual_review": "All17pages inspected via contact sheets; primary result/ablation/communication graphs inspected at page resolution; final communication legend corrected and rechecked",
+  "remote_build_attempt": "Tectonic could not reach its external bundle host; failure log retained; installed local TeX was used to compile document",
+  "software_tests": {
+    "host": "gpu003",
+    "passed": 463,
+    "seconds": 17.9
+  },
+  "record_invariants": 3460,
+  "independent_checkpoints": 27
+}
