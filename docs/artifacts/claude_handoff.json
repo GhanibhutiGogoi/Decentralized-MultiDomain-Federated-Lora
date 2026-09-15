@@ -795,6 +795,14 @@
         "adaptive_weighted_rank_personalized_accuracy": "20.30 \u00b1 2.51%"
       },
       "interpretation": "Tested loss-adaptive rank policy is negative by 3.85 percentage points while saving 20.5% effective floats; bounded domain weighting has no measurable effect in this run."
+    },
+    "pooled_data_baseline": {
+      "artifact": "docs/artifacts/p3-e2e-ablation/centralized_full_lora.json",
+      "protocol": "rank16; 30 full-data passes; full 50000 train/10000 test; seeds42/43/44",
+      "full_test_accuracy_mean_sd": "57.25 \u00b1 0.66%",
+      "fixed_mh_consensus_mean_sd": "5.11 \u00b1 1.29%",
+      "adaptive_rank_consensus_mean_sd": "5.35 \u00b1 0.20%",
+      "conclusion": "Original parity with conventional full-data LoRA is not met under the tested heterogeneous decentralized protocol."
     }
   },
   "handoff_commit": "775e986",
