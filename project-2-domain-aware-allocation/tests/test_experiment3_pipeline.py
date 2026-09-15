@@ -10,7 +10,9 @@ import random
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
@@ -55,6 +57,7 @@ from experiment3.metrics import (  # noqa: E402
 from experiment3.partitions import (  # noqa: E402
     PartitionValidationError,
     fresh_dirichlet_partition,
+    heldout_domain_indices,
     validate_partition,
 )
 import experiment3.run as exp3_run  # noqa: E402
@@ -768,6 +771,83 @@ class OutputCheckpointSmokeTest(unittest.TestCase):
                     flags.append(str(node.args[0].value))
         self.assertNotIn("--allow-invalid-calibration", flags)
         self.assertNotIn("--allow-synthetic", flags)
+
+
+class CorrectnessRegressionTests(unittest.TestCase):
+    def test_ci_honors_confidence_and_single_pair_uncertainty(self):
+        self.assertEqual(confidence_interval([2.0]), (None, None))
+        for bad in (0, 1, float("nan")):
+            with self.assertRaises(Experiment3StatisticsError):
+                confidence_interval([2.0], confidence=bad)
+        low, high = confidence_interval([1.0, 2.0, 3.0])
+        self.assertAlmostEqual(low, -0.4841377117, places=7)
+        self.assertAlmostEqual(high, 4.4841377117, places=7)
+        wider = confidence_interval([1.0, 2.0, 3.0], confidence=0.99)
+        self.assertLess(wider[0], low)
+        self.assertGreater(wider[1], high)
+
+    def test_heldout_partitions_are_disjoint_complete_and_follow_train_domains(self):
+        train_labels = np.array([0] * 8 + [1] * 8)
+        training = [list(range(8)), list(range(8, 16))]
+        test_labels = np.array([0] * 4 + [1] * 6)
+        partitions = heldout_domain_indices(test_labels, train_labels, training, seed=9)
+        self.assertEqual(partitions, heldout_domain_indices(test_labels, train_labels, training, seed=9))
+        validate_partition(partitions, len(test_labels))
+        self.assertTrue(np.all(test_labels[partitions[0]] == 0))
+        self.assertTrue(np.all(test_labels[partitions[1]] == 1))
+        self.assertEqual(training, [list(range(8)), list(range(8, 16))])
+        with self.assertRaises(PartitionValidationError):
+            heldout_domain_indices([0], train_labels, training, seed=9)
+
+    def test_production_evaluator_never_uses_client_training_loaders(self):
+        runtime = exp3_run.Project2RuntimeOps.__new__(exp3_run.Project2RuntimeOps)
+        runtime.fixed_rank, runtime.device = 2, "cpu"
+        runtime.load_global_state = lambda model, state: None
+        calls = []
+        def evaluate(model, loader, device):
+            calls.append(loader)
+            return 50.0
+        runtime.evaluate_fn = evaluate
+        task = TaskRuntime("TinyTask", {"model_fn": lambda rank: torch.nn.Linear(2, 2),
+                                         "testloader": "global_test"})
+        prepared = PreparedTask("p", ("0", "1"),
+            {"loaders": ["forbidden_train_0", "forbidden_train_1"],
+             "test_loaders": ["heldout_0", "heldout_1"]})
+        runtime.evaluate(task, prepared, arm="baseline", round_id=1, global_state={}, config=None)
+        self.assertEqual(calls, ["global_test", "heldout_0", "heldout_1"])
+
+    def test_resume_reuses_durable_checkpoint_without_cleanup_or_retraining(self):
+        class InterruptedOps(InMemoryExperiment3Ops):
+            def train_client_updates(self, *args, **kwargs):
+                if self.rng_draws:
+                    raise RuntimeError("simulated interruption")
+                return super().train_client_updates(*args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "repo" / "project-2-domain-aware-allocation"
+            outputs = project / "outputs"
+            exp3 = outputs / "exp3"
+            config = Experiment3Config(calibration_bundle_path=FIXTURE, output_dir=exp3,
+                tasks=("TinyTask",), experiment1_run_id="exp1-engineering-fixture",
+                experiment2_run_id="exp2-engineering-fixture", run_seed=3, rounds=2,
+                clients=2, mde=0.1, allowed_tasks=("TinyTask",))
+            with patch.multiple(exp3_run, PROJECT2_ROOT=project, OUTPUT_ROOT=outputs,
+                                EXP1_DIR=outputs / "exp1", EXP2_DIR=outputs / "exp2", OUTPUT_DIR=exp3):
+                with self.assertRaisesRegex(RuntimeError, "simulated interruption"):
+                    exp3_run.run_experiment3(config, runtime_ops=InterruptedOps(), allow_engineering_fixture=True)
+                saved = next((exp3 / "checkpoints").glob("*.json"))
+                before = saved.read_bytes()
+                resumed_ops = InMemoryExperiment3Ops()
+                result = exp3_run.run_experiment3(replace(config, resume=True),
+                    runtime_ops=resumed_ops, allow_engineering_fixture=True)
+                self.assertEqual(result["status"], "complete")
+                self.assertEqual(len(resumed_ops.aggregate_calls), 5)
+                self.assertEqual(saved.read_bytes(), before)
+                again_ops = InMemoryExperiment3Ops()
+                exp3_run.run_experiment3(replace(config, resume=True),
+                    runtime_ops=again_ops, allow_engineering_fixture=True)
+                self.assertEqual(again_ops.aggregate_calls, [])
+                self.assertEqual(result["rank_policy"]["controller"], False)
 
 
 if __name__ == "__main__":

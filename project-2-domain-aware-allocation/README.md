@@ -8,6 +8,9 @@ domain weighting.
 
 Project 1 mathematical formulations, adaptive rank logic, lambda calibration,
 and aggregation code are not redefined here.
+Experiment 1 and the Experiment 3 runtime reuse the historical stateless
+`estimate_optimal_rank` rule. They do not run the later stateful
+`AdaptiveRankController`, its warmup, or its quality-drop recovery.
 
 ## Current Status
 

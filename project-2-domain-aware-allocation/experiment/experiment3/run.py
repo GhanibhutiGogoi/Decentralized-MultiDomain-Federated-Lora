@@ -53,6 +53,7 @@ from experiment3.metrics import (  # noqa: E402
     worst_domain_accuracy,
 )
 from experiment3.seeds import Experiment3Seeds, derive_seeds  # noqa: E402
+from experiment3.partitions import heldout_domain_indices  # noqa: E402
 from experiment3.statistics import (  # noqa: E402
     compare_to_mde,
     confidence_interval,
@@ -82,6 +83,14 @@ DEFAULT_TASKS = (
     "Tabular-MLP",
     "Audio-1DCNN",
 )
+RANK_POLICY = {
+    "implementation": "Project 1 estimate_optimal_rank / stateless rank_equation",
+    "controller": False,
+    "warmup_rounds": 0,
+    "quality_drop_recovery": False,
+    "note": "Historical stateless policy; not the later stateful AdaptiveRankController.",
+}
+DOMAIN_EVALUATION = "held-out test shards allocated using training-derived per-class client proportions"
 
 
 class Experiment3RunnerError(RuntimeError):
@@ -299,6 +308,8 @@ def _config_payload(
         "target_accuracy": config.target_accuracy,
         "mde": config.mde,
         "paired_stochastic_seed_policy": "arm-independent stable hash of run/task/round",
+        "rank_policy": RANK_POLICY,
+        "domain_evaluation": DOMAIN_EVALUATION,
     }
 
 
@@ -439,6 +450,7 @@ def _round_rows(
                 "client_id": update.client_id,
                 "domain": update.domain,
                 "accuracy": accuracy,
+                "evaluation_split": "held_out_test",
             }
         )
         weight_rows.append(
@@ -555,6 +567,7 @@ def _paired_stat_artifacts(final_global: pd.DataFrame, config: Experiment3Config
                 "mean_difference": pooled["mean_difference"],
                 "ci_low": ci_low,
                 "ci_high": ci_high,
+                "ci_method": "Student-t paired mean; undefined with fewer than two pairs",
             }
         )
         task_summary = task_level_summary(paired).copy()
@@ -658,15 +671,20 @@ def run_experiment3(
         calibration_bundle_hash=bundle.content_hash,
         source_commit_sha=bundle.source_commit_sha,
     )
-    output_dir = prepare_output_directory(
-        config.output_dir,
-        overwrite=config.overwrite,
-        experiment_name="Experiment 3",
-        allowed_cleanup_root=OUTPUT_DIR,
-        repository_root=PROJECT2_ROOT.parent,
-        project_root=PROJECT2_ROOT,
-        shared_outputs_root=OUTPUT_ROOT,
-    )
+    if config.resume:
+        output_dir = Path(config.output_dir)
+        if not output_dir.is_dir() or not any((output_dir / "checkpoints").glob("*.json")):
+            raise Experiment3RunnerError("--resume requires an existing Experiment 3 checkpoint directory.")
+    else:
+        output_dir = prepare_output_directory(
+            config.output_dir,
+            overwrite=config.overwrite,
+            experiment_name="Experiment 3",
+            allowed_cleanup_root=OUTPUT_DIR,
+            repository_root=PROJECT2_ROOT.parent,
+            project_root=PROJECT2_ROOT,
+            shared_outputs_root=OUTPUT_ROOT,
+        )
     (output_dir / "checkpoints").mkdir(parents=True, exist_ok=True)
 
     ops = runtime_ops if runtime_ops is not None else create_default_runtime_ops()
@@ -695,6 +713,7 @@ def run_experiment3(
                 "task": task.name,
                 "partition_hash": prepared.partition_hash,
                 "client_ids": list(prepared.client_ids),
+                "heldout_test_indices_by_client": prepared.payload.get("test_indices_by_client"),
             }
         )
 
@@ -717,6 +736,10 @@ def run_experiment3(
                 cp_path = _checkpoint_path(output_dir, task.name, arm, config.run_seed, round_id)
                 if config.resume and cp_path.exists():
                     checkpoint = read_checkpoint(cp_path, expected_identity=identity)
+                    if (checkpoint["partition_hash"] != prepared.partition_hash
+                            or checkpoint["task"] != task.name or checkpoint["arm"] != arm
+                            or checkpoint["round"] != round_id or checkpoint["seed"] != config.run_seed):
+                        raise Experiment3RunnerError("Checkpoint execution unit or partition does not match this run.")
                     data = checkpoint["data"]
                     states[arm] = ops.load_state(output_dir / str(data["state_file"]))
                     observation_rows.extend(data["observation_rows"])
@@ -840,6 +863,8 @@ def run_experiment3(
         "source_experiment1_run_id": bundle.source_experiment1_run_id,
         "source_experiment2_run_id": bundle.source_experiment2_run_id,
         "source_commit_sha": bundle.source_commit_sha,
+        "rank_policy": RANK_POLICY,
+        "domain_evaluation": DOMAIN_EVALUATION,
         "run_config": config_payload,
         "identity": asdict(identity),
         "partitions": partitions,
@@ -993,6 +1018,21 @@ class Project2RuntimeOps:
             self._batch_sizes(config),
             partition_config,
         )
+        from framework.partitioning import extract_labels
+        from torch.utils.data import DataLoader, Subset
+
+        original_testloader = task.payload["testloader"]
+        test_indices = heldout_domain_indices(
+            extract_labels(original_testloader.dataset), metadata["labels"],
+            metadata["indices_by_client"], seed=int(seeds.partition_seed) + 7919,
+        )
+        test_loaders = [DataLoader(
+            Subset(original_testloader.dataset, indices),
+            batch_size=original_testloader.batch_size or 64, shuffle=False,
+            num_workers=config.num_workers, pin_memory=config.pin_memory,
+            collate_fn=original_testloader.collate_fn,
+            generator=self.torch.Generator().manual_seed(int(seeds.dataloader_seed) + 7919 + idx),
+        ) for idx, indices in enumerate(test_indices)]
         label_records, _ = self.label_distribution_records(
             task_name=task.name,
             labels=metadata["labels"],
@@ -1008,6 +1048,7 @@ class Project2RuntimeOps:
             "alpha": float(config.partition_alpha),
             "seed": int(seeds.partition_seed),
             "indices_by_client": metadata["indices_by_client"],
+            "test_indices_by_client": test_indices,
         }
         partition_hash = hashlib.sha256(
             json.dumps(partition_payload, sort_keys=True).encode("utf-8")
@@ -1017,6 +1058,8 @@ class Project2RuntimeOps:
             client_ids=tuple(str(idx) for idx in range(len(loaders))),
             payload={
                 "loaders": loaders,
+                "test_loaders": test_loaders,
+                "test_indices_by_client": test_indices,
                 "label_by_client": {
                     str(record["client_id"]): record for record in label_records
                 },
@@ -1172,7 +1215,7 @@ class Project2RuntimeOps:
         self.load_global_state(model, global_state)
         global_accuracy = self.evaluate_fn(model, task.payload["testloader"], self.device)
         domain_accuracy = {}
-        for client_id, loader in zip(prepared.client_ids, prepared.payload["loaders"]):
+        for client_id, loader in zip(prepared.client_ids, prepared.payload["test_loaders"]):
             domain_accuracy[client_id] = self.evaluate_fn(model, loader, self.device)
         return float(global_accuracy), domain_accuracy
 

@@ -41,6 +41,17 @@ Python, NumPy, PyTorch CPU/CUDA, and per-client DataLoader generator state from
 the same arm-independent seed. Baseline and each supported treatment arm receive
 independent copies of the same initial global model state; only lambda weighting
 differs.
+Rank selection is the historical stateless Project 1 `estimate_optimal_rank`
+rule in every arm. This experiment does not use the later stateful controller,
+two-round warmup, or quality-recovery guard; manifests record that distinction.
+
+For local-domain evaluation, held-out test examples are assigned to clients
+using training-derived per-class client proportions and deterministic
+largest-remainder allocation. The test shards are disjoint and cover the full
+test dataset; their indices enter the partition identity and manifest. These
+are simulated client domains, not external clinical labels. Training loaders
+are never used for reported domain accuracy. An empty held-out client shard
+raises an error rather than producing a fabricated accuracy.
 
 ## Metrics And Statistics
 
@@ -52,6 +63,11 @@ Statistical utilities pair arm-versus-baseline comparisons by task, seed, and
 partition identity. Paired permutation tests use exact sign-flip enumeration for
 small samples and deterministic Monte Carlo with the plus-one convention for
 larger samples. MDE comparison requires an explicit configured MDE.
+Confidence intervals use a Student-t quantile at the requested confidence
+level and assume independent paired differences. With only one pair, variance
+cannot be estimated and both interval bounds are missing. Global accuracy uses
+the complete held-out test loader; domain accuracy and its spread use the
+held-out client shards described above.
 Production CLI runs require `--mde`; no default minimum detectable effect is
 invented by the runner.
 
@@ -70,6 +86,9 @@ Checkpoints are JSON records with schema version, config hash, calibration
 bundle hash, source commit, task, arm, seed, partition, round, client, status,
 and data. Writes use a temporary file, fsync, and atomic replace. Resume rejects
 malformed or incompatible checkpoints.
+`--resume` preserves an existing checkpoint directory and validates each saved
+execution unit and partition before loading. It never invokes overwrite
+cleanup; a fresh run still rejects nonempty output directories.
 
 Future scientific artifacts belong only under `outputs/exp3`. The runner
 validates configuration and calibration before preparing output directories, and
@@ -79,4 +98,3 @@ Experiment 2 outputs are protected from overlap and deletion.
 Engineering smoke validation uses synthetic in-memory data and a private test
 fixture under `tests/fixtures/experiment3`; it is not a scientific run and does
 not produce conclusions.
-

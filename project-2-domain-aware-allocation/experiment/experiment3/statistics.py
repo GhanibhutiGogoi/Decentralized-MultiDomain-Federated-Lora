@@ -9,6 +9,7 @@ from typing import Sequence
 
 import numpy as np
 import pandas as pd
+from scipy.stats import t as student_t
 
 
 class Experiment3StatisticsError(ValueError):
@@ -119,20 +120,23 @@ def confidence_interval(
     values: Sequence[float],
     *,
     confidence: float = 0.95,
-) -> tuple[float, float]:
-    """Normal-approximation confidence interval for paired mean differences."""
+) -> tuple[float | None, float | None]:
+    """Student-t interval for a paired mean; undefined for a single pair.
+
+    The interval assumes independent paired differences. With one pair their
+    sampling variance cannot be estimated, so export missing bounds instead
+    of a zero-width interval that would imply certainty.
+    """
     arr = np.asarray(list(values), dtype=float)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
         raise Experiment3StatisticsError("CI values must be finite and non-empty.")
-    if arr.size == 1:
-        mean = float(arr[0])
-        return mean, mean
     if not 0.0 < confidence < 1.0:
         raise Experiment3StatisticsError("confidence must be between 0 and 1.")
-    # 0.95 is the only planned default; keep other values conservative.
-    z = 1.959963984540054 if abs(confidence - 0.95) < 1e-12 else 2.0
+    if arr.size == 1:
+        return None, None
+    quantile = float(student_t.ppf((1 + confidence) / 2, df=len(arr) - 1))
     mean = float(arr.mean())
-    margin = z * float(arr.std(ddof=1)) / math.sqrt(len(arr))
+    margin = quantile * float(arr.std(ddof=1)) / math.sqrt(len(arr))
     return mean - margin, mean + margin
 
 
@@ -186,4 +190,3 @@ def pooled_summary(paired: pd.DataFrame, *, difference_col: str = "difference") 
         "ci_low": low,
         "ci_high": high,
     }
-

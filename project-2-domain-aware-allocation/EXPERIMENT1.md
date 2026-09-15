@@ -20,6 +20,10 @@ This preserves the existing implementations of adaptive rank selection,
 stable-rank computation, capability constraints, quality score, rank
 projection, quality-weighted aggregation, SVD projection aggregation, training,
 and evaluation.
+The rank selector used here is specifically the stateless
+`estimate_optimal_rank` / `rank_equation` path. The revised stateful controller
+with warmup and quality recovery is a different policy and is not used in these
+recorded measurements.
 
 Dataset loading is Project 2 infrastructure and goes through
 `framework.datasets.DatasetFactory`.
