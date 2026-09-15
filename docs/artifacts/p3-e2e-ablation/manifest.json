@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "run_classification": "full_data_benchmark",
+  "config": {
+    "output": "/home/gogoi/ahlora-runs/e2e-full",
+    "data_dir": "/home/gogoi/ahlora-data",
+    "feature_cache": "/home/gogoi/ahlora-data/features-v2",
+    "methods": [
+      "fedavg",
+      "mh",
+      "adaptive_rank",
+      "weighted",
+      "adaptive_weighted_rank"
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "rounds": 30,
+    "ranks": [
+      4,
+      12,
+      32
+    ],
+    "consensus_rank": 0,
+    "alpha": 16.0,
+    "merge": "delta",
+    "error_feedback": false,
+    "n_domains": 5,
+    "clients_per_domain": 3,
+    "dirichlet_alpha": 0.5,
+    "bridge_every": 5,
+    "topology": "ring",
+    "local_epochs": 1,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 128,
+    "eval_batch_size": 2048,
+    "image_size": 224,
+    "feature_batch_size": 256,
+    "num_workers": 2,
+    "torch_threads": 2,
+    "max_train_per_client": 0,
+    "max_test_per_domain": 0,
+    "device": "cuda",
+    "prepare_only": false
+  },
+  "started_unix": 1789445956.91343,
+  "git": {
+    "commit": "709474e33bdca45e6a2440b3bb7964ae07861308",
+    "working_tree_status": "M .gitignore\n M LoRA_5_datasets.py\n M Project.md\n M docs/research/2026-09-03-project3-convergence-analysis.md\n M paper/main.tex\n M project-1-adaptive-rank/Source/datasets/audio.py\n M project-1-adaptive-rank/Source/datasets/image.py\n M project-1-adaptive-rank/Source/datasets/tabular.py\n M project-1-adaptive-rank/Source/datasets/text.py\n M project-1-adaptive-rank/adaptive_lora_report.md\n M project-1-adaptive-rank/experiment/exp1.py\n M project-1-adaptive-rank/rank_allocation/__init__.py\n M project-1-adaptive-rank/rank_allocation/rank_selector.py\n M project-1-adaptive-rank/tests/test_rank_selector.py\n M project-2-domain-aware-allocation/README.md\n M project-2-domain-aware-allocation/WEEK1-2_GUIDE.md\n M project-2-domain-aware-allocation/requirements.txt\n M project-3-hierarchical-gossip/README.md\n M project-3-hierarchical-gossip/src/federated/hierarchical.py\n M project-3-hierarchical-gossip/src/federated/runner.py\n M project-3-hierarchical-gossip/tests/test_convergence_lemmas.py\n M project-3-hierarchical-gossip/tests/test_hierarchical.py\n M project-3-hierarchical-gossip/tests/test_runner.py\n?? .claude/\n?? README.md\n?? data/\n?? docs/artifacts/\n?? docs/research/2026-09-13-automatic-discovery-adaptive-rank-protocol.md\n?? docs/validation/\n?? paper/.gitignore\n?? paper/README.md\n?? paper/figures/\n?? paper/main.pdf\n?? project-1-adaptive-rank/data/\n?? project-1-adaptive-rank/exp1.py\n?? project-1-adaptive-rank/rank_selector.py\n?? project-2-domain-aware-allocation/EXPERIMENT1.md\n?? project-2-domain-aware-allocation/EXPERIMENT2.md\n?? project-2-domain-aware-allocation/PLAN.md\n?? project-2-domain-aware-allocation/__init__.py\n?? project-2-domain-aware-allocation/domain_weighting.py\n?? project-2-domain-aware-allocation/experiment/\n?? project-2-domain-aware-allocation/fedavg.py\n?? project-2-domain-aware-allocation/framework/\n?? project-2-domain-aware-allocation/lambda_aggregation.py\n?? project-2-domain-aware-allocation/outputs/\n?? project-2-domain-aware-allocation/test_domain_weighting.py\n?? project-2-domain-aware-allocation/tests/\n?? project-2-domain-aware-allocation/weight_benchmark.py\n?? project-3-hierarchical-gossip/EXPERIMENT04.md\n?? project-3-hierarchical-gossip/EXPERIMENT05.md\n?? project-3-hierarchical-gossip/experiments/04_protocol_benchmark.py\n?? project-3-hierarchical-gossip/experiments/05_signature_validation.py\n?? project-3-hierarchical-gossip/experiments/06_online_discovery.py\n?? project-3-hierarchical-gossip/experiments/feature_cache.py\n?? project-3-hierarchical-gossip/experiments/protocol_benchmark.py\n?? project-3-hierarchical-gossip/experiments/run_completion.py\n?? project-3-hierarchical-gossip/experiments/summarize_completion.py\n?? project-3-hierarchical-gossip/requirements-gpu.txt\n?? project-3-hierarchical-gossip/src/clustering/discovery.py\n?? project-3-hierarchical-gossip/src/clustering/signatures.py\n?? project-3-hierarchical-gossip/tests/test_completion_orchestration.py\n?? project-3-hierarchical-gossip/tests/test_completion_summary.py\n?? project-3-hierarchical-gossip/tests/test_discovery.py\n?? project-3-hierarchical-gossip/tests/test_feature_cache.py\n?? project-3-hierarchical-gossip/tests/test_protocol_benchmark.py\n?? project-3-hierarchical-gossip/tests/test_signature_validation.py\n?? project-3-hierarchical-gossip/tests/test_signatures.py"
+  },
+  "source": {
+    "files_sha256": {
+      "experiments/01_fedavg_baseline.py": "b81e20a61be01f7b4187b287443935d7cb5309c1d7c9a9ec18b35a215084262e",
+      "experiments/02_gossip_baseline.py": "586de0b4df94c562c278ccf47606846e55c6da3020a1a2505018215e8bd5ea39",
+      "experiments/03_clustering_validation.py": "8ac711d5fd26f38398c86f6297fa606afb7759ff454494766e78999be9839349",
+      "experiments/04_protocol_benchmark.py": "06e600e298306f165d55208abeb53acc1f9e50d4e136bff182b46bdf91f2b4e3",
+      "experiments/05_signature_validation.py": "cecce000bc419b90ae834cce0daa93b46a88c679f55d99b5899a167fce018de2",
+      "experiments/06_online_discovery.py": "d7ec2ed5613bbdb4b9eefee0bd84bcc0dc74614d06c2a40af371b12708732f96",
+      "experiments/feature_cache.py": "90a849a31cea7e0c9620bf09a631ad5d0ad10dbba5a41398af3756310dd8637b",
+      "experiments/protocol_benchmark.py": "88d08961ea8404cead5ec24aed117263cef58f43b40389b3041d58c7424032ca",
+      "experiments/run_completion.py": "ef17da13a0b79f96558323287185568a6377a6ed1c830b82837e6b0347e69208",
+      "experiments/summarize_completion.py": "06045a56ebbf0b76a53ec5f23465728b28cfd0eab5cfa41260311a7fa07f0c0d",
+      "src/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/clustering/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/clustering/discovery.py": "bb3b75aa67cb1355fc6f422ef8918417b086cc51fb4cb0149c7e75d0607f30d3",
+      "src/clustering/domain_clustering.py": "b86f813be93304765b657a208291dfd1c3fcd378dcd9bd806ef540b10e450fbd",
+      "src/clustering/signatures.py": "c609bedd956baf16f5ed9866950d497022b24bd0288382f6c3bf45545f21805f",
+      "src/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/data/cifar100_domains.py": "b2b7bff51c68f287b8e37b2253e015644b9d01acac1c0384913259af57d44658",
+      "src/federated/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/federated/client.py": "90b13aacb65b70f1d9d1b33e0f759ff0dcdb265d996ac6fe45efa990c411d67d",
+      "src/federated/fedavg.py": "8c93ba865f825b3161ec1046ee66617c77006a9890d3de7240dd3bd78a25f10d",
+      "src/federated/gossip.py": "eea7c000f40c719ef2dcc1da2c427b4300bdfe658bf4edf089c6fd6756cb8e78",
+      "src/federated/hierarchical.py": "627dc4a61056fa5b963370a2115b67a5fa14b8908703bf93c2f6c5a24e593faa",
+      "src/federated/merge.py": "8f0f05aea939d83e27df8f1711c9e603f8244accd04bfa5daee5d8fbaa9d01e3",
+      "src/federated/mixing.py": "642913f9ba59bd7113eafe112d41bcb20fbce8b97c89b500f4b95bfd6b2efb4e",
+      "src/federated/runner.py": "ea698b9148d851c03f943c680e9592e2103fb4d364a19a3e963ddaa9d9af573d",
+      "src/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/models/lora_resnet.py": "a2c51890283268ede0bb0f87b04d953cafa48f683bfec4d6e42771749f676c20",
+      "src/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/utils/metrics.py": "a878b22457aa6dcdf0eb1feb58ffbd700029748040fbfb5fa50844f6cdb3bc96",
+      "src/utils/visualization.py": "dc956b9c8341eaf0088a96b943fd402b865e3ef14ceb0cc7d5db9dfdfc6a170f"
+    },
+    "combined_sha256": "5cdd19771802c1a12df097621c2c0c879ef666a2ee91bd5fba18ef16256bcfd4"
+  },
+  "invocation": {
+    "executable": "/home/gogoi/ahlora-venv/bin/python",
+    "argv": [
+      "experiments/04_protocol_benchmark.py",
+      "--output",
+      "/home/gogoi/ahlora-runs/e2e-full",
+      "--data-dir",
+      "/home/gogoi/ahlora-data",
+      "--feature-cache",
+      "/home/gogoi/ahlora-data/features-v2",
+      "--methods",
+      "fedavg",
+      "mh",
+      "adaptive_rank",
+      "weighted",
+      "adaptive_weighted_rank",
+      "--seeds",
+      "42",
+      "43",
+      "44",
+      "--rounds",
+      "30",
+      "--ranks",
+      "4",
+      "12",
+      "32",
+      "--device",
+      "cuda",
+      "--num-workers",
+      "2",
+      "--torch-threads",
+      "2"
+    ],
+    "cwd": "/home/gogoi/Decentralized-MultiDomain-Federated-Lora/project-3-hierarchical-gossip"
+  },
+  "environment": {
+    "python": "3.10.12",
+    "platform": "Linux-3.10.0-1160.71.1.el7.x86_64-x86_64-with-glibc2.17",
+    "torch": "2.3.0+cu121",
+    "cuda": "12.1",
+    "packages": {
+      "torch": "2.3.0",
+      "torchvision": "0.18.0",
+      "numpy": "1.26.4",
+      "scikit-learn": "1.7.2"
+    },
+    "CUDA_VISIBLE_DEVICES": null,
+    "device": "cuda",
+    "gpu": "Tesla V100S-PCIE-32GB"
+  },
+  "protocol": {
+    "representation": "cached frozen eval-mode ResNet-18 features; no augmentation",
+    "objective": "uniform client mean; FedAvg is client-uniform, not sample-weighted",
+    "head": "shared random frozen 100-class linear base plus trainable LoRA; common initialization per seed",
+    "optimizer": "Adam reset every round for every method, including local; paired client minibatch RNGs",
+    "personalized_accuracy": "arithmetic mean of client adapter accuracy on disjoint client test shards",
+    "personalized_sample_weighted_accuracy": "total correct across client test shards / total samples",
+    "per_domain_accuracy": "sample-weighted accuracy within each domain",
+    "consensus_accuracy": "uniform mean effective adapter, SVD at consensus_rank, on union of test shards",
+    "oracle": "known CIFAR superclass domain labels; no learned discovery or transfer weights",
+    "flat_topology": "seeded permutation of client IDs independent of domain, matrix reordered to client order",
+    "local": "no communication and no SVD reparameterization between local rounds",
+    "communication": "simulated scalar float counts; multiply by 4 for fp32 bytes; excludes setup/evaluation",
+    "operational_transport": "MH factors; FedAvg factors up/dense delta down; hierarchy factors first/dense later",
+    "factor_baseline": "naive zero-padded factor averaging; merge error is not SVD tail mass",
+    "adaptive_rank": "loss-adaptive capacity policy: two-round warmup, then half-ceiling for clients below 95% of the previous round median loss; rank changes preserve effective Delta-W",
+    "domain_weighting": "bounded update-norm factors (blend 0.10, deviation bound 0.15) applied through symmetric Sinkhorn reweighting of the gossip matrix"
+  },
+  "completed_runs": [
+    {
+      "seed": 42,
+      "method": "fedavg",
+      "file": "seed42_fedavg.json"
+    },
+    {
+      "seed": 42,
+      "method": "mh",
+      "file": "seed42_mh.json"
+    },
+    {
+      "seed": 42,
+      "method": "adaptive_rank",
+      "file": "seed42_adaptive_rank.json"
+    },
+    {
+      "seed": 42,
+      "method": "weighted",
+      "file": "seed42_weighted.json"
+    },
+    {
+      "seed": 42,
+      "method": "adaptive_weighted_rank",
+      "file": "seed42_adaptive_weighted_rank.json"
+    },
+    {
+      "seed": 43,
+      "method": "fedavg",
+      "file": "seed43_fedavg.json"
+    },
+    {
+      "seed": 43,
+      "method": "mh",
+      "file": "seed43_mh.json"
+    },
+    {
+      "seed": 43,
+      "method": "adaptive_rank",
+      "file": "seed43_adaptive_rank.json"
+    },
+    {
+      "seed": 43,
+      "method": "weighted",
+      "file": "seed43_weighted.json"
+    },
+    {
+      "seed": 43,
+      "method": "adaptive_weighted_rank",
+      "file": "seed43_adaptive_weighted_rank.json"
+    },
+    {
+      "seed": 44,
+      "method": "fedavg",
+      "file": "seed44_fedavg.json"
+    },
+    {
+      "seed": 44,
+      "method": "mh",
+      "file": "seed44_mh.json"
+    },
+    {
+      "seed": 44,
+      "method": "adaptive_rank",
+      "file": "seed44_adaptive_rank.json"
+    },
+    {
+      "seed": 44,
+      "method": "weighted",
+      "file": "seed44_weighted.json"
+    },
+    {
+      "seed": 44,
+      "method": "adaptive_weighted_rank",
+      "file": "seed44_adaptive_weighted_rank.json"
+    }
+  ],
+  "feature_cache": {
+    "schema_version": 1,
+    "dataset": "CIFAR-100 official train/test split",
+    "representation": "frozen ResNet-18, fc replaced by Identity, eval mode",
+    "weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "weights_url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+    "transform": {
+      "resize": [
+        224,
+        224
+      ],
+      "interpolation": "bilinear",
+      "antialias": true,
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ],
+      "augmentation": "none"
+    },
+    "torch_version": "2.3.0+cu121",
+    "torchvision_version": "0.18.0+cu121",
+    "cache_path": "/home/gogoi/ahlora-data/features-v2/cifar100-resnet18-imagenet1k-v1-resize224-v1",
+    "train": {
+      "n_samples": 50000,
+      "feature_dim": 512,
+      "sha256": "37c88fdb981dccbc117e2c3a0dc0065ab12bc667a18d991c66d312324fff3eb7"
+    },
+    "test": {
+      "n_samples": 10000,
+      "feature_dim": 512,
+      "sha256": "960c63636ce8b68bdc6ef7df9762c61ce9c9b47ba47c3482aba53504242c73f2"
+    },
+    "weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+    "cache_identity_sha256": "eff1ad00e14d86f46fc9d261fdbee194d05ed44678c2262bc975d11bdbe102df",
+    "extraction_wall_seconds": 39.99093856476247
+  },
+  "wall_seconds": 290.6064341068268
+}

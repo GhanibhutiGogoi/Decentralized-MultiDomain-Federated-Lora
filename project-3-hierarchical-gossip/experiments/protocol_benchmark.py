@@ -23,20 +23,59 @@ import torch
 from torch import nn
 
 from experiments.feature_cache import load_features, tensor_digest, write_json
-from src.federated.hierarchical import two_tier_mixing, two_tier_message_cost, window_product
-from src.federated.merge import lora_to_delta
+from src.federated.hierarchical import two_tier_mixing, two_tier_message_cost, window_product, sinkhorn
+from src.federated.merge import lora_to_delta, factorize_delta
 from src.federated.mixing import build_topology, metropolis_hastings, spectral_gap
 from src.federated.runner import DecentralizedRunner
 from src.clustering.discovery import AdaptiveAffinityMixer, OnlineDomainDiscovery
 
 
-METHODS = ("local", "fedavg", "mh", "oracle", "adaptive")
+METHODS = ("local", "fedavg", "mh", "oracle", "adaptive", "weighted", "adaptive_weighted",
+           "adaptive_rank", "adaptive_weighted_rank")
 SUMMARY_FIELDS = ["seed", "method", "merge", "rank_schedule", "error_feedback", "rounds",
                   "personalized_accuracy", "personalized_sample_weighted_accuracy",
                   "consensus_accuracy", "accuracy_gap", "worst_domain_accuracy",
                   "consensus_distance", "total_effective_messages", "total_effective_floats",
                   "total_operational_messages", "total_operational_floats",
                   "wall_seconds", "initial_state_sha256", "split_sha256"]
+
+
+def conservative_factors(values, blend=0.10, bound=0.15):
+    """Bounded, mean-one factors from a per-client signal."""
+    x = np.asarray(values, dtype=float)
+    if x.size == 0 or not np.isfinite(x).all() or x.std() < 1e-12:
+        return np.ones(len(x), dtype=float)
+    z = np.clip((x - x.mean()) / x.std(), -3.0, 3.0)
+    raw = np.exp(np.clip(z, -4.0, 4.0)); raw /= raw.mean()
+    f = 1.0 + blend * (raw - 1.0)
+    # Scale after clipping so the factors preserve the base update scale.
+    lo, hi = 0.0, 2.0
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if np.clip(f * mid, 1-bound, 1+bound).mean() < 1.0: lo = mid
+        else: hi = mid
+    return np.clip(f * ((lo + hi) / 2), 1-bound, 1+bound)
+
+
+class DomainWeightedMixer:
+    """Stateful symmetric DS mixer using update-norm domain evidence."""
+    def __init__(self, base_mixer, n_clients, blend=0.10, bound=0.15, signal_values=None):
+        self.base_mixer, self.n_clients = base_mixer, int(n_clients)
+        self.blend, self.bound, self._factors = float(blend), float(bound), np.ones(n_clients)
+        self.signal_values = None if signal_values is None else np.asarray(signal_values, dtype=float)
+
+    def update(self, states, alpha, client_ids=None):
+        if self.signal_values is None:
+            self.signal_values = np.asarray(
+                [sum(float(torch.linalg.vector_norm(d)) for d in lora_to_delta(s, alpha).values()) for s in states], dtype=float)
+        self._factors = conservative_factors(self.signal_values, self.blend, self.bound)
+        observe = getattr(self.base_mixer, "update", None)
+        if observe is not None: observe(states, alpha=alpha, client_ids=client_ids)
+
+    def __call__(self, round_idx):
+        base = np.asarray(self.base_mixer(round_idx), dtype=float)
+        scale = np.sqrt(np.outer(self._factors, self._factors))
+        return sinkhorn(base * scale)
 
 
 def source_provenance():
@@ -74,20 +113,30 @@ def build_mixing(method, assignments, bridge_every, topology="ring", seed=42, al
         # Client-uniform FedAvg is the centralized counterpart of the uniform
         # client objective preserved by doubly stochastic gossip.
         matrix = np.full((n, n), 1.0 / n)
-    elif method == "mh":
+    elif method in {"mh", "adaptive_rank"}:
         matrix = metropolis_hastings(build_topology(topology_order(assignments, seed), topology), client_ids=ids)
     elif method == "oracle":
         return lambda round_idx: two_tier_mixing(assignments, round_idx,
             bridge_every=bridge_every, client_ids=ids)
-    elif method == "adaptive":
+    elif method in {"adaptive", "adaptive_weighted"}:
         # Label-free stateful mixer. It observes only effective updates and
         # infers the number of groups by silhouette score before emitting a
         # soft Sinkhorn doubly-stochastic matrix on the configured topology.
-        return AdaptiveAffinityMixer(ids, alpha=float(alpha),
+        mixer = AdaptiveAffinityMixer(ids, alpha=float(alpha),
             discovery=OnlineDomainDiscovery(beta=0.8, min_clusters=2, max_clusters=8,
                                             temperature=0.5, self_weight=0.2),
             topology=topology,
             topology_client_ids=topology_order(assignments, seed))
+        return DomainWeightedMixer(mixer, n, blend=0.10, bound=0.15) if method == "adaptive_weighted" else mixer
+    elif method == "weighted":
+        matrix = metropolis_hastings(
+            build_topology(topology_order(assignments, seed), topology), client_ids=ids)
+        mixer = lambda round_idx: matrix
+        return DomainWeightedMixer(mixer, n, blend=0.10, bound=0.15)
+    elif method == "adaptive_weighted_rank":
+        matrix = metropolis_hastings(build_topology(topology_order(assignments, seed), topology), client_ids=ids)
+        mixer = lambda round_idx: matrix
+        return DomainWeightedMixer(mixer, n, blend=0.10, bound=0.15)
     else:
         raise ValueError(f"unknown method {method!r}")
     return lambda round_idx: matrix
@@ -209,6 +258,28 @@ class FeatureClient:
             self.model.lora_A.copy_(state["fc"]["A"])
             self.model.lora_B.copy_(state["fc"]["B"])
 
+    def resize_rank(self, rank):
+        """Change adapter capacity while preserving the represented update."""
+        rank = int(rank)
+        if rank < 1 or rank == self.rank:
+            if rank < 1:
+                raise ValueError("rank must be positive")
+            return
+        old_state = self.get_lora_state()
+        delta = lora_to_delta(old_state, self.alpha)["fc"]
+        factors = factorize_delta(delta, rank, self.alpha, dtype=self.model.lora_A.dtype)
+        base = nn.Linear(self.model.linear.in_features, self.model.linear.out_features).to(self.device)
+        with torch.no_grad():
+            base.weight.copy_(self.model.linear.weight)
+            base.bias.copy_(self.model.linear.bias)
+        from src.models.lora_resnet import LoRALinear
+        replacement = LoRALinear(base, rank, self.alpha).to(self.device)
+        with torch.no_grad():
+            replacement.lora_A.copy_(factors["A"].to(self.device))
+            replacement.lora_B.copy_(factors["B"].to(self.device))
+        self.model = replacement
+        self.rank = rank
+
 
 def make_splits(train_labels, test_labels, config, seed):
     from src.data.cifar100_domains import get_domain_classes, partition_domain_data_dirichlet
@@ -243,6 +314,18 @@ def make_splits(train_labels, test_labels, config, seed):
                            "test_indices": list(map(int, test_part)),
                            "train_class_counts": np.bincount(train_labels[train_part], minlength=100).tolist()}
     return splits, assignments
+
+
+def split_domain_signal(splits):
+    """Compute a label-distribution divergence signal without test labels."""
+    counts = np.asarray([s["train_class_counts"] for _, s in sorted(splits.items())], dtype=float)
+    p = counts / np.maximum(counts.sum(axis=1, keepdims=True), 1.0)
+    q = counts.sum(axis=0); q = q / max(q.sum(), 1.0)
+    m = 0.5 * (p + q[None, :])
+    eps = 1e-12
+    kl_p = np.sum(p * np.log((p + eps) / (m + eps)), axis=1)
+    kl_q = np.sum(q[None, :] * np.log((q[None, :] + eps) / (m + eps)), axis=1)
+    return 0.5 * (kl_p + kl_q)
 
 
 def initial_parameters(feature_dim, max_rank, seed):
@@ -293,7 +376,7 @@ def operational_cost(method, assignments, round_idx, bridge_every, states, diagn
     n = len(states)
     if method == "local":
         return 0, 0, "none"
-    if method in {"mh", "adaptive"}:
+    if method in {"mh", "adaptive", "weighted", "adaptive_weighted", "adaptive_rank", "adaptive_weighted_rank"}:
         return diagnostics["messages"], diagnostics["floats"], "direct neighbor factor payloads"
     sizes = [DecentralizedRunner._factor_floats(state) for state in states]
     dense_size = sum(p["A"].shape[1] * p["B"].shape[0] for p in states[0].values())
@@ -328,8 +411,14 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
     clients = [FeatureClient(cid, assignments[cid], initial, ranks[cid], config, train, test,
                              splits[cid], device) for cid in sorted(assignments)]
     mixer = build_mixing(method, assignments, config.bridge_every, config.topology, seed, alpha=config.alpha)
+    if isinstance(mixer, DomainWeightedMixer):
+        mixer.signal_values = split_domain_signal(splits)
     runner_class = DecentralizedRunner if config.merge == "delta" else FactorRunner
     runner = runner_class(clients, mixer, ranks, config.alpha, config.error_feedback)
+    dynamic_rank = method in {"adaptive_rank", "adaptive_weighted_rank"}
+    current_ranks = dict(ranks)
+    rank_history = []
+    previous_losses = None
     eval_indices = torch.tensor(sorted(index for value in splits.values() for index in value["test_indices"]), device=device)
     consensus_rank = config.consensus_rank or max(ranks.values())
     window = config.bridge_every if method == "oracle" else 1
@@ -350,7 +439,20 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
     write_json(path, record)
     for round_idx in range(config.rounds):
         round_started = time.perf_counter()
+        if dynamic_rank and previous_losses is not None and round_idx >= 2:
+            median_loss = float(np.median(previous_losses))
+            for client in clients:
+                ceiling = ranks[client.client_id]
+                floor = max(1, int(np.ceil(ceiling / 2)))
+                # Conservative controller: reduce only clearly easy clients;
+                # restore the ceiling for clients above the round median.
+                target = floor if previous_losses[client.client_id] < 0.95 * median_loss else ceiling
+                client.resize_rank(target)
+                current_ranks[client.client_id] = target
+            runner.set_target_ranks(current_ranks)
+        rank_history.append(dict(current_ranks))
         training = [client.train() for client in clients]
+        previous_losses = [float(item["loss"]) for item in training]
         states = [client.get_lora_state() for client in clients]
         if method == "local":
             diagnostics = {"messages": 0, "floats": 0, "mean_tail_mass": 0.0,
@@ -372,6 +474,7 @@ def run_one(config, seed, method, train_cpu, test_cpu, feature_metadata, output)
                "operational_transport": transport, "wall_seconds": time.perf_counter() - round_started}
         record["rounds"].append(row)
         record["wall_seconds"] = time.perf_counter() - started
+        record["rank_history"] = rank_history
         write_json(path, record)
         print(f"seed={seed} method={method} round={round_idx + 1}/{config.rounds} "
               f"personalized={metrics['personalized_accuracy']:.4f} "
@@ -441,7 +544,7 @@ def parse_args(argv=None):
         parser.error("seeds must be in [0, 2**32 - 1]")
     if args.error_feedback and args.merge != "delta":
         parser.error("error feedback requires --merge delta")
-    if "adaptive" in args.methods and args.merge != "delta":
+    if any(name in args.methods for name in ("adaptive", "adaptive_weighted", "adaptive_rank", "adaptive_weighted_rank")) and args.merge != "delta":
         parser.error("adaptive discovery requires --merge delta")
     return args
 
@@ -487,7 +590,9 @@ def main(argv=None):
           "local": "no communication and no SVD reparameterization between local rounds",
           "communication": "simulated scalar float counts; multiply by 4 for fp32 bytes; excludes setup/evaluation",
           "operational_transport": "MH factors; FedAvg factors up/dense delta down; hierarchy factors first/dense later",
-          "factor_baseline": "naive zero-padded factor averaging; merge error is not SVD tail mass"},
+          "factor_baseline": "naive zero-padded factor averaging; merge error is not SVD tail mass",
+          "adaptive_rank": "loss-adaptive capacity policy: two-round warmup, then half-ceiling for clients below 95% of the previous round median loss; rank changes preserve effective Delta-W",
+          "domain_weighting": "bounded update-norm factors (blend 0.10, deviation bound 0.15) applied through symmetric Sinkhorn reweighting of the gossip matrix"},
         "completed_runs": []}
     write_json(config.output / "manifest.json", manifest)
     try:

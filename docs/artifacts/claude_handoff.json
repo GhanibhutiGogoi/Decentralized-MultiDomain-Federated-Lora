@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-09-13T16:30:00Z",
+  "updated_at": "2026-09-15T00:00:00Z",
   "status": "complete_implementation_and_evidence_with_negative_research_outcomes",
   "project": {
     "name": "AH-LoRA",
@@ -747,7 +747,6 @@
     }
   ],
   "next_actions": [
-    "Test conservative domain weighting end to end (training accuracy, not ranking metrics) on gpu003.",
     "Run a privacy evaluation (differential privacy, membership inference, reconstruction, or secure aggregation) before any privacy statement.",
     "Keep docs/artifacts/README.md, this handoff, progress.jsonl, the paper and the explainer artifact in step with main.",
     "Optional follow-up: broaden adaptive-rank evaluation across remaining tasks/seeds and run formal privacy attacks or DP experiments."
@@ -757,9 +756,9 @@
     "source": "paper/main.tex",
     "rendered_pdf": "paper/main.pdf",
     "compile": "pdflatex + bibtex + pdflatex + pdflatex",
-    "pages": 12,
-    "scope": "Equations integrated into methodology; capability-matched adaptive-rank parity shown on Fashion-MNIST; domain weighting remains a modest ranking improvement; privacy requires separate DP/attack evaluation.",
-    "last_rendered": "2026-09-13T06:30:00Z"
+    "pages": 14,
+    "scope": "Equations integrated into methodology; capability-matched adaptive-rank parity shown on Fashion-MNIST; composed P3 ablation measured a negative loss-adaptive rank result and no measurable domain-weighting effect; privacy requires separate DP/attack evaluation.",
+    "last_rendered": "2026-09-15"
   },
   "validation": {
     "p3_discovery_targeted_remote": "30 passed",
@@ -784,7 +783,19 @@
       "No privacy guarantee has been demonstrated.",
       "Low-rank adapters and decentralized exchange alone do not establish privacy.",
       "Privacy claims require separate differential-privacy, membership-inference, reconstruction, or secure-aggregation experiments; none has been run."
-    ]
+    ],
+    "protocol_composition_note": "The composed P3 ablation is now complete: the tested loss-adaptive rank policy trails fixed MH, while bounded domain weighting has no measurable effect. Isolated parity or ranking gains therefore do not imply end-to-end improvement.",
+    "end_to_end_ablation": {
+      "artifact": "docs/artifacts/p3-e2e-ablation/",
+      "protocol": "CIFAR-100 cached features; heterogeneous (4,12,32); 30 rounds; seeds 42/43/44; identical splits, initialization, topology, optimizer and delta-W merge",
+      "results_mean_sample_sd": {
+        "fixed_mh_personalized_accuracy": "24.16 \u00b1 1.04%",
+        "adaptive_rank_personalized_accuracy": "20.30 \u00b1 2.51%",
+        "weighted_mh_personalized_accuracy": "24.16 \u00b1 1.04%",
+        "adaptive_weighted_rank_personalized_accuracy": "20.30 \u00b1 2.51%"
+      },
+      "interpretation": "Tested loss-adaptive rank policy is negative by 3.85 percentage points while saving 20.5% effective floats; bounded domain weighting has no measurable effect in this run."
+    }
   },
   "handoff_commit": "775e986",
   "completion_statement": "All requested implementation components, experiments, tests, artifacts, PR reviews, merges, and paper updates are complete. Results that do not meet the original performance or privacy objective are recorded as negative findings."

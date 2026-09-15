@@ -114,6 +114,17 @@ class DecentralizedRunner:
             )
         return w
 
+    def set_target_ranks(self, target_ranks):
+        """Update receiver ranks for a dynamic-capacity experiment."""
+        missing = [cid for cid in self.client_ids if cid not in target_ranks]
+        if missing:
+            raise ValueError(f"target_ranks missing entries for clients {missing}")
+        for cid in self.client_ids:
+            rank = int(target_ranks[cid])
+            if rank < 1:
+                raise ValueError(f"target rank for client {cid!r} must be >= 1")
+        self.target_ranks = {cid: int(target_ranks[cid]) for cid in self.client_ids}
+
     @staticmethod
     def _factor_floats(state):
         """Floats needed to transmit a lora state: sum over layers of r (d_in + d_out)."""

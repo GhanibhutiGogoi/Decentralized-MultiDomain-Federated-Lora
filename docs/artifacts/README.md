@@ -98,6 +98,22 @@ Stated once, so that no summary drifts past the evidence:
 - **No privacy guarantee has been demonstrated.** Low-rank adapters and decentralized exchange alone do not establish privacy. Any privacy claim requires separate differential-privacy, membership-inference, reconstruction, or secure-aggregation experiments, none of which has been run.
 - The decentralized benchmark results (oracle hierarchy 68.98 ± 0.95% personalized at uniform rank 16 versus 42.30 ± 1.39% flat gossip and 23.20 ± 0.29% centralized FedAvg) are three-seed finite-run measurements under one frozen-feature protocol, with the hierarchy receiving true domain labels. The online-discovery result is coordinator-visible, not neighborhood-local.
 
+### Why isolated gains do not transfer to the full pipeline
+
+The component studies and the P3 decentralized benchmark are different experiments. In P3, each round applies
+
+`ΔW_{i,t+1} = C_{r_{i,t}}(Σ_j W_{ij,t} ΔW^{local}_{j,t})`,
+
+where `W_t` is the gossip matrix and `C_r` is local rank truncation. The current P3 runner uses fixed rank 16 (or the fixed `4/12/32` cycle); it does not invoke the Project 1 adaptive controller. The one-task Fashion-MNIST parity result therefore cannot be read as an adaptive-rank P3 result.
+
+The model conventions differ as well: Project 1/P2 Experiment 1 use the unscaled LoRA update `B_i A_i`, while P3 uses `(α/r_i) B_i A_i` and undoes that scaling during SVD refactorization. Both aggregation paths match their own forward pass; this audit found no missing-scale error in either path. The parameterization and resulting local optimization still differ across studies.
+
+Project 2 evaluates a leave-one-client-out target, `y_i = Δaccuracy_{-i}`, using normalized contribution weights `n_i q_i λ_i`. Its modest Spearman and pairwise improvements are model-free ranking metrics over 75 rows. The current P2 Experiment 1/P3 training path does not pass the conservative `λ_i` factors into the decentralized aggregation loop, so those factors cannot change P3 accuracy. Even after integration, a better scalar contribution ranking is not equivalent to improving the vector of personalized client objectives or the separate consensus objective.
+
+For an end-to-end claim, all factors must be matched: data split, seed, rounds, rank budget, initialization, graph, aggregation operator, and evaluation target. A controlled P3 ablation is now complete. On heterogeneous `(4,12,32)` ranks over 30 rounds and three seeds, the tested loss-adaptive rank policy reached 20.30 ± 2.51% personalized accuracy versus 24.16 ± 1.04% for fixed MH; bounded domain reweighting produced no measurable change. This negative result is specific to the tested policy and protocol.
+
+The [`protocol_composition_audit.json`](protocol_composition_audit.json) artifact records the source hashes and code-location evidence. The composed run is in [`p3-e2e-ablation/`](p3-e2e-ablation/).
+
 ## Validation and the required test machine
 
 The adaptive-rank and domain-weighting regression tests pass on gpu003: **27 passed**. Earlier remote counts on the same host: Project 3 full suite 378 passed, Project 2 127 passed with 46 subtests (PR #42), adaptive-rank controller suite 20 passed, discovery/runner/protocol suite 30 passed.
