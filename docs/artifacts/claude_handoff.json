@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "updated_at": "2026-09-15T07:36:46.908554+00:00",
+  "updated_at": "2026-09-15T07:41:06.332617+00:00",
   "status": "corrected_experiment_complete_accuracy_objective_not_met",
   "project": {
     "name": "AH-LoRA",
@@ -802,6 +802,13 @@
       "merge_commit": "7ce944e23f08583cd393394dead1efb0c4847f2e",
       "validation": "gpu003:196tests +46subtests passed",
       "changes": "resume, held-out domain metrics, Student-t intervals, stateless rank-policy labeling"
+    },
+    {
+      "number": 45,
+      "status": "merged",
+      "merge_commit": "04f0d1370a013493a46db6ed61f93444774f76b6",
+      "url": "https://github.com/GhanibhutiGogoi/Decentralized-MultiDomain-Federated-Lora/pull/45",
+      "description": "Corrected27-run integrated experiment, independent validation, paper and evidence"
     }
   ],
   "next_actions": [
@@ -873,5 +880,14 @@
     "artifact": "docs/artifacts/integrated-corrected/",
     "uncertainty": "sample standard deviation across paired seeds (ddof=1), not a confidence interval"
   },
-  "completion_statement": "The corrected nine-arm, three-seed experiment is complete and validated. Its accuracy-preservation objective is not achieved. This scoped implementation result does not claim production multi-host deployment, neighborhood-local discovery, or privacy protection."
+  "completion_statement": "The corrected nine-arm, three-seed experiment is complete and validated. Its accuracy-preservation objective is not achieved. This scoped implementation result does not claim production multi-host deployment, neighborhood-local discovery, or privacy protection.",
+  "merged_delivery": {
+    "branch": "main",
+    "research_merge_commit": "04f0d1370a013493a46db6ed61f93444774f76b6",
+    "prs": [
+      44,
+      45
+    ],
+    "scope": "Completed scoped experiment; accuracy-preservation unsuccessful; no privacy guarantee"
+  }
 }
