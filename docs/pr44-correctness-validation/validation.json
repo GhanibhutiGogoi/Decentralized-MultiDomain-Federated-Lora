@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "date": "2026-09-15",
+  "reviewed_pr": 44,
+  "reviewed_head": "478a9a21038845d9445885cf1e96225d01bbfa90",
+  "execution": {
+    "host": "gpu003",
+    "python": "3.10.12",
+    "checkout": "/home/gogoi/pr44-validation",
+    "scope": "Engineering regression tests only; no new scientific Experiment 3 run"
+  },
+  "focused_suite": {
+    "command": "PYTHONPATH=/home/gogoi/pystubs /home/gogoi/ahlora-venv/bin/python -m pytest tests/test_experiment3_pipeline.py -q",
+    "passed": 29
+  },
+  "full_suite": {
+    "command": "PYTHONPATH=/home/gogoi/pystubs /home/gogoi/ahlora-venv/bin/python -m pytest tests -q",
+    "passed": 196,
+    "subtests_passed": 46,
+    "failures": 0
+  },
+  "verified_source_sha256": {
+    "experiment/experiment3/run.py": "a8c532e87ecdfd09609c2eccbddaecf009acd545bbe5a9360f73f56725ff6abb",
+    "experiment/experiment3/partitions.py": "bd22bab14a513ecc645709e53416aa2dcaf2e8f2ae4defb92a5e73ec437753a8",
+    "experiment/experiment3/statistics.py": "abab8c9b9c2031b4698663cc4c74dc93152a5d7072d99b7e1d716d28979cbd96",
+    "tests/test_experiment3_pipeline.py": "3b453afe27f2cffb351b9466368d32e8a845bd88de0ddc2ee84198c407e377e1"
+  },
+  "fixes": [
+    "Resume preserves existing checkpoints and checks execution unit/partition before loading.",
+    "Domain evaluation uses complete disjoint held-out test shards allocated by training-derived per-class client proportions.",
+    "Confidence intervals use the requested Student-t quantile; single-pair variance yields missing bounds.",
+    "Manifests and documentation identify the historical stateless rank policy rather than the later stateful controller."
+  ],
+  "scientific_status": "Existing unsupported A/B/C calibrations remain negative; no supported treatment bundle or scientific Experiment 3 result is invented."
+}

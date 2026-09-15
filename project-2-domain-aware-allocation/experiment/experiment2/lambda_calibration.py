@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -50,6 +51,10 @@ class LinearFit:
     target_mean: float
     target_std: float
     ridge_alpha: float | None = None
+    methodology_label: str = ""
+    feature_transformation: str = "global_population_zscore"
+    target_transformation: str = "global_population_zscore_delta_accuracy"
+    exploratory_status: str = ""
 
 
 def prepare_measurements(df: pd.DataFrame) -> pd.DataFrame:
@@ -176,7 +181,17 @@ def ridge_alpha_grid(
 ) -> list[float]:
     """Return the Ridge alpha grid without changing the default search."""
     if custom_alphas is not None:
-        alphas = [float(alpha) for alpha in custom_alphas]
+        alphas = []
+        for idx, alpha in enumerate(custom_alphas):
+            if isinstance(alpha, bool):
+                raise ValueError(f"Ridge alpha at index {idx} must be numeric.")
+            try:
+                parsed = float(alpha)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Ridge alpha at index {idx} must be numeric.") from exc
+            if not math.isfinite(parsed):
+                raise ValueError(f"Ridge alpha at index {idx} must be finite.")
+            alphas.append(parsed)
         if include_extended:
             alphas.extend(EXTENDED_RIDGE_ALPHAS)
     else:
@@ -255,20 +270,53 @@ def _clip_renormalize_to_mean_one(
 
 
 def _lambda_from_score(df: pd.DataFrame, score: np.ndarray, scale: float):
-    work = df[GROUP_COLS].reset_index(drop=True).copy()
-    work["score"] = score
-    centered = work["score"] - work.groupby(GROUP_COLS)["score"].transform("mean")
-    raw = np.exp(scale * centered.clip(lower=-20.0, upper=20.0))
+    return lambda_weights_from_scores(df[GROUP_COLS], score, scale)
+
+
+def lambda_weights_from_scores(
+    groups: pd.DataFrame,
+    score: Iterable[float],
+    scale: float,
+    *,
+    group_cols: list[str] | None = None,
+    lower: float = LAMBDA_MIN,
+    upper: float = LAMBDA_MAX,
+) -> np.ndarray:
+    """Convert calibrated scores to bounded mean-one lambda weights.
+
+    This is the single implementation used during Experiment 2 calibration and
+    Experiment 3 application.
+    """
+    group_cols = GROUP_COLS if group_cols is None else list(group_cols)
+    if not isinstance(groups, pd.DataFrame):
+        raise ValueError("groups must be a pandas DataFrame.")
+    missing = [column for column in group_cols if column not in groups.columns]
+    if missing:
+        raise ValueError(f"Lambda groups are missing columns: {missing}.")
+    if not np.isfinite(float(scale)):
+        raise ValueError("Lambda scale must be finite.")
+    work = groups[group_cols].reset_index(drop=True).copy()
+    score_array = np.asarray(list(score), dtype=float)
+    if len(work) != len(score_array):
+        raise ValueError("Lambda groups and scores must have equal length.")
+    if score_array.size == 0:
+        raise ValueError("Lambda scores must be non-empty.")
+    if not np.all(np.isfinite(score_array)):
+        raise ValueError("Lambda scores must be finite.")
+    work["score"] = score_array
+    centered = work["score"] - work.groupby(group_cols)["score"].transform("mean")
+    raw = np.exp(float(scale) * centered.clip(lower=-20.0, upper=20.0))
     work["lambda_raw"] = raw
     lam = np.empty(len(work), dtype=float)
     raw_values = work["lambda_raw"].to_numpy(dtype=float)
-    for _, indices in work.groupby(GROUP_COLS).groups.items():
+    for _, indices in work.groupby(group_cols).groups.items():
         group_positions = np.asarray(indices, dtype=int)
         lam[group_positions] = _clip_renormalize_to_mean_one(
-            raw_values[group_positions]
+            raw_values[group_positions],
+            lower=lower,
+            upper=upper,
         )
     return lam
-
 
 def _coefficient_of_variation(values: Iterable[float]) -> float:
     arr = np.asarray(list(values), dtype=float)
@@ -345,17 +393,31 @@ def attach_lambda_values(
         "class_imbalance_ratio",
     ]
     for fit in fits:
-        score = predict_standardized_score(df, fit)
+        if fit.form == "form_c":
+            from experiment2.form_c import predict_form_c_score, transform_form_c_context
+
+            transformed = transform_form_c_context(df, include_target=True)
+            score = predict_form_c_score(df, fit)
+            pred = score
+            relative_target = transformed.frame[transformed.target_column].to_numpy(
+                dtype=float
+            )
+        else:
+            score = predict_standardized_score(df, fit)
+            pred = predict_delta_accuracy(df, fit)
+            relative_target = np.full(len(df), np.nan)
         gamma = lambda_calibrations[fit.form]["gamma"]
         lam = _lambda_from_score(df, score, gamma)
-        pred = predict_delta_accuracy(df, fit)
         part = df[base_cols].copy()
         part["form"] = fit.form
+        part["methodology_label"] = fit.methodology_label
+        part["exploratory_status"] = fit.exploratory_status
         part["gamma"] = gamma
         part["target_lambda_cv"] = lambda_calibrations[fit.form]["target_cv"]
         part["achieved_lambda_cv"] = lambda_calibrations[fit.form]["achieved_cv"]
         part["raw_lambda_score"] = score
         part["predicted_delta_accuracy"] = pred
+        part["relative_contribution_target"] = relative_target
         part["lambda_weight"] = lam
         part["effective_quality_score"] = part["quality_score"] * part["lambda_weight"]
         rows.append(part)
@@ -374,6 +436,10 @@ def coefficient_table(fits: list[LinearFit]) -> pd.DataFrame:
                 "ridge_alpha": fit.ridge_alpha,
                 "feature_mean": "",
                 "feature_std": "",
+                "methodology_label": fit.methodology_label,
+                "feature_transformation": fit.feature_transformation,
+                "target_transformation": fit.target_transformation,
+                "exploratory_status": fit.exploratory_status,
             }
         )
         for feature, coef in zip(fit.features, fit.coefficients):
@@ -386,6 +452,10 @@ def coefficient_table(fits: list[LinearFit]) -> pd.DataFrame:
                     "ridge_alpha": fit.ridge_alpha,
                     "feature_mean": fit.feature_means[feature],
                     "feature_std": fit.feature_stds[feature],
+                    "methodology_label": fit.methodology_label,
+                    "feature_transformation": fit.feature_transformation,
+                    "target_transformation": fit.target_transformation,
+                    "exploratory_status": fit.exploratory_status,
                 }
             )
     return pd.DataFrame(rows)

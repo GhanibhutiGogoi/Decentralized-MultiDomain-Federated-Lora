@@ -90,3 +90,21 @@ def test_invalid_scaling_is_rejected(alpha):
         decompose_delta_w({"fc": torch.eye(3)}, target_rank=2, alpha=alpha)
     with pytest.raises(ValueError, match="alpha"):
         merge_lora_to_delta_w({}, alpha=alpha)
+
+
+def test_nonfinite_lora_factors_and_deltas_are_rejected():
+    bad_a = torch.ones(2, 3)
+    bad_a[0, 0] = torch.inf
+    with pytest.raises(ValueError, match="finite"):
+        merge_lora_to_delta_w({"fc": {"A": bad_a, "B": torch.ones(4, 2)}})
+
+    bad_delta = torch.eye(3)
+    bad_delta[0, 0] = torch.nan
+    with pytest.raises(ValueError, match="finite"):
+        decompose_delta_w({"fc": bad_delta}, target_rank=2)
+
+
+def test_decompose_preserves_float64_dtype():
+    state = decompose_delta_w({"fc": torch.eye(3, dtype=torch.float64)}, target_rank=2)
+    assert state["fc"]["A"].dtype == torch.float64
+    assert state["fc"]["B"].dtype == torch.float64
