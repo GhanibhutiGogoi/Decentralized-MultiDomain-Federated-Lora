@@ -1,0 +1,119 @@
+{
+  "recorded_utc": "2026-09-17T09:55:47.322003+00:00",
+  "status": "in_progress",
+  "scientific_conclusion": "none; one seed and incomplete training budgets; complete-checkpoint audits pending",
+  "campaign_progress": {
+    "training_rounds_remaining": 704,
+    "verified_jobs": 0,
+    "planned_jobs": 36,
+    "estimated_remaining_hours": 20.62223221972585,
+    "eta_scope": "Approximate training-only work / four GPUs; excludes verifier/report/startup delays and variable future round cost"
+  },
+  "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+  "runs": [
+    {
+      "run": "full-v1-quantity-declora16-seed42",
+      "partition": "quantity",
+      "arm": "declora16",
+      "seed": 42,
+      "round": 4,
+      "planned_rounds": 20,
+      "current_validation_accuracy": 93.80733944954129,
+      "current_correct": 818,
+      "n_validation": 872,
+      "best_so_far_validation_accuracy": 93.80733944954129,
+      "ranks": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "cumulative_training_bytes": 378595600,
+      "checkpoint_audit_status": "pending until completed run"
+    },
+    {
+      "run": "full-v1-quantity-adaptive_sample-seed42",
+      "partition": "quantity",
+      "arm": "adaptive_sample",
+      "seed": 42,
+      "round": 4,
+      "planned_rounds": 20,
+      "current_validation_accuracy": 93.69266055045871,
+      "current_correct": 817,
+      "n_validation": 872,
+      "best_so_far_validation_accuracy": 93.69266055045871,
+      "ranks": [
+        2,
+        6,
+        2,
+        2,
+        6,
+        16,
+        2,
+        8,
+        12,
+        12
+      ],
+      "cumulative_training_bytes": 287758320,
+      "checkpoint_audit_status": "pending until completed run"
+    },
+    {
+      "run": "full-v1-quantity-fixed_sample-seed42",
+      "partition": "quantity",
+      "arm": "fixed_sample",
+      "seed": 42,
+      "round": 4,
+      "planned_rounds": 20,
+      "current_validation_accuracy": 94.03669724770643,
+      "current_correct": 820,
+      "n_validation": 872,
+      "best_so_far_validation_accuracy": 94.03669724770643,
+      "ranks": [
+        4,
+        8,
+        4,
+        4,
+        8,
+        16,
+        4,
+        8,
+        16,
+        16
+      ],
+      "cumulative_training_bytes": 293656944,
+      "checkpoint_audit_status": "pending until completed run"
+    },
+    {
+      "run": "full-v1-equal-declora16-seed42",
+      "partition": "equal",
+      "arm": "declora16",
+      "seed": 42,
+      "round": 4,
+      "planned_rounds": 20,
+      "current_validation_accuracy": 93.11926605504587,
+      "current_correct": 812,
+      "n_validation": 872,
+      "best_so_far_validation_accuracy": 93.11926605504587,
+      "ranks": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "cumulative_training_bytes": 378595600,
+      "checkpoint_audit_status": "pending until completed run"
+    }
+  ]
+}
