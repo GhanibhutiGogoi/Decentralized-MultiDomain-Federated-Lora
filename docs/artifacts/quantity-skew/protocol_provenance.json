@@ -1,0 +1,10 @@
+{
+  "protocol_launch_commit": "8ae7c2e",
+  "protocol_sha256": "07114fb02a7b57c5def94d0e4543f005c2f7241cb1fb7a61a47d157b6cfb08a0",
+  "source_manifest_sha256": "a248d00cfdb426b07c9abbcba4424252fdd61d227bf06000ed85df907344607a",
+  "source_fingerprint": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+  "recorded_utc": "2026-09-17T09:41:30.550711+00:00",
+  "reporting_clarification_commit": "df41a94",
+  "clarifications": "Modeled count setup; excluded base/initial/topology provisioning; classifier is nonlinear. No training-source changes.",
+  "full_runs_use_protocol": "20rounds,211localsteps,batch32,5seeds42-46; equal-size anchor1localepoch"
+}

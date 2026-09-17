@@ -1,0 +1,12 @@
+{
+  "status": "finished",
+  "started_at": "2026-09-17T09:50:01.755461+00:00",
+  "worker_pid": 158058,
+  "spec_sha256": "747fe4bf02c8ddcc69a87614e485cd4f63ffc15031f825271cd6c77a40982f43",
+  "job_id": "validation-only",
+  "phase": "test",
+  "child_pid": 158059,
+  "child_start_ticks": "691973140",
+  "returncode": 7,
+  "ended_at": "2026-09-17T09:50:01.790130+00:00"
+}

@@ -1,0 +1,11 @@
+Update the project artifact using the new quantity-skew experiment, while preserving the earlier negative disjoint-domain findings.
+
+Read `docs/research/2026-09-17-quantity-skew-protocol.md`, the paper-baseline shortlist, this folder's latest campaign/status and summary files, and the source-pinned per-run artifacts. Treat raw verification/status records as authoritative. Do not turn an incomplete run or smoke score into a scientific result.
+
+Explain the new question: one task, disjoint client shards of unequal sizes but almost identical class proportions, independent hardware-rank capacities, neighbor-only training, and sample-count-weighted global adapter assembly. Name the competitor precisely: an independent reconstruction of published Dec-LoRA on RoBERTa-base/SST-2, with missing author implementation details explicitly assumed. Explain that sample weighting and effective-product aggregation are existing ideas; any contribution is the measured behavior of their combination with adaptive ranks and decentralized training.
+
+Show the seven matched arms, fixed work budget, rank trajectories, accuracy versus rounds/bytes, classifier and probe costs, sample sizes and topology, paired seed differences and uncertainty. Separate the equal-size paper anchor from the unequal-size extension. Use the paper's best validation accuracy as primary and final accuracy as secondary, and label official GLUE validation as validation. Do not call an insignificant difference parity or compare a changed protocol directly to the paper's printed score.
+
+Use mathematical expressions already defined in the protocol/paper. Keep terminology consistent: adaptive rank, static sample-size weighting, factor gossip, effective-update gossip, and final assembly. There are no different topic domains in the new main study. Report the implementation as a single-process peer-transport simulation, not a multi-machine or privacy-proven system.
+
+State the actual outcome, whether positive, negative or still running. Preserve failed attempts and resource limitations. The historical29-page paper is complete for the previous diagnostic study; new full-budget results require their own clearly identified update before being presented as part of that paper.

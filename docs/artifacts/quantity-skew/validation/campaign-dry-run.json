@@ -1,0 +1,475 @@
+{
+  "status": "dry_run_passed",
+  "writes": false,
+  "launches": false,
+  "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+  "occupied_gpus": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "screen_only": false,
+  "jobs": [
+    {
+      "id": "full-v1-quantity-declora16-seed42",
+      "seed": 42,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed42",
+      "local_steps": 211,
+      "state": {
+        "status": "training",
+        "phase": "train",
+        "kind": "adopted",
+        "gpu": 0,
+        "pid": 130134,
+        "start_ticks": "691822615",
+        "adopted_at": "2026-09-17T09:48:08.982504+00:00",
+        "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed42",
+      "seed": 42,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed42",
+      "local_steps": 211,
+      "state": {
+        "status": "training",
+        "phase": "train",
+        "kind": "adopted",
+        "gpu": 1,
+        "pid": 130135,
+        "start_ticks": "691822615",
+        "adopted_at": "2026-09-17T09:48:08.984019+00:00",
+        "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed42",
+      "seed": 42,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed42",
+      "local_steps": 211,
+      "state": {
+        "status": "training",
+        "phase": "train",
+        "kind": "adopted",
+        "gpu": 2,
+        "pid": 130136,
+        "start_ticks": "691822615",
+        "adopted_at": "2026-09-17T09:48:08.985502+00:00",
+        "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed42",
+      "seed": 42,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed42",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed42",
+      "seed": 42,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed42",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed42",
+      "seed": 42,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed42",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed42",
+      "seed": 42,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed42",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-equal-declora16-seed42",
+      "seed": 42,
+      "arm": "declora16",
+      "partition": "equal",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-equal-declora16-seed42",
+      "local_steps": 0,
+      "state": {
+        "status": "training",
+        "phase": "train",
+        "kind": "adopted",
+        "gpu": 3,
+        "pid": 131614,
+        "start_ticks": "691825968",
+        "adopted_at": "2026-09-17T09:48:08.987150+00:00",
+        "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed43",
+      "seed": 43,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed43",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed43",
+      "seed": 43,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed43",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed43",
+      "seed": 43,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed43",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed43",
+      "seed": 43,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed43",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed43",
+      "seed": 43,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed43",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed43",
+      "seed": 43,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed43",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed43",
+      "seed": 43,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed43",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed44",
+      "seed": 44,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed44",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed44",
+      "seed": 44,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed44",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed44",
+      "seed": 44,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed44",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed44",
+      "seed": 44,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed44",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed44",
+      "seed": 44,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed44",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed44",
+      "seed": 44,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed44",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed44",
+      "seed": 44,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed44",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed45",
+      "seed": 45,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed45",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed45",
+      "seed": 45,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed45",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed45",
+      "seed": 45,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed45",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed45",
+      "seed": 45,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed45",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed45",
+      "seed": 45,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed45",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed45",
+      "seed": 45,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed45",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed45",
+      "seed": 45,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed45",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed46",
+      "seed": 46,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed46",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed46",
+      "seed": 46,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed46",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed46",
+      "seed": 46,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed46",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed46",
+      "seed": 46,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed46",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed46",
+      "seed": 46,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed46",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed46",
+      "seed": 46,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed46",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed46",
+      "seed": 46,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed46",
+      "local_steps": 211,
+      "state": {
+        "status": "pending"
+      }
+    }
+  ]
+}
