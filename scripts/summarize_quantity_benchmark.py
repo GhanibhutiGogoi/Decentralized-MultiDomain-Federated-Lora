@@ -612,7 +612,7 @@ def markdown(summary):
                   f"{config['task'].upper()} · {config['partition']} · {context['classification']}; {config['rounds']} rounds, batch {config['batch_size']}, local steps {config.get('local_steps', 0)}, local epochs {config.get('local_epochs', 1)}. Total local updates {context['total_training_steps']:,}; training-example exposures {context['total_training_examples']:,}. Source `{context['source_sha256']}`.", "",
                   "A full configured budget means all training data are available and at least 20 rounds run; it does not imply an exact reproduction of the publication's budget. Rank-16 reference arms exceed weaker clients' rank caps. The assembly root stores routed adapter records; neither routing nor raw-data locality establishes privacy.", "",
                   f"Primary metric: best validation {context['primary_metric']} (%). Mean ± sample SD across seeds; n=1 has no estimated between-seed uncertainty.", "",
-                  "| Method | Seeds | Best primary | Final primary | Training GB | Best + final checkpoint audits |",
+                  "| Method | Seeds | Best primary | Final (secondary) | Training GB | Best + final checkpoint audits |",
                   "|---|---:|---:|---:|---:|---:|"]
         for row in group["aggregate"]:
             lines.append(f"| {row['label']} | {row['best_primary']['n']} | {formatted(row['best_primary'])} | {formatted(row['final_primary'])} | {row['training_bytes']['mean']/1e9:.3f} | {len(row['best_and_final_checkpoint_verified_seeds'])}/{row['best_primary']['n']} |")
