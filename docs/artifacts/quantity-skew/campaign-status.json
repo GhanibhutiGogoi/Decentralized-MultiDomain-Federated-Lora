@@ -2,7 +2,7 @@
   "schema_version": 1,
   "status": "running",
   "created_at": "2026-09-17T09:49:04.121838+00:00",
-  "updated_at": "2026-09-17T09:55:45.965867+00:00",
+  "updated_at": "2026-09-17T10:19:10.941186+00:00",
   "host": "gpu003",
   "base": "/home/gogoi/ahlora-quantity-20260917",
   "python_path": "/home/gogoi/ahlora-venv/bin/python",
@@ -470,7 +470,7 @@
       "start_ticks": "691822615",
       "adopted_at": "2026-09-17T09:49:04.379714+00:00",
       "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
-      "rounds_recorded": 4
+      "rounds_recorded": 7
     },
     "full-v1-quantity-adaptive_sample-seed42": {
       "status": "training",
@@ -481,7 +481,7 @@
       "start_ticks": "691822615",
       "adopted_at": "2026-09-17T09:49:04.383161+00:00",
       "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
-      "rounds_recorded": 4
+      "rounds_recorded": 7
     },
     "full-v1-quantity-fixed_sample-seed42": {
       "status": "training",
@@ -492,7 +492,7 @@
       "start_ticks": "691822615",
       "adopted_at": "2026-09-17T09:49:04.385763+00:00",
       "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
-      "rounds_recorded": 4
+      "rounds_recorded": 7
     },
     "full-v1-quantity-declora4-seed42": {
       "status": "pending"
@@ -515,7 +515,7 @@
       "start_ticks": "691825968",
       "adopted_at": "2026-09-17T09:49:04.388600+00:00",
       "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
-      "rounds_recorded": 4
+      "rounds_recorded": 7
     },
     "full-v1-quantity-declora16-seed43": {
       "status": "pending"
@@ -606,10 +606,10 @@
   "scheduler_pid": 157019,
   "screen_only": false,
   "progress": {
-    "training_rounds_remaining": 704,
+    "training_rounds_remaining": 692,
     "verified_jobs": 0,
     "planned_jobs": 36,
-    "estimated_remaining_hours": 20.62223221972585,
+    "estimated_remaining_hours": 20.28804170574721,
     "eta_scope": "Approximate training-only work / four GPUs; excludes verifier/report/startup delays and variable future round cost"
   }
 }

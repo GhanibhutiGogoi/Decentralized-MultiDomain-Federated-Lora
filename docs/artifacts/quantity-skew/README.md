@@ -11,6 +11,20 @@ The prospective protocol and all reconstruction assumptions are in [the protocol
 - Smoke results establish execution and auditability only. They do not establish scientific efficacy, equivalence or a win over Dec-LoRA.
 - Full-data comparison: running under the prospective protocol in a durable four-GPU queue. The fixed plan is 36 runs: seven quantity arms across five seeds plus one equal-size paper-setting anchor. Completed full-budget, replicated results must replace this status before any scientific success claim.
 
+### Latest recorded pilot: 2026-09-17, 18:18 Shanghai
+
+The three started quantity-split methods have completed7 of20 rounds for seed42. The registered primary endpoint is best validation accuracy over the full budget; these best-so-far values are provisional.
+
+| Method | Best validation accuracy so far | Latest round accuracy |
+|---|---:|---:|
+| Dec-LoRA reimplementation, rank16 | 94.38% | 93.69% |
+| Adaptive ranks, sample-size weights | 94.04% | 94.04% |
+| Fixed heterogeneous ranks, sample-size weights | 94.27% | 94.04% |
+
+Adaptive currently trails the baseline's best-so-far endpoint by0.34 percentage points; its latest-round lead is not a primary-endpoint win. Its mean training rank is5.4 versus the fixed-cap mean8.8, a38.6% reduction in persistent adapter rank. That is not a38.6% reduction in total memory or compute: the backbone, classifier and capability-rank probes remain. No full run or final full-run checkpoint audit has completed, so superiority and parity conclusions are pending. The separate equal-size anchor is not included in this comparison table.
+
+The exact snapshot is in [`pilot-progress.json`](pilot-progress.json). Work is now delivered directly to `main`, as requested; no new PR is required.
+
 [`campaign-status.json`](campaign-status.json) and [`campaign-events.jsonl`](campaign-events.jsonl) are dated repository snapshots, not a live service. The authoritative live records are `~/ahlora-quantity-20260917/campaign-full-v1/` on gpu003. The initial scheduler estimate was about21 remaining training hours, excluding verification/report overhead. Four existing runs were adopted without restarting or changing their source. Remote lifecycle checks verified successful and failed worker exit receipts, duplicate-worker rejection, and the single-scheduler lock.
 
 The scheduler automatically verifies each completed run, stops new launches on execution/verification/report errors, and generates CPU-only tables and plots in `~/ahlora-quantity-20260917/campaign-summary/`. It launches the remaining seed42 controls first; seeds43–46 start only after all eight screen runs pass verification. There is no accuracy threshold for continuing: negative outcomes are retained and replicated. Source, interpreter, packages, and analysis code are pinned. Final results still require research review and paper integration.
