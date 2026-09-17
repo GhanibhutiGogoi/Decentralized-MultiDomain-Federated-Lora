@@ -1,0 +1,2431 @@
+{
+  "schema_version": 1,
+  "analysis_host": "gpu003",
+  "analysis_script_sha256": "6a8eb959e12b4325aa71a6e506fcb16ec2c831d0a41b48d15e6121f0fa78a002",
+  "n_complete": 7,
+  "n_incomplete": 4,
+  "n_invalid": 0,
+  "metric_scope": "official labeled validation; best SST-2 accuracy primary, final secondary; no hidden test",
+  "uncertainty_scope": "sample SD and unadjusted seed-paired Student-t 95% intervals only for n>=2; exploratory, no equivalence or superiority certification",
+  "groups": [
+    {
+      "id": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "n_runs": 7,
+      "seeds": [
+        42
+      ],
+      "aggregate": [
+        {
+          "arm": "adaptive_sample",
+          "label": "Adaptive ranks, sample weights",
+          "best_primary": {
+            "n": 1,
+            "mean": 52.522935779816514,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 52.522935779816514
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary": {
+            "n": 1,
+            "mean": 52.522935779816514,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 52.522935779816514
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "training_bytes": {
+            "n": 1,
+            "mean": 285988852.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 285988852.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "production_bytes": {
+            "n": 1,
+            "mean": 367139150.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 367139150.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "best_and_final_checkpoint_verified_seeds": [
+            42
+          ],
+          "final_checkpoint_verified_seeds": [
+            42
+          ]
+        },
+        {
+          "arm": "adaptive_uniform",
+          "label": "Adaptive ranks, uniform weights",
+          "best_primary": {
+            "n": 1,
+            "mean": 68.80733944954129,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 68.80733944954129
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary": {
+            "n": 1,
+            "mean": 68.80733944954129,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 68.80733944954129
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "training_bytes": {
+            "n": 1,
+            "mean": 285988816.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 285988816.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "production_bytes": {
+            "n": 1,
+            "mean": 367138974.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 367138974.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "best_and_final_checkpoint_verified_seeds": [
+            42
+          ],
+          "final_checkpoint_verified_seeds": [
+            42
+          ]
+        },
+        {
+          "arm": "declora16",
+          "label": "Dec-LoRA reimplementation, rank 16",
+          "best_primary": {
+            "n": 1,
+            "mean": 68.0045871559633,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 68.0045871559633
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary": {
+            "n": 1,
+            "mean": 68.0045871559633,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 68.0045871559633
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "training_bytes": {
+            "n": 1,
+            "mean": 378595600.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 378595600.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "production_bytes": {
+            "n": 1,
+            "mean": 496906494.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 496906494.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "best_and_final_checkpoint_verified_seeds": [
+            42
+          ],
+          "final_checkpoint_verified_seeds": [
+            42
+          ]
+        },
+        {
+          "arm": "declora4",
+          "label": "Dec-LoRA reimplementation, rank 4",
+          "best_primary": {
+            "n": 1,
+            "mean": 69.03669724770643,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 69.03669724770643
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary": {
+            "n": 1,
+            "mean": 69.03669724770643,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 69.03669724770643
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "training_bytes": {
+            "n": 1,
+            "mean": 237032080.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 237032080.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "production_bytes": {
+            "n": 1,
+            "mean": 311104374.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 311104374.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "best_and_final_checkpoint_verified_seeds": [
+            42
+          ],
+          "final_checkpoint_verified_seeds": [
+            42
+          ]
+        },
+        {
+          "arm": "fixed_sample",
+          "label": "Fixed heterogeneous ranks, sample weights",
+          "best_primary": {
+            "n": 1,
+            "mean": 53.096330275229356,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 53.096330275229356
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary": {
+            "n": 1,
+            "mean": 53.096330275229356,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 53.096330275229356
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "training_bytes": {
+            "n": 1,
+            "mean": 293656948.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 293656948.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "production_bytes": {
+            "n": 1,
+            "mean": 384244958.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 384244958.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "best_and_final_checkpoint_verified_seeds": [
+            42
+          ],
+          "final_checkpoint_verified_seeds": [
+            42
+          ]
+        },
+        {
+          "arm": "fixed_uniform",
+          "label": "Fixed heterogeneous ranks, uniform weights",
+          "best_primary": {
+            "n": 1,
+            "mean": 70.29816513761467,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 70.29816513761467
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary": {
+            "n": 1,
+            "mean": 70.29816513761467,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 70.29816513761467
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "training_bytes": {
+            "n": 1,
+            "mean": 293656912.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 293656912.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "production_bytes": {
+            "n": 1,
+            "mean": 384244782.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 384244782.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "best_and_final_checkpoint_verified_seeds": [
+            42
+          ],
+          "final_checkpoint_verified_seeds": [
+            42
+          ]
+        },
+        {
+          "arm": "product16_sample",
+          "label": "Effective products, rank 16, sample weights",
+          "best_primary": {
+            "n": 1,
+            "mean": 52.178899082568805,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 52.178899082568805
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary": {
+            "n": 1,
+            "mean": 52.178899082568805,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 52.178899082568805
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "training_bytes": {
+            "n": 1,
+            "mean": 378595636.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 378595636.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "production_bytes": {
+            "n": 1,
+            "mean": 496906670.0,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 496906670.0
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "best_and_final_checkpoint_verified_seeds": [
+            42
+          ],
+          "final_checkpoint_verified_seeds": [
+            42
+          ]
+        }
+      ],
+      "paired_effects": {
+        "primary_adaptive_sample_minus_declora16": {
+          "coefficients": {
+            "adaptive_sample": 1,
+            "declora16": -1
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "declora16": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -15.481651376146793,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -15.481651376146793
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -15.481651376146793,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -15.481651376146793
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "adaptive_sample_minus_feasible_declora4": {
+          "coefficients": {
+            "adaptive_sample": 1,
+            "declora4": -1
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "declora4": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -16.513761467889914,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -16.513761467889914
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -16.513761467889914,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -16.513761467889914
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "adaptive_sample_minus_product16_sample": {
+          "coefficients": {
+            "adaptive_sample": 1,
+            "product16_sample": -1
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "product16_sample": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": 0.34403669724770936,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 0.34403669724770936
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": 0.34403669724770936,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 0.34403669724770936
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "adaptation_at_uniform_weights": {
+          "coefficients": {
+            "adaptive_uniform": 1,
+            "fixed_uniform": -1
+          },
+          "available_seeds": {
+            "adaptive_uniform": [
+              42
+            ],
+            "fixed_uniform": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -1.490825688073386,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -1.490825688073386
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -1.490825688073386,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -1.490825688073386
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "adaptation_at_sample_weights": {
+          "coefficients": {
+            "adaptive_sample": 1,
+            "fixed_sample": -1
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "fixed_sample": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -0.5733944954128418,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -0.5733944954128418
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -0.5733944954128418,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -0.5733944954128418
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "sample_weighting_at_fixed_ranks": {
+          "coefficients": {
+            "fixed_sample": 1,
+            "fixed_uniform": -1
+          },
+          "available_seeds": {
+            "fixed_sample": [
+              42
+            ],
+            "fixed_uniform": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -17.20183486238532,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -17.20183486238532
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -17.20183486238532,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -17.20183486238532
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "sample_weighting_at_adaptive_ranks": {
+          "coefficients": {
+            "adaptive_sample": 1,
+            "adaptive_uniform": -1
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "adaptive_uniform": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -16.284403669724774,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -16.284403669724774
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -16.284403669724774,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -16.284403669724774
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "adaptation_main_effect": {
+          "coefficients": {
+            "adaptive_sample": 0.5,
+            "fixed_sample": -0.5,
+            "adaptive_uniform": 0.5,
+            "fixed_uniform": -0.5
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "fixed_sample": [
+              42
+            ],
+            "adaptive_uniform": [
+              42
+            ],
+            "fixed_uniform": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -1.0321100917431139,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -1.0321100917431139
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -1.0321100917431139,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -1.0321100917431139
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "sample_weighting_main_effect": {
+          "coefficients": {
+            "adaptive_sample": 0.5,
+            "adaptive_uniform": -0.5,
+            "fixed_sample": 0.5,
+            "fixed_uniform": -0.5
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "adaptive_uniform": [
+              42
+            ],
+            "fixed_sample": [
+              42
+            ],
+            "fixed_uniform": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": -16.743119266055047,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -16.743119266055047
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": -16.743119266055047,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": -16.743119266055047
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        },
+        "adaptation_by_weighting_interaction": {
+          "coefficients": {
+            "adaptive_sample": 1,
+            "adaptive_uniform": -1,
+            "fixed_sample": -1,
+            "fixed_uniform": 1
+          },
+          "available_seeds": {
+            "adaptive_sample": [
+              42
+            ],
+            "adaptive_uniform": [
+              42
+            ],
+            "fixed_sample": [
+              42
+            ],
+            "fixed_uniform": [
+              42
+            ]
+          },
+          "matched_seeds": [
+            42
+          ],
+          "pairing_failures": [],
+          "best_primary_pp": {
+            "n": 1,
+            "mean": 0.9174311926605441,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 0.9174311926605441
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "final_primary_pp": {
+            "n": 1,
+            "mean": 0.9174311926605441,
+            "sample_sd": null,
+            "ci95": null,
+            "per_seed": {
+              "42": 0.9174311926605441
+            },
+            "interpretation": "single-seed exploratory observation; no estimated between-seed uncertainty"
+          },
+          "status": "paired_exploratory_estimate"
+        }
+      },
+      "figures": [
+        "figures/6923a7f12dc89d05_accuracy.pdf",
+        "figures/6923a7f12dc89d05_accuracy.png",
+        "figures/6923a7f12dc89d05_ranks_adaptive_sample.pdf",
+        "figures/6923a7f12dc89d05_ranks_adaptive_sample.png",
+        "figures/6923a7f12dc89d05_ranks_adaptive_uniform.pdf",
+        "figures/6923a7f12dc89d05_ranks_adaptive_uniform.png",
+        "figures/6923a7f12dc89d05_ranks_declora16.pdf",
+        "figures/6923a7f12dc89d05_ranks_declora16.png",
+        "figures/6923a7f12dc89d05_ranks_declora4.pdf",
+        "figures/6923a7f12dc89d05_ranks_declora4.png",
+        "figures/6923a7f12dc89d05_ranks_fixed_sample.pdf",
+        "figures/6923a7f12dc89d05_ranks_fixed_sample.png",
+        "figures/6923a7f12dc89d05_ranks_fixed_uniform.pdf",
+        "figures/6923a7f12dc89d05_ranks_fixed_uniform.png",
+        "figures/6923a7f12dc89d05_ranks_product16_sample.pdf",
+        "figures/6923a7f12dc89d05_ranks_product16_sample.png"
+      ],
+      "interpretation": "exploratory validation comparison; no hidden test, parity test, or direct comparison to printed paper scores"
+    }
+  ],
+  "runs": [
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-equal-declora16-seed42",
+      "arm": "declora16",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "equal",
+      "status": "incomplete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-equal-declora16-seed42",
+        "arm": "declora16",
+        "task": "sst2",
+        "partition": "equal",
+        "seed": 42,
+        "rounds": 20,
+        "local_epochs": 1,
+        "local_steps": 0,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 0,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [
+        "Training is incomplete; excluded from aggregate estimates and paired effects."
+      ],
+      "classification": "full_configured_budget",
+      "track": "equal_size_paper_setting_anchor",
+      "primary_metric": "accuracy",
+      "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+      "n_train": 67349,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 2110,
+      "total_examples": 67349,
+      "training_bytes": 94648900,
+      "evaluation_assembly_bytes": 118310574,
+      "split_sha256": "38561e7895751952a982c5ab9ba0a8b5e1e8222749e2287c8c3960d357845e75",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "missing",
+        "verified_endpoints": [],
+        "scope": "No independent audit or legacy fresh-process checkpoint record found."
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed42",
+      "arm": "adaptive_sample",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "incomplete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed42",
+        "arm": "adaptive_sample",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 20,
+        "local_epochs": 1,
+        "local_steps": 211,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 0,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [
+        "Training is incomplete; excluded from aggregate estimates and paired effects."
+      ],
+      "classification": "full_configured_budget",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+      "n_train": 67349,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 2110,
+      "total_examples": 67520,
+      "training_bytes": 73414236,
+      "evaluation_assembly_bytes": 90587950,
+      "split_sha256": "2ed6d053bda628b79e7cd87161183aa80fca526e2072fdd9c41b450047ba198c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "missing",
+        "verified_endpoints": [],
+        "scope": "No independent audit or legacy fresh-process checkpoint record found."
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed42",
+      "arm": "declora16",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "incomplete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed42",
+        "arm": "declora16",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 20,
+        "local_epochs": 1,
+        "local_steps": 211,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 0,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [
+        "Training is incomplete; excluded from aggregate estimates and paired effects."
+      ],
+      "classification": "full_configured_budget",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+      "n_train": 67349,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 2110,
+      "total_examples": 67520,
+      "training_bytes": 94648900,
+      "evaluation_assembly_bytes": 118310574,
+      "split_sha256": "2ed6d053bda628b79e7cd87161183aa80fca526e2072fdd9c41b450047ba198c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "missing",
+        "verified_endpoints": [],
+        "scope": "No independent audit or legacy fresh-process checkpoint record found."
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed42",
+      "arm": "fixed_sample",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "incomplete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed42",
+        "arm": "fixed_sample",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 20,
+        "local_epochs": 1,
+        "local_steps": 211,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 0,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [
+        "Training is incomplete; excluded from aggregate estimates and paired effects."
+      ],
+      "classification": "full_configured_budget",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+      "n_train": 67349,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 2110,
+      "total_examples": 67520,
+      "training_bytes": 73414236,
+      "evaluation_assembly_bytes": 90587950,
+      "split_sha256": "2ed6d053bda628b79e7cd87161183aa80fca526e2072fdd9c41b450047ba198c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "missing",
+        "verified_endpoints": [],
+        "scope": "No independent audit or legacy fresh-process checkpoint record found."
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-adaptive_sample",
+      "arm": "adaptive_sample",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "complete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-adaptive_sample",
+        "arm": "adaptive_sample",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 4,
+        "local_epochs": 1,
+        "local_steps": 2,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 640,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [],
+      "classification": "smoke",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+      "n_train": 640,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 80,
+      "total_examples": 2560,
+      "training_bytes": 285988852,
+      "evaluation_assembly_bytes": 352913048,
+      "split_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "passed",
+        "kind": "standalone_independent_evaluator",
+        "verified_endpoints": [
+          "best",
+          "final"
+        ],
+        "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-adaptive_sample/independent_checkpoint_audit.json",
+        "audit_sha256": "b78748e2f52c324346fd3f0b0bf84989ae997880d7248aeabd22a98e8387b56d",
+        "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+        "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+        "checkpoint_sha256": {
+          "best": "8560ffc43991eada157cccf5e4789e672f10e903094c2219c4a59d572bc7b19b",
+          "final": "97ae1c1b518b173d6d0db73367f4b3b1dc913461ad67a921cbae34eec9b3d94a"
+        },
+        "scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+        "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+        "evidence_binding": "Best/final hashes, rounds, metrics and exact raw prediction matches agree with this source-pinned run; local checkpoint files are not required when the audit remains available."
+      },
+      "checkpoint_files_present": {
+        "best": true,
+        "final": true
+      },
+      "comparison_group": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "pair_identity": {
+        "partition_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+        "label_sha256": "82aee841f4ae9caad88b46984fccaf74761f10364fc4ebdd89074937b4879b38",
+        "data_indices": {
+          "train": "2eb15a70bd86f2a71265c4c082db097b1baf613578fa2829b8b16e93094b521f",
+          "validation": "0f69fb2244d96d009a62fe740582122699d319ad43841c1d535f9f33fed97801"
+        },
+        "validation_labels_sha256": "34d089528031b4f5e18bae015cc45e1e46a869fb70d8bb204b4af6822e55f385",
+        "neighbors": {
+          "0": [
+            1,
+            9
+          ],
+          "1": [
+            0,
+            2
+          ],
+          "2": [
+            1,
+            3
+          ],
+          "3": [
+            2,
+            4
+          ],
+          "4": [
+            3,
+            5
+          ],
+          "5": [
+            4,
+            6
+          ],
+          "6": [
+            5,
+            7
+          ],
+          "7": [
+            6,
+            8
+          ],
+          "8": [
+            7,
+            9
+          ],
+          "9": [
+            0,
+            8
+          ]
+        },
+        "capacity": [
+          4,
+          8,
+          4,
+          4,
+          8,
+          16,
+          4,
+          8,
+          16,
+          16
+        ],
+        "deployment_root": 5,
+        "quantity_assignment_seed": 20042,
+        "capacity_assignment_seed": 30042,
+        "local_sample_stream_sha256": "332baa577c19a44e395d1fdbb9ea5b9c27d92db14f0cab31c1d9df03e456fe7a"
+      },
+      "pair_identity_sha256": "57ee260d57fb82565191096592c143d757b0d3817b88bc3b00a3d376e502fd40",
+      "best_primary": 52.522935779816514,
+      "final_primary": 52.522935779816514,
+      "best_round": 4,
+      "best_accuracy": 52.522935779816514,
+      "final_accuracy": 52.522935779816514,
+      "best_f1": 68.15384615384616,
+      "final_f1": 68.15384615384616,
+      "production_bytes": 367139150,
+      "total_probe_examples": 2464,
+      "elapsed_seconds": 46.89804649166763,
+      "capacity_scope": "training ranks within declared heterogeneous caps",
+      "input_artifacts_sha256": {
+        "config.json": "40eee8084ffe7356749073c4f1d6ac05aa9c4bf60ef78bd207bf5f7a55375dfc",
+        "environment.json": "b6a401b2bdf3c9e5140ee9e2726f0f9836ecde434f9da48b4a715ce68f8d473e",
+        "split.json": "4e658f5f6cd66609d8cb18ee00de96e29ab9a96f84a5b89bc61860e36b6ce842",
+        "graph.json": "a18de065b4cb4c6aaacf63c8e60cf0ddeb77945f39e6e4a2559e774a02494de5",
+        "rounds.jsonl": "15edaa71e40398c4a8aa28f9b3f21a49cf669a180ae472b4e83acbcc98763b2c",
+        "summary.json": "1c0020b9854b8b3fd1c9353c7f3cc5c271cb681a0cbf9fd3856e4b254f726da0",
+        "source_manifest.json": "77b5b4f018f195cb7d28babcd77a4c2551083edbd3f4ed914f1219f65286ced7"
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-adaptive_uniform",
+      "arm": "adaptive_uniform",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "complete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-adaptive_uniform",
+        "arm": "adaptive_uniform",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 4,
+        "local_epochs": 1,
+        "local_steps": 2,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 640,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [],
+      "classification": "smoke",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+      "n_train": 640,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 80,
+      "total_examples": 2560,
+      "training_bytes": 285988816,
+      "evaluation_assembly_bytes": 352912488,
+      "split_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "passed",
+        "kind": "standalone_independent_evaluator",
+        "verified_endpoints": [
+          "best",
+          "final"
+        ],
+        "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-adaptive_uniform/independent_checkpoint_audit.json",
+        "audit_sha256": "d59d170a403162ae26eeebac0762b0901b4c156db5cf209d7e28d6ee4582aaa1",
+        "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+        "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+        "checkpoint_sha256": {
+          "best": "778e20ece5d0476ae1cb9c7448a1fb7688594070f6b613c6bb08373983d3aabd",
+          "final": "443334f5184ab558e0ff4d8c6ba33c5ed926595b80083e999da5b7355ddff680"
+        },
+        "scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+        "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+        "evidence_binding": "Best/final hashes, rounds, metrics and exact raw prediction matches agree with this source-pinned run; local checkpoint files are not required when the audit remains available."
+      },
+      "checkpoint_files_present": {
+        "best": true,
+        "final": true
+      },
+      "comparison_group": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "pair_identity": {
+        "partition_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+        "label_sha256": "82aee841f4ae9caad88b46984fccaf74761f10364fc4ebdd89074937b4879b38",
+        "data_indices": {
+          "train": "2eb15a70bd86f2a71265c4c082db097b1baf613578fa2829b8b16e93094b521f",
+          "validation": "0f69fb2244d96d009a62fe740582122699d319ad43841c1d535f9f33fed97801"
+        },
+        "validation_labels_sha256": "34d089528031b4f5e18bae015cc45e1e46a869fb70d8bb204b4af6822e55f385",
+        "neighbors": {
+          "0": [
+            1,
+            9
+          ],
+          "1": [
+            0,
+            2
+          ],
+          "2": [
+            1,
+            3
+          ],
+          "3": [
+            2,
+            4
+          ],
+          "4": [
+            3,
+            5
+          ],
+          "5": [
+            4,
+            6
+          ],
+          "6": [
+            5,
+            7
+          ],
+          "7": [
+            6,
+            8
+          ],
+          "8": [
+            7,
+            9
+          ],
+          "9": [
+            0,
+            8
+          ]
+        },
+        "capacity": [
+          4,
+          8,
+          4,
+          4,
+          8,
+          16,
+          4,
+          8,
+          16,
+          16
+        ],
+        "deployment_root": 5,
+        "quantity_assignment_seed": 20042,
+        "capacity_assignment_seed": 30042,
+        "local_sample_stream_sha256": "332baa577c19a44e395d1fdbb9ea5b9c27d92db14f0cab31c1d9df03e456fe7a"
+      },
+      "pair_identity_sha256": "57ee260d57fb82565191096592c143d757b0d3817b88bc3b00a3d376e502fd40",
+      "best_primary": 68.80733944954129,
+      "final_primary": 68.80733944954129,
+      "best_round": 4,
+      "best_accuracy": 68.80733944954129,
+      "final_accuracy": 68.80733944954129,
+      "best_f1": 56.962025316455694,
+      "final_f1": 56.962025316455694,
+      "production_bytes": 367138974,
+      "total_probe_examples": 2464,
+      "elapsed_seconds": 44.392648136243224,
+      "capacity_scope": "training ranks within declared heterogeneous caps",
+      "input_artifacts_sha256": {
+        "config.json": "8d8068bfa768d74f478ba55287eda838658b139c588344ad783338970f1baed4",
+        "environment.json": "b6a401b2bdf3c9e5140ee9e2726f0f9836ecde434f9da48b4a715ce68f8d473e",
+        "split.json": "4e658f5f6cd66609d8cb18ee00de96e29ab9a96f84a5b89bc61860e36b6ce842",
+        "graph.json": "2d5cef7664050a93b81680e098dd608df0311cb2a8fa6bb1df160b1168c0aa39",
+        "rounds.jsonl": "dc39d31b302faf626b019ca3b3069ba123a48ca63a373a57b6c78c710032fb0f",
+        "summary.json": "52371eabe5ac9fe0c46c8c34be1f7855ecf0051e7eab6c8ab70caa5e629b0bd6",
+        "source_manifest.json": "77b5b4f018f195cb7d28babcd77a4c2551083edbd3f4ed914f1219f65286ced7"
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-declora16",
+      "arm": "declora16",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "complete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-declora16",
+        "arm": "declora16",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 4,
+        "local_epochs": 1,
+        "local_steps": 2,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 640,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [],
+      "classification": "smoke",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+      "n_train": 640,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 80,
+      "total_examples": 2560,
+      "training_bytes": 378595600,
+      "evaluation_assembly_bytes": 473242296,
+      "split_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "passed",
+        "kind": "standalone_independent_evaluator",
+        "verified_endpoints": [
+          "best",
+          "final"
+        ],
+        "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-declora16/independent_checkpoint_audit.json",
+        "audit_sha256": "1ed16cdb50f2b1dfa569ffd143401e7924b98ba8b5f1e4c29274fb1b1f5137fb",
+        "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+        "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+        "checkpoint_sha256": {
+          "best": "df331713c32381e66a4b4ecc497769dd8e20c467d1384cb43dbd90ef667deb17",
+          "final": "128d510f22cf7fbed782595e60b25d79de56c99ffb42fd230b0959a771afdbc5"
+        },
+        "scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+        "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+        "evidence_binding": "Best/final hashes, rounds, metrics and exact raw prediction matches agree with this source-pinned run; local checkpoint files are not required when the audit remains available."
+      },
+      "checkpoint_files_present": {
+        "best": true,
+        "final": true
+      },
+      "comparison_group": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "pair_identity": {
+        "partition_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+        "label_sha256": "82aee841f4ae9caad88b46984fccaf74761f10364fc4ebdd89074937b4879b38",
+        "data_indices": {
+          "train": "2eb15a70bd86f2a71265c4c082db097b1baf613578fa2829b8b16e93094b521f",
+          "validation": "0f69fb2244d96d009a62fe740582122699d319ad43841c1d535f9f33fed97801"
+        },
+        "validation_labels_sha256": "34d089528031b4f5e18bae015cc45e1e46a869fb70d8bb204b4af6822e55f385",
+        "neighbors": {
+          "0": [
+            1,
+            9
+          ],
+          "1": [
+            0,
+            2
+          ],
+          "2": [
+            1,
+            3
+          ],
+          "3": [
+            2,
+            4
+          ],
+          "4": [
+            3,
+            5
+          ],
+          "5": [
+            4,
+            6
+          ],
+          "6": [
+            5,
+            7
+          ],
+          "7": [
+            6,
+            8
+          ],
+          "8": [
+            7,
+            9
+          ],
+          "9": [
+            0,
+            8
+          ]
+        },
+        "capacity": [
+          4,
+          8,
+          4,
+          4,
+          8,
+          16,
+          4,
+          8,
+          16,
+          16
+        ],
+        "deployment_root": 5,
+        "quantity_assignment_seed": 20042,
+        "capacity_assignment_seed": 30042,
+        "local_sample_stream_sha256": "332baa577c19a44e395d1fdbb9ea5b9c27d92db14f0cab31c1d9df03e456fe7a"
+      },
+      "pair_identity_sha256": "57ee260d57fb82565191096592c143d757b0d3817b88bc3b00a3d376e502fd40",
+      "best_primary": 68.0045871559633,
+      "final_primary": 68.0045871559633,
+      "best_round": 4,
+      "best_accuracy": 68.0045871559633,
+      "final_accuracy": 68.0045871559633,
+      "best_f1": 55.072463768115945,
+      "final_f1": 55.072463768115945,
+      "production_bytes": 496906494,
+      "total_probe_examples": 0,
+      "elapsed_seconds": 31.502009017392993,
+      "capacity_scope": "uniform-rank reference exceeds some declared client caps",
+      "input_artifacts_sha256": {
+        "config.json": "c99f8597a4d4c4e55371b2c638616c95ea723b39045c4c94116798ac67248c0c",
+        "environment.json": "b6a401b2bdf3c9e5140ee9e2726f0f9836ecde434f9da48b4a715ce68f8d473e",
+        "split.json": "4e658f5f6cd66609d8cb18ee00de96e29ab9a96f84a5b89bc61860e36b6ce842",
+        "graph.json": "2d5cef7664050a93b81680e098dd608df0311cb2a8fa6bb1df160b1168c0aa39",
+        "rounds.jsonl": "4ea1e4640991a2d5de9084baba0786a6b8a0a4c47f6535e32bcbf8f08082d583",
+        "summary.json": "21284f0f75678070af4dc055bebe60ac200b8e83e50279f40b6b837966eecf23",
+        "source_manifest.json": "77b5b4f018f195cb7d28babcd77a4c2551083edbd3f4ed914f1219f65286ced7"
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-declora4",
+      "arm": "declora4",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "complete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-declora4",
+        "arm": "declora4",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 4,
+        "local_epochs": 1,
+        "local_steps": 2,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 640,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [],
+      "classification": "smoke",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+      "n_train": 640,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 80,
+      "total_examples": 2560,
+      "training_bytes": 237032080,
+      "evaluation_assembly_bytes": 296287896,
+      "split_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "passed",
+        "kind": "standalone_independent_evaluator",
+        "verified_endpoints": [
+          "best",
+          "final"
+        ],
+        "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-declora4/independent_checkpoint_audit.json",
+        "audit_sha256": "fb633d0257338e1385f69d8a616bf30ecb27a19d2d5fbddc17cd5cae44f6907b",
+        "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+        "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+        "checkpoint_sha256": {
+          "best": "bedfade8cf4c0cc19d1813c10d6e59adb4ee7f18dc048d1eb6fe463d6f5b9966",
+          "final": "7ac63e83110934e996d5f4577d31bbcc739f172c821eb033993e7d0f31b70114"
+        },
+        "scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+        "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+        "evidence_binding": "Best/final hashes, rounds, metrics and exact raw prediction matches agree with this source-pinned run; local checkpoint files are not required when the audit remains available."
+      },
+      "checkpoint_files_present": {
+        "best": true,
+        "final": true
+      },
+      "comparison_group": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "pair_identity": {
+        "partition_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+        "label_sha256": "82aee841f4ae9caad88b46984fccaf74761f10364fc4ebdd89074937b4879b38",
+        "data_indices": {
+          "train": "2eb15a70bd86f2a71265c4c082db097b1baf613578fa2829b8b16e93094b521f",
+          "validation": "0f69fb2244d96d009a62fe740582122699d319ad43841c1d535f9f33fed97801"
+        },
+        "validation_labels_sha256": "34d089528031b4f5e18bae015cc45e1e46a869fb70d8bb204b4af6822e55f385",
+        "neighbors": {
+          "0": [
+            1,
+            9
+          ],
+          "1": [
+            0,
+            2
+          ],
+          "2": [
+            1,
+            3
+          ],
+          "3": [
+            2,
+            4
+          ],
+          "4": [
+            3,
+            5
+          ],
+          "5": [
+            4,
+            6
+          ],
+          "6": [
+            5,
+            7
+          ],
+          "7": [
+            6,
+            8
+          ],
+          "8": [
+            7,
+            9
+          ],
+          "9": [
+            0,
+            8
+          ]
+        },
+        "capacity": [
+          4,
+          8,
+          4,
+          4,
+          8,
+          16,
+          4,
+          8,
+          16,
+          16
+        ],
+        "deployment_root": 5,
+        "quantity_assignment_seed": 20042,
+        "capacity_assignment_seed": 30042,
+        "local_sample_stream_sha256": "332baa577c19a44e395d1fdbb9ea5b9c27d92db14f0cab31c1d9df03e456fe7a"
+      },
+      "pair_identity_sha256": "57ee260d57fb82565191096592c143d757b0d3817b88bc3b00a3d376e502fd40",
+      "best_primary": 69.03669724770643,
+      "final_primary": 69.03669724770643,
+      "best_round": 4,
+      "best_accuracy": 69.03669724770643,
+      "final_accuracy": 69.03669724770643,
+      "best_f1": 57.142857142857146,
+      "final_f1": 57.142857142857146,
+      "production_bytes": 311104374,
+      "total_probe_examples": 0,
+      "elapsed_seconds": 29.309435311704874,
+      "capacity_scope": "training ranks within declared heterogeneous caps",
+      "input_artifacts_sha256": {
+        "config.json": "687b477709cd60000c509cb5a2903362694bd12ef67cf14a6d1c868f8f92ca01",
+        "environment.json": "b6a401b2bdf3c9e5140ee9e2726f0f9836ecde434f9da48b4a715ce68f8d473e",
+        "split.json": "4e658f5f6cd66609d8cb18ee00de96e29ab9a96f84a5b89bc61860e36b6ce842",
+        "graph.json": "2d5cef7664050a93b81680e098dd608df0311cb2a8fa6bb1df160b1168c0aa39",
+        "rounds.jsonl": "1824aca968f1f0aee7ff68842dac36a24f726ea5e0428be76ee3090a1a6b0ad6",
+        "summary.json": "d474fbc8be3569bd8913f6b5e2a1e7e37808d0001861268966a85ee0b27da384",
+        "source_manifest.json": "77b5b4f018f195cb7d28babcd77a4c2551083edbd3f4ed914f1219f65286ced7"
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-fixed_sample",
+      "arm": "fixed_sample",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "complete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-fixed_sample",
+        "arm": "fixed_sample",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 4,
+        "local_epochs": 1,
+        "local_steps": 2,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 640,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [],
+      "classification": "smoke",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+      "n_train": 640,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 80,
+      "total_examples": 2560,
+      "training_bytes": 293656948,
+      "evaluation_assembly_bytes": 362350760,
+      "split_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "passed",
+        "kind": "standalone_independent_evaluator",
+        "verified_endpoints": [
+          "best",
+          "final"
+        ],
+        "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-fixed_sample/independent_checkpoint_audit.json",
+        "audit_sha256": "9e7d282d99d66fd9bdb93eb536b8e338681d95f9b673f09f483a6cd01f57e357",
+        "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+        "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+        "checkpoint_sha256": {
+          "best": "f6e3f8ff854b0d5e55ac312ccb3d613db957d135ce23c22633674bfbc8946c25",
+          "final": "f09a7a0f4db49e13a533379536e26b5d9a1ee522d6cca94dcc5057018ef6fb04"
+        },
+        "scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+        "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+        "evidence_binding": "Best/final hashes, rounds, metrics and exact raw prediction matches agree with this source-pinned run; local checkpoint files are not required when the audit remains available."
+      },
+      "checkpoint_files_present": {
+        "best": true,
+        "final": true
+      },
+      "comparison_group": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "pair_identity": {
+        "partition_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+        "label_sha256": "82aee841f4ae9caad88b46984fccaf74761f10364fc4ebdd89074937b4879b38",
+        "data_indices": {
+          "train": "2eb15a70bd86f2a71265c4c082db097b1baf613578fa2829b8b16e93094b521f",
+          "validation": "0f69fb2244d96d009a62fe740582122699d319ad43841c1d535f9f33fed97801"
+        },
+        "validation_labels_sha256": "34d089528031b4f5e18bae015cc45e1e46a869fb70d8bb204b4af6822e55f385",
+        "neighbors": {
+          "0": [
+            1,
+            9
+          ],
+          "1": [
+            0,
+            2
+          ],
+          "2": [
+            1,
+            3
+          ],
+          "3": [
+            2,
+            4
+          ],
+          "4": [
+            3,
+            5
+          ],
+          "5": [
+            4,
+            6
+          ],
+          "6": [
+            5,
+            7
+          ],
+          "7": [
+            6,
+            8
+          ],
+          "8": [
+            7,
+            9
+          ],
+          "9": [
+            0,
+            8
+          ]
+        },
+        "capacity": [
+          4,
+          8,
+          4,
+          4,
+          8,
+          16,
+          4,
+          8,
+          16,
+          16
+        ],
+        "deployment_root": 5,
+        "quantity_assignment_seed": 20042,
+        "capacity_assignment_seed": 30042,
+        "local_sample_stream_sha256": "332baa577c19a44e395d1fdbb9ea5b9c27d92db14f0cab31c1d9df03e456fe7a"
+      },
+      "pair_identity_sha256": "57ee260d57fb82565191096592c143d757b0d3817b88bc3b00a3d376e502fd40",
+      "best_primary": 53.096330275229356,
+      "final_primary": 53.096330275229356,
+      "best_round": 4,
+      "best_accuracy": 53.096330275229356,
+      "final_accuracy": 53.096330275229356,
+      "best_f1": 68.41698841698842,
+      "final_f1": 68.41698841698842,
+      "production_bytes": 384244958,
+      "total_probe_examples": 0,
+      "elapsed_seconds": 32.66242078691721,
+      "capacity_scope": "training ranks within declared heterogeneous caps",
+      "input_artifacts_sha256": {
+        "config.json": "400e93728c1b807ac786039e61a1c42c5ad59d765df1f34a2a8d21df7cee1a00",
+        "environment.json": "b6a401b2bdf3c9e5140ee9e2726f0f9836ecde434f9da48b4a715ce68f8d473e",
+        "split.json": "4e658f5f6cd66609d8cb18ee00de96e29ab9a96f84a5b89bc61860e36b6ce842",
+        "graph.json": "a18de065b4cb4c6aaacf63c8e60cf0ddeb77945f39e6e4a2559e774a02494de5",
+        "rounds.jsonl": "bcb05e2efb594ca2f87c835af63b5f1151dfd537fb2aaf4d9c3411c0802ee470",
+        "summary.json": "7a72b85212c0244fc0a8c50a620cf1ffa78b0bc212a21c626607db7822df7013",
+        "source_manifest.json": "77b5b4f018f195cb7d28babcd77a4c2551083edbd3f4ed914f1219f65286ced7"
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-fixed_uniform",
+      "arm": "fixed_uniform",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "complete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-fixed_uniform",
+        "arm": "fixed_uniform",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 4,
+        "local_epochs": 1,
+        "local_steps": 2,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 640,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [],
+      "classification": "smoke",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+      "n_train": 640,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 80,
+      "total_examples": 2560,
+      "training_bytes": 293656912,
+      "evaluation_assembly_bytes": 362350200,
+      "split_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "passed",
+        "kind": "standalone_independent_evaluator",
+        "verified_endpoints": [
+          "best",
+          "final"
+        ],
+        "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-fixed_uniform/independent_checkpoint_audit.json",
+        "audit_sha256": "d17e315bd994082e4b6bac5577b9cfe854df904d47429e2234c44a560b1f5706",
+        "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+        "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+        "checkpoint_sha256": {
+          "best": "29a192ad28a858ca9e3ba850ee7321649c54195f466a37fd463a06d6f035513e",
+          "final": "4fc578248e916dc2cb4bf69f9dc84317f027be5595b0d862b0f5b518abd63aad"
+        },
+        "scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+        "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+        "evidence_binding": "Best/final hashes, rounds, metrics and exact raw prediction matches agree with this source-pinned run; local checkpoint files are not required when the audit remains available."
+      },
+      "checkpoint_files_present": {
+        "best": true,
+        "final": true
+      },
+      "comparison_group": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "pair_identity": {
+        "partition_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+        "label_sha256": "82aee841f4ae9caad88b46984fccaf74761f10364fc4ebdd89074937b4879b38",
+        "data_indices": {
+          "train": "2eb15a70bd86f2a71265c4c082db097b1baf613578fa2829b8b16e93094b521f",
+          "validation": "0f69fb2244d96d009a62fe740582122699d319ad43841c1d535f9f33fed97801"
+        },
+        "validation_labels_sha256": "34d089528031b4f5e18bae015cc45e1e46a869fb70d8bb204b4af6822e55f385",
+        "neighbors": {
+          "0": [
+            1,
+            9
+          ],
+          "1": [
+            0,
+            2
+          ],
+          "2": [
+            1,
+            3
+          ],
+          "3": [
+            2,
+            4
+          ],
+          "4": [
+            3,
+            5
+          ],
+          "5": [
+            4,
+            6
+          ],
+          "6": [
+            5,
+            7
+          ],
+          "7": [
+            6,
+            8
+          ],
+          "8": [
+            7,
+            9
+          ],
+          "9": [
+            0,
+            8
+          ]
+        },
+        "capacity": [
+          4,
+          8,
+          4,
+          4,
+          8,
+          16,
+          4,
+          8,
+          16,
+          16
+        ],
+        "deployment_root": 5,
+        "quantity_assignment_seed": 20042,
+        "capacity_assignment_seed": 30042,
+        "local_sample_stream_sha256": "332baa577c19a44e395d1fdbb9ea5b9c27d92db14f0cab31c1d9df03e456fe7a"
+      },
+      "pair_identity_sha256": "57ee260d57fb82565191096592c143d757b0d3817b88bc3b00a3d376e502fd40",
+      "best_primary": 70.29816513761467,
+      "final_primary": 70.29816513761467,
+      "best_round": 4,
+      "best_accuracy": 70.29816513761467,
+      "final_accuracy": 70.29816513761467,
+      "best_f1": 59.969088098918085,
+      "final_f1": 59.969088098918085,
+      "production_bytes": 384244782,
+      "total_probe_examples": 0,
+      "elapsed_seconds": 32.02688851952553,
+      "capacity_scope": "training ranks within declared heterogeneous caps",
+      "input_artifacts_sha256": {
+        "config.json": "cd894c4c4aec15f31f2ba66ccb56e1bffa6289b78e32e39192f6a9b4e5942d58",
+        "environment.json": "b6a401b2bdf3c9e5140ee9e2726f0f9836ecde434f9da48b4a715ce68f8d473e",
+        "split.json": "4e658f5f6cd66609d8cb18ee00de96e29ab9a96f84a5b89bc61860e36b6ce842",
+        "graph.json": "2d5cef7664050a93b81680e098dd608df0311cb2a8fa6bb1df160b1168c0aa39",
+        "rounds.jsonl": "7e11a2900290281685622eb52b4053fdf2175a7ef670a1137047b01e62f186df",
+        "summary.json": "e37a01bf97528cb6a00dca6710e4b0ec3ce092c121ef442990b3e7ab3ab0e010",
+        "source_manifest.json": "77b5b4f018f195cb7d28babcd77a4c2551083edbd3f4ed914f1219f65286ced7"
+      }
+    },
+    {
+      "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-product16_sample",
+      "arm": "product16_sample",
+      "seed": 42,
+      "task": "sst2",
+      "partition": "quantity",
+      "status": "complete",
+      "config": {
+        "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+        "output": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-product16_sample",
+        "arm": "product16_sample",
+        "task": "sst2",
+        "partition": "quantity",
+        "seed": 42,
+        "rounds": 4,
+        "local_epochs": 1,
+        "local_steps": 2,
+        "batch_size": 32,
+        "max_length": 128,
+        "lr": 0.001,
+        "alpha": 16.0,
+        "max_grad_norm": 1.0,
+        "max_train": 640,
+        "threads": 2,
+        "verify_only": false
+      },
+      "warnings": [],
+      "classification": "smoke",
+      "track": "quantity_skew_extension",
+      "primary_metric": "accuracy",
+      "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+      "n_train": 640,
+      "n_validation": 872,
+      "n_clients": 10,
+      "total_steps": 80,
+      "total_examples": 2560,
+      "training_bytes": 378595636,
+      "evaluation_assembly_bytes": 473242856,
+      "split_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+      "metric_verification": "independent arithmetic from every saved prediction and labeled validation target",
+      "checkpoint_verification": {
+        "status": "passed",
+        "kind": "standalone_independent_evaluator",
+        "verified_endpoints": [
+          "best",
+          "final"
+        ],
+        "path": "/home/gogoi/ahlora-quantity-20260917/runs/smoke-v1-product16_sample/independent_checkpoint_audit.json",
+        "audit_sha256": "f36f26c2bfcde6ccd3ccd721ad6a2456e4c6c220c14cbaa42c90785cf2c653ad",
+        "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+        "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+        "checkpoint_sha256": {
+          "best": "de5d7e671c50d8d74e65b79bb7322ee214ea664d7e5d4a4b24bbe15628dca119",
+          "final": "79cb05d42da5563d1bc0e7704c1caa6f8b39a194229d1a21794382d1d7ecf1ac"
+        },
+        "scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+        "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+        "evidence_binding": "Best/final hashes, rounds, metrics and exact raw prediction matches agree with this source-pinned run; local checkpoint files are not required when the audit remains available."
+      },
+      "checkpoint_files_present": {
+        "best": true,
+        "final": true
+      },
+      "comparison_group": "6923a7f12dc89d05",
+      "compatibility": {
+        "classification": "smoke",
+        "track": "quantity_skew_extension",
+        "config": {
+          "task": "sst2",
+          "partition": "quantity",
+          "rounds": 4,
+          "local_epochs": 1,
+          "local_steps": 2,
+          "batch_size": 32,
+          "max_length": 128,
+          "lr": 0.001,
+          "alpha": 16.0,
+          "max_grad_norm": 1.0,
+          "max_train": 640
+        },
+        "source_sha256": "db671264d9ff4f23f20cbacd08697632d2b68094043a4bbfa3ae11d51c654332",
+        "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+        "model_files": {
+          "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+          "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+          "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+          "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+          "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+          "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+        },
+        "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+        "data_files": {
+          "train": {
+            "file_sha256": "66a253e67968acfabcbe49dbe9da964b42ac1c851c40ab760e8c8942efdb3229",
+            "rows_in_file": 67349,
+            "rows_used": 640
+          },
+          "validation": {
+            "file_sha256": "a1371f3b3a7b0bcefa8388799a9359dc3ce76c349cc0079507a7991364fd2a9b",
+            "rows_in_file": 872,
+            "rows_used": 872
+          }
+        },
+        "precision": "fp32; deterministic algorithms",
+        "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+        "primary_metric": "accuracy",
+        "total_training_steps": 80,
+        "total_training_examples": 2560
+      },
+      "pair_identity": {
+        "partition_sha256": "f46019783e00a41b5edb24e956be6c23b9cfa41ca7f9f4791559090a6c88f39c",
+        "label_sha256": "82aee841f4ae9caad88b46984fccaf74761f10364fc4ebdd89074937b4879b38",
+        "data_indices": {
+          "train": "2eb15a70bd86f2a71265c4c082db097b1baf613578fa2829b8b16e93094b521f",
+          "validation": "0f69fb2244d96d009a62fe740582122699d319ad43841c1d535f9f33fed97801"
+        },
+        "validation_labels_sha256": "34d089528031b4f5e18bae015cc45e1e46a869fb70d8bb204b4af6822e55f385",
+        "neighbors": {
+          "0": [
+            1,
+            9
+          ],
+          "1": [
+            0,
+            2
+          ],
+          "2": [
+            1,
+            3
+          ],
+          "3": [
+            2,
+            4
+          ],
+          "4": [
+            3,
+            5
+          ],
+          "5": [
+            4,
+            6
+          ],
+          "6": [
+            5,
+            7
+          ],
+          "7": [
+            6,
+            8
+          ],
+          "8": [
+            7,
+            9
+          ],
+          "9": [
+            0,
+            8
+          ]
+        },
+        "capacity": [
+          4,
+          8,
+          4,
+          4,
+          8,
+          16,
+          4,
+          8,
+          16,
+          16
+        ],
+        "deployment_root": 5,
+        "quantity_assignment_seed": 20042,
+        "capacity_assignment_seed": 30042,
+        "local_sample_stream_sha256": "332baa577c19a44e395d1fdbb9ea5b9c27d92db14f0cab31c1d9df03e456fe7a"
+      },
+      "pair_identity_sha256": "57ee260d57fb82565191096592c143d757b0d3817b88bc3b00a3d376e502fd40",
+      "best_primary": 52.178899082568805,
+      "final_primary": 52.178899082568805,
+      "best_round": 4,
+      "best_accuracy": 52.178899082568805,
+      "final_accuracy": 52.178899082568805,
+      "best_f1": 67.99693016116655,
+      "final_f1": 67.99693016116655,
+      "production_bytes": 496906670,
+      "total_probe_examples": 0,
+      "elapsed_seconds": 38.42088906187564,
+      "capacity_scope": "uniform-rank reference exceeds some declared client caps",
+      "input_artifacts_sha256": {
+        "config.json": "3d0b9e9dc1c7d2da63b31931f036e92671a3ff5ff24272941a2bf8eda144ec4f",
+        "environment.json": "b6a401b2bdf3c9e5140ee9e2726f0f9836ecde434f9da48b4a715ce68f8d473e",
+        "split.json": "4e658f5f6cd66609d8cb18ee00de96e29ab9a96f84a5b89bc61860e36b6ce842",
+        "graph.json": "a18de065b4cb4c6aaacf63c8e60cf0ddeb77945f39e6e4a2559e774a02494de5",
+        "rounds.jsonl": "0341425a19d734a9722f364d227a7636cd0b74f10df245bfd914118045aa4c65",
+        "summary.json": "ab01597292354264f6f87daeb4d85dd22971ec0a048d861f897e67609621c955",
+        "source_manifest.json": "77b5b4f018f195cb7d28babcd77a4c2551083edbd3f4ed914f1219f65286ced7"
+      }
+    }
+  ]
+}

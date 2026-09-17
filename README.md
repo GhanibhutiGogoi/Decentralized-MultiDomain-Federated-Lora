@@ -1,10 +1,14 @@
 # AH-LoRA
 
-A working testbed for heterogeneous LoRA adapters in multi-domain federated learning. Clients share a frozen backbone, train low-rank classification-head updates, and aggregate those updates centrally or through peer-to-peer gossip. The repository includes the completed experiments, evidence bundle, and paper.
+A testbed for heterogeneous LoRA adapters in federated learning. It includes a frozen-feature CIFAR-100 classification-head study and a RoBERTa query/value-adapter benchmark on SST-2. The repository preserves completed diagnostic experiments, evidence and a paper, alongside the new quantity-skew comparison described below.
 
-The immediate benchmark uses real CIFAR-100, ImageNet-pretrained ResNet-18, and 15 clients across five known domains. It compares local-only training, client-uniform centralized FedAvg, flat Metropolis-Hastings gossip, and a hierarchy supplied with the true domain groups. Merging expands each scaled update `(alpha / rank) B A`, averages in a common matrix space, then refactorizes by SVD at each client's rank.
+The original benchmark uses real CIFAR-100, ImageNet-pretrained ResNet-18, and 15 clients across five known domains. It compares local-only training, client-uniform centralized FedAvg, flat Metropolis-Hastings gossip, and a hierarchy supplied with the true domain groups. Merging averages scaled updates `(alpha / rank) B A`, then refactorizes by SVD at each client's rank. The transformer benchmark uses a compact QR/SVD implementation of this effective-update operation.
 
 ## Current status
+
+The new [quantity-skew study](docs/research/2026-09-17-quantity-skew-protocol.md) compares a documented independent implementation of published Dec-LoRA with adaptive-rank, sample-weighted peer training on RoBERTa-base/SST-2. All clients use the same task with unequal, class-stratified data quantities. Seven real-model smoke runs and 119 remote tests passed; all 14 best/final smoke checkpoints were independently audited. Full-data, five-seed comparison runs are underway on gpu003. [Study status and artifacts](docs/artifacts/quantity-skew/README.md) distinguish execution checks from completed scientific results; no competitive result is claimed yet.
+
+The earlier [methodology exploration](docs/artifacts/methodology-exploration/README.md) is complete, including the rebuilt 29-page [paper](paper/main.pdf). It isolates optimization and repeated rank-projection losses, preserves failed residual repairs, and shows that a successful full-state gradient-sharing control does not establish the original heterogeneous-rank resource claim.
 
 The corrected end-to-end comparison is complete: nine arms, three seeds, 30 rounds, all 50,000 training and 10,000 test examples on gpu003. The actual P1 rank policy and P2 conservative weights run through weighted peer gossip and neighbor-tree final assembly. Conventional pooled LoRA reaches **57.23 ± 0.59%** full-test accuracy; the adaptive-domain pipeline reaches **6.90 ± 2.03%**. **The accuracy-preservation objective is not met under this protocol.** These are frozen-feature, head-only experiments in a single-process peer simulation; no privacy guarantee or multi-host deployment is established.
 
