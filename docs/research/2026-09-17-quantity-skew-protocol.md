@@ -97,7 +97,7 @@ P_{ii}=1-\sum_{j\ne i}P_{ij}.
 \]
 
 The kernel obeys detailed balance and preserves pi. Uniform variants use
-pi_i=1/10, hence P=Q. Counts are exchanged once between neighbors. Weighting
+pi_i=1/10, hence P=Q. One-time neighbor count exchange is modeled with fixed-width ID/count records (320 bytes), rather than passed through the tensor serializer. Weighting
 also changes mixing speed; log its reversible spectral gap and weighted
 effective-update disagreement. This is not a pure objective-only ablation.
 
@@ -119,7 +119,7 @@ Weighted concatenated factors are decomposed by thin QR and a core SVD, giving
 the same best-rank approximation as a dense SVD without forming dense768x768
 updates at every receiver. Independent dense-oracle tests cover scaling,
 different ranks, weights, gauge changes, truncation, and zero contributions.
-The linear classification head is averaged with the same weights.
+The trainable classifier parameters (including its dense layer, tanh nonlinearity, and output-layer parameters) are averaged with the same weights; the tanh operation itself has no parameters.
 
 Adaptive clients use the existing P1 stateful controller: capability-bounded
 candidate ranks, two warmup rounds, half-capability minimum, EMA/hysteresis,
@@ -171,7 +171,7 @@ X_{\rm global}=\mathcal P_{16}\left(\sum_i\pi_iX_i\right).
 Baseline evaluation averages its factors; the rank4 baseline deploys at rank4.
 The output is not broadcast back to low-capacity peers. Evaluation assemblies
 never alter training state. Their costs are reported separately; production
-cost includes count setup, training exchange, and the final assembly once.
+cost includes modeled count setup, serialized training exchange, and the final assembly once. Base-model, initial-state and topology provisioning are excluded and must not be described as part of this communication total.
 
 Execution is a single-process decentralized transport simulation on gpu003,
 not a multi-machine network deployment or a cryptographic privacy experiment.
