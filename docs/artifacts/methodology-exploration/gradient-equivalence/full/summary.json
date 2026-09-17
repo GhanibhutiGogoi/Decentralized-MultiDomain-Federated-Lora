@@ -1,0 +1,84 @@
+{
+  "status": "completed",
+  "n_seeds": 3,
+  "epochs": 30,
+  "comparison": "paired fp32 pooled versus exact neighbor-tree factor-gradient synchronization, uniform rank16",
+  "statistics": "sample standard deviation across seeds; numerical positive control, not population equivalence inference",
+  "fp64_gradient_checks": 192,
+  "max_fp64_gradient_abs_error": 3.3306690738754696e-16,
+  "max_recorded_prediction_disagreements": 0,
+  "per_seed": [
+    {
+      "seed": 42,
+      "pooled_accuracy_percent": 57.8,
+      "peer_accuracy_percent": 57.8,
+      "peer_minus_pooled_pp": 0.0,
+      "prediction_disagreements": 0,
+      "max_factor_abs_error": 4.76837158203125e-07,
+      "fp64_gradient_max_abs_error": 2.220446049250313e-16,
+      "peer_payload_bytes": 12866965440,
+      "peer_messages": 328440,
+      "wall_seconds": 443.57658630795777
+    },
+    {
+      "seed": 43,
+      "pooled_accuracy_percent": 56.63,
+      "peer_accuracy_percent": 56.63,
+      "peer_minus_pooled_pp": 0.0,
+      "prediction_disagreements": 0,
+      "max_factor_abs_error": 5.364418029785156e-07,
+      "fp64_gradient_max_abs_error": 3.3306690738754696e-16,
+      "peer_payload_bytes": 12866965440,
+      "peer_messages": 328440,
+      "wall_seconds": 412.40111606474966
+    },
+    {
+      "seed": 44,
+      "pooled_accuracy_percent": 57.25,
+      "peer_accuracy_percent": 57.25,
+      "peer_minus_pooled_pp": 0.0,
+      "prediction_disagreements": 0,
+      "max_factor_abs_error": 5.364418029785156e-07,
+      "fp64_gradient_max_abs_error": 2.7755575615628914e-16,
+      "peer_payload_bytes": 12866965440,
+      "peer_messages": 328440,
+      "wall_seconds": 492.09714258648455
+    }
+  ],
+  "pooled_accuracy_percent": {
+    "mean": 57.22666666666667,
+    "sample_sd": 0.5853488988059431
+  },
+  "peer_accuracy_percent": {
+    "mean": 57.22666666666667,
+    "sample_sd": 0.5853488988059431
+  },
+  "peer_minus_pooled_pp": {
+    "mean": 0.0,
+    "sample_sd": 0.0
+  },
+  "prediction_disagreements": {
+    "mean": 0.0,
+    "sample_sd": 0.0
+  },
+  "max_factor_abs_error": {
+    "mean": 5.165735880533854e-07,
+    "sample_sd": 3.4412757706023796e-08
+  },
+  "fp64_gradient_max_abs_error": {
+    "mean": 2.7755575615628914e-16,
+    "sample_sd": 5.551115123125783e-17
+  },
+  "peer_payload_bytes": {
+    "mean": 12866965440.0,
+    "sample_sd": 0.0
+  },
+  "peer_messages": {
+    "mean": 328440.0,
+    "sample_sd": 0.0
+  },
+  "wall_seconds": {
+    "mean": 449.358281653064,
+    "sample_sd": 40.1613640410281
+  }
+}

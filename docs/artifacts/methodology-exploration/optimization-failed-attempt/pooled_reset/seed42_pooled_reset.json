@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "status": "running",
+  "method": "pooled_reset",
+  "seed": 42,
+  "alpha": 32.0,
+  "reference_rank": 16,
+  "capacity_ceilings": {
+    "0": 16
+  },
+  "initial_state_sha256": "c0d1b26cfeeac71c58b48aea4797791e6e786b986ca345b2fb477050455064b5",
+  "split_sha256": "733412b45f3f3936f7b496e4aef99f806bf53dfee64fd50600f2ade095cfe385",
+  "n_train": 50000,
+  "n_test": 10000,
+  "feature_cache_identity_sha256": "eff1ad00e14d86f46fc9d261fdbee194d05ed44678c2262bc975d11bdbe102df",
+  "optimizer": {
+    "name": "Adam",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 128,
+    "local_epochs": 1,
+    "reset_each_round": true
+  },
+  "topology": {},
+  "assembly_root": null,
+  "objective": "sample",
+  "rank_policy": null,
+  "domain_policy": null,
+  "execution": "one-process simulation; tree-delivered metadata and peer assembly",
+  "quality_definition": "post-local-training cross entropy on fixed seeded local training minibatch; 1/(1+loss)",
+  "rounds": []
+}

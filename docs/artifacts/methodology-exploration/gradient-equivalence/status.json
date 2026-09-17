@@ -1,0 +1,30 @@
+{
+  "status": "completed",
+  "remote_output": "~/ahlora-runs/methodology-exploration-20260915/gradient-equivalence-v1",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "epochs_per_seed": 30,
+  "dtype": "float32",
+  "proof_dtype": "float64",
+  "pooled_accuracy_percent": {
+    "mean": 57.22666666666667,
+    "sample_sd": 0.5853488988059431
+  },
+  "peer_accuracy_percent": {
+    "mean": 57.22666666666667,
+    "sample_sd": 0.5853488988059431
+  },
+  "fp64_gradient_checks": 192,
+  "max_fp64_gradient_abs_error": 3.3306690738754696e-16,
+  "independently_reproduced_final_checkpoints": 6,
+  "max_recorded_prediction_disagreements": 0,
+  "adam_order": {
+    "status": "completed",
+    "training_only_batches": 24,
+    "effective_update_cosine_mean": 0.24158926534416492,
+    "max_raw_gradient_abs_error": 6.938893903907228e-17
+  }
+}

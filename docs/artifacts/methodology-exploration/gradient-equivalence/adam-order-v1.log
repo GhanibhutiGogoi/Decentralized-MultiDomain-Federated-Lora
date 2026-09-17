@@ -1,0 +1,53 @@
+{
+  "status": "completed",
+  "host": "gpu003",
+  "source_sha256": "90e37e97451971cc2b623f8a7e84320f525c26dac95890510b9af9df914a33c3",
+  "training_data_sha256": "37c88fdb981dccbc117e2c3a0dc0065ab12bc667a18d991c66d312324fff3eb7",
+  "test_data_accessed": false,
+  "dtype": "float64",
+  "rank": 16,
+  "alpha": 32.0,
+  "optimizer": {
+    "name": "Adam",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "fresh_moments_for_every_batch_and_arm": true
+  },
+  "scope": "one-step arithmetic diagnostic; no training-trajectory or convergence claim",
+  "protocol": "original non-IID ownership, same initialization for each batch, sample-count-weighted effective-update average; no SVD",
+  "gradient_tolerance": {
+    "atol": 2e-11,
+    "rtol": 2e-10
+  },
+  "effective_update_cosine": {
+    "mean": 0.24158926534416492,
+    "min": 0.17113500712917673,
+    "max": 0.2929508763933521
+  },
+  "effective_update_relative_difference_to_global": {
+    "mean": 1.1040952405927575,
+    "min": 1.062799991429204,
+    "max": 1.1519779282664278
+  },
+  "effective_update_global_norm": {
+    "mean": 0.04500432273917632,
+    "min": 0.04428878739201354,
+    "max": 0.04566339887934862
+  },
+  "effective_update_averaged_local_norm": {
+    "mean": 0.03459404584761903,
+    "min": 0.03295262848321741,
+    "max": 0.0365959025787929
+  },
+  "global_adam_loss_change": {
+    "mean": -0.015344866986056305,
+    "min": -0.018013189681342467,
+    "max": -0.013153916095924423
+  },
+  "averaged_local_adam_loss_change": {
+    "mean": -0.0014364330249950763,
+    "min": -0.001752329226873961,
+    "max": -0.0010603861095423994
+  },
+  "max_gradient_abs_error": 6.938893903907228e-17
+}
