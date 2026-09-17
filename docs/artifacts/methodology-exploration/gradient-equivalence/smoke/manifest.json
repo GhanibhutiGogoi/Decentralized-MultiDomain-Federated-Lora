@@ -1,0 +1,58 @@
+{
+  "status": "completed",
+  "source_sha256": "a3b83bc3d1b1cc7ec83f5d17c5e81d58086bb164cebc22ecdcc98128c16062b2",
+  "arguments": {
+    "data_dir": "/home/gogoi/ahlora-data",
+    "feature_cache": "/home/gogoi/ahlora-data/features-v2",
+    "output": "/home/gogoi/ahlora-runs/methodology-exploration-20260915/gradient-equivalence-smoke-v1",
+    "seeds": [
+      42
+    ],
+    "epochs": 1,
+    "proof_batches": 64,
+    "reset_each_epoch": false,
+    "device": "cuda:0",
+    "dtype": "float32",
+    "alpha": 32.0,
+    "reference_rank": 16,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 128,
+    "eval_batch_size": 2048,
+    "local_epochs": 1,
+    "n_domains": 5,
+    "clients_per_domain": 3,
+    "dirichlet_alpha": 0.5,
+    "max_train_per_client": 0,
+    "max_test_per_domain": 0
+  },
+  "packages": {
+    "torch": "2.3.0",
+    "torchvision": "0.18.0",
+    "numpy": "1.26.4",
+    "scikit-learn": "1.7.2"
+  },
+  "host": "gpu003",
+  "results": [
+    {
+      "seed": 42,
+      "final": {
+        "epoch": 1,
+        "optimizer_steps": 391,
+        "pooled_train_loss": 2.9101160333251954,
+        "distributed_train_loss": 2.910116042817235,
+        "pooled_full_test_correct": 4400,
+        "distributed_full_test_correct": 4400,
+        "pooled_full_test_accuracy": 0.44,
+        "distributed_full_test_accuracy": 0.44,
+        "test_prediction_disagreements": 0,
+        "max_factor_abs_error": 1.3527460396289825e-07,
+        "train_sample_exposures_per_arm": 50000,
+        "peer_messages": 10948,
+        "peer_payload_bytes": 428898848,
+        "wall_seconds": 17.462221764959395
+      },
+      "max_proof_gradient_abs_error": 2.220446049250313e-16
+    }
+  ]
+}

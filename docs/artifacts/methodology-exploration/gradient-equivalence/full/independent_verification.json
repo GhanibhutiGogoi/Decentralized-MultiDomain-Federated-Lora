@@ -1,0 +1,65 @@
+{
+  "status": "completed",
+  "execution_host": "gpu003",
+  "scope": "independent forward evaluation and recorded traffic/source invariants",
+  "seeds": [
+    {
+      "seed": 42,
+      "arms": {
+        "pooled": {
+          "full_test_correct": 5780,
+          "accuracy": 0.578,
+          "prediction_sha256": "2c724f0b263a48c616c1eb690718a27726624fc7c8aa0487fe855997cf8af655"
+        },
+        "distributed": {
+          "full_test_correct": 5780,
+          "accuracy": 0.578,
+          "prediction_sha256": "2c724f0b263a48c616c1eb690718a27726624fc7c8aa0487fe855997cf8af655"
+        }
+      },
+      "steps_per_arm": 11730,
+      "peer_messages": 328440,
+      "peer_payload_bytes": 12866965440,
+      "fp64_gradient_checks": 64
+    },
+    {
+      "seed": 43,
+      "arms": {
+        "pooled": {
+          "full_test_correct": 5663,
+          "accuracy": 0.5663,
+          "prediction_sha256": "529983b3ea17b5de84df2ff54b96ac9b0cc5212077951c501ba47e2afc834537"
+        },
+        "distributed": {
+          "full_test_correct": 5663,
+          "accuracy": 0.5663,
+          "prediction_sha256": "529983b3ea17b5de84df2ff54b96ac9b0cc5212077951c501ba47e2afc834537"
+        }
+      },
+      "steps_per_arm": 11730,
+      "peer_messages": 328440,
+      "peer_payload_bytes": 12866965440,
+      "fp64_gradient_checks": 64
+    },
+    {
+      "seed": 44,
+      "arms": {
+        "pooled": {
+          "full_test_correct": 5725,
+          "accuracy": 0.5725,
+          "prediction_sha256": "3880400c0e7506a338f9bc30d824f680a86881fa5a7701147185b2524fad1592"
+        },
+        "distributed": {
+          "full_test_correct": 5725,
+          "accuracy": 0.5725,
+          "prediction_sha256": "3880400c0e7506a338f9bc30d824f680a86881fa5a7701147185b2524fad1592"
+        }
+      },
+      "steps_per_arm": 11730,
+      "peer_messages": 328440,
+      "peer_payload_bytes": 12866965440,
+      "fp64_gradient_checks": 64
+    }
+  ],
+  "source_files_verified": 30
+}

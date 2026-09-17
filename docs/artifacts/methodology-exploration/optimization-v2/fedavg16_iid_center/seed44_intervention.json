@@ -1,0 +1,9 @@
+{
+  "arm": "fedavg16_iid_center",
+  "base_method": "fedavg16",
+  "pooled_epoch_svd": false,
+  "center_before_svd": true,
+  "iid_preserving_client_sizes": true,
+  "exploratory": true,
+  "seed": 44
+}

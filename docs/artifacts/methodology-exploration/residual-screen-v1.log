@@ -1,0 +1,330 @@
+seed=42 method=pooled round=1/30 full_test=0.4118 seconds=1.13
+seed=42 method=pooled round=2/30 full_test=0.4868 seconds=0.96
+seed=42 method=pooled round=3/30 full_test=0.5180 seconds=0.92
+seed=42 method=pooled round=4/30 full_test=0.5304 seconds=0.92
+seed=42 method=pooled round=5/30 full_test=0.5380 seconds=0.92
+seed=42 method=pooled round=6/30 full_test=0.5404 seconds=0.92
+seed=42 method=pooled round=7/30 full_test=0.5468 seconds=0.92
+seed=42 method=pooled round=8/30 full_test=0.5516 seconds=0.92
+seed=42 method=pooled round=9/30 full_test=0.5524 seconds=0.92
+seed=42 method=pooled round=10/30 full_test=0.5572 seconds=0.92
+seed=42 method=pooled round=11/30 full_test=0.5560 seconds=0.92
+seed=42 method=pooled round=12/30 full_test=0.5644 seconds=0.92
+seed=42 method=pooled round=13/30 full_test=0.5722 seconds=0.92
+seed=42 method=pooled round=14/30 full_test=0.5704 seconds=0.93
+seed=42 method=pooled round=15/30 full_test=0.5654 seconds=0.91
+seed=42 method=pooled round=16/30 full_test=0.5688 seconds=0.93
+seed=42 method=pooled round=17/30 full_test=0.5636 seconds=0.91
+seed=42 method=pooled round=18/30 full_test=0.5726 seconds=0.93
+seed=42 method=pooled round=19/30 full_test=0.5678 seconds=0.94
+seed=42 method=pooled round=20/30 full_test=0.5726 seconds=0.95
+seed=42 method=pooled round=21/30 full_test=0.5676 seconds=0.92
+seed=42 method=pooled round=22/30 full_test=0.5728 seconds=0.90
+seed=42 method=pooled round=23/30 full_test=0.5758 seconds=0.90
+seed=42 method=pooled round=24/30 full_test=0.5730 seconds=0.91
+seed=42 method=pooled round=25/30 full_test=0.5722 seconds=0.95
+seed=42 method=pooled round=26/30 full_test=0.5758 seconds=1.00
+seed=42 method=pooled round=27/30 full_test=0.5722 seconds=0.93
+seed=42 method=pooled round=28/30 full_test=0.5716 seconds=0.93
+seed=42 method=pooled round=29/30 full_test=0.5722 seconds=0.93
+seed=42 method=pooled round=30/30 full_test=0.5764 seconds=0.93
+seed=42 method=fixed_domain round=1/30 full_test=0.0142 seconds=2.00
+seed=42 method=fixed_domain round=2/30 full_test=0.0160 seconds=1.88
+seed=42 method=fixed_domain round=3/30 full_test=0.0164 seconds=1.57
+seed=42 method=fixed_domain round=4/30 full_test=0.0200 seconds=1.74
+seed=42 method=fixed_domain round=5/30 full_test=0.0260 seconds=2.22
+seed=42 method=fixed_domain round=6/30 full_test=0.0268 seconds=1.85
+seed=42 method=fixed_domain round=7/30 full_test=0.0282 seconds=1.80
+seed=42 method=fixed_domain round=8/30 full_test=0.0300 seconds=1.67
+seed=42 method=fixed_domain round=9/30 full_test=0.0308 seconds=1.63
+seed=42 method=fixed_domain round=10/30 full_test=0.0328 seconds=1.77
+seed=42 method=fixed_domain round=11/30 full_test=0.0342 seconds=1.68
+seed=42 method=fixed_domain round=12/30 full_test=0.0354 seconds=1.72
+seed=42 method=fixed_domain round=13/30 full_test=0.0362 seconds=1.63
+seed=42 method=fixed_domain round=14/30 full_test=0.0368 seconds=1.56
+seed=42 method=fixed_domain round=15/30 full_test=0.0384 seconds=1.53
+seed=42 method=fixed_domain round=16/30 full_test=0.0380 seconds=1.50
+seed=42 method=fixed_domain round=17/30 full_test=0.0380 seconds=1.99
+seed=42 method=fixed_domain round=18/30 full_test=0.0394 seconds=1.65
+seed=42 method=fixed_domain round=19/30 full_test=0.0386 seconds=1.70
+seed=42 method=fixed_domain round=20/30 full_test=0.0394 seconds=1.62
+seed=42 method=fixed_domain round=21/30 full_test=0.0398 seconds=1.89
+seed=42 method=fixed_domain round=22/30 full_test=0.0406 seconds=2.29
+seed=42 method=fixed_domain round=23/30 full_test=0.0408 seconds=2.10
+seed=42 method=fixed_domain round=24/30 full_test=0.0398 seconds=1.64
+seed=42 method=fixed_domain round=25/30 full_test=0.0410 seconds=2.14
+seed=42 method=fixed_domain round=26/30 full_test=0.0410 seconds=1.71
+seed=42 method=fixed_domain round=27/30 full_test=0.0416 seconds=1.48
+seed=42 method=fixed_domain round=28/30 full_test=0.0414 seconds=1.86
+seed=42 method=fixed_domain round=29/30 full_test=0.0424 seconds=1.53
+seed=42 method=fixed_domain round=30/30 full_test=0.0452 seconds=2.00
+seed=42 method=adaptive_domain round=1/30 full_test=0.0142 seconds=1.74
+seed=42 method=adaptive_domain round=2/30 full_test=0.0160 seconds=1.77
+seed=42 method=adaptive_domain round=3/30 full_test=0.0164 seconds=1.90
+seed=42 method=adaptive_domain round=4/30 full_test=0.0218 seconds=1.75
+seed=42 method=adaptive_domain round=5/30 full_test=0.0260 seconds=1.78
+seed=42 method=adaptive_domain round=6/30 full_test=0.0266 seconds=1.77
+seed=42 method=adaptive_domain round=7/30 full_test=0.0262 seconds=1.70
+seed=42 method=adaptive_domain round=8/30 full_test=0.0278 seconds=1.54
+seed=42 method=adaptive_domain round=9/30 full_test=0.0286 seconds=1.57
+seed=42 method=adaptive_domain round=10/30 full_test=0.0298 seconds=1.56
+seed=42 method=adaptive_domain round=11/30 full_test=0.0310 seconds=1.62
+seed=42 method=adaptive_domain round=12/30 full_test=0.0324 seconds=1.59
+seed=42 method=adaptive_domain round=13/30 full_test=0.0336 seconds=1.61
+seed=42 method=adaptive_domain round=14/30 full_test=0.0348 seconds=1.57
+seed=42 method=adaptive_domain round=15/30 full_test=0.0350 seconds=1.61
+seed=42 method=adaptive_domain round=16/30 full_test=0.0362 seconds=1.59
+seed=42 method=adaptive_domain round=17/30 full_test=0.0374 seconds=1.58
+seed=42 method=adaptive_domain round=18/30 full_test=0.0388 seconds=1.60
+seed=42 method=adaptive_domain round=19/30 full_test=0.0388 seconds=1.75
+seed=42 method=adaptive_domain round=20/30 full_test=0.0416 seconds=2.00
+seed=42 method=adaptive_domain round=21/30 full_test=0.0434 seconds=1.75
+seed=42 method=adaptive_domain round=22/30 full_test=0.0430 seconds=1.85
+seed=42 method=adaptive_domain round=23/30 full_test=0.0436 seconds=1.99
+seed=42 method=adaptive_domain round=24/30 full_test=0.0436 seconds=1.73
+seed=42 method=adaptive_domain round=25/30 full_test=0.0442 seconds=1.96
+seed=42 method=adaptive_domain round=26/30 full_test=0.0452 seconds=1.93
+seed=42 method=adaptive_domain round=27/30 full_test=0.0440 seconds=2.01
+seed=42 method=adaptive_domain round=28/30 full_test=0.0454 seconds=1.91
+seed=42 method=adaptive_domain round=29/30 full_test=0.0452 seconds=2.18
+seed=42 method=adaptive_domain round=30/30 full_test=0.0462 seconds=2.26
+seed=42 arm=residual_uniform_sample_g1 epoch=1/30 validation=0.0132
+seed=42 arm=residual_uniform_sample_g1 epoch=2/30 validation=0.0154
+seed=42 arm=residual_uniform_sample_g1 epoch=3/30 validation=0.0138
+seed=42 arm=residual_uniform_sample_g1 epoch=4/30 validation=0.0146
+seed=42 arm=residual_uniform_sample_g1 epoch=5/30 validation=0.0126
+seed=42 arm=residual_uniform_sample_g1 epoch=6/30 validation=0.0136
+seed=42 arm=residual_uniform_sample_g1 epoch=7/30 validation=0.0130
+seed=42 arm=residual_uniform_sample_g1 epoch=8/30 validation=0.0134
+seed=42 arm=residual_uniform_sample_g1 epoch=9/30 validation=0.0122
+seed=42 arm=residual_uniform_sample_g1 epoch=10/30 validation=0.0132
+seed=42 arm=residual_uniform_sample_g1 epoch=11/30 validation=0.0136
+seed=42 arm=residual_uniform_sample_g1 epoch=12/30 validation=0.0132
+seed=42 arm=residual_uniform_sample_g1 epoch=13/30 validation=0.0132
+seed=42 arm=residual_uniform_sample_g1 epoch=14/30 validation=0.0122
+seed=42 arm=residual_uniform_sample_g1 epoch=15/30 validation=0.0140
+seed=42 arm=residual_uniform_sample_g1 epoch=16/30 validation=0.0138
+seed=42 arm=residual_uniform_sample_g1 epoch=17/30 validation=0.0140
+seed=42 arm=residual_uniform_sample_g1 epoch=18/30 validation=0.0150
+seed=42 arm=residual_uniform_sample_g1 epoch=19/30 validation=0.0156
+seed=42 arm=residual_uniform_sample_g1 epoch=20/30 validation=0.0154
+seed=42 arm=residual_uniform_sample_g1 epoch=21/30 validation=0.0156
+seed=42 arm=residual_uniform_sample_g1 epoch=22/30 validation=0.0156
+seed=42 arm=residual_uniform_sample_g1 epoch=23/30 validation=0.0150
+seed=42 arm=residual_uniform_sample_g1 epoch=24/30 validation=0.0160
+seed=42 arm=residual_uniform_sample_g1 epoch=25/30 validation=0.0148
+seed=42 arm=residual_uniform_sample_g1 epoch=26/30 validation=0.0156
+seed=42 arm=residual_uniform_sample_g1 epoch=27/30 validation=0.0158
+seed=42 arm=residual_uniform_sample_g1 epoch=28/30 validation=0.0162
+seed=42 arm=residual_uniform_sample_g1 epoch=29/30 validation=0.0162
+seed=42 arm=residual_uniform_sample_g1 epoch=30/30 validation=0.0168
+seed=42 arm=residual_fixed_sample_g1 epoch=1/30 validation=0.0130
+seed=42 arm=residual_fixed_sample_g1 epoch=2/30 validation=0.0148
+seed=42 arm=residual_fixed_sample_g1 epoch=3/30 validation=0.0132
+seed=42 arm=residual_fixed_sample_g1 epoch=4/30 validation=0.0136
+seed=42 arm=residual_fixed_sample_g1 epoch=5/30 validation=0.0124
+seed=42 arm=residual_fixed_sample_g1 epoch=6/30 validation=0.0138
+seed=42 arm=residual_fixed_sample_g1 epoch=7/30 validation=0.0134
+seed=42 arm=residual_fixed_sample_g1 epoch=8/30 validation=0.0128
+seed=42 arm=residual_fixed_sample_g1 epoch=9/30 validation=0.0120
+seed=42 arm=residual_fixed_sample_g1 epoch=10/30 validation=0.0126
+seed=42 arm=residual_fixed_sample_g1 epoch=11/30 validation=0.0126
+seed=42 arm=residual_fixed_sample_g1 epoch=12/30 validation=0.0126
+seed=42 arm=residual_fixed_sample_g1 epoch=13/30 validation=0.0126
+seed=42 arm=residual_fixed_sample_g1 epoch=14/30 validation=0.0116
+seed=42 arm=residual_fixed_sample_g1 epoch=15/30 validation=0.0124
+seed=42 arm=residual_fixed_sample_g1 epoch=16/30 validation=0.0128
+seed=42 arm=residual_fixed_sample_g1 epoch=17/30 validation=0.0140
+seed=42 arm=residual_fixed_sample_g1 epoch=18/30 validation=0.0148
+seed=42 arm=residual_fixed_sample_g1 epoch=19/30 validation=0.0154
+seed=42 arm=residual_fixed_sample_g1 epoch=20/30 validation=0.0150
+seed=42 arm=residual_fixed_sample_g1 epoch=21/30 validation=0.0154
+seed=42 arm=residual_fixed_sample_g1 epoch=22/30 validation=0.0142
+seed=42 arm=residual_fixed_sample_g1 epoch=23/30 validation=0.0144
+seed=42 arm=residual_fixed_sample_g1 epoch=24/30 validation=0.0144
+seed=42 arm=residual_fixed_sample_g1 epoch=25/30 validation=0.0132
+seed=42 arm=residual_fixed_sample_g1 epoch=26/30 validation=0.0132
+seed=42 arm=residual_fixed_sample_g1 epoch=27/30 validation=0.0138
+seed=42 arm=residual_fixed_sample_g1 epoch=28/30 validation=0.0148
+seed=42 arm=residual_fixed_sample_g1 epoch=29/30 validation=0.0142
+seed=42 arm=residual_fixed_sample_g1 epoch=30/30 validation=0.0142
+seed=42 arm=residual_adaptive_domain_g1 epoch=1/30 validation=0.0142
+seed=42 arm=residual_adaptive_domain_g1 epoch=2/30 validation=0.0146
+seed=42 arm=residual_adaptive_domain_g1 epoch=3/30 validation=0.0138
+seed=42 arm=residual_adaptive_domain_g1 epoch=4/30 validation=0.0144
+seed=42 arm=residual_adaptive_domain_g1 epoch=5/30 validation=0.0148
+seed=42 arm=residual_adaptive_domain_g1 epoch=6/30 validation=0.0146
+seed=42 arm=residual_adaptive_domain_g1 epoch=7/30 validation=0.0146
+seed=42 arm=residual_adaptive_domain_g1 epoch=8/30 validation=0.0152
+seed=42 arm=residual_adaptive_domain_g1 epoch=9/30 validation=0.0142
+seed=42 arm=residual_adaptive_domain_g1 epoch=10/30 validation=0.0138
+seed=42 arm=residual_adaptive_domain_g1 epoch=11/30 validation=0.0140
+seed=42 arm=residual_adaptive_domain_g1 epoch=12/30 validation=0.0156
+seed=42 arm=residual_adaptive_domain_g1 epoch=13/30 validation=0.0148
+seed=42 arm=residual_adaptive_domain_g1 epoch=14/30 validation=0.0144
+seed=42 arm=residual_adaptive_domain_g1 epoch=15/30 validation=0.0160
+seed=42 arm=residual_adaptive_domain_g1 epoch=16/30 validation=0.0158
+seed=42 arm=residual_adaptive_domain_g1 epoch=17/30 validation=0.0158
+seed=42 arm=residual_adaptive_domain_g1 epoch=18/30 validation=0.0172
+seed=42 arm=residual_adaptive_domain_g1 epoch=19/30 validation=0.0180
+seed=42 arm=residual_adaptive_domain_g1 epoch=20/30 validation=0.0174
+seed=42 arm=residual_adaptive_domain_g1 epoch=21/30 validation=0.0180
+seed=42 arm=residual_adaptive_domain_g1 epoch=22/30 validation=0.0146
+seed=42 arm=residual_adaptive_domain_g1 epoch=23/30 validation=0.0164
+seed=42 arm=residual_adaptive_domain_g1 epoch=24/30 validation=0.0166
+seed=42 arm=residual_adaptive_domain_g1 epoch=25/30 validation=0.0166
+seed=42 arm=residual_adaptive_domain_g1 epoch=26/30 validation=0.0180
+seed=42 arm=residual_adaptive_domain_g1 epoch=27/30 validation=0.0162
+seed=42 arm=residual_adaptive_domain_g1 epoch=28/30 validation=0.0174
+seed=42 arm=residual_adaptive_domain_g1 epoch=29/30 validation=0.0172
+seed=42 arm=residual_adaptive_domain_g1 epoch=30/30 validation=0.0174
+seed=42 arm=residual_adaptive_domain_g5 epoch=1/30 validation=0.0116
+seed=42 arm=residual_adaptive_domain_g5 epoch=2/30 validation=0.0166
+seed=42 arm=residual_adaptive_domain_g5 epoch=3/30 validation=0.0184
+seed=42 arm=residual_adaptive_domain_g5 epoch=4/30 validation=0.0192
+seed=42 arm=residual_adaptive_domain_g5 epoch=5/30 validation=0.0116
+seed=42 arm=residual_adaptive_domain_g5 epoch=6/30 validation=0.0142
+seed=42 arm=residual_adaptive_domain_g5 epoch=7/30 validation=0.0206
+seed=42 arm=residual_adaptive_domain_g5 epoch=8/30 validation=0.0162
+seed=42 arm=residual_adaptive_domain_g5 epoch=9/30 validation=0.0150
+seed=42 arm=residual_adaptive_domain_g5 epoch=10/30 validation=0.0186
+seed=42 arm=residual_adaptive_domain_g5 epoch=11/30 validation=0.0116
+seed=42 arm=residual_adaptive_domain_g5 epoch=12/30 validation=0.0186
+seed=42 arm=residual_adaptive_domain_g5 epoch=13/30 validation=0.0228
+seed=42 arm=residual_adaptive_domain_g5 epoch=14/30 validation=0.0188
+seed=42 arm=residual_adaptive_domain_g5 epoch=15/30 validation=0.0246
+seed=42 arm=residual_adaptive_domain_g5 epoch=16/30 validation=0.0224
+seed=42 arm=residual_adaptive_domain_g5 epoch=17/30 validation=0.0246
+seed=42 arm=residual_adaptive_domain_g5 epoch=18/30 validation=0.0230
+seed=42 arm=residual_adaptive_domain_g5 epoch=19/30 validation=0.0256
+seed=42 arm=residual_adaptive_domain_g5 epoch=20/30 validation=0.0158
+seed=42 arm=residual_adaptive_domain_g5 epoch=21/30 validation=0.0268
+seed=42 arm=residual_adaptive_domain_g5 epoch=22/30 validation=0.0142
+seed=42 arm=residual_adaptive_domain_g5 epoch=23/30 validation=0.0278
+seed=42 arm=residual_adaptive_domain_g5 epoch=24/30 validation=0.0172
+seed=42 arm=residual_adaptive_domain_g5 epoch=25/30 validation=0.0254
+seed=42 arm=residual_adaptive_domain_g5 epoch=26/30 validation=0.0206
+seed=42 arm=residual_adaptive_domain_g5 epoch=27/30 validation=0.0246
+seed=42 arm=residual_adaptive_domain_g5 epoch=28/30 validation=0.0262
+seed=42 arm=residual_adaptive_domain_g5 epoch=29/30 validation=0.0280
+seed=42 arm=residual_adaptive_domain_g5 epoch=30/30 validation=0.0264
+seed=42 arm=residual_adaptive_domain_g15 epoch=1/30 validation=0.0138
+seed=42 arm=residual_adaptive_domain_g15 epoch=2/30 validation=0.0116
+seed=42 arm=residual_adaptive_domain_g15 epoch=3/30 validation=0.0100
+seed=42 arm=residual_adaptive_domain_g15 epoch=4/30 validation=0.0116
+seed=42 arm=residual_adaptive_domain_g15 epoch=5/30 validation=0.0112
+seed=42 arm=residual_adaptive_domain_g15 epoch=6/30 validation=0.0100
+seed=42 arm=residual_adaptive_domain_g15 epoch=7/30 validation=0.0102
+seed=42 arm=residual_adaptive_domain_g15 epoch=8/30 validation=0.0128
+seed=42 arm=residual_adaptive_domain_g15 epoch=9/30 validation=0.0096
+seed=42 arm=residual_adaptive_domain_g15 epoch=10/30 validation=0.0138
+seed=42 arm=residual_adaptive_domain_g15 epoch=11/30 validation=0.0094
+seed=42 arm=residual_adaptive_domain_g15 epoch=12/30 validation=0.0104
+seed=42 arm=residual_adaptive_domain_g15 epoch=13/30 validation=0.0094
+seed=42 arm=residual_adaptive_domain_g15 epoch=14/30 validation=0.0128
+seed=42 arm=residual_adaptive_domain_g15 epoch=15/30 validation=0.0086
+seed=42 arm=residual_adaptive_domain_g15 epoch=16/30 validation=0.0110
+seed=42 arm=residual_adaptive_domain_g15 epoch=17/30 validation=0.0128
+seed=42 arm=residual_adaptive_domain_g15 epoch=18/30 validation=0.0094
+seed=42 arm=residual_adaptive_domain_g15 epoch=19/30 validation=0.0102
+seed=42 arm=residual_adaptive_domain_g15 epoch=20/30 validation=0.0080
+seed=42 arm=residual_adaptive_domain_g15 epoch=21/30 validation=0.0096
+seed=42 arm=residual_adaptive_domain_g15 epoch=22/30 validation=0.0122
+seed=42 arm=residual_adaptive_domain_g15 epoch=23/30 validation=0.0126
+seed=42 arm=residual_adaptive_domain_g15 epoch=24/30 validation=0.0084
+seed=42 arm=residual_adaptive_domain_g15 epoch=25/30 validation=0.0164
+seed=42 arm=residual_adaptive_domain_g15 epoch=26/30 validation=0.0098
+seed=42 arm=residual_adaptive_domain_g15 epoch=27/30 validation=0.0136
+seed=42 arm=residual_adaptive_domain_g15 epoch=28/30 validation=0.0060
+seed=42 arm=residual_adaptive_domain_g15 epoch=29/30 validation=0.0070
+seed=42 arm=residual_adaptive_domain_g15 epoch=30/30 validation=0.0148
+seed=42 arm=residual_adaptive_sample_g5 epoch=1/30 validation=0.0110
+seed=42 arm=residual_adaptive_sample_g5 epoch=2/30 validation=0.0132
+seed=42 arm=residual_adaptive_sample_g5 epoch=3/30 validation=0.0130
+seed=42 arm=residual_adaptive_sample_g5 epoch=4/30 validation=0.0168
+seed=42 arm=residual_adaptive_sample_g5 epoch=5/30 validation=0.0078
+seed=42 arm=residual_adaptive_sample_g5 epoch=6/30 validation=0.0150
+seed=42 arm=residual_adaptive_sample_g5 epoch=7/30 validation=0.0168
+seed=42 arm=residual_adaptive_sample_g5 epoch=8/30 validation=0.0130
+seed=42 arm=residual_adaptive_sample_g5 epoch=9/30 validation=0.0134
+seed=42 arm=residual_adaptive_sample_g5 epoch=10/30 validation=0.0194
+seed=42 arm=residual_adaptive_sample_g5 epoch=11/30 validation=0.0154
+seed=42 arm=residual_adaptive_sample_g5 epoch=12/30 validation=0.0176
+seed=42 arm=residual_adaptive_sample_g5 epoch=13/30 validation=0.0222
+seed=42 arm=residual_adaptive_sample_g5 epoch=14/30 validation=0.0178
+seed=42 arm=residual_adaptive_sample_g5 epoch=15/30 validation=0.0214
+seed=42 arm=residual_adaptive_sample_g5 epoch=16/30 validation=0.0230
+seed=42 arm=residual_adaptive_sample_g5 epoch=17/30 validation=0.0238
+seed=42 arm=residual_adaptive_sample_g5 epoch=18/30 validation=0.0256
+seed=42 arm=residual_adaptive_sample_g5 epoch=19/30 validation=0.0220
+seed=42 arm=residual_adaptive_sample_g5 epoch=20/30 validation=0.0246
+seed=42 arm=residual_adaptive_sample_g5 epoch=21/30 validation=0.0242
+seed=42 arm=residual_adaptive_sample_g5 epoch=22/30 validation=0.0214
+seed=42 arm=residual_adaptive_sample_g5 epoch=23/30 validation=0.0204
+seed=42 arm=residual_adaptive_sample_g5 epoch=24/30 validation=0.0226
+seed=42 arm=residual_adaptive_sample_g5 epoch=25/30 validation=0.0240
+seed=42 arm=residual_adaptive_sample_g5 epoch=26/30 validation=0.0204
+seed=42 arm=residual_adaptive_sample_g5 epoch=27/30 validation=0.0258
+seed=42 arm=residual_adaptive_sample_g5 epoch=28/30 validation=0.0244
+seed=42 arm=residual_adaptive_sample_g5 epoch=29/30 validation=0.0272
+seed=42 arm=residual_adaptive_sample_g5 epoch=30/30 validation=0.0288
+seed=42 arm=residual_adaptive_quality_g5 epoch=1/30 validation=0.0118
+seed=42 arm=residual_adaptive_quality_g5 epoch=2/30 validation=0.0120
+seed=42 arm=residual_adaptive_quality_g5 epoch=3/30 validation=0.0146
+seed=42 arm=residual_adaptive_quality_g5 epoch=4/30 validation=0.0142
+seed=42 arm=residual_adaptive_quality_g5 epoch=5/30 validation=0.0092
+seed=42 arm=residual_adaptive_quality_g5 epoch=6/30 validation=0.0154
+seed=42 arm=residual_adaptive_quality_g5 epoch=7/30 validation=0.0192
+seed=42 arm=residual_adaptive_quality_g5 epoch=8/30 validation=0.0152
+seed=42 arm=residual_adaptive_quality_g5 epoch=9/30 validation=0.0132
+seed=42 arm=residual_adaptive_quality_g5 epoch=10/30 validation=0.0164
+seed=42 arm=residual_adaptive_quality_g5 epoch=11/30 validation=0.0144
+seed=42 arm=residual_adaptive_quality_g5 epoch=12/30 validation=0.0166
+seed=42 arm=residual_adaptive_quality_g5 epoch=13/30 validation=0.0242
+seed=42 arm=residual_adaptive_quality_g5 epoch=14/30 validation=0.0208
+seed=42 arm=residual_adaptive_quality_g5 epoch=15/30 validation=0.0228
+seed=42 arm=residual_adaptive_quality_g5 epoch=16/30 validation=0.0250
+seed=42 arm=residual_adaptive_quality_g5 epoch=17/30 validation=0.0232
+seed=42 arm=residual_adaptive_quality_g5 epoch=18/30 validation=0.0226
+seed=42 arm=residual_adaptive_quality_g5 epoch=19/30 validation=0.0226
+seed=42 arm=residual_adaptive_quality_g5 epoch=20/30 validation=0.0202
+seed=42 arm=residual_adaptive_quality_g5 epoch=21/30 validation=0.0234
+seed=42 arm=residual_adaptive_quality_g5 epoch=22/30 validation=0.0200
+seed=42 arm=residual_adaptive_quality_g5 epoch=23/30 validation=0.0226
+seed=42 arm=residual_adaptive_quality_g5 epoch=24/30 validation=0.0220
+seed=42 arm=residual_adaptive_quality_g5 epoch=25/30 validation=0.0192
+seed=42 arm=residual_adaptive_quality_g5 epoch=26/30 validation=0.0216
+seed=42 arm=residual_adaptive_quality_g5 epoch=27/30 validation=0.0214
+seed=42 arm=residual_adaptive_quality_g5 epoch=28/30 validation=0.0232
+seed=42 arm=residual_adaptive_quality_g5 epoch=29/30 validation=0.0298
+seed=42 arm=residual_adaptive_quality_g5 epoch=30/30 validation=0.0246
+seed=42 arm=residual_fixed_domain_g5 epoch=1/30 validation=0.0116
+seed=42 arm=residual_fixed_domain_g5 epoch=2/30 validation=0.0166
+seed=42 arm=residual_fixed_domain_g5 epoch=3/30 validation=0.0184
+seed=42 arm=residual_fixed_domain_g5 epoch=4/30 validation=0.0172
+seed=42 arm=residual_fixed_domain_g5 epoch=5/30 validation=0.0130
+seed=42 arm=residual_fixed_domain_g5 epoch=6/30 validation=0.0166
+seed=42 arm=residual_fixed_domain_g5 epoch=7/30 validation=0.0190
+seed=42 arm=residual_fixed_domain_g5 epoch=8/30 validation=0.0154
+seed=42 arm=residual_fixed_domain_g5 epoch=9/30 validation=0.0184
+seed=42 arm=residual_fixed_domain_g5 epoch=10/30 validation=0.0196
+seed=42 arm=residual_fixed_domain_g5 epoch=11/30 validation=0.0160
+seed=42 arm=residual_fixed_domain_g5 epoch=12/30 validation=0.0232
+seed=42 arm=residual_fixed_domain_g5 epoch=13/30 validation=0.0220
+seed=42 arm=residual_fixed_domain_g5 epoch=14/30 validation=0.0198
+seed=42 arm=residual_fixed_domain_g5 epoch=15/30 validation=0.0252
+seed=42 arm=residual_fixed_domain_g5 epoch=16/30 validation=0.0234
+seed=42 arm=residual_fixed_domain_g5 epoch=17/30 validation=0.0256
+seed=42 arm=residual_fixed_domain_g5 epoch=18/30 validation=0.0204
+seed=42 arm=residual_fixed_domain_g5 epoch=19/30 validation=0.0278
+seed=42 arm=residual_fixed_domain_g5 epoch=20/30 validation=0.0184
+seed=42 arm=residual_fixed_domain_g5 epoch=21/30 validation=0.0256
+seed=42 arm=residual_fixed_domain_g5 epoch=22/30 validation=0.0196
+seed=42 arm=residual_fixed_domain_g5 epoch=23/30 validation=0.0262
+seed=42 arm=residual_fixed_domain_g5 epoch=24/30 validation=0.0224
+seed=42 arm=residual_fixed_domain_g5 epoch=25/30 validation=0.0250
+seed=42 arm=residual_fixed_domain_g5 epoch=26/30 validation=0.0240
+seed=42 arm=residual_fixed_domain_g5 epoch=27/30 validation=0.0262
+seed=42 arm=residual_fixed_domain_g5 epoch=28/30 validation=0.0260
+seed=42 arm=residual_fixed_domain_g5 epoch=29/30 validation=0.0288
+seed=42 arm=residual_fixed_domain_g5 epoch=30/30 validation=0.0260

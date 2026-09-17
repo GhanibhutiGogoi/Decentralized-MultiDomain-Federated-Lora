@@ -1,0 +1,9 @@
+{
+  "arm": "pooled_reset_svd",
+  "base_method": "pooled_reset",
+  "pooled_epoch_svd": true,
+  "center_before_svd": false,
+  "iid_preserving_client_sizes": false,
+  "exploratory": true,
+  "seed": 43
+}

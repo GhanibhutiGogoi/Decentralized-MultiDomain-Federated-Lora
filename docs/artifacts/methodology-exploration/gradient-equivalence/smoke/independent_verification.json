@@ -1,0 +1,26 @@
+{
+  "status": "completed",
+  "execution_host": "gpu003",
+  "scope": "independent forward evaluation and recorded traffic/source invariants",
+  "seeds": [
+    {
+      "seed": 42,
+      "arms": {
+        "pooled": {
+          "full_test_correct": 4400,
+          "accuracy": 0.44,
+          "prediction_sha256": "750cd8b685a96dce4bb07f397f5a3b897bb6c3725d9bd74c2a937b9863a69052"
+        },
+        "distributed": {
+          "full_test_correct": 4400,
+          "accuracy": 0.44,
+          "prediction_sha256": "750cd8b685a96dce4bb07f397f5a3b897bb6c3725d9bd74c2a937b9863a69052"
+        }
+      },
+      "steps_per_arm": 391,
+      "peer_messages": 10948,
+      "peer_payload_bytes": 428898848,
+      "fp64_gradient_checks": 64
+    }
+  ]
+}

@@ -1,0 +1,627 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "seed": 42,
+  "execution": "single-process simulation with collapsed identical model/Adam replicas",
+  "method": "uniform-rank exact peer factor-gradient allreduce",
+  "scope": "positive control, not heterogeneous/adaptive solution or privacy proof",
+  "dtype": "float32",
+  "alpha": 32.0,
+  "rank": 16,
+  "source_sha256": "a3b83bc3d1b1cc7ec83f5d17c5e81d58086bb164cebc22ecdcc98128c16062b2",
+  "feature_cache_identity_sha256": "eff1ad00e14d86f46fc9d261fdbee194d05ed44678c2262bc975d11bdbe102df",
+  "initial_state_sha256": "b037361a6fedf8d7ca05314822f1d954d39034aa4081d1334cd39eba255dae8d",
+  "split_sha256": "733412b45f3f3936f7b496e4aef99f806bf53dfee64fd50600f2ade095cfe385",
+  "ownership_sha256": "e6d3864a6aa1142e78baa588fbb60f803ae976e350c9d54864b64f462d5b2215",
+  "n_train": 50000,
+  "n_test": 10000,
+  "optimizer": {
+    "name": "Adam",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "reset_each_epoch": false,
+    "batch_size": 128
+  },
+  "minibatch_schedule": "FeatureClient cid0 seeded generator; pooled batch split by original client ownership",
+  "topology": {
+    "13": [
+      6,
+      8
+    ],
+    "8": [
+      13,
+      10
+    ],
+    "10": [
+      8,
+      2
+    ],
+    "2": [
+      10,
+      1
+    ],
+    "1": [
+      2,
+      14
+    ],
+    "14": [
+      1,
+      11
+    ],
+    "11": [
+      14,
+      4
+    ],
+    "4": [
+      11,
+      3
+    ],
+    "3": [
+      4,
+      9
+    ],
+    "9": [
+      3,
+      5
+    ],
+    "5": [
+      9,
+      12
+    ],
+    "12": [
+      5,
+      0
+    ],
+    "0": [
+      12,
+      7
+    ],
+    "7": [
+      0,
+      6
+    ],
+    "6": [
+      7,
+      13
+    ]
+  },
+  "root": 0,
+  "reduction_edges": [
+    [
+      14,
+      11
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      11,
+      4
+    ],
+    [
+      2,
+      10
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      10,
+      8
+    ],
+    [
+      3,
+      9
+    ],
+    [
+      8,
+      13
+    ],
+    [
+      9,
+      5
+    ],
+    [
+      13,
+      6
+    ],
+    [
+      5,
+      12
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      12,
+      0
+    ],
+    [
+      7,
+      0
+    ]
+  ],
+  "broadcast_edges": [
+    [
+      0,
+      7
+    ],
+    [
+      0,
+      12
+    ],
+    [
+      7,
+      6
+    ],
+    [
+      12,
+      5
+    ],
+    [
+      6,
+      13
+    ],
+    [
+      5,
+      9
+    ],
+    [
+      13,
+      8
+    ],
+    [
+      9,
+      3
+    ],
+    [
+      8,
+      10
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      10,
+      2
+    ],
+    [
+      4,
+      11
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      11,
+      14
+    ]
+  ],
+  "message_payload": "factor gradient sum/mean and int64 sample count; no raw examples or example indices",
+  "gradient_bytes_per_message": 39168,
+  "messages_per_step": 28,
+  "bytes_per_step": 1096928,
+  "communication_exclusions": "initial model dissemination, schedule metadata, transport framing; oracle/evaluation are diagnostics",
+  "factor_coordinate_policy": "shared initialization, no projection/SVD, persistent identical factor coordinates",
+  "proof_tolerance": {
+    "dtype": "float64",
+    "atol": 2e-11,
+    "rtol": 2e-10,
+    "checked_batches": 64
+  },
+  "proof": [
+    {
+      "step": 1,
+      "max_gradient_abs_error": 5.551115123125783e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 2,
+      "max_gradient_abs_error": 3.469446951953614e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 3,
+      "max_gradient_abs_error": 4.85722573273506e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 4,
+      "max_gradient_abs_error": 5.551115123125783e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 5,
+      "max_gradient_abs_error": 5.724587470723463e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 6,
+      "max_gradient_abs_error": 8.326672684688674e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 7,
+      "max_gradient_abs_error": 8.326672684688674e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 8,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 9,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 10,
+      "max_gradient_abs_error": 1.8041124150158794e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 11,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 12,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 13,
+      "max_gradient_abs_error": 1.942890293094024e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 14,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 15,
+      "max_gradient_abs_error": 2.220446049250313e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 16,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 17,
+      "max_gradient_abs_error": 1.942890293094024e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 18,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 19,
+      "max_gradient_abs_error": 2.220446049250313e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 20,
+      "max_gradient_abs_error": 1.942890293094024e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 21,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 22,
+      "max_gradient_abs_error": 2.220446049250313e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 23,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 24,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 25,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 26,
+      "max_gradient_abs_error": 1.5265566588595902e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 27,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 28,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 29,
+      "max_gradient_abs_error": 2.220446049250313e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 30,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 31,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 32,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 33,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 34,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 35,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 36,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 37,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 38,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 39,
+      "max_gradient_abs_error": 2.220446049250313e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 40,
+      "max_gradient_abs_error": 2.220446049250313e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 41,
+      "max_gradient_abs_error": 1.249000902703301e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 42,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 43,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 44,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 45,
+      "max_gradient_abs_error": 1.249000902703301e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 46,
+      "max_gradient_abs_error": 1.249000902703301e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 47,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 48,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 49,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 50,
+      "max_gradient_abs_error": 9.71445146547012e-17,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 51,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 52,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 53,
+      "max_gradient_abs_error": 2.220446049250313e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 54,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 55,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 56,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 57,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 58,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 59,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 60,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 61,
+      "max_gradient_abs_error": 1.1102230246251565e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 62,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 63,
+      "max_gradient_abs_error": 1.6653345369377348e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    },
+    {
+      "step": 64,
+      "max_gradient_abs_error": 1.3877787807814457e-16,
+      "n_samples": 128,
+      "contributing_peers": 15
+    }
+  ],
+  "rounds": [
+    {
+      "epoch": 1,
+      "optimizer_steps": 391,
+      "pooled_train_loss": 2.9101160333251954,
+      "distributed_train_loss": 2.910116042817235,
+      "pooled_full_test_correct": 4400,
+      "distributed_full_test_correct": 4400,
+      "pooled_full_test_accuracy": 0.44,
+      "distributed_full_test_accuracy": 0.44,
+      "test_prediction_disagreements": 0,
+      "max_factor_abs_error": 1.3527460396289825e-07,
+      "train_sample_exposures_per_arm": 50000,
+      "peer_messages": 10948,
+      "peer_payload_bytes": 428898848,
+      "wall_seconds": 17.462221764959395
+    }
+  ],
+  "total_optimizer_steps_per_arm": 391,
+  "total_peer_messages": 10948,
+  "total_peer_payload_bytes": 428898848,
+  "total_wall_seconds": 17.61971940100193,
+  "max_proof_gradient_abs_error": 2.220446049250313e-16,
+  "checkpoint_sha256": "b205080f56ebaaefa3b204cf7ab4a599b78456435b40d8cb69ba75eebc5dad45"
+}

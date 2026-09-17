@@ -1,0 +1,100 @@
+{
+  "status": "completed",
+  "source_sha256": "82d02cb8bd9dfcc1751a5e692a44ead9ac4250eedd7d98554ec4874149c394a7",
+  "arguments": {
+    "data_dir": "/home/gogoi/ahlora-data",
+    "feature_cache": "/home/gogoi/ahlora-data/features-v2",
+    "output": "/home/gogoi/ahlora-runs/methodology-exploration-20260915/gradient-equivalence-v1",
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "epochs": 30,
+    "proof_batches": 64,
+    "reset_each_epoch": false,
+    "device": "cuda:0",
+    "dtype": "float32",
+    "alpha": 32.0,
+    "reference_rank": 16,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 128,
+    "eval_batch_size": 2048,
+    "local_epochs": 1,
+    "n_domains": 5,
+    "clients_per_domain": 3,
+    "dirichlet_alpha": 0.5,
+    "max_train_per_client": 0,
+    "max_test_per_domain": 0
+  },
+  "packages": {
+    "torch": "2.3.0",
+    "torchvision": "0.18.0",
+    "numpy": "1.26.4",
+    "scikit-learn": "1.7.2"
+  },
+  "host": "gpu003",
+  "results": [
+    {
+      "seed": 42,
+      "final": {
+        "epoch": 30,
+        "optimizer_steps": 391,
+        "pooled_train_loss": 1.3357528846359252,
+        "distributed_train_loss": 1.335752893417417,
+        "pooled_full_test_correct": 5780,
+        "distributed_full_test_correct": 5780,
+        "pooled_full_test_accuracy": 0.578,
+        "distributed_full_test_accuracy": 0.578,
+        "test_prediction_disagreements": 0,
+        "max_factor_abs_error": 4.76837158203125e-07,
+        "train_sample_exposures_per_arm": 50000,
+        "peer_messages": 10948,
+        "peer_payload_bytes": 428898848,
+        "wall_seconds": 14.427253669127822
+      },
+      "max_proof_gradient_abs_error": 2.220446049250313e-16
+    },
+    {
+      "seed": 43,
+      "final": {
+        "epoch": 30,
+        "optimizer_steps": 391,
+        "pooled_train_loss": 1.3387717792892455,
+        "distributed_train_loss": 1.3387717867392768,
+        "pooled_full_test_correct": 5663,
+        "distributed_full_test_correct": 5663,
+        "pooled_full_test_accuracy": 0.5663,
+        "distributed_full_test_accuracy": 0.5663,
+        "test_prediction_disagreements": 0,
+        "max_factor_abs_error": 5.364418029785156e-07,
+        "train_sample_exposures_per_arm": 50000,
+        "peer_messages": 10948,
+        "peer_payload_bytes": 428898848,
+        "wall_seconds": 13.353918817825615
+      },
+      "max_proof_gradient_abs_error": 3.3306690738754696e-16
+    },
+    {
+      "seed": 44,
+      "final": {
+        "epoch": 30,
+        "optimizer_steps": 391,
+        "pooled_train_loss": 1.3345880368041991,
+        "distributed_train_loss": 1.3345880456239652,
+        "pooled_full_test_correct": 5725,
+        "distributed_full_test_correct": 5725,
+        "pooled_full_test_accuracy": 0.5725,
+        "distributed_full_test_accuracy": 0.5725,
+        "test_prediction_disagreements": 0,
+        "max_factor_abs_error": 5.364418029785156e-07,
+        "train_sample_exposures_per_arm": 50000,
+        "peer_messages": 10948,
+        "peer_payload_bytes": 428898848,
+        "wall_seconds": 14.885560004971921
+      },
+      "max_proof_gradient_abs_error": 2.7755575615628914e-16
+    }
+  ]
+}

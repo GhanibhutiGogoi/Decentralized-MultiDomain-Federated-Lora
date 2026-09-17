@@ -1,0 +1,114 @@
+{
+  "status": "complete",
+  "verified_checkpoints": 15,
+  "replicated_accuracy_percent": {
+    "pooled": {
+      "n": 3,
+      "mean": 57.18000000000001,
+      "sample_sd": 0.7118988692223077,
+      "per_seed": {
+        "42": 57.64,
+        "43": 57.54,
+        "44": 56.36
+      }
+    },
+    "uniform_sample": {
+      "n": 3,
+      "mean": 57.18000000000001,
+      "sample_sd": 0.7118988692223077,
+      "per_seed": {
+        "42": 57.64,
+        "43": 57.54,
+        "44": 56.36
+      }
+    },
+    "fixed_domain": {
+      "n": 3,
+      "mean": 55.9,
+      "sample_sd": 0.5892367945062515,
+      "per_seed": {
+        "42": 55.26,
+        "43": 56.02,
+        "44": 56.42
+      }
+    },
+    "adaptive_domain": {
+      "n": 3,
+      "mean": 55.03333333333334,
+      "sample_sd": 1.0104124570359057,
+      "per_seed": {
+        "42": 54.800000000000004,
+        "43": 54.16,
+        "44": 56.14
+      }
+    }
+  },
+  "paired_effects_percentage_points": {
+    "uniform_minus_pooled": {
+      "n": 3,
+      "mean": 0.0,
+      "sample_sd": 0.0,
+      "per_seed": {
+        "42": 0.0,
+        "43": 0.0,
+        "44": 0.0
+      }
+    },
+    "fixed_domain_minus_pooled": {
+      "n": 3,
+      "mean": -1.2799999999999987,
+      "sample_sd": 1.2375782803524005,
+      "per_seed": {
+        "42": -2.3800000000000026,
+        "43": -1.519999999999996,
+        "44": 0.060000000000002274
+      }
+    },
+    "adaptive_domain_minus_pooled": {
+      "n": 3,
+      "mean": -2.146666666666666,
+      "sample_sd": 1.690246530342049,
+      "per_seed": {
+        "42": -2.8399999999999963,
+        "43": -3.3800000000000026,
+        "44": -0.21999999999999886
+      }
+    },
+    "adaptive_domain_minus_fixed_domain": {
+      "n": 3,
+      "mean": -0.8666666666666671,
+      "sample_sd": 0.8649470118645083,
+      "per_seed": {
+        "42": -0.45999999999999375,
+        "43": -1.8600000000000065,
+        "44": -0.28000000000000114
+      }
+    }
+  },
+  "uniform_control_checks": [
+    {
+      "seed": 42,
+      "uniform_vs_pooled_matching_round_counts": 29,
+      "final_predictions_identical": true,
+      "intermediate_count_differences": [
+        {
+          "epoch": 1,
+          "uniform_correct": 2058,
+          "pooled_correct": 2059
+        }
+      ]
+    },
+    {
+      "seed": 43,
+      "uniform_vs_pooled_matching_round_counts": 30,
+      "final_predictions_identical": true,
+      "intermediate_count_differences": []
+    },
+    {
+      "seed": 44,
+      "uniform_vs_pooled_matching_round_counts": 30,
+      "final_predictions_identical": true,
+      "intermediate_count_differences": []
+    }
+  ]
+}

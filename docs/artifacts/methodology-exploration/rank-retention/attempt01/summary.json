@@ -1,0 +1,529 @@
+{
+  "status": "complete",
+  "scope": "no-training oracle information-retention diagnostic",
+  "n_records": 18,
+  "cycle_count": 30,
+  "per_seed": [
+    {
+      "seed": 42,
+      "method": "ring_uniform16",
+      "oracle_accuracy_percent": 57.8,
+      "initial_projected_accuracy_percent": 57.8,
+      "final_accuracy_percent": 57.8,
+      "additional_cycle_accuracy_change_pp": 0.0,
+      "gap_to_oracle_pp": 0.0,
+      "initial_retained_energy_percent": 100.0000401021589,
+      "final_retained_energy_percent": 100.00094240073444,
+      "final_relative_frobenius_norm": 1.0000047119925708,
+      "max_common_basis_prediction_error": 5.648644787756374e-06,
+      "final_mean_projection_residual_energy": 1.2688257888804343e-09
+    },
+    {
+      "seed": 42,
+      "method": "ring_capability4_8_16",
+      "oracle_accuracy_percent": 57.8,
+      "initial_projected_accuracy_percent": 47.44,
+      "final_accuracy_percent": 16.12,
+      "additional_cycle_accuracy_change_pp": -31.319999999999997,
+      "gap_to_oracle_pp": -41.67999999999999,
+      "initial_retained_energy_percent": 59.49764827572748,
+      "final_retained_energy_percent": 43.28510068449039,
+      "final_relative_frobenius_norm": 0.6579141333372494,
+      "max_common_basis_prediction_error": 2.0472276424033983e-06,
+      "final_mean_projection_residual_energy": 0.17301125931383374
+    },
+    {
+      "seed": 42,
+      "method": "ring_reduced2_4_8",
+      "oracle_accuracy_percent": 57.8,
+      "initial_projected_accuracy_percent": 22.040000000000003,
+      "final_accuracy_percent": 7.580000000000001,
+      "additional_cycle_accuracy_change_pp": -14.46,
+      "gap_to_oracle_pp": -50.22,
+      "initial_retained_energy_percent": 37.60357385093279,
+      "final_retained_energy_percent": 26.2053539322974,
+      "final_relative_frobenius_norm": 0.511911651872639,
+      "max_common_basis_prediction_error": 9.948182193076889e-07,
+      "final_mean_projection_residual_energy": 0.11793806836547514
+    },
+    {
+      "seed": 42,
+      "method": "central_uniform16",
+      "oracle_accuracy_percent": 57.8,
+      "initial_projected_accuracy_percent": 57.8,
+      "final_accuracy_percent": 57.8,
+      "additional_cycle_accuracy_change_pp": 0.0,
+      "gap_to_oracle_pp": 0.0,
+      "initial_retained_energy_percent": 100.0000401021589,
+      "final_retained_energy_percent": 100.00077530840565,
+      "final_relative_frobenius_norm": 1.0000038765345145,
+      "max_common_basis_prediction_error": 4.7724038143453115e-06,
+      "final_mean_projection_residual_energy": 1.1699626822903042e-09
+    },
+    {
+      "seed": 42,
+      "method": "central_capability4_8_16",
+      "oracle_accuracy_percent": 57.8,
+      "initial_projected_accuracy_percent": 47.44,
+      "final_accuracy_percent": 12.139999999999999,
+      "additional_cycle_accuracy_change_pp": -35.3,
+      "gap_to_oracle_pp": -45.66,
+      "initial_retained_energy_percent": 59.49764827572748,
+      "final_retained_energy_percent": 42.43350460519826,
+      "final_relative_frobenius_norm": 0.6514100444819549,
+      "max_common_basis_prediction_error": 2.143330365241598e-06,
+      "final_mean_projection_residual_energy": 5.37007825059573e-08
+    },
+    {
+      "seed": 42,
+      "method": "central_reduced2_4_8",
+      "oracle_accuracy_percent": 57.8,
+      "initial_projected_accuracy_percent": 22.040000000000003,
+      "final_accuracy_percent": 4.61,
+      "additional_cycle_accuracy_change_pp": -17.43,
+      "gap_to_oracle_pp": -53.18999999999999,
+      "initial_retained_energy_percent": 37.60357385093279,
+      "final_retained_energy_percent": 25.62482171248516,
+      "final_relative_frobenius_norm": 0.5062096572813004,
+      "max_common_basis_prediction_error": 1.1213498489075358e-06,
+      "final_mean_projection_residual_energy": 3.664112600369288e-08
+    },
+    {
+      "seed": 43,
+      "method": "ring_uniform16",
+      "oracle_accuracy_percent": 56.63,
+      "initial_projected_accuracy_percent": 56.63,
+      "final_accuracy_percent": 56.63,
+      "additional_cycle_accuracy_change_pp": 0.0,
+      "gap_to_oracle_pp": 0.0,
+      "initial_retained_energy_percent": 100.00001312088693,
+      "final_retained_energy_percent": 100.00055107725106,
+      "final_relative_frobenius_norm": 1.0000027553824593,
+      "max_common_basis_prediction_error": 6.33320411179266e-06,
+      "final_mean_projection_residual_energy": 1.3953875166450303e-09
+    },
+    {
+      "seed": 43,
+      "method": "ring_capability4_8_16",
+      "oracle_accuracy_percent": 56.63,
+      "initial_projected_accuracy_percent": 48.97,
+      "final_accuracy_percent": 12.83,
+      "additional_cycle_accuracy_change_pp": -36.14000000000001,
+      "gap_to_oracle_pp": -43.800000000000004,
+      "initial_retained_energy_percent": 61.00531448404212,
+      "final_retained_energy_percent": 42.05267222607393,
+      "final_relative_frobenius_norm": 0.648480317558474,
+      "max_common_basis_prediction_error": 2.522621719744099e-06,
+      "final_mean_projection_residual_energy": 0.1501589782982018
+    },
+    {
+      "seed": 43,
+      "method": "ring_reduced2_4_8",
+      "oracle_accuracy_percent": 56.63,
+      "initial_projected_accuracy_percent": 21.36,
+      "final_accuracy_percent": 5.63,
+      "additional_cycle_accuracy_change_pp": -15.73,
+      "gap_to_oracle_pp": -51.0,
+      "initial_retained_energy_percent": 38.436877249904086,
+      "final_retained_energy_percent": 25.287998547780234,
+      "final_relative_frobenius_norm": 0.5028717385952429,
+      "max_common_basis_prediction_error": 1.4798673008204456e-06,
+      "final_mean_projection_residual_energy": 0.09899868049582072
+    },
+    {
+      "seed": 43,
+      "method": "central_uniform16",
+      "oracle_accuracy_percent": 56.63,
+      "initial_projected_accuracy_percent": 56.63,
+      "final_accuracy_percent": 56.63,
+      "additional_cycle_accuracy_change_pp": 0.0,
+      "gap_to_oracle_pp": 0.0,
+      "initial_retained_energy_percent": 100.00001312088693,
+      "final_retained_energy_percent": 100.0011808798237,
+      "final_relative_frobenius_norm": 1.0000059043816876,
+      "max_common_basis_prediction_error": 9.724251159773736e-06,
+      "final_mean_projection_residual_energy": 1.5251990781450786e-09
+    },
+    {
+      "seed": 43,
+      "method": "central_capability4_8_16",
+      "oracle_accuracy_percent": 56.63,
+      "initial_projected_accuracy_percent": 48.97,
+      "final_accuracy_percent": 10.31,
+      "additional_cycle_accuracy_change_pp": -38.660000000000004,
+      "gap_to_oracle_pp": -46.32000000000001,
+      "initial_retained_energy_percent": 61.00531448404212,
+      "final_retained_energy_percent": 41.77000239849813,
+      "final_relative_frobenius_norm": 0.6462971638379525,
+      "max_common_basis_prediction_error": 3.1062482508033742e-06,
+      "final_mean_projection_residual_energy": 2.819090341906379e-07
+    },
+    {
+      "seed": 43,
+      "method": "central_reduced2_4_8",
+      "oracle_accuracy_percent": 56.63,
+      "initial_projected_accuracy_percent": 21.36,
+      "final_accuracy_percent": 4.58,
+      "additional_cycle_accuracy_change_pp": -16.78,
+      "gap_to_oracle_pp": -52.050000000000004,
+      "initial_retained_energy_percent": 38.436877249904086,
+      "final_retained_energy_percent": 25.104806364574866,
+      "final_relative_frobenius_norm": 0.5010469675047926,
+      "max_common_basis_prediction_error": 2.2629834219399674e-06,
+      "final_mean_projection_residual_energy": 1.8215427810552853e-07
+    },
+    {
+      "seed": 44,
+      "method": "ring_uniform16",
+      "oracle_accuracy_percent": 57.25,
+      "initial_projected_accuracy_percent": 57.25,
+      "final_accuracy_percent": 57.25,
+      "additional_cycle_accuracy_change_pp": 0.0,
+      "gap_to_oracle_pp": 0.0,
+      "initial_retained_energy_percent": 99.9999802168784,
+      "final_retained_energy_percent": 100.00009891560796,
+      "final_relative_frobenius_norm": 1.0000004945779175,
+      "max_common_basis_prediction_error": 2.3945647260558517e-06,
+      "final_mean_projection_residual_energy": 1.431894240215096e-09
+    },
+    {
+      "seed": 44,
+      "method": "ring_capability4_8_16",
+      "oracle_accuracy_percent": 57.25,
+      "initial_projected_accuracy_percent": 47.67,
+      "final_accuracy_percent": 11.64,
+      "additional_cycle_accuracy_change_pp": -36.03,
+      "gap_to_oracle_pp": -45.61,
+      "initial_retained_energy_percent": 60.12006904045661,
+      "final_retained_energy_percent": 43.0051168384567,
+      "final_relative_frobenius_norm": 0.6557828667970573,
+      "max_common_basis_prediction_error": 2.1169371823055383e-06,
+      "final_mean_projection_residual_energy": 0.012298424761401123
+    },
+    {
+      "seed": 44,
+      "method": "ring_reduced2_4_8",
+      "oracle_accuracy_percent": 57.25,
+      "initial_projected_accuracy_percent": 19.919999999999998,
+      "final_accuracy_percent": 4.35,
+      "additional_cycle_accuracy_change_pp": -15.57,
+      "gap_to_oracle_pp": -52.900000000000006,
+      "initial_retained_energy_percent": 38.07938333636015,
+      "final_retained_energy_percent": 25.845047579066872,
+      "final_relative_frobenius_norm": 0.508380247246752,
+      "max_common_basis_prediction_error": 1.157145816549819e-06,
+      "final_mean_projection_residual_energy": 0.008498004493409293
+    },
+    {
+      "seed": 44,
+      "method": "central_uniform16",
+      "oracle_accuracy_percent": 57.25,
+      "initial_projected_accuracy_percent": 57.25,
+      "final_accuracy_percent": 57.25,
+      "additional_cycle_accuracy_change_pp": 0.0,
+      "gap_to_oracle_pp": 0.0,
+      "initial_retained_energy_percent": 99.9999802168784,
+      "final_retained_energy_percent": 100.00038247368417,
+      "final_relative_frobenius_norm": 1.0000019123665922,
+      "max_common_basis_prediction_error": 4.418059564908353e-06,
+      "final_mean_projection_residual_energy": 1.017741668718486e-09
+    },
+    {
+      "seed": 44,
+      "method": "central_capability4_8_16",
+      "oracle_accuracy_percent": 57.25,
+      "initial_projected_accuracy_percent": 47.67,
+      "final_accuracy_percent": 11.360000000000001,
+      "additional_cycle_accuracy_change_pp": -36.309999999999995,
+      "gap_to_oracle_pp": -45.89,
+      "initial_retained_energy_percent": 60.12006904045661,
+      "final_retained_energy_percent": 42.99690354580802,
+      "final_relative_frobenius_norm": 0.6557202417632692,
+      "max_common_basis_prediction_error": 3.038161370398582e-06,
+      "final_mean_projection_residual_energy": 6.004746859004466e-08
+    },
+    {
+      "seed": 44,
+      "method": "central_reduced2_4_8",
+      "oracle_accuracy_percent": 57.25,
+      "initial_projected_accuracy_percent": 19.919999999999998,
+      "final_accuracy_percent": 4.18,
+      "additional_cycle_accuracy_change_pp": -15.739999999999998,
+      "gap_to_oracle_pp": -53.07000000000001,
+      "initial_retained_energy_percent": 38.07938333636015,
+      "final_retained_energy_percent": 25.83912088555583,
+      "final_relative_frobenius_norm": 0.5083219539382086,
+      "max_common_basis_prediction_error": 9.954985796080812e-07,
+      "final_mean_projection_residual_energy": 4.125465309183044e-08
+    }
+  ],
+  "aggregate": [
+    {
+      "method": "ring_uniform16",
+      "n_seeds": 3,
+      "oracle_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "initial_projected_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "final_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "additional_cycle_accuracy_change_pp": {
+        "mean": 0.0,
+        "sample_sd": 0.0
+      },
+      "gap_to_oracle_pp": {
+        "mean": 0.0,
+        "sample_sd": 0.0
+      },
+      "initial_retained_energy_percent": {
+        "mean": 100.0000111466414,
+        "sample_sd": 2.9991414427814628e-05
+      },
+      "final_retained_energy_percent": {
+        "mean": 100.00053079786449,
+        "sample_sd": 0.00042210807832638176
+      },
+      "final_relative_frobenius_norm": {
+        "mean": 1.0000026539843159,
+        "sample_sd": 2.1105349504461156e-06
+      },
+      "max_common_basis_prediction_error": {
+        "mean": 4.792137875201628e-06,
+        "sample_sd": 2.1043818857707013e-06
+      },
+      "final_mean_projection_residual_energy": {
+        "mean": 1.3653691819135203e-09,
+        "sample_sd": 8.557835748722323e-11
+      }
+    },
+    {
+      "method": "ring_capability4_8_16",
+      "n_seeds": 3,
+      "oracle_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "initial_projected_accuracy_percent": {
+        "mean": 48.026666666666664,
+        "sample_sd": 0.8250050504895913
+      },
+      "final_accuracy_percent": {
+        "mean": 13.530000000000001,
+        "sample_sd": 2.320581823595109
+      },
+      "additional_cycle_accuracy_change_pp": {
+        "mean": -34.49666666666667,
+        "sample_sd": 2.7516237630412625
+      },
+      "gap_to_oracle_pp": {
+        "mean": -43.69666666666666,
+        "sample_sd": 1.9670366883546802
+      },
+      "initial_retained_energy_percent": {
+        "mean": 60.207677266742074,
+        "sample_sd": 0.7576415708685227
+      },
+      "final_retained_energy_percent": {
+        "mean": 42.780963249673675,
+        "sample_sd": 0.6460677981465446
+      },
+      "final_relative_frobenius_norm": {
+        "mean": 0.6540591058975936,
+        "sample_sd": 0.004947497727726381
+      },
+      "max_common_basis_prediction_error": {
+        "mean": 2.228928848151012e-06,
+        "sample_sd": 2.567225781009281e-07
+      },
+      "final_mean_projection_residual_energy": {
+        "mean": 0.11182288745781223,
+        "sample_sd": 0.08694478531321673
+      }
+    },
+    {
+      "method": "ring_reduced2_4_8",
+      "n_seeds": 3,
+      "oracle_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "initial_projected_accuracy_percent": {
+        "mean": 21.10666666666667,
+        "sample_sd": 1.0824663197223912
+      },
+      "final_accuracy_percent": {
+        "mean": 5.853333333333334,
+        "sample_sd": 1.6265402956377488
+      },
+      "additional_cycle_accuracy_change_pp": {
+        "mean": -15.253333333333336,
+        "sample_sd": 0.6916887546673959
+      },
+      "gap_to_oracle_pp": {
+        "mean": -51.373333333333335,
+        "sample_sd": 1.378453239443886
+      },
+      "initial_retained_energy_percent": {
+        "mean": 38.03994481239901,
+        "sample_sd": 0.41804926332126685
+      },
+      "final_retained_energy_percent": {
+        "mean": 25.7794666863815,
+        "sample_sd": 0.4621805550753046
+      },
+      "final_relative_frobenius_norm": {
+        "mean": 0.5077212125715447,
+        "sample_sd": 0.004555848224321643
+      },
+      "max_common_basis_prediction_error": {
+        "mean": 1.2106104455593177e-06,
+        "sample_sd": 2.4690484560946707e-07
+      },
+      "final_mean_projection_residual_energy": {
+        "mean": 0.07514491778490172,
+        "sample_sd": 0.05848960071399091
+      }
+    },
+    {
+      "method": "central_uniform16",
+      "n_seeds": 3,
+      "oracle_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "initial_projected_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "final_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "additional_cycle_accuracy_change_pp": {
+        "mean": 0.0,
+        "sample_sd": 0.0
+      },
+      "gap_to_oracle_pp": {
+        "mean": 0.0,
+        "sample_sd": 0.0
+      },
+      "initial_retained_energy_percent": {
+        "mean": 100.0000111466414,
+        "sample_sd": 2.9991414427814628e-05
+      },
+      "final_retained_energy_percent": {
+        "mean": 100.00077955397119,
+        "sample_sd": 0.0003992200014187894
+      },
+      "final_relative_frobenius_norm": {
+        "mean": 1.0000038977609316,
+        "sample_sd": 1.99609219501809e-06
+      },
+      "max_common_basis_prediction_error": {
+        "mean": 6.304904846342466e-06,
+        "sample_sd": 2.9665361737486485e-06
+      },
+      "final_mean_projection_residual_energy": {
+        "mean": 1.237634476384623e-09,
+        "sample_sd": 2.6040902323545747e-10
+      }
+    },
+    {
+      "method": "central_capability4_8_16",
+      "n_seeds": 3,
+      "oracle_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "initial_projected_accuracy_percent": {
+        "mean": 48.026666666666664,
+        "sample_sd": 0.8250050504895913
+      },
+      "final_accuracy_percent": {
+        "mean": 11.270000000000001,
+        "sample_sd": 0.9183136719008372
+      },
+      "additional_cycle_accuracy_change_pp": {
+        "mean": -36.75666666666667,
+        "sample_sd": 1.7239586228599997
+      },
+      "gap_to_oracle_pp": {
+        "mean": -45.95666666666667,
+        "sample_sd": 0.3350124375800651
+      },
+      "initial_retained_energy_percent": {
+        "mean": 60.207677266742074,
+        "sample_sd": 0.7576415708685227
+      },
+      "final_retained_energy_percent": {
+        "mean": 42.4001368498348,
+        "sample_sd": 0.6141308180193181
+      },
+      "final_relative_frobenius_norm": {
+        "mean": 0.6511424833610588,
+        "sample_sd": 0.004717233417132189
+      },
+      "max_common_basis_prediction_error": {
+        "mean": 2.7625799954811846e-06,
+        "sample_sd": 5.373653638212205e-07
+      },
+      "final_mean_projection_residual_energy": {
+        "mean": 1.318857617622133e-07,
+        "sample_sd": 1.2996271314751193e-07
+      }
+    },
+    {
+      "method": "central_reduced2_4_8",
+      "n_seeds": 3,
+      "oracle_accuracy_percent": {
+        "mean": 57.22666666666667,
+        "sample_sd": 0.5853488988059431
+      },
+      "initial_projected_accuracy_percent": {
+        "mean": 21.10666666666667,
+        "sample_sd": 1.0824663197223912
+      },
+      "final_accuracy_percent": {
+        "mean": 4.456666666666667,
+        "sample_sd": 0.24006943440041148
+      },
+      "additional_cycle_accuracy_change_pp": {
+        "mean": -16.650000000000002,
+        "sample_sd": 0.8524670081592609
+      },
+      "gap_to_oracle_pp": {
+        "mean": -52.77,
+        "sample_sd": 0.6264183905346292
+      },
+      "initial_retained_energy_percent": {
+        "mean": 38.03994481239901,
+        "sample_sd": 0.41804926332126685
+      },
+      "final_retained_energy_percent": {
+        "mean": 25.522916320871953,
+        "sample_sd": 0.37761486406225636
+      },
+      "final_relative_frobenius_norm": {
+        "mean": 0.5051928595747671,
+        "sample_sd": 0.003742561299912795
+      },
+      "max_common_basis_prediction_error": {
+        "mean": 1.4599439501518615e-06,
+        "sample_sd": 6.982935847001324e-07
+      },
+      "final_mean_projection_residual_energy": {
+        "mean": 8.668335240035061e-08,
+        "sample_sd": 8.271241986123333e-08
+      }
+    }
+  ],
+  "uncertainty": "sample SD across seeds; no equivalence claim",
+  "training_steps": 0,
+  "interpretation_boundary": "Information lost from repeated projection/mixing can explain a failure mechanism; these oracle-initialized results are not achievable federated training results."
+}

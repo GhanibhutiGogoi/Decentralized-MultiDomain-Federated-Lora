@@ -1,0 +1,205 @@
+{
+  "status": "complete",
+  "date": "2026-09-17",
+  "execution_host": "gpu003",
+  "build": "TeX Live 2026 pdflatex + bibtex + repeated pdflatex; final log has zero warnings and overfull/underfull boxes",
+  "pages": 29,
+  "pdf_sha256": "fd28d06a9e027692a9e4054e50eaead6c6f55114f263ca55b6a500998dda9d40",
+  "pdf_bytes": 1350749,
+  "render": "Poppler pdftoppm, 95 dpi, all 29 pages",
+  "visual_inspection": "All 29 final rendered pages viewed; tables, equations and new figures readable and within page bounds",
+  "new_results_present": true,
+  "insertion_markers_removed": true,
+  "tangent_plus_corrected": true,
+  "validation_vs_official_test_controls_distinguished": true,
+  "historical_findings_preserved": true,
+  "new_training_or_experimental_evaluation_performed": false,
+  "input_files": [
+    {
+      "path": "main.tex",
+      "sha256": "9ac7f39fc0b168930de6d830245668c25356d505335979ad79989b01de3a1540"
+    },
+    {
+      "path": "references.bib",
+      "sha256": "29ff2d96fbf94ce408ff3873fa09e11803cedf35d428226d9ba4559f4fd2e957"
+    },
+    {
+      "path": "integrated_results.tex",
+      "sha256": "c1df038ce7c5ae09fc4c052d9b40fa18ec71bb5e99c77eb4ee90380ccad6e939"
+    },
+    {
+      "path": "figures/integrated_final_comparison.pdf",
+      "sha256": "b106a49ab82ab7217b51793560ff65bb635414c7506be79ac152b2b57093341e"
+    },
+    {
+      "path": "figures/integrated_accuracy_curves.pdf",
+      "sha256": "cfbbf6a1a9e44c01e37130e15ca9869cd5057860da97817f64ad481bb096dca1"
+    },
+    {
+      "path": "figures/integrated_factorial.pdf",
+      "sha256": "3195dd53a1b42fba837df3dfcf07a089652e7159f72eb4731f30de883fc0f618"
+    },
+    {
+      "path": "figures/integrated_communication.pdf",
+      "sha256": "fdcb7760d38fd493242ff801a90e1175c8cdad76eaef0adefdac0be5409d3183"
+    },
+    {
+      "path": "figures/integrated_rank_trajectories.pdf",
+      "sha256": "a505e784d3344182211d6ff9d670466d1731891059456d9680180176677ab9dc"
+    },
+    {
+      "path": "figures/exploration_optimization.pdf",
+      "sha256": "0f4387e1ed4bc0700013f4d88518022f248dddc15f64216832c9a136529bfdaa"
+    },
+    {
+      "path": "figures/exploration_rank_retention.pdf",
+      "sha256": "ea081ab8d5247f551c7fab0a25e90698752288b850104ec4c5ad58e2db2b1380"
+    },
+    {
+      "path": "figures/exploration_gradient_equivalence.pdf",
+      "sha256": "8f3d2d8aad061c27ec1a9bfe00664bbba5de1cc8231d5dd2c96ae59482cef113"
+    },
+    {
+      "path": "figures/exploration_residual.pdf",
+      "sha256": "f97600c1d6cff2a393bf3890656c95f277ca5cab5757c9efd3f9750d40cc11ff"
+    },
+    {
+      "path": "figures/exploration_masked.pdf",
+      "sha256": "a173847ba584c6bda492d536575a2abf250991195d6f15d1fccb71aa5f17f397"
+    },
+    {
+      "path": "figures/p3_uniform_curves.png",
+      "sha256": "b3b343e7443a01693772453ebac8e398d284a8e012d36b6c490353f9edbcd2c4"
+    },
+    {
+      "path": "figures/p3_heterogeneous_curves.png",
+      "sha256": "72c77f01aec24f4b76723ce2227c68cf4d1c6089851045312ee59a889571094f"
+    },
+    {
+      "path": "figures/p1_adaptive_accuracy_curves.png",
+      "sha256": "488a9e47afacf13ac1d994ad5771aa8db0ef8ba0b8c8f9e5ae072b43b80bc592"
+    },
+    {
+      "path": "figures/p3_adaptive_discovery.png",
+      "sha256": "68ab975d5e465c2cbe0ba19d949c25cebaa503579a0688a2644f702b2ce027bd"
+    }
+  ],
+  "rendered_pages": [
+    {
+      "page": 1,
+      "sha256": "ecede2da2ed959bc2d9f40955f36a89e6d6fd9b1ffa64e7356d4d99e605ae26a"
+    },
+    {
+      "page": 2,
+      "sha256": "ef0d868de392f6d515033dbcfcaaafb4a534b1af98b1fb7bf2f429bd82bb7829"
+    },
+    {
+      "page": 3,
+      "sha256": "a0fa758b4c2d8fb2abb4d8ef398e0a6b1863b431d5dbd38b09bdd604e5598440"
+    },
+    {
+      "page": 4,
+      "sha256": "01ce13611670b02fa20fe195c2d0f3281620653d2d1e4bde8f876cdb57f478df"
+    },
+    {
+      "page": 5,
+      "sha256": "36085f7f7dd14026d100cf5c6cc31597db07f583a79165362a6f67af21162a31"
+    },
+    {
+      "page": 6,
+      "sha256": "4921eac279af2c2fdf4fe1c4851f11a4c5ebc7f1e597d618044c7b8a52a875cc"
+    },
+    {
+      "page": 7,
+      "sha256": "fa9321be718b6eb894a856cbc213aae00af34515d9bcd3117ede17eba1b3f980"
+    },
+    {
+      "page": 8,
+      "sha256": "921780ab3f5bc4a61e2e5edb5fcbbb100839d3f15909e7fbbde1155c9a256166"
+    },
+    {
+      "page": 9,
+      "sha256": "06b13116b8713d86c0b5cee7aaab5317fbb3e2bb55bb99b8ba3ed3ac85c84b7a"
+    },
+    {
+      "page": 10,
+      "sha256": "8e58a68471d790bd962feed2ce5324a599af951fd5a5467a65e1aa06e9db76a7"
+    },
+    {
+      "page": 11,
+      "sha256": "3f25b829811d6cc911a05ef028cd99f0c2ab23012f4b6d1b258397e6b970163a"
+    },
+    {
+      "page": 12,
+      "sha256": "643f22d0fca337451f7f49897b97981e7afe30215f56232504b42b660fa78504"
+    },
+    {
+      "page": 13,
+      "sha256": "497a67d64f6181747bc7075002d76b4ca21a8bb4c0055ed0980ed7cff885099b"
+    },
+    {
+      "page": 14,
+      "sha256": "38033e5c4292d8f727ce66a1ed5220f7b4bcc26e2397b53fb87a3f4781696961"
+    },
+    {
+      "page": 15,
+      "sha256": "7b96add57da241602d27f25b5fd4d5e8bf4d3d8de7886e546422ad3892640f52"
+    },
+    {
+      "page": 16,
+      "sha256": "a02b835fbcd2162a121a2b091113b512610a335f19e81f50901ac3c88af5bb66"
+    },
+    {
+      "page": 17,
+      "sha256": "8a868837c1fb3d6bde081bd31b5f0131c3b1b9ef335ec6c58c2f17eab4be9f8d"
+    },
+    {
+      "page": 18,
+      "sha256": "9deb086011316453c6bdbdf3248b06d9dd5f731586ea76fe18003ea1dbde08a5"
+    },
+    {
+      "page": 19,
+      "sha256": "a2eee6ac50ed4b2a05386937a5702c8de3f423aa53372d2500c33f39713978bf"
+    },
+    {
+      "page": 20,
+      "sha256": "f297aede41bbaa9b9d528b4fdbe3c31f1d10005e8fc8f1bb67950e839752c002"
+    },
+    {
+      "page": 21,
+      "sha256": "8d8d9cac6a97699b2c5b4cfc2c2a5389dd4f8c72b5c810b4107bf7b61bf3d310"
+    },
+    {
+      "page": 22,
+      "sha256": "aa4f666a16534aad2bef0e14d49f9a6dce8e7a93b494a40f9662b21cbde25031"
+    },
+    {
+      "page": 23,
+      "sha256": "030c57a340f11ef5fb7b08e34201b53083e0e6656781878aa98e6a141931c310"
+    },
+    {
+      "page": 24,
+      "sha256": "c0f80e88d1d87e35788e940c1950850233b2e25bbe18ece88210c8ee1fc66a1f"
+    },
+    {
+      "page": 25,
+      "sha256": "7aba9ff5ac870e8038f16ef1fba84d1850f485530bcac06bea4c53af87071f9a"
+    },
+    {
+      "page": 26,
+      "sha256": "fcd2f35054b640d0aea326a64790f727157c8ebb007c0329383558143c6994e5"
+    },
+    {
+      "page": 27,
+      "sha256": "1161b241867cda6b7f6cbc1231254e4ee4dc9d68040f739bdbf70d1934370697"
+    },
+    {
+      "page": 28,
+      "sha256": "4ba899e6bd62dd2a1e727e687e1df15ca46e8c9cc935bee3fde2ff3de9fb35a6"
+    },
+    {
+      "page": 29,
+      "sha256": "9ab3b51a2849a7c71a727ada58ddc31b1645bd7fdc7c6881c80f2c119865f1b9"
+    }
+  ]
+}
