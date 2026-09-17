@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "scope": "CPU-only scheduler lifecycle tests on gpu003; existing training untouched",
+  "worker_checks": [
+    {
+      "cpu_child_exit": 0,
+      "durable_receipt_correct": true,
+      "duplicate_worker_rejected": true
+    },
+    {
+      "cpu_child_exit": 7,
+      "durable_receipt_correct": true,
+      "duplicate_worker_rejected": true
+    }
+  ],
+  "concurrent_scheduler_rejected": true,
+  "campaign_still_running": true,
+  "fixtures": "/home/gogoi/ahlora-quantity-20260917/validation/queue-check-9f5_3xed"
+}

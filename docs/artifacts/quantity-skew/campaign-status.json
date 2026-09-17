@@ -1,0 +1,615 @@
+{
+  "schema_version": 1,
+  "status": "running",
+  "created_at": "2026-09-17T09:49:04.121838+00:00",
+  "updated_at": "2026-09-17T09:51:45.064474+00:00",
+  "host": "gpu003",
+  "base": "/home/gogoi/ahlora-quantity-20260917",
+  "python_path": "/home/gogoi/ahlora-venv/bin/python",
+  "scheduler_sha256": "a7cf0808bfbaefbdf0ade7a878724e84b542f6b8f0e836919f770de278145927",
+  "interpreter_sha256": "b52d7321b5a915c78d508993d00206a0d50b11d6029fb27888cfac5ef20373bc",
+  "source_manifest": {
+    "project-2-domain-aware-allocation/experiment/experiment1/signals.py": "5572d453b57d373835b971d3ba181b263567cced1940edcebb9b63ca1b683b24",
+    "project-2-domain-aware-allocation/framework/aggregation/domain_weighting.py": "e9d4272a0ab588d06b34718aa26e473d5473f0da6603dea6581270edebc06a68",
+    "project-3-hierarchical-gossip/experiments/quantity_skew_benchmark.py": "51a7ed5a0e654799aca6d615a41482315065e8f246e4ec117fef8d57ad893dc3",
+    "project-3-hierarchical-gossip/experiments/verify_quantity_checkpoint.py": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+    "project-3-hierarchical-gossip/requirements-transformer-gpu.txt": "900258fe50ba770742b23b994103db777b51f3e29f7c65a340d6bcfb99156135",
+    "project-3-hierarchical-gossip/src/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "project-3-hierarchical-gossip/src/clustering/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "project-3-hierarchical-gossip/src/clustering/discovery.py": "bb3b75aa67cb1355fc6f422ef8918417b086cc51fb4cb0149c7e75d0607f30d3",
+    "project-3-hierarchical-gossip/src/clustering/domain_clustering.py": "b86f813be93304765b657a208291dfd1c3fcd378dcd9bd806ef540b10e450fbd",
+    "project-3-hierarchical-gossip/src/clustering/signatures.py": "c609bedd956baf16f5ed9866950d497022b24bd0288382f6c3bf45545f21805f",
+    "project-3-hierarchical-gossip/src/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "project-3-hierarchical-gossip/src/data/cifar100_domains.py": "b2b7bff51c68f287b8e37b2253e015644b9d01acac1c0384913259af57d44658",
+    "project-3-hierarchical-gossip/src/data/quantity_skew.py": "d0346dc5df885f5bc34923dcec4c3393253eecf551eaccaa41cbc1b8b34e0761",
+    "project-3-hierarchical-gossip/src/federated/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "project-3-hierarchical-gossip/src/federated/adaptive_rank.py": "8e9447ed74abc1e4f8a54865c9e40d01ce65336b1683a922ace06bc511b3973e",
+    "project-3-hierarchical-gossip/src/federated/client.py": "90b13aacb65b70f1d9d1b33e0f759ff0dcdb265d996ac6fe45efa990c411d67d",
+    "project-3-hierarchical-gossip/src/federated/compact_merge.py": "a7d3b167891c00af7af3163563d4551a7f4d52cc9101dc05fe2195f21b5cc312",
+    "project-3-hierarchical-gossip/src/federated/domain_weights.py": "442b5c7f96e94209bfbd0d6aa2c373f7333c1ee26dfbfdce5c4f13da8036fe11",
+    "project-3-hierarchical-gossip/src/federated/fedavg.py": "8c93ba865f825b3161ec1046ee66617c77006a9890d3de7240dd3bd78a25f10d",
+    "project-3-hierarchical-gossip/src/federated/gossip.py": "eea7c000f40c719ef2dcc1da2c427b4300bdfe658bf4edf089c6fd6756cb8e78",
+    "project-3-hierarchical-gossip/src/federated/hierarchical.py": "627dc4a61056fa5b963370a2115b67a5fa14b8908703bf93c2f6c5a24e593faa",
+    "project-3-hierarchical-gossip/src/federated/merge.py": "8f0f05aea939d83e27df8f1711c9e603f8244accd04bfa5daee5d8fbaa9d01e3",
+    "project-3-hierarchical-gossip/src/federated/mixing.py": "642913f9ba59bd7113eafe112d41bcb20fbce8b97c89b500f4b95bfd6b2efb4e",
+    "project-3-hierarchical-gossip/src/federated/peer_assembly.py": "be63a098d7900e93f5ae3a3a65b66f34b46b59c87fe78009d159fff4a6916298",
+    "project-3-hierarchical-gossip/src/federated/quantity_transport.py": "3ede2d71f74107e0598b6eb4c96a5f23ef9fc0d9d902604c4746fd1f0ca5a57c",
+    "project-3-hierarchical-gossip/src/federated/runner.py": "ea698b9148d851c03f943c680e9592e2103fb4d364a19a3e963ddaa9d9af573d",
+    "project-3-hierarchical-gossip/src/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "project-3-hierarchical-gossip/src/models/lora_resnet.py": "a2c51890283268ede0bb0f87b04d953cafa48f683bfec4d6e42771749f676c20",
+    "project-3-hierarchical-gossip/src/models/roberta_lora.py": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+    "project-3-hierarchical-gossip/src/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "project-3-hierarchical-gossip/src/utils/metrics.py": "a878b22457aa6dcdf0eb1feb58ffbd700029748040fbfb5fa50844f6cdb3bc96",
+    "project-3-hierarchical-gossip/src/utils/visualization.py": "dc956b9c8341eaf0088a96b943fd402b865e3ef14ceb0cc7d5db9dfdfc6a170f"
+  },
+  "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+  "requirements_gpu_sha256": "88e547e4b39931afe12e8014ca69d6138f56ec50b1642210098030ee401a9203",
+  "summary_script": "/home/gogoi/ahlora-quantity-20260917/repo/scripts/summarize_quantity_benchmark.py",
+  "summary_script_sha256": "dfffd9cdd8eb3e55830749a62d689ca5ff6594d954f3aae0dfe6b6580bb2f52b",
+  "python_environment": {
+    "packages": {
+      "certifi": "2026.7.22",
+      "cffi": "2.1.1",
+      "charset-normalizer": "3.5.1",
+      "cloudpickle": "3.1.2",
+      "contourpy": "1.3.2",
+      "cycler": "0.12.1",
+      "exceptiongroup": "1.3.1",
+      "filelock": "3.32.5",
+      "fonttools": "4.64.0",
+      "fsspec": "2026.7.0",
+      "huggingface-hub": "0.24.7",
+      "idna": "3.19",
+      "iniconfig": "2.3.0",
+      "jinja2": "3.1.6",
+      "joblib": "1.6.0",
+      "kiwisolver": "1.5.1",
+      "markupsafe": "3.0.3",
+      "matplotlib": "3.10.9",
+      "mpmath": "1.3.0",
+      "networkx": "3.4.2",
+      "numpy": "1.26.4",
+      "nvidia-cublas-cu12": "12.1.3.1",
+      "nvidia-cuda-cupti-cu12": "12.1.105",
+      "nvidia-cuda-nvrtc-cu12": "12.1.105",
+      "nvidia-cuda-runtime-cu12": "12.1.105",
+      "nvidia-cudnn-cu12": "8.9.2.26",
+      "nvidia-cufft-cu12": "11.0.2.54",
+      "nvidia-curand-cu12": "10.3.2.106",
+      "nvidia-cusolver-cu12": "11.4.5.107",
+      "nvidia-cusparse-cu12": "12.1.0.106",
+      "nvidia-nccl-cu12": "2.20.5",
+      "nvidia-nvjitlink-cu12": "12.9.86",
+      "nvidia-nvtx-cu12": "12.1.105",
+      "packaging": "26.3",
+      "pandas": "2.2.3",
+      "pillow": "12.2.0",
+      "pip": "26.2.1",
+      "pluggy": "1.6.0",
+      "portalocker": "2.10.1",
+      "pyarrow": "12.0.1",
+      "pycparser": "3.0",
+      "pygments": "2.21.0",
+      "pyparsing": "3.3.2",
+      "pypdf": "6.19.0",
+      "pytest": "9.1.1",
+      "python-dateutil": "2.9.0.post0",
+      "pytz": "2026.3.post1",
+      "pyyaml": "6.0.3",
+      "regex": "2026.9.10",
+      "requests": "2.34.2",
+      "safetensors": "0.4.5",
+      "scikit-learn": "1.7.2",
+      "scipy": "1.15.3",
+      "setuptools": "65.5.0",
+      "six": "1.17.0",
+      "soundfile": "0.12.1",
+      "sympy": "1.14.0",
+      "threadpoolctl": "3.6.0",
+      "tokenizers": "0.19.1",
+      "tomli": "2.4.1",
+      "torch": "2.3.0",
+      "torchaudio": "2.3.0",
+      "torchdata": "0.8.0",
+      "torchtext": "0.18.0",
+      "torchvision": "0.18.0",
+      "tqdm": "4.70.0",
+      "transformers": "4.44.2",
+      "triton": "2.3.0",
+      "typing-extensions": "4.16.0",
+      "tzdata": "2026.3",
+      "urllib3": "2.7.0"
+    },
+    "prefix": "/home/gogoi/ahlora-venv",
+    "python": "3.10.12 (main, Jul  5 2023, 18:54:27) [GCC 11.2.0]"
+  },
+  "runtime_env": {
+    "PYTHONPATH": "/home/gogoi/pystubs:/home/gogoi/ahlora-quantity-20260917/repo/project-3-hierarchical-gossip",
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "CUDA_DEVICE_ORDER": null,
+    "OMP_NUM_THREADS": null,
+    "MKL_NUM_THREADS": null,
+    "TOKENIZERS_PARALLELISM": null,
+    "HF_HUB_OFFLINE": null,
+    "TRANSFORMERS_OFFLINE": null,
+    "PYTHONHASHSEED": null
+  },
+  "plan": [
+    {
+      "id": "full-v1-quantity-declora16-seed42",
+      "seed": 42,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed42",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed42",
+      "seed": 42,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed42",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed42",
+      "seed": 42,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed42",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed42",
+      "seed": 42,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed42",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed42",
+      "seed": 42,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed42",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed42",
+      "seed": 42,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed42",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed42",
+      "seed": 42,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed42",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-equal-declora16-seed42",
+      "seed": 42,
+      "arm": "declora16",
+      "partition": "equal",
+      "stage": "screen",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-equal-declora16-seed42",
+      "local_steps": 0
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed43",
+      "seed": 43,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed43",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed43",
+      "seed": 43,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed43",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed43",
+      "seed": 43,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed43",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed43",
+      "seed": 43,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed43",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed43",
+      "seed": 43,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed43",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed43",
+      "seed": 43,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed43",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed43",
+      "seed": 43,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed43",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed44",
+      "seed": 44,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed44",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed44",
+      "seed": 44,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed44",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed44",
+      "seed": 44,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed44",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed44",
+      "seed": 44,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed44",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed44",
+      "seed": 44,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed44",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed44",
+      "seed": 44,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed44",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed44",
+      "seed": 44,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed44",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed45",
+      "seed": 45,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed45",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed45",
+      "seed": 45,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed45",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed45",
+      "seed": 45,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed45",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed45",
+      "seed": 45,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed45",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed45",
+      "seed": 45,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed45",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed45",
+      "seed": 45,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed45",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed45",
+      "seed": 45,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed45",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora16-seed46",
+      "seed": 46,
+      "arm": "declora16",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora16-seed46",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-declora4-seed46",
+      "seed": 46,
+      "arm": "declora4",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed46",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-product16_sample-seed46",
+      "seed": 46,
+      "arm": "product16_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-product16_sample-seed46",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_uniform-seed46",
+      "seed": 46,
+      "arm": "fixed_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_uniform-seed46",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-fixed_sample-seed46",
+      "seed": 46,
+      "arm": "fixed_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed46",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_uniform-seed46",
+      "seed": 46,
+      "arm": "adaptive_uniform",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_uniform-seed46",
+      "local_steps": 211
+    },
+    {
+      "id": "full-v1-quantity-adaptive_sample-seed46",
+      "seed": 46,
+      "arm": "adaptive_sample",
+      "partition": "quantity",
+      "stage": "replication",
+      "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-adaptive_sample-seed46",
+      "local_steps": 211
+    }
+  ],
+  "jobs": {
+    "full-v1-quantity-declora16-seed42": {
+      "status": "training",
+      "phase": "train",
+      "kind": "adopted",
+      "gpu": 0,
+      "pid": 130134,
+      "start_ticks": "691822615",
+      "adopted_at": "2026-09-17T09:49:04.379714+00:00",
+      "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
+      "rounds_recorded": 3
+    },
+    "full-v1-quantity-adaptive_sample-seed42": {
+      "status": "training",
+      "phase": "train",
+      "kind": "adopted",
+      "gpu": 1,
+      "pid": 130135,
+      "start_ticks": "691822615",
+      "adopted_at": "2026-09-17T09:49:04.383161+00:00",
+      "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
+      "rounds_recorded": 3
+    },
+    "full-v1-quantity-fixed_sample-seed42": {
+      "status": "training",
+      "phase": "train",
+      "kind": "adopted",
+      "gpu": 2,
+      "pid": 130136,
+      "start_ticks": "691822615",
+      "adopted_at": "2026-09-17T09:49:04.385763+00:00",
+      "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
+      "rounds_recorded": 3
+    },
+    "full-v1-quantity-declora4-seed42": {
+      "status": "pending"
+    },
+    "full-v1-quantity-product16_sample-seed42": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_uniform-seed42": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_uniform-seed42": {
+      "status": "pending"
+    },
+    "full-v1-equal-declora16-seed42": {
+      "status": "training",
+      "phase": "train",
+      "kind": "adopted",
+      "gpu": 3,
+      "pid": 131614,
+      "start_ticks": "691825968",
+      "adopted_at": "2026-09-17T09:49:04.388600+00:00",
+      "exit_code_scope": "non-child exit code unavailable; require complete artifacts and standalone audit",
+      "rounds_recorded": 3
+    },
+    "full-v1-quantity-declora16-seed43": {
+      "status": "pending"
+    },
+    "full-v1-quantity-declora4-seed43": {
+      "status": "pending"
+    },
+    "full-v1-quantity-product16_sample-seed43": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_uniform-seed43": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_sample-seed43": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_uniform-seed43": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_sample-seed43": {
+      "status": "pending"
+    },
+    "full-v1-quantity-declora16-seed44": {
+      "status": "pending"
+    },
+    "full-v1-quantity-declora4-seed44": {
+      "status": "pending"
+    },
+    "full-v1-quantity-product16_sample-seed44": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_uniform-seed44": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_sample-seed44": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_uniform-seed44": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_sample-seed44": {
+      "status": "pending"
+    },
+    "full-v1-quantity-declora16-seed45": {
+      "status": "pending"
+    },
+    "full-v1-quantity-declora4-seed45": {
+      "status": "pending"
+    },
+    "full-v1-quantity-product16_sample-seed45": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_uniform-seed45": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_sample-seed45": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_uniform-seed45": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_sample-seed45": {
+      "status": "pending"
+    },
+    "full-v1-quantity-declora16-seed46": {
+      "status": "pending"
+    },
+    "full-v1-quantity-declora4-seed46": {
+      "status": "pending"
+    },
+    "full-v1-quantity-product16_sample-seed46": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_uniform-seed46": {
+      "status": "pending"
+    },
+    "full-v1-quantity-fixed_sample-seed46": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_uniform-seed46": {
+      "status": "pending"
+    },
+    "full-v1-quantity-adaptive_sample-seed46": {
+      "status": "pending"
+    }
+  },
+  "scope": "Four local GPU workers; single-process peer simulations; no metric gate",
+  "scheduler_pid": 157019,
+  "screen_only": false,
+  "progress": {
+    "training_rounds_remaining": 708,
+    "verified_jobs": 0,
+    "planned_jobs": 36,
+    "estimated_remaining_hours": 20.82660883174239,
+    "eta_scope": "Approximate training-only work / four GPUs; excludes verifier/report/startup delays and variable future round cost"
+  }
+}
