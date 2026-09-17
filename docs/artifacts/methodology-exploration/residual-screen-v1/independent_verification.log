@@ -1,0 +1,84 @@
+{
+  "status": "complete",
+  "verified_checkpoints": 11,
+  "official_test_opened": false,
+  "results": [
+    {
+      "arm": "pooled",
+      "validation_accuracy_percent": 57.64,
+      "maximum_train_loss": 2.983542214796278,
+      "final_train_loss": 1.340494846343994,
+      "independent_validation_cross_entropy": 1.4897951212422438
+    },
+    {
+      "arm": "fixed_domain",
+      "validation_accuracy_percent": 4.52,
+      "maximum_train_loss": 3.519733296251297,
+      "final_train_loss": 1.3171566784580548,
+      "independent_validation_cross_entropy": 4.274503179524823
+    },
+    {
+      "arm": "adaptive_domain",
+      "validation_accuracy_percent": 4.62,
+      "maximum_train_loss": 3.519733296251297,
+      "final_train_loss": 1.7784687781757778,
+      "independent_validation_cross_entropy": 4.492132232379915
+    },
+    {
+      "arm": "residual_uniform_sample_g1",
+      "validation_accuracy_percent": 1.68,
+      "maximum_train_loss": 3.801696730767356,
+      "final_train_loss": 3.801696730767356,
+      "independent_validation_cross_entropy": 5.08699308377099
+    },
+    {
+      "arm": "residual_fixed_sample_g1",
+      "validation_accuracy_percent": 1.4200000000000002,
+      "maximum_train_loss": 3.8043663102520835,
+      "final_train_loss": 3.8043663102520835,
+      "independent_validation_cross_entropy": 5.10056131934717
+    },
+    {
+      "arm": "residual_adaptive_domain_g1",
+      "validation_accuracy_percent": 1.7399999999999998,
+      "maximum_train_loss": 3.936410578695933,
+      "final_train_loss": 3.936410578695933,
+      "independent_validation_cross_entropy": 5.22845415243104
+    },
+    {
+      "arm": "residual_adaptive_domain_g5",
+      "validation_accuracy_percent": 2.64,
+      "maximum_train_loss": 4.21335231912401,
+      "final_train_loss": 4.058899113119973,
+      "independent_validation_cross_entropy": 5.280176961968191
+    },
+    {
+      "arm": "residual_adaptive_domain_g15",
+      "validation_accuracy_percent": 1.48,
+      "maximum_train_loss": 53.490031454722086,
+      "final_train_loss": 47.848374175220066,
+      "independent_validation_cross_entropy": 41.46333407271891
+    },
+    {
+      "arm": "residual_adaptive_sample_g5",
+      "validation_accuracy_percent": 2.88,
+      "maximum_train_loss": 4.02679102818701,
+      "final_train_loss": 3.896116048664517,
+      "independent_validation_cross_entropy": 5.062699163235674
+    },
+    {
+      "arm": "residual_adaptive_quality_g5",
+      "validation_accuracy_percent": 2.46,
+      "maximum_train_loss": 4.166202176846398,
+      "final_train_loss": 4.027288323677911,
+      "independent_validation_cross_entropy": 5.232130072084135
+    },
+    {
+      "arm": "residual_fixed_domain_g5",
+      "validation_accuracy_percent": 2.6,
+      "maximum_train_loss": 4.130172482405769,
+      "final_train_loss": 3.9431708713213602,
+      "independent_validation_cross_entropy": 5.137336910289182
+    }
+  ]
+}

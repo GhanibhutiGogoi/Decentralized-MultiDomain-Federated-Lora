@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "scope": "Archive and independently verify already completed residual and masked-gradient validation experiments",
+  "archived_on": "2026-09-17",
+  "training_performed_during_archival_pass": false,
+  "scientific_execution_host": "gpu003",
+  "official_test_opened_during_archival_pass": false,
+  "residual_checkpoint_verifications": 11,
+  "masked_and_pooled_checkpoint_verifications": 15,
+  "unique_saved_models_verified": 25,
+  "all_independent_fp32_correct_counts_match": true,
+  "source_files_verified_against_launch_provenance": 47,
+  "masked_replicated_seeds": [42, 43, 44],
+  "residual_screening_seeds": [42],
+  "holdout": {"fit": 45000, "validation": 5000, "source": "original CIFAR-100 training set"},
+  "summary_paths": ["residual-screen-v1/summary.json", "masked-summary/summary.json"],
+  "source_manifest": "masked-summary/source_manifest.json",
+  "data_manifest": "masked-summary/data_manifest.json",
+  "paper_figures": ["exploration_residual.pdf", "exploration_residual.png", "exploration_masked.pdf", "exploration_masked.png"],
+  "paper_integration": "separate delivery task; no paper text edited by archival task",
+  "remaining_archival_work": [],
+  "result_scope": "Exploratory validation evidence; no equivalence or privacy guarantee; partial gradients retain full rank16 state"
+}
