@@ -11,7 +11,11 @@ The prospective protocol and all reconstruction assumptions are in [the protocol
 - Smoke results establish execution and auditability only. They do not establish scientific efficacy, equivalence or a win over Dec-LoRA.
 - Full-data comparison: running under the prospective protocol in a durable four-GPU queue. The fixed plan is 36 runs: seven quantity arms across five seeds plus one equal-size paper-setting anchor. Completed full-budget, replicated results must replace this status before any scientific success claim.
 
-### Latest recorded progress: 2026-09-18, 13:18 Shanghai
+### Latest access attempt: 2026-09-18, 15:18 Shanghai
+
+SSH to gpu003 reset the connection before authentication on four consecutive attempts. Live campaign completion could not be checked. This is an access failure, not evidence that training failed or stopped. The last confirmed experimental snapshot remains the 13:18 record below; its remaining-time estimate is historical. No jobs were restarted or modified. See [`monitoring-events.jsonl`](monitoring-events.jsonl). Final five-seed analysis, evidence transfer, and paper integration await access to the remaining remote records.
+
+### Last confirmed progress: 2026-09-18, 13:18 Shanghai
 
 Thirty-two of36 full runs have completed and passed independent best/final checkpoint audits. The last four seed46 runs are training, with roughly1.5 training hours remaining plus verification/report overhead. No campaign error is recorded.
 
