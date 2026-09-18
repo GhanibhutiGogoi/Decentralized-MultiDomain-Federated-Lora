@@ -11,27 +11,27 @@ The prospective protocol and all reconstruction assumptions are in [the protocol
 - Smoke results establish execution and auditability only. They do not establish scientific efficacy, equivalence or a win over Dec-LoRA.
 - Full-data comparison: running under the prospective protocol in a durable four-GPU queue. The fixed plan is 36 runs: seven quantity arms across five seeds plus one equal-size paper-setting anchor. Completed full-budget, replicated results must replace this status before any scientific success claim.
 
-### Latest recorded progress: 2026-09-18, 09:47 Shanghai
+### Latest recorded progress: 2026-09-18, 13:18 Shanghai
 
-Twenty-four of36 full runs have completed and passed independent best/final checkpoint audits; four more are training and eight are queued. All seven quantity-split arms for seeds42–44 are complete. Approximately5 training hours remain, plus verification/report overhead. No campaign error is recorded.
+Thirty-two of36 full runs have completed and passed independent best/final checkpoint audits. The last four seed46 runs are training, with roughly1.5 training hours remaining plus verification/report overhead. No campaign error is recorded.
 
-The table compares only the same three completed seeds42,43,44. Best labeled-validation accuracy is the registered primary endpoint; final-round accuracy is secondary. Values are mean ± sample standard deviation.
+The table compares only the same four completed seeds42–45 across all seven methods. Best labeled-validation accuracy is the registered primary endpoint; final-round accuracy is secondary. Values are mean ± sample standard deviation.
 
 | Method | Best validation accuracy | Final-round accuracy |
 |---|---:|---:|
-| Dec-LoRA reimplementation, rank16 | 94.61 ± 0.11% | 94.53 ± 0.13% |
-| Dec-LoRA reimplementation, rank4 | 94.38 ± 0.41% | 94.11 ± 0.37% |
-| Effective products, rank16, sample-size weights | 94.69 ± 0.18% | 94.30 ± 0.18% |
-| Fixed heterogeneous ranks, uniform weights | 94.53 ± 0.29% | 94.30 ± 0.40% |
-| Fixed heterogeneous ranks, sample-size weights | 94.46 ± 0.13% | 94.38 ± 0.11% |
-| Adaptive ranks, uniform weights | 94.23 ± 0.07% | 93.73 ± 0.54% |
-| Adaptive ranks, sample-size weights | 94.27 ± 0.30% | 93.96 ± 0.24% |
+| Dec-LoRA reimplementation, rank16 | 94.50 ± 0.25% | 94.38 ± 0.32% |
+| Dec-LoRA reimplementation, rank4 | 94.47 ± 0.38% | 94.27 ± 0.43% |
+| Effective products, rank16, sample-size weights | 94.75 ± 0.20% | 94.41 ± 0.25% |
+| Fixed heterogeneous ranks, uniform weights | 94.58 ± 0.25% | 94.24 ± 0.36% |
+| Fixed heterogeneous ranks, sample-size weights | 94.44 ± 0.11% | 94.29 ± 0.20% |
+| Adaptive ranks, uniform weights | 94.27 ± 0.09% | 93.89 ± 0.55% |
+| Adaptive ranks, sample-size weights | 94.29 ± 0.25% | 93.92 ± 0.21% |
 
-The proposed adaptive/sample method trails rank16 Dec-LoRA by0.344 percentage points on mean best accuracy, with an exploratory paired95% t interval of[-0.914,+0.226] points. It trails fixed/sample by0.191 points and rank4 by0.115 points. At the final round its mean gap from rank16 is0.573 points. These interim three-seed results show no accuracy advantage; they do not establish statistical parity or replace the planned five-seed comparison.
+The proposed adaptive/sample method trails rank16 Dec-LoRA by0.201 percentage points on mean best accuracy, with an exploratory paired95% t interval of[-0.746,+0.344] points. It trails fixed/sample by0.143 points and rank4 by0.172 points. At the final round its mean gap from rank16 is0.459 points. These interim four-seed results show no accuracy advantage; they establish neither superiority nor parity. The final fifth seed remains pending.
 
-Mean adaptive training payload is1.292GB versus1.893GB for rank16 Dec-LoRA (31.74% lower),1.468GB for fixed/sample (12.00% lower), and1.185GB for rank4 (adaptive uses9.02% more). Mean persistent adaptive training rank is5.813. Rank and payload reductions do not establish lower total memory: the backbone, classifier and capability-rank probes remain. Final deployment and evaluation assembly costs are separate from these training-byte totals.
+Mean adaptive training payload is1.292GB versus1.893GB for rank16 Dec-LoRA (31.74% lower),1.468GB for fixed/sample (12.00% lower), and1.185GB for rank4 (adaptive uses9.02% more). Mean persistent adaptive training rank is5.8125. Rank and payload reductions do not establish lower total memory: the backbone, classifier and capability-rank probes remain. Final deployment and evaluation assembly costs are separate from these training-byte totals.
 
-Completed records and source snapshots are in [`full/`](full/). The dated [progress report and figures](progress-summary-20260918-0947/SUMMARY.md) include24 completed full runs and seven smoke runs in separate groups. Its available per-arm seed counts differ; only matched seeds enter paired comparisons. This README and [`pilot-progress.json`](pilot-progress.json) explicitly restrict the current main comparison to the three seeds completed by every arm. The report's final-score column label is editorially clarified as secondary; numerical data are unchanged. The local summarizer carries the same label fix, while the running remote campaign retains its pinned script until completion.
+Completed records and source snapshots are in [`full/`](full/). The dated [progress report and figures](progress-summary-20260918-1318/SUMMARY.md) separate completed runs from smoke and ongoing runs. Its available per-arm seed counts differ; only matched seeds enter paired comparisons. This README and [`pilot-progress.json`](pilot-progress.json) explicitly restrict the current main comparison to the four seeds completed by every arm. The report's final-score column label is editorially clarified as secondary; numerical data are unchanged. The running remote campaign retains its pinned analysis script until completion.
 
 Work is delivered directly to `main`. New paper conclusions await the completed five-seed comparison. Earlier dated snapshots are preserved.
 

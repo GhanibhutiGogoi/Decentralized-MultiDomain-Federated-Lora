@@ -1,0 +1,82 @@
+{
+  "status": "passed",
+  "host": "gpu003",
+  "run": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-declora4-seed46",
+  "evaluator_sha256": "6bca6f0411d4c17860d1c940528f4527f222210ea8ce1c83f8edf875c5b82a4a",
+  "model_helper_sha256": "f9445095014dc48c6cac20afc564d40d0e6c4e64b5ced051b865c277268dda7c",
+  "independence_scope": "Independent parquet reader, split/hash validator, log checks and confusion-matrix metrics; shared Hugging Face architecture and roberta_lora install helper; no training runner imports.",
+  "artifact_checks": {
+    "archived_source_files_verified": 32,
+    "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+    "model_asset_files_verified": 6,
+    "parquet_files_verified": 2,
+    "partition_examples": 67349,
+    "partition_sha256": "cc2a0130357b29e1365b8567c10fba6042744d102f7a789a3c5c33a2accf1945",
+    "shards_disjoint_exhaustive": true,
+    "quantity_only_class_quotas_verified": true,
+    "classes_observed_per_client": {
+      "0": 2,
+      "1": 2,
+      "2": 2,
+      "3": 2,
+      "4": 2,
+      "5": 2,
+      "6": 2,
+      "7": 2,
+      "8": 2,
+      "9": 2
+    },
+    "training_source_indices_sha256": "7c61045b75551892be9f61417f8a3f2df907177bc4e92827b78e604a9dc64049",
+    "validation_rows": 872,
+    "split_identity_scope": "Separate canonical train/validation parquet assets; original source index mappings checked."
+  },
+  "round_metric_records_verified": 20,
+  "checkpoints": {
+    "best": {
+      "round": 19,
+      "checkpoint_sha256": "89de3b0a1a154327c46a375ba2cb3b8ec1824e5fe9af4fbfcf0b2942d5ccfc3e",
+      "metrics": {
+        "n": 872,
+        "correct": 825,
+        "accuracy": 94.61009174311927,
+        "f1": 94.80662983425414,
+        "confusion_matrix": [
+          [
+            396,
+            32
+          ],
+          [
+            15,
+            429
+          ]
+        ],
+        "predictions_sha256": "dc04a688fe2a6748b9b98e049e88d23199250c00ffd0e4f5f1593c6b16efc29a"
+      },
+      "exact_raw_prediction_match": true
+    },
+    "final": {
+      "round": 20,
+      "checkpoint_sha256": "d0d02ebaba963e2226dfc22f8081bebe855ad1fbd828041fd7245b4578fb18f6",
+      "metrics": {
+        "n": 872,
+        "correct": 822,
+        "accuracy": 94.26605504587155,
+        "f1": 94.43207126948775,
+        "confusion_matrix": [
+          [
+            398,
+            30
+          ],
+          [
+            20,
+            424
+          ]
+        ],
+        "predictions_sha256": "dd18129abe793d89d4c5037b420d8543cd8fea66d7118102e12dbdcb820823b0"
+      },
+      "exact_raw_prediction_match": true
+    }
+  },
+  "precision": "fp32 deterministic CUDA, original evaluation batch shapes",
+  "evaluation_scope": "Canonical labeled GLUE validation; not hidden test evaluation."
+}
