@@ -1,5 +1,7 @@
 # Completed paper build and review
 
+**Historical combined manuscript:** this record identifies the 2026-09-18 version, now preserved at `paper/archive/combined-20260918/main.pdf`. On 2026-09-19 it was superseded as the current deliverable by two standalone papers. See `paper/README.md` and `docs/artifacts/paper-split-20260919/` for their links and build records. The hashes below are intentionally unchanged.
+
 `paper/main.pdf` was compiled and rendered on gpu003 using TeX Live 2026 and
 Poppler. The final manuscript has **38 pages**. All pages were visually reviewed,
 with independent-agent coverage of scientific claims and 16 rendered pages.

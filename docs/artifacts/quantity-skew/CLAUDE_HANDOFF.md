@@ -5,9 +5,11 @@ Read these files first:
 - `docs/artifacts/quantity-skew/README.md`
 - `docs/artifacts/quantity-skew/final-summary-20260918/SUMMARY.md`, `summary.json`, `per_run.csv`, and `per_round.csv`
 - `docs/artifacts/quantity-skew/final-audit/`
-- `docs/artifacts/quantity-skew/final-figures/` and `paper/figures/quantity-skew-*`
+- `docs/artifacts/quantity-skew/final-figures/` and `paper/quantity-skew/figures/quantity-skew-*`
 - `docs/research/2026-09-17-quantity-skew-protocol.md` and the paper-baseline shortlist
-- `paper/main.tex`, `paper/main.pdf`, and the source-pinned per-run records under `docs/artifacts/quantity-skew/full/`
+- `paper/quantity-skew/main.tex`, `paper/quantity-skew/main.pdf`, and the source-pinned per-run records under `docs/artifacts/quantity-skew/full/`
+
+The papers are now standalone: `paper/quantity-skew/` is this SST-2 study, while `paper/multidomain/` reports the previous CIFAR-100 study and its failure analysis. Give them separate artifact pages or clearly separated experiment views. Keep their datasets, endpoints, mathematical conventions, conclusions and paper links separate. The former combined manuscript is an archive at `paper/archive/combined-20260918/`, not a current paper.
 
 Earlier dated progress folders and `pilot-progress.json` are superseded historical snapshots. The final generated report counts 43 complete entries because it includes seven smoke runs; keep its three protocol groups separate. The frozen report accidentally labeled its final column primary; `SUMMARY.md` corrects that label, while `SUMMARY.raw.md` preserves the exact original report. The data are unchanged.
 

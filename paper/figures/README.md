@@ -1,6 +1,6 @@
 # Paper figures
 
-These figures are the authoritative plots used by `../main.tex`.
+This shared collection is preserved for historical provenance. The current standalone papers use their own copies under `paper/multidomain/figures/` and `paper/quantity-skew/figures/`. The former combined manuscript is archived at `paper/archive/combined-20260918/`. Numerical data and source contexts below remain unchanged.
 
 The completed RoBERTa/SST-2 quantity study adds four PDF/PNG pairs with JSON data
 sidecars: `quantity-skew-accuracy`, `quantity-skew-paired-effects`,

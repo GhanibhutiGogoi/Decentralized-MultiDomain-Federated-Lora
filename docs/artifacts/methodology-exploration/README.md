@@ -93,6 +93,7 @@ python summarize_masked_exploration.py \
 
 The feature directory must directly contain the original `train.pt` and cache
 `manifest.json`. These commands perform validation and plotting, not training.
-PDF/PNG figure pairs are also preserved in `paper/figures/`. Paper text/PDF
-integration is tracked separately; this archive does not assert that an older
-paper PDF already includes these additions.
+The current standalone manuscript and its figures are in `paper/multidomain/`.
+The complete failure analysis is integrated there, with its own methodology,
+results and limitations. The new SST-2 comparison has a separate manuscript in
+`paper/quantity-skew/`; the experiments are not pooled.

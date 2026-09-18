@@ -46,8 +46,8 @@ Run the summarizer on gpu003 after the complete raw record set is present:
 ```sh
 ~/ahlora-venv/bin/python scripts/summarize_integrated.py \
   --input docs/artifacts/integrated-corrected \
-  --figures paper/figures \
-  --latex paper/integrated_results.tex
+  --figures paper/multidomain/figures \
+  --latex paper/multidomain/integrated_results.tex
 ```
 
 The script refuses incomplete runs, missing seed/arm pairs, mismatched alpha/initialization/data identity/exposures, inconsistent full-test counts, and inconsistent communication totals. It does not run new training. All figures and tables derive from the raw per-round records, with file and script SHA-256 hashes saved in `summary.json`.
@@ -63,8 +63,8 @@ The script refuses incomplete runs, missing seed/arm pairs, mismatched alpha/ini
 | `adaptive_resource_pairs.csv` | Adaptive-versus-fixed factor, payload and rank-sample-product changes |
 | `curves.csv`, `rank_trajectories.csv` | Plot-ready full-test curves and every peer's rank trajectory |
 | `RESULTS.md` | Generated numerical tables with interpretation limits |
-| `paper/integrated_results.tex` | Generated paper tables |
-| `paper/figures/integrated_*.pdf`, `.png` | Final comparison, accuracy curves, factorial effects, communication components and rank trajectories |
+| `paper/multidomain/integrated_results.tex` | Generated paper tables |
+| `paper/multidomain/figures/integrated_*.pdf`, `.png` | Final comparison, accuracy curves, factorial effects, communication components and rank trajectories |
 
 All reported error bars use **sample standard deviation across seeds** (`ddof=1`). Accuracy differences are computed within matching seeds before aggregation. The factorial interaction is `(adaptive_domain - fixed_domain) - (adaptive_quality - fixed_quality)`. Three seeds and no prespecified equivalence margin support a descriptive comparison; they do not establish formal equivalence. A negative result should be reported directly after checking these completed corrected runs, without substituting invalid historical weighting experiments.
 

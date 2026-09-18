@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.1",
-  "updated_at": "2026-09-18T10:45:57.358845+00:00",
+  "schema_version": "2.2",
+  "updated_at": "2026-09-18T19:54:53.806545+00:00",
   "status": "quantity_and_historical_studies_complete_advantage_not_established",
   "project": {
     "name": "AH-LoRA",
@@ -817,15 +817,19 @@
     "Privacy claims need a defined threat model and implemented protection; current results do not support them."
   ],
   "paper": {
-    "status": "complete",
-    "source": "paper/main.tex",
-    "rendered_pdf": "paper/main.pdf",
-    "compile": "pdflatex + bibtex + pdflatex + pdflatex",
-    "scope": "Corrected nine-arm pooled comparison, integrated methodology equations, actual peer assembly, full resource accounting, and a scoped negative accuracy conclusion; historical invalid comparisons excluded.",
-    "last_rendered": "2026-09-15",
-    "pages": 17,
-    "sha256": "8dcf6781d2c61336b8cd2b20a65dfacc69acf141060d80a1cc4209874c46c8d9",
-    "validation": "docs/artifacts/integrated-corrected/paper_validation.json"
+    "status": "complete_standalone_manuscript",
+    "source": "paper/multidomain/main.tex",
+    "rendered_pdf": "paper/multidomain/main.pdf",
+    "path": "paper/multidomain/main.pdf",
+    "pages": 30,
+    "sha256": "fab6dc6db0c237e7b875c075fab7c668f956a96a26a5998787d1cd896f3709be",
+    "scope": "Original CIFAR-100 pooled-versus-decentralized experiment and completed failure analysis, with separately qualified component studies. Accuracy-preservation claim not met.",
+    "included_figures": 14,
+    "last_rendered": "2026-09-19",
+    "build_host": "gpu003",
+    "build_record": "docs/artifacts/paper-split-20260919/build-record.json",
+    "scientific_review": "docs/artifacts/paper-split-20260919/SCIENTIFIC_REVIEW.md",
+    "visual_review": "docs/artifacts/paper-split-20260919/VISUAL_REVIEW.md"
   },
   "validation": {
     "p3_discovery_targeted_remote": "30 passed",
@@ -910,11 +914,74 @@
     "conclusion": "Adaptive/sample saves training traffic relative to rank16, but has lower mean accuracy; rank4 is cheaper and has higher mean accuracy. Superiority, parity, total-memory savings and privacy guarantees are not established.",
     "historical_fields_notice": "The historical experiment_plan, metric_dictionary and result records elsewhere in this file refer to earlier CIFAR-100/component studies unless their own scope says otherwise.",
     "paper": {
-      "path": "paper/main.pdf",
+      "status": "complete_standalone_manuscript",
+      "source": "paper/quantity-skew/main.tex",
+      "rendered_pdf": "paper/quantity-skew/main.pdf",
+      "path": "paper/quantity-skew/main.pdf",
+      "pages": 14,
+      "sha256": "bc28e87bd1d2db3fb7feb34ce420c12d21fb1fd89912f305a9e8302061eba419",
+      "scope": "Independent RoBERTa-base/SST-2 decentralized comparison: seven methods, five matched seeds and one separate reconstruction anchor. Best validation primary; final validation secondary. No demonstrated superiority or established parity.",
+      "included_figures": 4,
+      "last_rendered": "2026-09-19",
+      "build_host": "gpu003",
+      "build_record": "docs/artifacts/paper-split-20260919/build-record.json",
+      "scientific_review": "docs/artifacts/paper-split-20260919/SCIENTIFIC_REVIEW.md",
+      "visual_review": "docs/artifacts/paper-split-20260919/VISUAL_REVIEW.md"
+    }
+  },
+  "historical_paper_records": [
+    {
+      "status": "historical_20260915_manuscript",
+      "source": "paper/main.tex",
+      "rendered_pdf": "paper/main.pdf",
+      "compile": "pdflatex + bibtex + pdflatex + pdflatex",
+      "scope": "Corrected nine-arm pooled comparison, integrated methodology equations, actual peer assembly, full resource accounting, and a scoped negative accuracy conclusion; historical invalid comparisons excluded.",
+      "last_rendered": "2026-09-15",
+      "pages": 17,
+      "sha256": "8dcf6781d2c61336b8cd2b20a65dfacc69acf141060d80a1cc4209874c46c8d9",
+      "validation": "docs/artifacts/integrated-corrected/paper_validation.json",
+      "path_notice": "Recorded paths refer to the version in Git at that date, not the current standalone manuscripts."
+    },
+    {
+      "path": "paper/archive/combined-20260918/main.pdf",
       "pages": 38,
       "sha256": "8a0816eadf36888c930bd448c6ebe3f938cf314d503809f87429a83f0f3cbd5b",
-      "status": "compiled_on_gpu003_all_pages_visually_checked",
-      "build_record": "docs/artifacts/quantity-skew/paper-build/build-record.json"
+      "status": "archived_combined_manuscript_20260918",
+      "build_record": "docs/artifacts/quantity-skew/paper-build/build-record.json",
+      "source": "paper/archive/combined-20260918/main.tex"
     }
-  }
+  ],
+  "current_papers": {
+    "multidomain": {
+      "status": "complete_standalone_manuscript",
+      "source": "paper/multidomain/main.tex",
+      "rendered_pdf": "paper/multidomain/main.pdf",
+      "path": "paper/multidomain/main.pdf",
+      "pages": 30,
+      "sha256": "fab6dc6db0c237e7b875c075fab7c668f956a96a26a5998787d1cd896f3709be",
+      "scope": "Original CIFAR-100 pooled-versus-decentralized experiment and completed failure analysis, with separately qualified component studies. Accuracy-preservation claim not met.",
+      "included_figures": 14,
+      "last_rendered": "2026-09-19",
+      "build_host": "gpu003",
+      "build_record": "docs/artifacts/paper-split-20260919/build-record.json",
+      "scientific_review": "docs/artifacts/paper-split-20260919/SCIENTIFIC_REVIEW.md",
+      "visual_review": "docs/artifacts/paper-split-20260919/VISUAL_REVIEW.md"
+    },
+    "quantity-skew": {
+      "status": "complete_standalone_manuscript",
+      "source": "paper/quantity-skew/main.tex",
+      "rendered_pdf": "paper/quantity-skew/main.pdf",
+      "path": "paper/quantity-skew/main.pdf",
+      "pages": 14,
+      "sha256": "bc28e87bd1d2db3fb7feb34ce420c12d21fb1fd89912f305a9e8302061eba419",
+      "scope": "Independent RoBERTa-base/SST-2 decentralized comparison: seven methods, five matched seeds and one separate reconstruction anchor. Best validation primary; final validation secondary. No demonstrated superiority or established parity.",
+      "included_figures": 4,
+      "last_rendered": "2026-09-19",
+      "build_host": "gpu003",
+      "build_record": "docs/artifacts/paper-split-20260919/build-record.json",
+      "scientific_review": "docs/artifacts/paper-split-20260919/SCIENTIFIC_REVIEW.md",
+      "visual_review": "docs/artifacts/paper-split-20260919/VISUAL_REVIEW.md"
+    }
+  },
+  "paper_index": "paper/README.md"
 }

@@ -1,0 +1,20 @@
+Title:          Adaptive-Rank Decentralized LoRA under Quantity Skew: An SST-2 Benchmark
+Subject:        A standalone five-seed comparison of adaptive ranks and sample-size weighting with independently reconstructed Dec-LoRA
+Keywords:       
+Author:         AH-LoRA Project Team
+Creator:        LaTeX with hyperref
+Producer:       pdfTeX-1.40.29
+CreationDate:   Sat Sep 19 03:36:51 2026
+ModDate:        Sat Sep 19 03:36:51 2026
+Tagged:         no
+UserProperties: no
+Suspects:       no
+Form:           none
+JavaScript:     no
+Pages:          14
+Encrypted:      no
+Page size:      612 x 792 pts (letter)
+Page rot:       0
+File size:      417390 bytes
+Optimized:      no
+PDF version:    1.7
