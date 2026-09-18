@@ -1,0 +1,19 @@
+{
+  "assets": "/home/gogoi/ahlora-quantity-20260917/assets",
+  "output": "/home/gogoi/ahlora-quantity-20260917/runs/full-v1-quantity-fixed_sample-seed46",
+  "arm": "fixed_sample",
+  "task": "sst2",
+  "partition": "quantity",
+  "seed": 46,
+  "rounds": 20,
+  "local_epochs": 1,
+  "local_steps": 211,
+  "batch_size": 32,
+  "max_length": 128,
+  "lr": 0.001,
+  "alpha": 16.0,
+  "max_grad_norm": 1.0,
+  "max_train": 0,
+  "threads": 2,
+  "verify_only": false
+}

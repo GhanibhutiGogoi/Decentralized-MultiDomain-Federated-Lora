@@ -1,0 +1,29 @@
+{
+  "tasks": [
+    "CIFAR-CNN",
+    "Fashion-MLP",
+    "AGNews-LSTM",
+    "Tabular-MLP",
+    "Audio-1DCNN"
+  ],
+  "fixed_rank32_final_accuracy_percent": [
+    59.5,
+    86.55,
+    24.72,
+    90.0,
+    96.36
+  ],
+  "original_adaptive_final_accuracy_percent": [
+    34.74,
+    68.5,
+    26.05,
+    83.33,
+    96.36
+  ],
+  "seed": 42,
+  "rounds": 5,
+  "scope": "Original controller, not revised controller; fixed rank32 exceeds all declared caps; one seed, no uncertainty intervals",
+  "source_csv_sha256": "b1a9d297544c23c71ba3f5d104be2556364a950a75d2f6e698e9821609b2d0f9",
+  "source_manifest_sha256": "3c3cbadfd45662f1fef56e07b295d7df1aae636fe284ab8fba0fba7b53833ddd",
+  "note": "Only final endpoints are plotted from exact CSV fields; original round-curve figures remain in the historical archive."
+}

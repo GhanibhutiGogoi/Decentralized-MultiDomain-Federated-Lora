@@ -1,0 +1,45 @@
+{
+  "status": "complete",
+  "hostname": "gpu003",
+  "context_id": "b729ad24b6b0",
+  "raw_reconstruction_checks": 1800,
+  "python": "3.10.12",
+  "matplotlib": "3.10.9",
+  "numpy": "1.26.4",
+  "script": {
+    "path": "scripts/plot_historical_paper_readable.py",
+    "sha256": "f799ff0a3754bc5f9d262f7fbd3554e583c1c46b13cb9d8c3511c4a7e80db257"
+  },
+  "inputs": [
+    {
+      "path": "docs/artifacts/p3-completion-report/aggregate.json",
+      "sha256": "492952335c6d7cb0b3f4a3ddff3c14465628148cb62404c4201f01627a448002"
+    },
+    {
+      "path": "docs/artifacts/p3-completion-report/round_aggregate.csv",
+      "sha256": "2004ace8278c372b6ad25271965400451d1cfe673a73cff871d2f95fa082b52b"
+    },
+    {
+      "path": "docs/artifacts/p3-completion-report/round_metrics.csv",
+      "sha256": "8950f4eb5d6647460bd520882d8df8dc1102ae29d483a4239239ee237b3be8a7"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "p3_actual_width_preview.png",
+      "sha256": "dcd2f82a8bd6578690f5bb61e829dfd0d8a9fa9bb61e881f116f5d12e3113ddb"
+    },
+    {
+      "path": "p3_heterogeneous_curves_readable.data.json",
+      "sha256": "7b6b4ba6fe8f3e6884d3fdd425e2fb2ef9bf86aa15c017f60af6ac9a22c3b431"
+    },
+    {
+      "path": "p3_heterogeneous_curves_readable.pdf",
+      "sha256": "4500c30f76f900aae31f84cddf9f995822a592913396c96cddd98afd01f610ea"
+    },
+    {
+      "path": "p3_heterogeneous_curves_readable.png",
+      "sha256": "dde1d8a4082f221652880e1b5572a63a70f0e6c09af17986e926f78f5436e375"
+    }
+  ]
+}

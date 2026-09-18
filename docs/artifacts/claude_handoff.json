@@ -1,7 +1,7 @@
 {
-  "schema_version": "2.0",
-  "updated_at": "2026-09-15T07:41:06.332617+00:00",
-  "status": "corrected_experiment_complete_accuracy_objective_not_met",
+  "schema_version": "2.1",
+  "updated_at": "2026-09-18T10:45:57.358845+00:00",
+  "status": "quantity_and_historical_studies_complete_advantage_not_established",
   "project": {
     "name": "AH-LoRA",
     "description": "Adaptive heterogeneous LoRA for decentralized multi-domain federated learning",
@@ -889,5 +889,32 @@
       45
     ],
     "scope": "Completed scoped experiment; accuracy-preservation unsuccessful; no privacy guarantee"
+  },
+  "latest_study": {
+    "name": "RoBERTa-base/SST-2 quantity-skew decentralized LoRA",
+    "status": "all_36_full_runs_complete_and_checkpoint_verified",
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "scope": "Seven matched quantity arms and one separate equal-size anchor; single-process peer-transport simulation",
+    "primary_endpoint": "Best official labeled-validation accuracy, percent",
+    "secondary_endpoint": "Final-round labeled-validation accuracy, percent",
+    "results": "docs/artifacts/quantity-skew/README.md",
+    "data": "docs/artifacts/quantity-skew/final-summary-20260918/summary.json",
+    "independent_audit": "docs/artifacts/quantity-skew/final-audit/",
+    "artifact_prompt": "docs/artifacts/quantity-skew/CLAUDE_HANDOFF.md",
+    "conclusion": "Adaptive/sample saves training traffic relative to rank16, but has lower mean accuracy; rank4 is cheaper and has higher mean accuracy. Superiority, parity, total-memory savings and privacy guarantees are not established.",
+    "historical_fields_notice": "The historical experiment_plan, metric_dictionary and result records elsewhere in this file refer to earlier CIFAR-100/component studies unless their own scope says otherwise.",
+    "paper": {
+      "path": "paper/main.pdf",
+      "pages": 38,
+      "sha256": "8a0816eadf36888c930bd448c6ebe3f938cf314d503809f87429a83f0f3cbd5b",
+      "status": "compiled_on_gpu003_all_pages_visually_checked",
+      "build_record": "docs/artifacts/quantity-skew/paper-build/build-record.json"
+    }
   }
 }

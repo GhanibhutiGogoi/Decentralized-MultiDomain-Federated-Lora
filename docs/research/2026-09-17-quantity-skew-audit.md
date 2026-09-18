@@ -136,3 +136,24 @@ The current evidence supports executing and auditing this comparison. It
 does not yet support “beats Dec-LoRA,” “matches conventional training,” a
 noninferiority claim, or a hospital privacy claim. A complete negative result
 would still answer the prospective research question.
+
+## Closure recorded 2026-09-18
+
+The remaining experimental gates above are now complete. All 36 full-budget
+runs finished, all 72 best/final checkpoint inference records passed, and the
+independent final audit bound those records to 108 current checkpoint files,
+recomputed all 720 round accuracies from saved predictions and canonical labels,
+and checked the source, asset, allocation, stream, budget and transfer records.
+See [`final-audit/AUDIT.md`](../artifacts/quantity-skew/final-audit/AUDIT.md) and
+[`the final report`](../artifacts/quantity-skew/README.md). Seven smoke runs are
+kept separate from the 35 five-seed quantity runs and one equal-size anchor.
+
+The completed comparison does not demonstrate an advantage or parity:
+adaptive/sample reaches 94.243 ± 0.249% best validation accuracy versus
+94.541 ± 0.238% for reconstructed Dec-LoRA rank 16, with a paired gap of
+-0.298 points and exploratory 95% interval [-0.755, +0.159]. Training traffic
+is 31.81% lower than rank 16, but 8.92% higher than rank 4, which has higher
+mean accuracy. The original negative study remains separate. Final auditing
+also discloses that raw wire buffers and per-run initial-state hashes were
+not retained; the final artifact audit checks recorded inference evidence and
+does not itself rerun inference.

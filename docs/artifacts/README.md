@@ -2,7 +2,9 @@
 
 Start with [`claude_handoff.json`](claude_handoff.json). It records the intended completion scope, which evidence is current, where to find the measured data, and which claims the data can support. [`progress.jsonl`](progress.jsonl) is an append-only work log; each line is one JSON object. New experiments should be added to the handoff only after their files exist.
 
-**Current authoritative comparison:** [`integrated-corrected/RESULTS.md`](integrated-corrected/RESULTS.md), with 27 complete runs and 3,460 passed protocol checks. Ordinary pooled LoRA reaches 57.23 ± 0.59% full-test accuracy; the P1/P2 weighted peer pipeline reaches 6.90 ± 2.03%. The tested accuracy-preservation goal is not achieved. Use [`CLAUDE_UPDATE_PROMPT.md`](CLAUDE_UPDATE_PROMPT.md) to update the external explainer.
+**Latest completed study:** [`quantity-skew/README.md`](quantity-skew/README.md) reports all 36 RoBERTa/SST-2 full runs (seven quantity-skew methods across five seeds and one separate equal-size anchor). Adaptive/sample reaches 94.24 ± 0.25% best validation accuracy versus Dec-LoRA rank 16 at 94.54 ± 0.24% and rank 4 at 94.50 ± 0.33%. It saves 31.81% training traffic relative to rank 16 but uses 8.92% more than rank 4. Neither superiority nor parity is established. Use [`quantity-skew/CLAUDE_HANDOFF.md`](quantity-skew/CLAUDE_HANDOFF.md) for the updated explainer.
+
+**Historical corrected comparison:** [`integrated-corrected/RESULTS.md`](integrated-corrected/RESULTS.md), with 27 complete runs and 3,460 passed protocol checks. Ordinary pooled LoRA reaches 57.23 ± 0.59% full-test accuracy; the P1/P2 weighted peer pipeline reaches 6.90 ± 2.03%. The tested accuracy-preservation goal is not achieved. The remainder of this guide describes those earlier CIFAR-100 and component studies. Their fractional metrics and final-round primary endpoint must not be applied to the newer SST-2 study, whose accuracy is stored in percent and whose primary endpoint is best labeled-validation accuracy.
 
 The deliverable is a reproducible CIFAR-100 benchmark of decentralized LoRA with known domain groups. The repository now also contains a measured coordinator-visible online-discovery extension, a measured adaptive-rank controller, and a conservative domain-weighting iteration. Discovery is supported by full-data evidence. The original adaptive-rank controller failed its accuracy-preservation gate against a fixed rank-32 reference (historical, preserved below); the revised controller reaches final-accuracy parity with a feasible capability-matched baseline on one Fashion-MNIST run while saving 10.0% FLOPs, and broader five-task parity is unproven. Project 2's regenerated lambda estimates remain exploratory, and the conservative domain-weighting sweep improves contribution ranking modestly without an end-to-end no-regression result. See [Scientific conclusion](#scientific-conclusion) for what the evidence does and does not support.
 
@@ -122,7 +124,7 @@ The corrected P3 suite passes on gpu003: **463 passed in 17.90 seconds**, plus 3
 
 gpu003 (the documented SSH GPU machine, Tesla V100S, Python 3.10.12, torch 2.3.0+cu121) remains the **required** test and experiment machine. Local runs on a development laptop do not replace SSH validation and must not be reported as if they did. Access details are not part of this bundle.
 
-## Pending completion extensions
+## Completed component extensions
 
 The automatic-discovery and adaptive-rank drivers are implemented and their measured outputs are tracked separately from the completed P3 battery:
 

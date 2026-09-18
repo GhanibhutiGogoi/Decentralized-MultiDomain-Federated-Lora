@@ -1,0 +1,15 @@
+{
+  "host": "gpu003",
+  "generated_utc": "2026-09-18T10:39:46.807284+00:00",
+  "script_sha256": "443693c42641b00c56df253bc9fa7e8d668bbb8e8eea7b06482dce3eb04b2d37",
+  "source_csv": "docs/artifacts/p1-adaptive-rank/federated_lora_summary.csv",
+  "source_csv_sha256": "b1a9d297544c23c71ba3f5d104be2556364a950a75d2f6e698e9821609b2d0f9",
+  "source_manifest_sha256": "3c3cbadfd45662f1fef56e07b295d7df1aae636fe284ab8fba0fba7b53833ddd",
+  "matplotlib": "3.10.9",
+  "output_sha256": {
+    "p1_adaptive_final_accuracy_readable.pdf": "401900a5bf2d1a12999642ade54590aa4f13f62ca56aaeda2bef584a6c877598",
+    "p1_adaptive_final_accuracy_readable.png": "282a5a3af2f2cb30ef37f314a560cf05e9b4573850a10d77a42c530f796128db",
+    "p1_adaptive_final_accuracy_readable.data.json": "c4eca44eea4125579454805cfa344eaba0a047921e4943be57be8b2b04118c0b"
+  },
+  "validation": "Five exact endpoints; recorded differences and rank assignments checked; no new training or inferred round data"
+}

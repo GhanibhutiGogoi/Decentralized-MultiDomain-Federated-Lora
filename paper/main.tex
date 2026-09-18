@@ -8,6 +8,11 @@
 \usepackage{graphicx}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Resource-Adaptive Decentralized LoRA: Failure Analysis and a Quantity-Skew Benchmark},
+  pdfauthor={AH-LoRA Project Team},
+  pdfsubject={Two scoped LoRA studies: historical pooled-accuracy failure analysis and a quantity-skew decentralized transformer comparison}
+}
 \usepackage{microtype}
 \newtheorem{proposition}{Proposition}
 \newcommand{\R}{\mathbb{R}}
@@ -16,26 +21,33 @@
 \newcommand{\clip}{\operatorname{clip}}
 \newcommand{\rank}{\operatorname{rank}}
 \newcommand{\Acc}{\operatorname{Acc}}
-\title{AH-LoRA: Evaluating Resource-Adaptive Decentralized LoRA Against Pooled Training}
+\title{Resource-Adaptive Decentralized LoRA: Failure Analysis and a Quantity-Skew Benchmark}
 \author{AH-LoRA Project Team}
 \date{September 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
-Can clients with unequal computing budgets collaboratively train low-rank adapters while retaining the accuracy of ordinary LoRA trained on pooled data? We evaluate AH-LoRA, combining capability-constrained rank selection, domain-dependent contribution weights, and neighbor aggregation of scaled LoRA updates. Nine protocols use all 50,000 CIFAR-100 training examples, frozen ResNet-18 features, 15 clients, and three seeds. Pooled rank-16 LoRA reaches $57.23\pm0.59\%$ full-test accuracy, whereas the combined adaptive-domain method reaches $6.90\pm2.03\%$. Exploratory controls identify specific limitations: IID ownership raises uniform-rank FedAvg from $20.06\%$ to $53.25\%$, while repeated heterogeneous projection can erase an already trained model without learning. Exact synchronized peer gradients reproduce the pooled prediction path, showing that separate data ownership alone does not preclude pooled accuracy. A subsequent training-only holdout study rejects eight retained-base residual recipes. Shared-model adaptive gradient-coordinate training instead reaches $55.03\pm1.01\%$ validation accuracy versus $57.18\pm0.71\%$ for its pooled reference, but retains full rank-16 model and optimizer state. Thus the original complete-model resource and accuracy claim remains unsupported. Its 41.9\% reduction in training-factor payload becomes only 0.26\% in total payload after dense domain-control exchange. The evidence identifies protocol-specific failure mechanisms, not an impossibility result for decentralized LoRA. Exchanged updates and statistics have no demonstrated privacy protection.
+Can heterogeneous clients train useful low-rank adapters through peer communication without sacrificing accuracy? We study this question in two settings. An initial CIFAR-100 experiment with disjoint label domains fails to preserve pooled accuracy: adaptive-rank, domain-weighted LoRA reaches $6.90\pm2.03\%$ versus $57.23\pm0.59\%$ for pooled training. Controlled diagnostics identify local label allocation and repeated heterogeneous projection as important limitations; synchronized peer gradients reproduce pooled predictions when every client retains full rank. We then evaluate a separately specified quantity-skew benchmark using RoBERTa-base, SST-2, ten ring-connected clients, and an independent reconstruction of published Dec-LoRA. Seven methods are trained at five paired seeds, with unequal dataset sizes, independent capacity assignments, and equal local optimization budgets. Adaptive rank with sample-size weighting reaches $94.24\pm0.25\%$ best validation accuracy versus $94.54\pm0.24\%$ for rank-16 Dec-LoRA. The paired difference is $-0.30$ percentage points, with a 95\% interval of $[-0.76,0.16]$; this does not establish equivalence. Serialized training traffic falls by 31.81\%, but the feasible rank-4 comparator reaches $94.50\pm0.33\%$, while the proposed method uses 8.92\% more traffic. Final-round adaptive accuracy is also lower than rank-16 Dec-LoRA. All 36 full-budget runs complete, and independent evaluation reproduces predictions from their 72 best/final checkpoints. The quantity-skew study demonstrates a functioning transformer protocol and a measured tradeoff, but no superiority or established accuracy parity. The original complete-model resource claim remains unsupported, and logical data locality supplies no privacy guarantee.
 \end{abstract}
 
 \section{Introduction}
 LoRA adapts a pretrained model by training low-rank matrices while keeping the original weights fixed~\citep{hu2022lora}. Federated learning permits participants to retain their examples locally~\citep{mcmahan2017fedavg}; decentralized optimization replaces a dedicated aggregation server with communication between participating peers~\citep{boyd2006gossip,lian2017dpsgd}. Together these ideas suggest a practical objective: match ordinary pooled-data LoRA accuracy while allowing participants with smaller computing budgets to train smaller adapters.
 
-Accuracy preservation is the criterion in this study. An improvement over pooled training is not required. Conversely, matching another weak federated baseline is insufficient if both methods trail a model trained directly on the pooled data. The proposed benefit also has two distinct parts: keeping raw examples local is a property of the training workflow, whereas protecting information in exchanged updates requires a separate privacy mechanism and threat model. A possible hospital collaboration motivates the problem but is not an evaluated application.
+Our original criterion is accuracy preservation relative to pooled training; an improvement over pooled training is not required. A subsequent study asks the narrower question of competitiveness against a published decentralized method on one shared task with unequal client dataset sizes. These are distinct estimands: matching another federated baseline cannot establish pooled parity, and the new study does not include a pooled transformer comparator. The proposed benefit also has two distinct parts: keeping raw examples local is a property of the training workflow, whereas protecting information in exchanged updates requires a separate privacy mechanism and threat model. A possible hospital collaboration motivates the problem but is not an evaluated application.
 
 Combining the components introduces difficulties that isolated experiments do not resolve. LoRA factors are not identifiable, heterogeneous ranks induce different scaling and compression, and nonuniform contribution weights must survive the gossip normalization. The final model also matters: an adapter assembled centrally by an evaluator is not necessarily a model produced by the stated peer protocol.
 
-We therefore evaluate a concrete composition. AH-LoRA uses scaled effective-update aggregation, a source-pinned adaptive-rank controller, the canonical conservative domain-weighting function, a weighted Metropolis kernel, and an explicit final peer reduction. We compare its output with a conventional pooled LoRA model under common data, initialization, and evaluation. After completing that comparison, we investigate whether its failure follows from data separation itself or from particular optimization and compression choices. Paired controls examine label allocation and factor refactorization; an oracle-initialized stress test isolates information loss without training; exact gradient synchronization provides a uniform-rank positive control. Separately specified training/validation explorations test retained-base local residuals and shared-model partial gradients, followed by paired three-seed replication of selected partial-gradient arms. Supporting oracle-hierarchy, automatic-discovery, and isolated policy studies remain separate. This is an empirical study of executable protocols, not a new convergence theorem or a validated private-learning system.
+We first evaluate AH-LoRA's original composition of scaled effective-update aggregation, a source-pinned adaptive-rank controller, conservative domain weights, weighted Metropolis gossip, and final peer assembly. The completed pooled comparison is negative. Paired controls examine label allocation and factor refactorization; an oracle-initialized stress test isolates information loss without training; exact gradient synchronization provides a uniform-rank positive control. Training-only holdout studies subsequently test retained-base residuals and partial gradients. These results are retained rather than replaced by a more favorable task.
+
+The new experiment changes the scientific question deliberately: one SST-2 task is divided into unequal, label-stratified shards, and resource-aware variants are compared directly with Dec-LoRA~\citep{ghiasvand2025declora}. All seven methods share the same partition, graph, random seed, and local sample stream. The design separates adaptation and sample-size weighting, includes a feasible uniform rank-4 comparator, and measures communication beyond adapter factors. Its 35 paired runs and one equal-size reconstruction anchor complete the registered finite campaign. This is an empirical study of executable protocols, not a new convergence theorem or a validated private-learning system.
+
+\section{Related Work and Comparator Scope}
+Dec-LoRA performs local fine-tuning followed by separate neighbor averages of the two LoRA factors~\citep{ghiasvand2025declora}. We select its REALM 2025 RoBERTa-base/SST-2 ring setting because it directly addresses decentralized fine-tuning and supplies a tractable published comparator. No author implementation was verified, so our baseline is an independent reconstruction. We pin the published workshop version rather than combine its settings with changed scores from later arXiv versions. Unspecified optimizer, scaling, target-module, classifier, and split choices are disclosed in the experimental design.
+
+Effective-product consensus followed by low-rank factorization is already central to DeCAF~\citep{saadati2025decaf}. Our product-space operation is therefore not claimed as a new aggregation principle. The unconstrained product-space arm is a mechanism control on the Dec-LoRA task, not a numerical reproduction of DeCAF's CLIP or LLaMA experiments. Likewise, weights proportional to dataset size are conventional empirical-risk weights~\citep{mcmahan2017fedavg}, not new domain-allocation theory. The question is whether a particular combination of capability-bounded adaptation, these weights, and graph-constrained merging delivers a useful measured tradeoff. Static quantities yield static sample weights; they must not be conflated with the dynamic domain signals in the historical study.
 
 \section{Learning Objective and Evaluation}
-Let $\mathcal D_i$ contain $n_i$ training examples at client $i$, let $n=\sum_i n_i$, and let $\phi(x)\in\R^{512}$ be the shared frozen feature extractor. A client's logits are
+Let $\mathcal D_i$ contain $n_i$ training examples at client $i$, with $n=\sum_i n_i$. For either model family, the intended sample-weighted objective is $F(\theta)=\sum_i(n_i/n)F_i(\theta)$, where $F_i$ is the client's mean cross entropy and $\theta$ denotes trainable parameters. The two studies use different architectures and endpoints, which we do not pool statistically. In the original CIFAR-100 study, let $\phi(x)\in\R^{512}$ be the shared frozen feature extractor. A client's logits are
 \begin{equation}
  z_i(x)=(W_0+\dW_i)\phi(x)+b_0,
  \qquad \dW_i=\frac{\alpha}{r_i}B_iA_i,
@@ -54,13 +66,21 @@ Ordinary pooled LoRA trains one rank-$R$ adapter directly on all examples:
 \end{equation}
 Sample-weighted federated comparators target the same empirical weighting. Quality and domain arms instead use round-dependent weights $\pi_i^t\propto n_iq_i^t\lambda_i^t$. These weights change the training emphasis; all methods are still evaluated on the same unweighted full test set.
 
-The primary endpoint is the final assembled rank-16 model's accuracy on all 10,000 test examples. For seed $s$ and method $m$, we report the paired difference in percentage points,
+The original study's primary endpoint is the final assembled rank-16 model's accuracy on all 10,000 test examples. For seed $s$ and method $m$, we report the paired difference in percentage points,
 \begin{equation}
  \Delta_{m,s}=100\left(\Acc(\widehat{\dW}_{m,s};\mathcal T)
  -\Acc(\dW_{{\rm pool},s};\mathcal T)\right).
  \label{eq:primary-endpoint}
 \end{equation}
 A prespecified noninferiority margin was not available; we report observed differences and sample standard deviations without equating a nonsignificant difference with equivalence. Personalized accuracy, $N^{-1}\sum_i\Acc(\dW_i;\mathcal T_i)$, is a secondary diagnostic. It evaluates different models on different local test shards and cannot replace the pooled-model comparison.
+
+The SST-2 study instead follows the published best-validation endpoint. If $a_{m,s,t}$ is the assembled model's percentage accuracy on the 872 labeled validation examples after round $t$, its primary score and paired effect are
+\begin{equation}
+ b_{m,s}=\max_{1\le t\le20}a_{m,s,t},\qquad
+ d_s=b_{\mathrm{adaptive\text{-}sample},s}-b_{\mathrm{Dec\text{-}LoRA16},s}.
+ \label{eq:quantity-endpoint}
+\end{equation}
+The first occurrence resolves ties; round-20 accuracy is secondary. Across $S=5$ paired seeds, we report $\bar d$, sample standard deviation $s_d$, and the descriptive interval $\bar d\pm t_{0.975,S-1}s_d/\sqrt S$. These unadjusted intervals describe seed variation on the same validation set, not sampling uncertainty on a new test population. No equivalence margin is introduced after seeing results. Repeated validation selection prevents interpreting $b_{m,s}$ as hidden-test performance.
 
 \section{Methodology}
 \subsection{Capability-constrained adaptive rank}
@@ -188,6 +208,71 @@ For a source adapter with rank $r_j$, the training payload is $S_j=r_j(512+100)$
 \end{equation}
 The last term is one final peer assembly. Earlier assemblies used to draw evaluation curves are recorded separately and do not alter training. FedAvg already returns its centrally aggregated model and does not require the peer reduction; pooled training has no inter-client payload. Static sample-count exchange, graph setup, packet framing, and subsequent model dissemination are excluded. We report training rank--sample products, $\sum_{t,i}r_i^tn_i$, and probe work separately; this proxy excludes SVD, feature extraction, optimizer, and communication costs and is not a measured total-FLOP or hardware-speedup claim.
 
+\subsection{Quantity-weighted transformer adapters}
+\label{sec:quantity-method}
+The quantity-skew study applies LoRA to query and value projections in all 12 RoBERTa-base blocks~\citep{liu2019roberta}. For adapted layer $\ell$ at peer $i$, write
+\begin{equation}
+ X_{i\ell}=\frac{\alpha}{r_i}B_{i\ell}A_{i\ell},\qquad
+ h_\ell'=\left(W_{0\ell}+X_{i\ell}\right)h_\ell+b_{0\ell},
+ \quad \alpha=16.
+ \label{eq:transformer-adapter}
+\end{equation}
+Each effective adapter update has shape $768\times768$; the pretrained backbone and projection bias $b_{0\ell}$ are frozen, but the complete RoBERTa classification head is trained. Denote its dense projection and output-layer weights and biases collectively by $\vartheta_i$. Its intervening tanh and dropout operations have no trainable parameters. Unlike the historical cached-feature experiment, gradients pass through the transformer's adapted layers.
+
+With ten peers on a ring, the proposal has $Q_{ii}=Q_{i,i-1}=Q_{i,i+1}=1/3$ (indices modulo ten). Uniform arms use $\pi_i=1/10$; sample-weighted arms use $\pi_i=n_i/n$. Equation~\eqref{eq:weighted-mh} then defines the graph-supported kernel. Counts and weights remain fixed throughout a run. For common rank $r$, the reconstructed Dec-LoRA operation is
+\begin{equation}
+ A_{i\ell}^{+}=\sum_jQ_{ij}A_{j\ell}^{\mathrm{local}},\qquad
+ B_{i\ell}^{+}=\sum_jQ_{ij}B_{j\ell}^{\mathrm{local}},\qquad
+ \vartheta_i^{+}=\sum_jQ_{ij}\vartheta_j^{\mathrm{local}}.
+ \label{eq:declora-factor}
+\end{equation}
+The effective-product controls instead use
+\begin{equation}
+ Y_{i\ell}=\sum_jP_{ij}X_{j\ell}^{\mathrm{local}},\qquad
+ X_{i\ell}^{+}=\mathcal C_{r_i}(Y_{i\ell}),\qquad
+ \vartheta_i^{+}=\sum_jP_{ij}\vartheta_j^{\mathrm{local}}.
+ \label{eq:quantity-product}
+\end{equation}
+Separate factor averaging includes cross-products absent from averaging effective updates, since $(\sum_jw_jB_j)(\sum_kw_kA_k)=\sum_{j,k}w_jw_kB_jA_k$. Thus the two operations are distinct even at common rank. The product-16/sample arm also changes the stationary weights relative to Dec-LoRA, so that contrast alone does not isolate factor versus product aggregation.
+
+To avoid materializing every dense effective update, concatenate weighted factors for a receiver as
+\begin{equation}
+ L=[\sqrt{w_j\alpha/r_j}\,B_j]_j,\qquad
+ R=[\sqrt{w_j\alpha/r_j}\,A_j^\top]_j,\qquad Y=LR^\top.
+\end{equation}
+Thin QR gives $L=Q_LR_L$ and $R=Q_RR_R$. If $R_LR_R^\top=U\Sigma V^\top$, the best rank-$r$ update is
+\begin{equation}
+ \mathcal C_r(Y)=(Q_LU_{:r})\Sigma_{:r}(Q_RV_{:r})^\top.
+ \label{eq:compact-merge}
+\end{equation}
+The stored factors divide both square-root singular-value factors by $\sqrt{\alpha/r}$, preserving Equation~\eqref{eq:transformer-adapter}. This is algebraically the dense truncated SVD, not an additional approximate compressor. Its core dimensions grow with the sum of contributing ranks; compactness is not a universal workspace guarantee. Independent dense-oracle tests cover heterogeneous ranks, scaling, weights, gauge changes, and truncation.
+
+The adaptive arms reuse the capability-constrained controller described above, including two warm-up rounds, a half-capability floor, smoothing, hysteresis, and quality-drop restoration. One fixed local training batch is probed at the capability ceiling. The transformer probe computes
+\begin{equation}
+ s_{\rm transformer}(G)=\frac{\norm{G}_F^2}{\max\{\norm{G}_2^2,10^{-30}\}},
+ \qquad s_{\rm transformer}(0)=0,
+ \label{eq:transformer-stable-rank}
+\end{equation}
+and takes the median over all adapter $A$ and $B$ gradients, including zero gradients. This convention differs from the earlier nonzero-gradient description: at zero-$B$ initialization, the $A$ gradients are zero and remain part of the transformer's demand statistic. The score $1/(1+\ell_i)$ supplies quality feedback. Quality affects rank decisions only in this benchmark, never the sample weights. No validation labels enter the controller. Factor-gradient stable rank is coordinate-dependent and is not assumed to estimate a uniquely required global model rank. A ceiling probe can require the ceiling adapter even when the persistent training rank is smaller.
+
+Weighting also changes graph mixing. With $D_\pi=\operatorname{diag}(\pi)$, the reversible similarity $S_\pi=D_\pi^{1/2}PD_\pi^{-1/2}$ is symmetric. We record the absolute spectral gap $1-\max_{k<N}|\lambda_k(S_\pi)|$, excluding its eigenvalue one, and post-merge adapter disagreement
+\begin{equation}
+ V=\sum_i\pi_i\sum_\ell\left\|X_{i\ell}-\sum_j\pi_jX_{j\ell}\right\|_F^2.
+ \label{eq:quantity-disagreement}
+\end{equation}
+Consequently, sample versus uniform weighting is a joint objective-and-mixing intervention, not a pure reweighting with unchanged consensus speed.
+
+Final assembly gathers serialized factor and classifier records along a breadth-first tree of the same ring. The first capacity-16 peer is selected as root before training, independently of validation scores. It forms $\widehat X_\ell=\mathcal C_{16}(\sum_i\pi_iX_{i\ell})$ and $\widehat\vartheta=\sum_i\pi_i\vartheta_i$ for product-space arms. Dec-LoRA instead assembles $\widehat A_\ell=N^{-1}\sum_iA_{i\ell}$ and $\widehat B_\ell=N^{-1}\sum_iB_{i\ell}$; its rank-4 comparator deploys at rank 4. Relay peers route records without intermediate adapter truncation. The assembled model is evaluated at the root and is not broadcast to smaller peers or fed back into training.
+
+Each training message contains 24 pairs of adapter factors, the full classifier, and serialized metadata. Let $H$ be the classifier parameter count and $M_{ji}^t$ the measured metadata length for directed edge $j\to i$. For fp32 tensors,
+\begin{align}
+ B_{\rm train}&=\sum_{t=1}^{20}\sum_{j\to i}
+ \left[4\{24\cdot1536r_j^t+H\}+M_{ji}^t\right],\\
+ B_{\rm delivery}&=320+B_{\rm train}+B_{\rm final\ gather}.
+ \label{eq:quantity-bytes}
+\end{align}
+Model messages are actually serialized, hashed, decoded, and routed inside the simulator. The 320-byte setup allowance models twenty fixed-width neighbor count records; it is not measured through that serializer. Evaluation gathers from earlier rounds are reported separately and excluded from $B_{\rm delivery}$. Base-model, initial-state and graph provisioning, network framing, and subsequent dissemination are excluded. Logical per-peer gather storage, structural QR/SVD workspace, and measured whole-process CUDA peaks are different quantities. The last includes the shared backbone and multiple simulated peers and cannot establish independent-client device-memory savings.
+
 \subsection{Diagnosing label allocation, factor coordinates, and retained information}
 The failure analysis separates several operations that the original training loop combines. First, an IID redistribution changes only which client owns each training example, preserving every $n_i$, the complete training union, the test set, and all optimizer settings. Second, a pooled-reset control inserts $\mathcal C_{16}$ after each epoch of an already rank-16 adapter. Its immediate effective update is unchanged up to roundoff, but its factor coordinates change. This intervention includes both Adam's coordinate-dependent transformation and the factor-wise weight-decay geometry; it does not isolate lost moments, since moments are reset in both arms.
 
@@ -312,6 +397,45 @@ The canonical conservative allocator receives this signal and the training histo
 All peers retain the entire rank-16 model, a full forward pass, and full Adam moments. The current implementation transmits padded rank-16 gradient vectors, so it claims no communication saving. The budget $r_i$ restricts computed gradient coordinates only; it is not a bound on model storage, optimizer storage, or total runtime. We therefore call this adaptive gradient-coordinate training rather than successful heterogeneous model-rank training. Ceiling probes, common optimizer work, and domain-control traffic are separately accounted for.
 
 \section{Experimental Design}
+\subsection{Published-method reconstruction and quantity-skew comparison}
+\label{sec:quantity-design}
+The new study uses RoBERTa-base and SST-2 from GLUE~\citep{liu2019roberta,wang2019glue}. The pinned asset revisions are
+\begin{quote}\small
+Model: \texttt{e2da8e2f811d1448a5b465c236feacd80ffbac7b}\\
+Dataset: \texttt{bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c}.
+\end{quote}
+All 67,349 canonical training examples are used; evaluation uses the official 872 labeled validation examples, with no official-test access. The published Dec-LoRA table instead lists 66,675 training and 674 development examples. Because the source of that discrepancy is unresolved, our scores are not claimed as exact numerical reproduction or a direct win over its printed 93.81\% ring result.
+
+The reconstruction retains ten clients, a ring, rank 16, learning rate $10^{-3}$, batch size 32, and 20 rounds. The equal-size anchor interprets the publication's ambiguous $K=1$ as one local epoch per round. Other disclosed choices are query/value adapters in all 12 blocks, $\alpha=16$, common Gaussian $A$ initialization with standard deviation 0.02, zero $B$, the complete trainable classifier, maximum token length 128 with dynamic padding, pretrained-model dropout and zero adapter dropout, and fp32 deterministic Torch operations. AdamW uses zero decay and gradient clipping at norm one, with moments reset for every peer in every round in every arm. Resetting avoids retaining stale moments across the changed SVD factor coordinates, but is a reconstruction choice rather than an attributed author setting. Rank-16 adapters contain 589,824 parameters; classifier parameters are counted separately. We do not infer the complete adapter specification from the publication's rounded 0.60M count.
+
+For the quantity extension, the size-ratio vector is $(1,1,1,1,2,2,2,4,4,4)$. Largest-remainder allocation yields exact client totals; bipartite integer rounding assigns each client/class count either the floor or ceiling of its proportional quota, preserving both client sizes and global label totals. Full source-row memberships establish disjointness and coverage. At seed $s$, partition randomization uses $s+10000$, assignment of quantities to ring positions uses $s+20000$, and an independent permutation of ceilings $(4,4,4,4,8,8,8,16,16,16)$ uses $s+30000$. Matched methods reuse these assignments. Thus data quantity, rather than different topics or deliberately shifted class distributions, is the designed statistical heterogeneity.
+
+Every quantity arm performs 211 full local updates of 32 examples per peer per round. Local streams independently reshuffle and continue across epoch boundaries, so smaller shards are revisited more often. This gives 42,200 aggregate optimizer steps and 1,350,400 example exposures per run; the equal-size full-epoch anchor instead uses 1,346,980 exposures. Equal local steps prevent larger shards from also contributing longer local trajectories before weighting. Training-probe work is additional and separately recorded. All methods use the same per-peer sample order at a paired seed, but rank-dependent computation is not identical total work.
+
+\begin{table}[t]
+\centering
+\caption{Seven matched quantity-skew methods. Sample weights are $n_i/n$; uniform weights are $1/10$. The last four arms form the rank-policy by weighting factorial. Uniform rank 16 exceeds weaker clients' declared adapter caps.}
+\label{tab:quantity-design}
+\small
+\begin{tabular}{llll}
+\toprule
+Arm & Local rank & Aggregation & Weights\\
+\midrule
+Dec-LoRA16 & 16 & factor average & uniform\\
+Dec-LoRA4 & 4 & factor average & uniform\\
+Product16/sample & 16 & product + SVD & sample\\
+Fixed/uniform & capability ceilings & product + SVD & uniform\\
+Fixed/sample & capability ceilings & product + SVD & sample\\
+Adaptive/uniform & controller within caps & product + SVD & uniform\\
+Adaptive/sample & controller within caps & product + SVD & sample\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+After remote numerical and transport tests and seven bounded smoke runs, a fixed seed-42 screen covers all seven quantity arms and the equal-size Dec-LoRA16 anchor. All seven quantity arms are retained at seeds 43--46, irrespective of whether early scores favor the proposal. The completed campaign therefore has 35 matched quantity runs and one separate anchor. Neither a post-hoc accuracy gate nor a selected subset of seeds determines replication. The protocol is archived before full-budget results; source snapshots and hashes identify the immutable training implementation. No hyperparameter search is performed for one comparator alone. This fixes a transparent operating point but does not establish each method's optimized performance.
+
+Equation~\eqref{eq:quantity-endpoint} is the primary comparison, with Dec-LoRA4 as the feasible comparator and final-round accuracy as a required secondary outcome. The factorial effects are adaptive minus fixed within each weighting choice, and sample minus uniform within each rank policy. Their difference is the interaction. These exploratory secondary intervals are not adjusted for multiple comparisons. The one-seed equal-size anchor is excluded from the five-seed aggregates and cannot by itself estimate the causal effect of quantity skew. Independent fresh-process audits recompute saved best/final predictions using separately loaded canonical data and metric code; they share the model architecture and state-install helper, so they are not an independent reimplementation of the entire transformer.
+
 \subsection{Matched pooled and integrated comparison}
 The primary benchmark uses all 50,000 CIFAR-100 training images and 10,000 test images. Frozen ImageNet-pretrained ResNet-18 features have dimension 512 after deterministic resizing to $224\times224$ and ImageNet normalization. Only LoRA factors on the random frozen 100-class head are trained. This is head-only LoRA on cached features, not end-to-end backbone or language-model fine-tuning.
 
@@ -382,6 +506,66 @@ With affinity $a_{ij}=h_i^\top h_j$, a graph-supported kernel $K_{ij}=\mathbf1_{
 Project 1's original five-task battery compared a controller against fixed rank 32, above its capability ceilings. A later Fashion-MNIST rerun used a feasible fixed $(4,8,16)$ reference and the revised controller. Project 2 separately evaluated recorded leave-one-client-out contributions, $y_i=\Acc(\mathrm{all})-\Acc(\mathrm{all}\setminus i)$, on 75 real-data observations. Its exploratory fitted score used ridge regression, $\widehat\theta_\kappa=(X^\top X+\kappa I)^{-1}X^\top y$, with leave-one-task-out selection of $\kappa$. The corrected training experiment uses the conservative unfitted allocator in Equation~\eqref{eq:domain-factors}, not a fit to held-out test accuracy.
 
 \section{Results}
+\subsection{Quantity skew: a functioning protocol without a demonstrated win}
+\label{sec:quantity-results}
+All 36 full-budget runs complete: seven quantity arms at five matched seeds plus the equal-size anchor. The separate evaluator reproduces the exact raw prediction vectors of all 72 saved best/final checkpoints and verifies their source, data, and checkpoint hashes. Table~\ref{tab:quantity-results} and Figure~\ref{fig:quantity-accuracy} report all seven methods, without mixing smoke results or the one-seed anchor into their uncertainty estimates.
+
+\begin{table}[t]
+\centering
+\caption{Completed SST-2 quantity-skew comparison at seeds 42--46. Accuracy is percent, mean $\pm$ sample SD. Best over 20 rounds is primary; round 20 is secondary. Mean traffic is decimal GB. Training includes classifier and metadata; delivery adds modeled setup and one final gather, excluding provisioning. A dagger marks references exceeding some peers' adapter caps.}
+\label{tab:quantity-results}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Method & Best validation & Final validation & Train GB & Delivery GB\\
+\midrule
+Dec-LoRA16$^\dagger$ & $94.54\pm0.24$ & $94.45\pm0.32$ & 1.893 & 2.011\\
+Dec-LoRA4 & $94.50\pm0.33$ & $94.27\pm0.37$ & 1.185 & 1.259\\
+Product16/sample$^\dagger$ & $94.72\pm0.18$ & $94.43\pm0.22$ & 1.893 & 2.011\\
+Fixed/uniform & $94.52\pm0.26$ & $94.20\pm0.32$ & 1.468 & 1.556\\
+Fixed/sample & $94.40\pm0.13$ & $94.22\pm0.24$ & 1.468 & 1.556\\
+Adaptive/uniform & $94.17\pm0.22$ & $93.81\pm0.51$ & 1.296 & 1.373\\
+Adaptive/sample & $94.24\pm0.25$ & $93.90\pm0.19$ & 1.291 & 1.368\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Adaptive/sample reaches $94.24\pm0.25\%$ best validation accuracy, versus $94.54\pm0.24\%$ for reconstructed Dec-LoRA16. The paired primary difference is $-0.298\pm0.368$ percentage points, with unadjusted 95\% $t$ interval $[-0.755,0.159]$. The interval includes zero, but this is not an equivalence or noninferiority result. Its final-round difference is $-0.550\pm0.297$ points, with interval $[-0.919,-0.182]$. Reporting only the selected best scores would obscure this less favorable final endpoint. The feasible Dec-LoRA4 comparator also has a higher mean best score, with adaptive minus rank-4 difference $-0.252\pm0.348$ points and interval $[-0.684,0.180]$. These results support neither superiority nor established parity for the proposed combined method.
+
+The product-16/sample control has the highest mean best score, $94.72\pm0.18\%$; adaptive/sample trails it by $0.482$ points, with difference interval $[-0.877,-0.087]$. Its final score, $94.43\pm0.22\%$, is similar in magnitude to Dec-LoRA16's, illustrating the influence of the best-round endpoint. This arm exceeds weaker clients' rank ceilings and changes both aggregation and weighting relative to Dec-LoRA. It cannot be used to attribute its score to one operation alone or to claim a resource-feasible solution.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/quantity-skew-accuracy.pdf}
+\caption{All seven full-budget quantity-skew arms on official SST-2 validation data. Individual seeds, means, and sample SD distinguish the primary best-round endpoint from final-round performance. Rank-16 references exceed weaker peers' declared adapter caps; the equal-size anchor and smoke runs are excluded.}
+\label{fig:quantity-accuracy}\end{figure}
+
+\subsection{Rank and sample-weight effects in the quantity benchmark}
+At uniform weights, adaptation changes best accuracy by $-0.344$ points, with a 95\% interval of $[-0.569,-0.119]$. At sample weights, its effect is $-0.161$ points, with interval $[-0.399,0.078]$. Sample weighting changes fixed-rank accuracy by $-0.115$ points, with interval $[-0.340,0.110]$. Its effect at adaptive ranks is $+0.069$ points, with interval $[-0.169,0.307]$.
+
+The adaptation main effect is $-0.252$ points, with interval $[-0.382,-0.123]$. The weighting main effect is $-0.023$ points, with interval $[-0.152,0.106]$. Their interaction is $+0.183$ points, with interval $[-0.201,0.568]$. These paired descriptive contrasts (Figure~\ref{fig:quantity-effects}) show no demonstrated weighting benefit and a less favorable accuracy pattern for this adaptive policy. Small or nonsignificant effects do not prove that weighting is universally neutral. Counts, capacities, and ring positions vary jointly across only five seeds, and nonuniform weights also change the mixing kernel.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/quantity-skew-paired-effects.pdf}
+\caption{Seed-paired comparative and factorial effects in the quantity benchmark, in percentage points. Each method uses its own selected best round for primary contrasts. Intervals are unadjusted 95\% Student-$t$ intervals over five seeds, not equivalence tests or uncertainty on a new hidden-test population.}
+\label{fig:quantity-effects}\end{figure}
+
+Adaptive/sample has a mean persistent training rank of $5.792\pm0.094$ across the five runs, compared with mean ceiling rank 8.8 in fixed heterogeneous training. Its final mean client ranks are 5.6, 5.0, 5.2, 5.4, and 5.4 at seeds 42--46. Figure~\ref{fig:quantity-trajectories} relates these rank trajectories to validation learning curves. Every adaptive run adds 12,800 probe-example evaluations: half are backward ceiling-rank demand probes and half forward quality checks. Those costs, the trainable classifier, the full backbone forward/backward path, and the root's assembly workspace prevent converting a rank reduction directly into a total-compute or device-memory saving.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/quantity-skew-trajectories.pdf}
+\caption{Validation learning curves and mean client training rank over the fixed 20-round quantity-skew budget. Curves summarize five paired seeds; evaluation assemblies do not alter subsequent peer training. Training rank excludes ceiling probes and root assembly requirements.}
+\label{fig:quantity-trajectories}\end{figure}
+
+\subsection{Quantity-skew communication tradeoff and reconstruction anchor}
+Adaptive/sample transmits a mean 1.291 GB during training, 31.81\% below Dec-LoRA16's 1.893 GB and 12.08\% below fixed/sample's 1.468 GB. However, it uses 8.92\% more training traffic than feasible Dec-LoRA4's 1.185 GB while also having a lower mean accuracy. Thus it offers a measured traffic-versus-accuracy tradeoff relative to rank 16, but does not dominate the simpler feasible rank-4 baseline. The classifier alone contributes 0.947 GB to every run's training exchange. LoRA-factor-only savings therefore materially exaggerate total model-message savings. Figure~\ref{fig:quantity-tradeoff} retains all methods and explicitly marks the unconstrained rank-16 references.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figures/quantity-skew-tradeoff.pdf}
+\caption{Best SST-2 validation accuracy against serialized training traffic. Traffic includes adapter factors, full classifier parameters, and metadata; it excludes provisioning, modeled setup, evaluation gathers, and final delivery. The rank-4 baseline is feasible at every declared adapter cap. This plot establishes neither independent-device memory savings nor a measured network speedup.}
+\label{fig:quantity-tradeoff}\end{figure}
+
+The equal-size Dec-LoRA16 anchor reaches 94.15\% best and final validation accuracy at seed 42. It is a useful reconstruction check but has only one seed and slightly different sample exposure from the fixed-step quantity extension. The number is not evidence that we exceeded the publication's 93.81\% result: the canonical split, disclosed implementation choices, and uncertain local-update interpretation differ. All scores in the new study concern one public validation set, one model family, one topology, and one quantity-ratio schedule.
+
 \subsection{Corrected pooled comparison}
 \input{integrated_results.tex}
 
@@ -566,7 +750,11 @@ The original Project 1 controller stayed at rank 2 throughout its five-round bat
 Project 2's conservative follow-up changes Spearman association with recorded contributions from 0.152 to 0.196 and pairwise ordering accuracy from 0.520 to 0.547. These are model-free ranking results, not retrained-model accuracy results. Its earlier ridge forms have weak global fit ($R^2=0.079$ and $0.025$) and task-dependent correlations. Neither the isolated Fashion-MNIST parity nor the contribution-ranking change predicts the composed method's full-test accuracy without the corrected experiment.
 
 \section{Discussion and Limitations}
-The parity question has several distinct comparisons. Pooled versus FedAvg tests the effect of local optimization and aggregation with uniform rank. MH-16 adds neighbor communication. MH-sample imposes heterogeneous capacity. The four quality/domain arms then isolate the selected adaptive policy and the domain multipliers. A shortfall at one step cannot automatically be attributed to a different component, and matching a resource-constrained federated control does not establish matching pooled training.
+The quantity-skew experiment changes the empirical picture without reversing the original negative result. Backbone LoRA on a shared task attains validation accuracy near its reconstructed decentralized references under heterogeneous adapter ranks; the previous severe collapse is therefore not an inevitable property of every decentralized LoRA implementation. Yet adaptive/sample does not beat either Dec-LoRA baseline, its final-round deficit to rank 16 is visible in the paired interval, and its traffic exceeds the feasible rank-4 baseline. This is a completed comparative study with a qualified tradeoff, not a successful demonstration of all proposed benefits.
+
+The new factorial also gives no evidence that adaptation or size weighting improves accuracy at the chosen operating point. The mechanism control with unrestricted product-space rank performs well, but neither its rank feasibility nor its combined change in weighting and aggregation permits a single-component explanation. The studied sample weights are static and target conventional sample-weighted empirical risk; they do not solve dynamic domain allocation. No pooled RoBERTa/SST-2 arm was included, so even a stronger decentralized comparison would not establish the original pooled-parity claim. The one-seed equal-size anchor and previously observed CIFAR diagnostics are insufficient to attribute the new task's behavior solely to removing label skew: the architecture, task, optimizer settings, rank scaling, and aggregation implementation also changed.
+
+The original parity question has several distinct comparisons. Pooled versus FedAvg tests the effect of local optimization and aggregation with uniform rank. MH-16 adds neighbor communication. MH-sample imposes heterogeneous capacity. The four quality/domain arms then isolate the selected adaptive policy and the domain multipliers. A shortfall at one step cannot automatically be attributed to a different component, and matching a resource-constrained federated control does not establish matching pooled training.
 
 The follow-up experiments replace a generic failure diagnosis with several narrower findings. Label redistribution recovers more than 33 points of uniform-rank FedAvg accuracy, while exact pooled SVD refactorization changes its pooled control by less than one tenth of a point on average. Removing common-logit offsets does not restore non-IID accuracy. The no-training test establishes repeated heterogeneous model projection as an independent mechanism for destroying retained information. The one-step Adam test shows that aggregation after local optimization can differ substantially from optimization after gradient aggregation even with no multi-step drift or SVD. These interventions identify effects in their respective settings; their magnitudes cannot be added to explain the original full-pipeline gap.
 
@@ -581,20 +769,28 @@ This explains why the desired equality is an empirical hypothesis rather than an
 
 The successful uniform-rank positive control changes the scope of the conclusion: the evidence rejects the tested adaptive state-averaging protocol, not the proposition that decentralized data ownership can coexist with pooled accuracy. It nevertheless leaves the original resource claim open because every synchronized peer stores the full rank-16 model and optimizer. The completed candidate studies sharpen this distinction. All screened retained-base recipes remain far below their pooled validation reference, despite preserving a frozen accumulated model. Partial-gradient training reaches within 2.15 points on average under adaptive/domain allocation, but its fixed/domain comparator performs better, and it reduces computed gradient coordinates without reducing full model or Adam storage. Neither method satisfies the original complete-model rank cap merely because its local computation uses a smaller $r_i$.
 
-The benchmark deliberately exposes costs that a factor-only account omits. Domain weighting currently exchanges dense update changes and class histograms with every peer, and final exact assembly also uses dense matrices. This simple protocol makes data dependencies auditable but can dominate the savings from smaller factor payloads. A compressed sufficient-statistic protocol would be a different implementation requiring its own correctness and accuracy evaluation. Rank--sample products likewise omit gradient probes, factorization, optimizer work, and dense processing.
+Both benchmarks expose costs that a factor-only account omits. The original domain-weighted protocol exchanges dense update changes and class histograms with every peer, and its final exact assembly uses dense matrices. The quantity protocol removes that domain-control exchange and uses compact factor merging, but its classifier traffic is substantial, root gathering stores all routed source records, and ceiling probes limit peak-memory claims. Structural workspace estimates exclude backend temporaries; measured CUDA peaks belong to a process sharing the backbone among simulated clients. Neither rank--sample products nor smaller serialized factors establish lower total FLOPs, lower independent-client peak memory, or shorter end-to-end training time.
 
-The execution is a single-process simulation of peer message flow on the designated remote GPU machine. It verifies graph-constrained operations and payloads; it does not establish multi-host reliability, measured communication speed, asynchronous behavior, or tolerance of dropped clients. The cached-feature, head-only CIFAR-100 task does not validate end-to-end visual fine-tuning, language models, medical data, or arbitrary AI training. Three seeds describe variation in this testbed and do not establish broad equivalence. The official-test mechanism controls are exploratory follow-ups to an observed failure; the later 45,000/5,000 split limits further selection to training data but does not erase that research history. The historical oracle and automatic-discovery results have different observation assumptions and are not silently included in the corrected pipeline.
+Execution is a single-process simulation of peer message flow on the designated remote GPU machine. It verifies graph-constrained operations and payloads; it does not establish multi-host reliability, measured communication speed, asynchronous behavior, or tolerance of dropped clients. The cached-feature CIFAR-100 task is head-only, while the new study adapts internal transformer layers; neither validates medical data or arbitrary AI training. Three historical seeds and five quantity-study seeds describe limited variation, not broad equivalence. The new study's 872 validation examples are repeatedly used to select best rounds, and its uncertainty intervals do not correct for this selection or quantify hidden-test generalization. Its fixed operating point is not a fair-tuning claim about every method's optimum. Additional datasets, quantity ratios, topologies, and independently held-out endpoints would be needed for broader claims. The original official-test mechanism controls are exploratory follow-ups to an observed failure; the later 45,000/5,000 split limits further selection to training data but does not erase that research history. The historical oracle and automatic-discovery results have different observation assumptions and are not silently included in either fixed-ring pipeline.
 
-Raw examples are absent from the simulated peer messages, and each client's optimizer reads its assigned examples. The simulator process nevertheless has access to the entire dataset, so this experiment does not verify enforced isolation between machines. Updates and training statistics are exposed; in particular, the domain-control allgather reveals all supplied records to all peers. No differential privacy, secure aggregation, membership-inference evaluation, reconstruction evaluation, or medical threat model is implemented in this study. Consequently, accuracy parity, if observed, would still not justify a claim that hospitals can collaborate without privacy loss.
+Raw examples are absent from the simulated peer messages, and each client's optimizer reads its assigned examples. The simulator process nevertheless has access to the entire dataset, so these experiments do not verify enforced isolation between machines. Updates and training statistics are exposed: the historical domain-control allgather reveals all supplied records to all peers, and the quantity-study assembly root sees every routed adapter and classifier record. No differential privacy, secure aggregation, membership-inference evaluation, reconstruction evaluation, or medical threat model is implemented. Consequently, accuracy parity, if observed, would still not justify a claim that hospitals can collaborate without privacy loss.
 
 \section{Conclusion}
-The original adaptive-rank, domain-weighted state-averaging protocol is unsuccessful at preserving pooled accuracy: its corrected 30-round result is $6.90\pm2.03\%$ against $57.23\pm0.59\%$ for conventional rank-16 LoRA. The completed follow-up experiments make this conclusion more specific. Severe label skew accounts for much of the uniform-rank FedAvg shortfall, optimizer aggregation order changes even a single local step, and repeated heterogeneous projection can erase a learned classifier without training. Exact synchronized peer gradients reproduce the pooled reference at every evaluated epoch, establishing that separate data ownership need not itself cause accuracy loss. That positive control requires full rank 16, common Adam state, and 12.87 GB of modeled communication per run. On a separate training-only validation split, all eight retained-base residual recipes fail, while adaptive partial gradients reach $55.03\pm1.01\%$ against $57.18\pm0.71\%$ for pooled LoRA. This narrower gap is obtained by retaining full rank-16 model and optimizer state, and fixed partial gradients perform better than adaptive ones. The original joint claim of pooled accuracy under complete-model heterogeneous rank caps therefore remains unsupported; the evidence supports further protocol research rather than declaring decentralized LoRA impossible. No tested protocol establishes a privacy guarantee for the proposed hospital use case.
+The completed quantity-skew comparison shows that adaptive-rank, sample-weighted decentralized LoRA can train a useful transformer: best SST-2 validation accuracy is $94.24\pm0.25\%$, compared with $94.54\pm0.24\%$ for independently reconstructed rank-16 Dec-LoRA. Its 31.81\% reduction in serialized training traffic accompanies a small observed best-score deficit and a larger final-round deficit. The feasible rank-4 baseline attains $94.50\pm0.33\%$ with lower traffic than the proposal. Thus this experiment establishes neither a win nor statistical equivalence; the tested adaptive policy and sample weighting have not demonstrated a superior combined tradeoff. All registered runs and checkpoint verifications are complete, including unfavorable outcomes.
+
+The earlier disjoint-label CIFAR-100 protocol remains unsuccessful at preserving pooled accuracy, with $6.90\pm2.03\%$ versus $57.23\pm0.59\%$. Its completed diagnostics identify local label allocation and repeated heterogeneous projection as important mechanisms, while exact shared-state peer gradients show that separate ownership need not itself cause accuracy loss. Residual candidates fail, and partial gradients approach pooled validation accuracy only while retaining full model and optimizer state. The new transformer benchmark asks a different comparator question and does not overturn those findings. The original joint claim of pooled accuracy under complete-model resource limits remains unsupported, and no tested protocol establishes privacy protection. These are specific empirical limits on the evaluated methods, not an impossibility theorem for decentralized LoRA.
 
 \appendix
 \section{Reproducibility and Supporting Figures}
-The repository contains executable protocols, canonical policy provenance, feature and split hashes, per-round JSON records, phase timings, final adapters, and scripts that generate the reported tables and plots. The corrected driver is \path{project-3-hierarchical-gossip/experiments/integrated_benchmark.py}. Its evaluation does not tune on test data. Remote tests cover the numerical operators and paired execution invariants; artifacts distinguish full experiments from smoke tests and excluded pilots. Local credentials are not part of the artifact bundle.
+The completed quantity study is archived under \path{docs/artifacts/quantity-skew/}. The immutable source directory is \path{project-3-hierarchical-gossip/experiments/}. It contains the benchmark, \path{quantity_skew_benchmark.py}, and independent evaluator, \path{verify_quantity_checkpoint.py}.
 
-The follow-up evidence is stored under \path{docs/artifacts/methodology-exploration/}, with prospective plans separating official-test diagnostics from validation-only candidate exploration. Optimization controls retain all 21 endpoints and independently reconstructed correct counts; retention runs preserve spectra, coefficient recurrence predictions, and all 18 no-training trajectories. The gradient control preserves six paired final models, 192 same-state fp64 checks, and independent predictions and communication counts. The Adam-order diagnostic retains all 24 training-only probes. Residual and partial-gradient verifiers independently reconstruct 25 unique saved validation models (11 residual-screen and 15 partial-gradient/pooled evaluations share one pooled checkpoint), with every correct count matching. They open only the original training tensor, validate its hash and exhaustive class-stratified holdout, and check exposures, initialization, rank ceilings, weight formulas and recorded transport ledgers. Per-step gradient edge traces are not retained, so their actual runtime paths cannot be independently reconstructed from the saved counters. A 47-file snapshot is verified against the six validation launch manifests and canonical P1/P2 dependency hashes. All unsuccessful candidates, the finite high-gain instability, raw per-round records and checkpoints remain archived. Figure files in the paper directory are copied from remotely generated artifacts rather than manually plotted from selected outcomes. Historical figures below retain their original protocols and should be read with the associated qualifications.
+The archive preserves the prospective protocol with provenance, all configurations and source manifests, pinned model/data hashes, full shard memberships, capacity and quantity permutations, per-peer sample-order hashes, per-round metrics and ranks, graph kernels, serialized-transfer byte/hash ledgers, independent checkpoint audits, and campaign status. The scientific campaign contains 36 completed full-budget runs and 72 verified checkpoint evaluations; seven separately labeled smoke runs are excluded from efficacy estimates. Large checkpoint binaries are retained remotely and identified by hashes in the repository records. The audit verifies saved best/final inference and round-metric consistency; it does not re-execute inference for every intermediate round. Final summary and figure scripts run on the designated remote host, and paper figures retain their underlying data and generation provenance.
+
+A final source-independent artifact audit on the remote host binds all 72 saved inference audits to current checkpoint bytes, hashes the 36 additional peer-state archives, and recomputes all 720 round metric records from stored predictions and canonical validation labels. It also checks pairings, partitions, source identity, and communication arithmetic. This audit does not rerun model inference. Raw wire buffers were not retained, so saved payload hashes and ledger consistency are verified without reconstructing every historical message. Initial model-state hashes were not recorded; common initialization is supported by source-pinned same-seed code and model tests rather than a per-run initial-state artifact comparison. These limits distinguish reproducible numerical evidence from an end-to-end independent execution trace.
+
+The historical repository records contain executable protocols, canonical policy provenance, feature and split hashes, per-round JSON records, phase timings, final adapters, and scripts that generate the reported tables and plots. The corrected driver is \path{project-3-hierarchical-gossip/experiments/integrated_benchmark.py}. Its evaluation does not tune on test data. Remote tests cover the numerical operators and paired execution invariants; artifacts distinguish full experiments from smoke tests and excluded pilots. Local credentials are not part of the artifact bundle.
+
+The follow-up evidence is stored under \path{docs/artifacts/methodology-exploration/}, with prospective plans separating official-test diagnostics from validation-only candidate exploration. Optimization controls retain all 21 endpoints and independently reconstructed correct counts; retention runs preserve spectra, coefficient recurrence predictions, and all 18 no-training trajectories. The gradient control preserves six paired final models, 192 same-state fp64 checks, and independent predictions and communication counts. The Adam-order diagnostic retains all 24 training-only probes. Residual and partial-gradient verifiers independently reconstruct 25 unique saved validation models (11 residual-screen and 15 partial-gradient/pooled evaluations share one pooled checkpoint), with every correct count matching. They open only the original training tensor, validate its hash and exhaustive class-stratified holdout, and check exposures, initialization, rank ceilings, weight formulas and recorded transport ledgers. Per-step gradient edge traces are not retained, so their actual runtime paths cannot be independently reconstructed from the saved counters. A 47-file snapshot is verified against the six validation launch manifests and canonical P1/P2 dependency hashes. All unsuccessful candidates, the finite high-gain instability, raw per-round records and checkpoints remain archived.
 
 \begin{figure}[p]
 \centering
@@ -602,18 +798,21 @@ The follow-up evidence is stored under \path{docs/artifacts/methodology-explorat
 \caption{Supporting historical uniform-rank protocol curves, 50 rounds. Personalized and evaluator-assembled consensus accuracy are different endpoints.}
 \label{fig:historical-uniform}
 \end{figure}
+\clearpage
 \begin{figure}[p]
 \centering
-\includegraphics[width=\linewidth]{figures/p3_heterogeneous_curves.png}
+\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{figures/p3_heterogeneous_curves_readable.pdf}
 \caption{Supporting historical heterogeneous $(4,12,32)$ protocol curves. The rank budget and objective differ from the corrected $(4,8,16)$ pooled comparison.}
 \label{fig:historical-heterogeneous}
 \end{figure}
+\clearpage
 \begin{figure}[p]
 \centering
-\includegraphics[width=\linewidth]{figures/p1_adaptive_accuracy_curves.png}
-\caption{Historical five-task Project 1 battery. Fixed rank 32 exceeds the tested capability ceilings and is not a feasible hardware-matched reference. The revised Fashion-MNIST comparison is reported separately.}
+\includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{figures/p1_adaptive_final_accuracy_readable.pdf}
+\caption{Historical five-task Project 1 final accuracy after five rounds, seed 42. These single-seed endpoints have no uncertainty intervals. Fixed rank 32 exceeds the tested capability ceilings and is not a feasible hardware-matched reference. The revised Fashion-MNIST comparison is reported separately.}
 \label{fig:historical-p1}
 \end{figure}
+\clearpage
 \begin{figure}[p]
 \centering
 \includegraphics[width=\linewidth]{figures/p3_adaptive_discovery.png}

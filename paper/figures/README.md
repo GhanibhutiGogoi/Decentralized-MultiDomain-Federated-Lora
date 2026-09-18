@@ -2,6 +2,31 @@
 
 These figures are the authoritative plots used by `../main.tex`.
 
+The completed RoBERTa/SST-2 quantity study adds four PDF/PNG pairs with JSON data
+sidecars: `quantity-skew-accuracy`, `quantity-skew-paired-effects`,
+`quantity-skew-tradeoff`, and `quantity-skew-trajectories`. They were generated
+on gpu003 by `scripts/plot_quantity_paper.py`, using all seven matched arms at
+seeds 42--46. Smoke runs and the equal-size anchor are excluded. Accuracy bars
+are sample SD; paired-effect intervals are exploratory, unadjusted 95% Student-t
+intervals, not equivalence tests. Training traffic includes classifier and
+metadata, while assembly costs remain separate. The source data, CSVs, script
+and input hashes, and generation provenance are in
+`docs/artifacts/quantity-skew/final-figures/`. The best-validation endpoint is
+primary; the final-round endpoint is secondary. Both use official labeled
+validation data, not a hidden test.
+
+Two historical appendix figures have readable replacements; the originals are
+preserved. `p3_heterogeneous_curves_readable` regenerates the historical P3
+rank-4/12/32 curves with a separate legend. `p1_adaptive_final_accuracy_readable`
+plots the exact final endpoints in `p1-adaptive-rank/federated_lora_summary.csv`
+instead of reproducing the tiny five-panel round curves: intermediate accuracy
+arrays were not present in that CSV and are not inferred from the old image.
+The P1 figure retains the original single-seed, five-round controller and
+infeasible rank-32 reference, distinct from the revised controller. Both
+replacements were generated on gpu003; scripts and data/provenance are recorded
+in `docs/artifacts/quantity-skew/paper-build/historical-figure-qa/` and the
+repository's `scripts/` directory.
+
 The corrected comparison uses `integrated_accuracy_curves`, `integrated_final_comparison`, `integrated_factorial`, `integrated_communication`, and `integrated_rank_trajectories`, each in PDF and PNG. They are generated on gpu003 by `scripts/summarize_integrated.py` from all 27 raw records in `docs/artifacts/integrated-corrected/`. `summary.json` records input, script, and figure hashes. Error bars are sample standard deviations over seeds 42--44; the communication plot includes control traffic and one final assembly. The following figures retain their historical protocols.
 
 - `p3_uniform_curves.png` and `p3_uniform_domains.png` come from the completed
