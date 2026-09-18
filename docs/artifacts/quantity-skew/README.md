@@ -11,29 +11,29 @@ The prospective protocol and all reconstruction assumptions are in [the protocol
 - Smoke results establish execution and auditability only. They do not establish scientific efficacy, equivalence or a win over Dec-LoRA.
 - Full-data comparison: running under the prospective protocol in a durable four-GPU queue. The fixed plan is 36 runs: seven quantity arms across five seeds plus one equal-size paper-setting anchor. Completed full-budget, replicated results must replace this status before any scientific success claim.
 
-### Latest recorded progress: 2026-09-18, 00:35 Shanghai
+### Latest recorded progress: 2026-09-18, 09:47 Shanghai
 
-Ten of36 full runs have completed and passed independent best/final checkpoint audits; four more are training. All seven quantity-split arms and the equal-size anchor for seed42 are complete. The next seeds are running, with approximately14 remaining training hours plus verification/report overhead. No campaign error is recorded.
+Twenty-four of36 full runs have completed and passed independent best/final checkpoint audits; four more are training and eight are queued. All seven quantity-split arms for seeds42–44 are complete. Approximately5 training hours remain, plus verification/report overhead. No campaign error is recorded.
 
-The table below compares only the same completed seed42. Best labeled-validation accuracy is the registered primary endpoint; final-round accuracy is secondary.
+The table compares only the same three completed seeds42,43,44. Best labeled-validation accuracy is the registered primary endpoint; final-round accuracy is secondary. Values are mean ± sample standard deviation.
 
 | Method | Best validation accuracy | Final-round accuracy |
 |---|---:|---:|
-| Dec-LoRA reimplementation, rank16 | 94.61% | 94.61% |
-| Dec-LoRA reimplementation, rank4 | 94.84% | 94.38% |
-| Effective products, rank16, sample-size weights | 94.72% | 94.27% |
-| Fixed heterogeneous ranks, uniform weights | 94.84% | 94.72% |
-| Fixed heterogeneous ranks, sample-size weights | 94.61% | 94.50% |
-| Adaptive ranks, uniform weights | 94.27% | 93.12% |
-| Adaptive ranks, sample-size weights | 94.50% | 94.15% |
+| Dec-LoRA reimplementation, rank16 | 94.61 ± 0.11% | 94.53 ± 0.13% |
+| Dec-LoRA reimplementation, rank4 | 94.38 ± 0.41% | 94.11 ± 0.37% |
+| Effective products, rank16, sample-size weights | 94.69 ± 0.18% | 94.30 ± 0.18% |
+| Fixed heterogeneous ranks, uniform weights | 94.53 ± 0.29% | 94.30 ± 0.40% |
+| Fixed heterogeneous ranks, sample-size weights | 94.46 ± 0.13% | 94.38 ± 0.11% |
+| Adaptive ranks, uniform weights | 94.23 ± 0.07% | 93.73 ± 0.54% |
+| Adaptive ranks, sample-size weights | 94.27 ± 0.30% | 93.96 ± 0.24% |
 
-The proposed adaptive/sample method trails rank16 Dec-LoRA by0.115 percentage points on best accuracy (one correct example out of872) and by0.459 points at the final round. It trails the feasible rank4 baseline by0.344 points on best accuracy. This is close performance in one paired seed, not evidence of superiority or statistical parity.
+The proposed adaptive/sample method trails rank16 Dec-LoRA by0.344 percentage points on mean best accuracy, with an exploratory paired95% t interval of[-0.914,+0.226] points. It trails fixed/sample by0.191 points and rank4 by0.115 points. At the final round its mean gap from rank16 is0.573 points. These interim three-seed results show no accuracy advantage; they do not establish statistical parity or replace the planned five-seed comparison.
 
-Adaptive training payload is1.291GB versus1.893GB for rank16 Dec-LoRA (31.8% lower), but the rank4 baseline uses less at1.185GB and has higher best accuracy in this seed. Mean adaptive training rank is5.79, versus the fixed-cap mean8.8. Rank and payload reductions do not establish lower total memory: whole-process CUDA peaks remain around1.67GB and adaptive clients also perform capability-rank probes. Final deployment and evaluation assembly costs are separate from these training-byte totals.
+Mean adaptive training payload is1.292GB versus1.893GB for rank16 Dec-LoRA (31.74% lower),1.468GB for fixed/sample (12.00% lower), and1.185GB for rank4 (adaptive uses9.02% more). Mean persistent adaptive training rank is5.813. Rank and payload reductions do not establish lower total memory: the backbone, classifier and capability-rank probes remain. Final deployment and evaluation assembly costs are separate from these training-byte totals.
 
-Completed records and source snapshots are in [`full/`](full/). The dated [progress report and figures](progress-summary-20260918/SUMMARY.md) include ten completed full runs and seven smoke runs in separate groups. Its available per-arm seed counts differ; only matched seeds enter paired comparisons. The report's final-score column label is editorially clarified as secondary; numerical data are unchanged. The local summarizer carries the same label fix, while the running remote campaign retains its pinned script until completion.
+Completed records and source snapshots are in [`full/`](full/). The dated [progress report and figures](progress-summary-20260918-0947/SUMMARY.md) include24 completed full runs and seven smoke runs in separate groups. Its available per-arm seed counts differ; only matched seeds enter paired comparisons. This README and [`pilot-progress.json`](pilot-progress.json) explicitly restrict the current main comparison to the three seeds completed by every arm. The report's final-score column label is editorially clarified as secondary; numerical data are unchanged. The local summarizer carries the same label fix, while the running remote campaign retains its pinned script until completion.
 
-The exact snapshot is in [`pilot-progress.json`](pilot-progress.json). Work is delivered directly to `main`, as requested; no new PR is required. New paper conclusions await the completed five-seed comparison.
+Work is delivered directly to `main`. New paper conclusions await the completed five-seed comparison. Earlier dated snapshots are preserved.
 
 [`campaign-status.json`](campaign-status.json) and [`campaign-events.jsonl`](campaign-events.jsonl) are dated repository snapshots, not a live service. The authoritative live records are `~/ahlora-quantity-20260917/campaign-full-v1/` on gpu003. The initial scheduler estimate was about21 remaining training hours, excluding verification/report overhead. Four existing runs were adopted without restarting or changing their source. Remote lifecycle checks verified successful and failed worker exit receipts, duplicate-worker rejection, and the single-scheduler lock.
 

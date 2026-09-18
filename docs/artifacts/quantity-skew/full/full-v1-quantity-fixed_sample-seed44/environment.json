@@ -1,0 +1,36 @@
+{
+  "host": "gpu003",
+  "python": "3.10.12",
+  "torch": "2.3.0+cu121",
+  "gpu": "Tesla V100S-PCIE-32GB",
+  "model_revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+  "dataset_revision": "bcdcba79d07bc864c1c254ccfcedcce55bcc9a8c",
+  "model_files": {
+    "tokenizer_config.json": "994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce",
+    "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+    "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+    "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+    "model.safetensors": "5bde1d28afb363d0103324efeb5afc8b2b397fe5e04beabb9b1ef355255ade81",
+    "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655"
+  },
+  "source_sha256": "daced6fc0052f4aab6069aea78ce1468bd5c039b76dedb71080155b0276b8d61",
+  "simulation": "single-process sequential peers; graph-restricted payloads",
+  "adapter_policy": {
+    "implementation": "verbatim P1 AdaptiveRankController and rank_equation",
+    "source": "project-1-adaptive-rank/rank_allocation/rank_selector.py",
+    "source_sha256": "aaca6293881ef93d73638ea7188e00181b8dbb246884542a38536f5e8a38a6d0",
+    "config_source": "project-1-adaptive-rank/config.py",
+    "config_source_sha256": "4e5d0f2e8c559bcb751203a15287f225a227301760238d2aa00ca1c2dcc78dce",
+    "initial_rank": "max",
+    "warmup_rounds": 2,
+    "minimum_rank_fraction": 0.5,
+    "quality_drop_tolerance": 0.05,
+    "gradient_probe": "median stable rank of LoRA A/B gradients on one fixed seeded training batch at capability ceiling",
+    "quality_probe": "1 / (1 + cross entropy) on the same fixed seeded training batch after local training",
+    "minibatch_note": "P1 batch sizes identify capability tiers; P3 training minibatch size is configured separately"
+  },
+  "base_parameter_bytes": 496220160,
+  "optimizer_policy": "AdamW weight_decay=0, reset for every client/round in all arms; lr constant; grad clip1",
+  "precision": "fp32; deterministic algorithms",
+  "evaluation_split": "official labeled validation; not a hidden test"
+}

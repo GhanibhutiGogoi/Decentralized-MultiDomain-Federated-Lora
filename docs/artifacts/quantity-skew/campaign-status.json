@@ -2,7 +2,7 @@
   "schema_version": 1,
   "status": "running",
   "created_at": "2026-09-17T09:49:04.121838+00:00",
-  "updated_at": "2026-09-17T16:34:42.339800+00:00",
+  "updated_at": "2026-09-18T01:48:55.046501+00:00",
   "host": "gpu003",
   "base": "/home/gogoi/ahlora-quantity-20260917",
   "python_path": "/home/gogoi/ahlora-venv/bin/python",
@@ -596,18 +596,18 @@
       "completed_at": "2026-09-17T16:32:56.079542+00:00"
     },
     "full-v1-quantity-declora4-seed43": {
-      "status": "training",
-      "phase": "train",
+      "status": "complete",
+      "phase": "verify",
       "kind": "worker",
       "gpu": 1,
-      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed43/train.spec.json",
-      "spec_sha256": "be76cc5ce90b79ee4a4aee123e8e428b66ef98877cc7306ae2dc89455b00da4d",
-      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed43/train.receipt.json",
-      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-declora4-seed43-train-managed.log",
-      "pid": 70113,
-      "start_ticks": "693552497",
-      "launched_at": "2026-09-17T14:13:15.321744+00:00",
-      "rounds_recorded": 19
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed43/verify.spec.json",
+      "spec_sha256": "fe99bb225f6906c16c2c7d8764a9f0d3e0cbcfbfa43f9c45021e558ed4b7aa64",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed43/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-declora4-seed43-verify-managed.log",
+      "launched_at": "2026-09-17T16:34:52.795695+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T16:35:02.848520+00:00"
     },
     "full-v1-quantity-product16_sample-seed43": {
       "status": "complete",
@@ -624,86 +624,242 @@
       "completed_at": "2026-09-17T16:30:59.071249+00:00"
     },
     "full-v1-quantity-fixed_uniform-seed43": {
-      "status": "training",
-      "phase": "train",
+      "status": "complete",
+      "phase": "verify",
       "kind": "worker",
       "gpu": 3,
-      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed43/train.spec.json",
-      "spec_sha256": "b89237c5911dfca769de60ac9731f72f4376556c3c3e058620c6c169453920e3",
-      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed43/train.receipt.json",
-      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_uniform-seed43-train-managed.log",
-      "pid": 70262,
-      "start_ticks": "693552564",
-      "launched_at": "2026-09-17T14:13:15.990806+00:00",
-      "rounds_recorded": 19
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed43/verify.spec.json",
+      "spec_sha256": "e06ba74f4f25664a5bea7e335096dbaffbff350b1b499a9c501f3b42ac2f6c7d",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed43/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_uniform-seed43-verify-managed.log",
+      "launched_at": "2026-09-17T16:35:18.524949+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T16:35:28.938743+00:00"
     },
     "full-v1-quantity-fixed_sample-seed43": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 2,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed43/verify.spec.json",
+      "spec_sha256": "0c74b84178e9833eae761c4999c5a1c148c08d49ea059b93e1f8041b31cd4bab",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed43/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_sample-seed43-verify-managed.log",
+      "launched_at": "2026-09-17T18:51:58.214191+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T18:52:18.324681+00:00"
+    },
+    "full-v1-quantity-adaptive_uniform-seed43": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 0,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed43/verify.spec.json",
+      "spec_sha256": "f6fdb55d633b8a959d2a3b26cf87292145f582a5bd6cd39476cd3db813a56ed9",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed43/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-adaptive_uniform-seed43-verify-managed.log",
+      "launched_at": "2026-09-17T18:57:30.823969+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T18:57:50.929017+00:00"
+    },
+    "full-v1-quantity-adaptive_sample-seed43": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 1,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_sample-seed43/verify.spec.json",
+      "spec_sha256": "f10349db0ecda26a692a58aa1242b9d53b67e934417622ce252d7541f35e6683",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_sample-seed43/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-adaptive_sample-seed43-verify-managed.log",
+      "launched_at": "2026-09-17T18:58:07.175690+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T18:58:17.611784+00:00"
+    },
+    "full-v1-quantity-declora16-seed44": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 3,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora16-seed44/verify.spec.json",
+      "spec_sha256": "bae5e6d825fdf761d123025abab4821ae4458226f99c580b68a2c83b7e36cb63",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora16-seed44/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-declora16-seed44-verify-managed.log",
+      "launched_at": "2026-09-17T18:56:55.041730+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T18:57:05.112895+00:00"
+    },
+    "full-v1-quantity-declora4-seed44": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 2,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed44/verify.spec.json",
+      "spec_sha256": "cab706723de9682ecdcadedf729905ba49721b4374aa2656326cc1a2904c45cd",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed44/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-declora4-seed44-verify-managed.log",
+      "launched_at": "2026-09-17T21:11:15.696479+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T21:11:35.852833+00:00"
+    },
+    "full-v1-quantity-product16_sample-seed44": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 3,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-product16_sample-seed44/verify.spec.json",
+      "spec_sha256": "765952e5da2ab36b20f7bfb698fc48325ad93b777edb9a2aaeecbb8e5a49d0e2",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-product16_sample-seed44/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-product16_sample-seed44-verify-managed.log",
+      "launched_at": "2026-09-17T21:15:53.281813+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T21:16:13.374716+00:00"
+    },
+    "full-v1-quantity-fixed_uniform-seed44": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 0,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed44/verify.spec.json",
+      "spec_sha256": "59f2e43f138b0af4e1dc21df788eab1669201b705c7e5fdd1c82b0a115ad6655",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed44/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_uniform-seed44-verify-managed.log",
+      "launched_at": "2026-09-17T21:18:20.156958+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T21:18:30.606666+00:00"
+    },
+    "full-v1-quantity-fixed_sample-seed44": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 1,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed44/verify.spec.json",
+      "spec_sha256": "1b551b6e236a67535f160905c479c1e43231c386f828d41ef1deaf5b9d8353e4",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed44/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_sample-seed44-verify-managed.log",
+      "launched_at": "2026-09-17T21:18:20.548928+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T21:18:46.727908+00:00"
+    },
+    "full-v1-quantity-adaptive_uniform-seed44": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 2,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed44/verify.spec.json",
+      "spec_sha256": "9bc930757f94413967b34d53101ef5328b2167080c410b8b18dbae9b95216105",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed44/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-adaptive_uniform-seed44-verify-managed.log",
+      "launched_at": "2026-09-17T23:35:16.091610+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T23:35:36.203758+00:00"
+    },
+    "full-v1-quantity-adaptive_sample-seed44": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 3,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_sample-seed44/verify.spec.json",
+      "spec_sha256": "49e9e5519c77a1039cf39f6e8c504b19ebd499f5e18bb2e3d87ce27444217838",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_sample-seed44/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-adaptive_sample-seed44-verify-managed.log",
+      "launched_at": "2026-09-17T23:41:17.327027+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T23:41:27.384503+00:00"
+    },
+    "full-v1-quantity-declora16-seed45": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 0,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora16-seed45/verify.spec.json",
+      "spec_sha256": "79cc0168c058a49f5131cc755e18d861c35d3ec5575fd844db58fccb8d5f086a",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora16-seed45/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-declora16-seed45-verify-managed.log",
+      "launched_at": "2026-09-17T23:40:00.413616+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T23:40:20.512041+00:00"
+    },
+    "full-v1-quantity-declora4-seed45": {
+      "status": "complete",
+      "phase": "verify",
+      "kind": "worker",
+      "gpu": 1,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed45/verify.spec.json",
+      "spec_sha256": "eaddab9af7ee0d2aa6bd9ae2390abbb2aec3a291019d458e6b27fee7d13b606a",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-declora4-seed45/verify.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-declora4-seed45-verify-managed.log",
+      "launched_at": "2026-09-17T23:38:23.419959+00:00",
+      "rounds_recorded": 20,
+      "last_returncode": 0,
+      "completed_at": "2026-09-17T23:38:43.513973+00:00"
+    },
+    "full-v1-quantity-product16_sample-seed45": {
       "status": "training",
       "phase": "train",
       "kind": "worker",
       "gpu": 2,
-      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed43/train.spec.json",
-      "spec_sha256": "1fe6b4e672f59618178b1a223859cdc44ef01da10f672c94b40ee214f543a1cd",
-      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed43/train.receipt.json",
-      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_sample-seed43-train-managed.log",
-      "pid": 31694,
-      "start_ticks": "694380489",
-      "launched_at": "2026-09-17T16:31:15.239973+00:00"
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-product16_sample-seed45/train.spec.json",
+      "spec_sha256": "f665f0a2cd9f08a25bd1cf82b214e5d31172cf3ad0bcd054ff76d0921d04cd7c",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-product16_sample-seed45/train.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-product16_sample-seed45-train-managed.log",
+      "pid": 110746,
+      "start_ticks": "696928212",
+      "launched_at": "2026-09-17T23:35:52.472929+00:00",
+      "rounds_recorded": 19
     },
-    "full-v1-quantity-adaptive_uniform-seed43": {
+    "full-v1-quantity-fixed_uniform-seed45": {
+      "status": "training",
+      "phase": "train",
+      "kind": "worker",
+      "gpu": 1,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed45/train.spec.json",
+      "spec_sha256": "369ace207c95575e732c7c59f56dd77a87e92f31a42da3b6d6bf195c05679b22",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_uniform-seed45/train.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_uniform-seed45-train-managed.log",
+      "pid": 114701,
+      "start_ticks": "696946942",
+      "launched_at": "2026-09-17T23:38:59.777768+00:00",
+      "rounds_recorded": 18
+    },
+    "full-v1-quantity-fixed_sample-seed45": {
       "status": "training",
       "phase": "train",
       "kind": "worker",
       "gpu": 0,
-      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed43/train.spec.json",
-      "spec_sha256": "9f8914bb6c7522a6d9142044b64275d14e3fdf0f0183457dc7f351096acf5e53",
-      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed43/train.receipt.json",
-      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-adaptive_uniform-seed43-train-managed.log",
-      "pid": 34403,
-      "start_ticks": "694392156",
-      "launched_at": "2026-09-17T16:33:11.910871+00:00"
-    },
-    "full-v1-quantity-adaptive_sample-seed43": {
-      "status": "pending"
-    },
-    "full-v1-quantity-declora16-seed44": {
-      "status": "pending"
-    },
-    "full-v1-quantity-declora4-seed44": {
-      "status": "pending"
-    },
-    "full-v1-quantity-product16_sample-seed44": {
-      "status": "pending"
-    },
-    "full-v1-quantity-fixed_uniform-seed44": {
-      "status": "pending"
-    },
-    "full-v1-quantity-fixed_sample-seed44": {
-      "status": "pending"
-    },
-    "full-v1-quantity-adaptive_uniform-seed44": {
-      "status": "pending"
-    },
-    "full-v1-quantity-adaptive_sample-seed44": {
-      "status": "pending"
-    },
-    "full-v1-quantity-declora16-seed45": {
-      "status": "pending"
-    },
-    "full-v1-quantity-declora4-seed45": {
-      "status": "pending"
-    },
-    "full-v1-quantity-product16_sample-seed45": {
-      "status": "pending"
-    },
-    "full-v1-quantity-fixed_uniform-seed45": {
-      "status": "pending"
-    },
-    "full-v1-quantity-fixed_sample-seed45": {
-      "status": "pending"
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed45/train.spec.json",
+      "spec_sha256": "720a8ebd7a083998644b13b5dfbc32ae05afe7e2d05ecacc1c4fa22ea3593e31",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-fixed_sample-seed45/train.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-fixed_sample-seed45-train-managed.log",
+      "pid": 117069,
+      "start_ticks": "696956633",
+      "launched_at": "2026-09-17T23:40:36.686196+00:00",
+      "rounds_recorded": 18
     },
     "full-v1-quantity-adaptive_uniform-seed45": {
-      "status": "pending"
+      "status": "training",
+      "phase": "train",
+      "kind": "worker",
+      "gpu": 3,
+      "spec": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed45/train.spec.json",
+      "spec_sha256": "6149ea0f24694961dc909e03071095c88573d238d19b3af1a939a7b53d4d0dc0",
+      "receipt": "/home/gogoi/ahlora-quantity-20260917/campaign-full-v1/workers/full-v1-quantity-adaptive_uniform-seed45/train.receipt.json",
+      "log": "/home/gogoi/ahlora-quantity-20260917/logs/full-v1-quantity-adaptive_uniform-seed45-train-managed.log",
+      "pid": 118890,
+      "start_ticks": "696963349",
+      "launched_at": "2026-09-17T23:41:43.849767+00:00",
+      "rounds_recorded": 17
     },
     "full-v1-quantity-adaptive_sample-seed45": {
       "status": "pending"
@@ -734,17 +890,17 @@
   "scheduler_pid": 157019,
   "screen_only": false,
   "progress": {
-    "training_rounds_remaining": 482,
-    "verified_jobs": 10,
+    "training_rounds_remaining": 168,
+    "verified_jobs": 24,
     "planned_jobs": 36,
-    "estimated_remaining_hours": 14.11137531105112,
+    "estimated_remaining_hours": 4.9243611246316386,
     "eta_scope": "Approximate training-only work / four GPUs; excludes verifier/report/startup delays and variable future round cost"
   },
   "last_summary": {
-    "completed_at": "2026-09-17T16:33:11.526152+00:00",
-    "reason": "verified:full-v1-quantity-declora16-seed43",
+    "completed_at": "2026-09-17T23:41:43.479877+00:00",
+    "reason": "verified:full-v1-quantity-adaptive_sample-seed44",
     "returncode": 0,
-    "summary_sha256": "1a61797ae0338581e678ac305c4a6c1e5c31009da27f2b6e6d1c8f55072be54b",
+    "summary_sha256": "57cfd0db889a111e5f492604b40c5047dc3f4e533e66d76fed22d76b8e879ad4",
     "script_sha256": "dfffd9cdd8eb3e55830749a62d689ca5ff6594d954f3aae0dfe6b6580bb2f52b"
   }
 }
